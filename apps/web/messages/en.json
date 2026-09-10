@@ -6,5 +6,13 @@
   "home": {
     "titulo": "Find your next stay",
     "subtitulo": "Verified homes, ready for you"
+  },
+  "properties": {
+    "titulo": "Our properties",
+    "huespedes": "{count} guests",
+    "habitaciones": "{count} bd.",
+    "banos": "{count} baths",
+    "verDetalle": "View details",
+    "consultar": "Check dates"
   }
 }

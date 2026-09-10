@@ -1,6 +1,6 @@
 # Progreso del Proyecto
 
-## Semana 1
-- ✅ Estructura del proyecto y base de datos
-- 🔄 Configuración del frontend con soporte multi-idioma
-- ⏳ Siguiente: páginas de listado y detalle de casas
+## Semana 1 (continuación)
+- ✅ Repo publicado en GitHub con estructura del proyecto
+- ✅ Soporte multi-idioma ES/EN/FR
+- 🔄 Siguiente: página de listado de casas

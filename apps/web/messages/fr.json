@@ -1,10 +1,10 @@
 {
   "common": {
-    "verMas": "Ver más",
-    "contactar": "Contactar"
+    "verMas": "Voir plus",
+    "contactar": "Contacter"
   },
   "home": {
-    "titulo": "Encuentra tu próxima estancia",
-    "subtitulo": "Casas verificadas, listas para ti"
+    "titre": "Trouvez votre prochain séjour",
+    "sousTitre": "Des maisons vérifiées, prêtes pour vous"
   }
 }

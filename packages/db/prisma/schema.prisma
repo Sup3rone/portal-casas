@@ -1,1 +1,8 @@
-DATABASE_URL="postgresql://portal:TUPASSWORD@localhost:5432/portal_casas?schema=public"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

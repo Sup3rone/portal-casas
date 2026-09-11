@@ -4,7 +4,8 @@ import PropertyCard from '@/components/PropertyCard';
 
 export default async function PropertiesPage() {
   const properties = await prisma.property.findMany({
-    where: { published: true }
+    where: { published: true },
+    include: { media: { orderBy: { order: 'asc' }, take: 1 } }
   });
 
   return (

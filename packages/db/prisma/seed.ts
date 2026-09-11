@@ -53,7 +53,26 @@ async function main() {
       }
     ]
   });
+  // imágenes de las propiedades
+  const playa = await prisma.property.findUniqueOrThrow({ where: { slug: 'casa-playa-caribe' } });
+  const centro = await prisma.property.findUniqueOrThrow({ where: { slug: 'apartamento-centro-historico' } });
 
+  await prisma.media.createMany({
+    data: [
+      {
+        propertyId: playa.id,
+        url: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80',
+        type: 'PHOTO',
+        order: 0
+      },
+      {
+        propertyId: centro.id,
+        url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
+        type: 'PHOTO',
+        order: 0
+      }
+    ]
+  });
   console.log('✅ Seed completo: admin + 2 propiedades');
 }
 

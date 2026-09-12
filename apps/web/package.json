@@ -24,5 +24,12 @@
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
     "typescript": "^5"
+  }.
+  {
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "postinstall": "pnpm --filter @portal/db exec prisma generate"
+    }
   }
 }

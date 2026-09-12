@@ -2,6 +2,10 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import '../globals.css';  // ajusta la ruta según la profundidad
 
+export function generateStaticParams() {
+  return [{ locale: 'es' }, { locale: 'en' }, { locale: 'fr' }];
+}
+
 export default async function LocaleLayout({
   children,
   params

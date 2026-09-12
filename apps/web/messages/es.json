@@ -1,0 +1,18 @@
+{
+  "common": {
+    "verMas": "Ver más",
+    "contactar": "Contactar"
+  },
+  "home": {
+    "titulo": "Encuentra tu próxima estancia",
+    "subtitulo": "Casas verificadas, listas para ti"
+  },
+  "properties": {
+    "titulo": "Nuestras propiedades",
+    "huespedes": "{count} huéspedes",
+    "habitaciones": "{count} hab.",
+    "banos": "{count} baños",
+    "verDetalle": "Ver detalle",
+    "consultar": "Consultar fechas"
+  }
+}

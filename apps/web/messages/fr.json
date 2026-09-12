@@ -1,0 +1,18 @@
+{
+  "common": {
+    "verMas": "Voir plus",
+    "contactar": "Contacter"
+  },
+  "home": {
+    "titre": "Trouvez votre prochain séjour",
+    "sousTitre": "Des maisons vérifiées, prêtes pour vous"
+  },
+  "properties": {
+    "titulo": "Nos propriétés",
+    "huespedes": "{count} voyageurs",
+    "habitaciones": "{count} ch.",
+    "banos": "{count} sdb",
+    "verDetalle": "Voir le détail",
+    "consultar": "Demander les dates"
+  }
+}

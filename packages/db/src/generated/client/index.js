@@ -215,6 +215,10 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "rhel-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -232,6 +236,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -240,8 +245,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id         String     @id @default(cuid())\n  email      String     @unique\n  name       String\n  role       Role       @default(ADMIN)\n  properties Property[]\n  createdAt  DateTime   @default(now())\n}\n\nenum Role {\n  ADMIN\n  VIEWER\n}\n\nmodel Property {\n  id        String     @id @default(cuid())\n  slug      String     @unique\n  titleEs   String\n  titleEn   String\n  titleFr   String\n  descEs    String\n  descEn    String\n  descFr    String\n  address   String\n  city      String\n  maxGuests Int\n  bedrooms  Int\n  bathrooms Float\n  published Boolean    @default(false)\n  ownerId   String\n  owner     User       @relation(fields: [ownerId], references: [id])\n  media     Media[]\n  messages  Message[]\n  icalFeeds IcalFeed[]\n  bookings  Booking[]\n  createdAt DateTime   @default(now())\n}\n\nmodel Media {\n  id         String    @id @default(cuid())\n  propertyId String\n  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)\n  url        String\n  type       MediaType @default(PHOTO)\n  order      Int       @default(0)\n}\n\nenum MediaType {\n  PHOTO\n  VIDEO\n}\n\nmodel Message {\n  id         String    @id @default(cuid())\n  propertyId String\n  property   Property  @relation(fields: [propertyId], references: [id])\n  name       String\n  email      String\n  phone      String?\n  lang       String    @default(\"es\")\n  body       String\n  startDate  DateTime?\n  endDate    DateTime?\n  read       Boolean   @default(false)\n  createdAt  DateTime  @default(now())\n}\n\nmodel IcalFeed {\n  id           String    @id @default(cuid())\n  propertyId   String\n  property     Property  @relation(fields: [propertyId], references: [id])\n  url          String\n  source       String    @default(\"airbnb\")\n  lastSyncedAt DateTime?\n  bookings     Booking[]\n}\n\nmodel Booking {\n  id         String    @id @default(cuid())\n  propertyId String\n  property   Property  @relation(fields: [propertyId], references: [id])\n  icalFeedId String?\n  icalFeed   IcalFeed? @relation(fields: [icalFeedId], references: [id])\n  startDate  DateTime\n  endDate    DateTime\n  source     String    @default(\"manual\")\n  createdAt  DateTime  @default(now())\n\n  @@index([propertyId, startDate, endDate])\n}\n",
-  "inlineSchemaHash": "db7bab63db76dcaab3d16344daf3628018418adeea5380c941784377a4465473",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../src/generated/client\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id         String     @id @default(cuid())\n  email      String     @unique\n  name       String\n  role       Role       @default(ADMIN)\n  properties Property[]\n  createdAt  DateTime   @default(now())\n}\n\nenum Role {\n  ADMIN\n  VIEWER\n}\n\nmodel Property {\n  id        String     @id @default(cuid())\n  slug      String     @unique\n  titleEs   String\n  titleEn   String\n  titleFr   String\n  descEs    String\n  descEn    String\n  descFr    String\n  address   String\n  city      String\n  maxGuests Int\n  bedrooms  Int\n  bathrooms Float\n  published Boolean    @default(false)\n  ownerId   String\n  owner     User       @relation(fields: [ownerId], references: [id])\n  media     Media[]\n  messages  Message[]\n  icalFeeds IcalFeed[]\n  bookings  Booking[]\n  createdAt DateTime   @default(now())\n}\n\nmodel Media {\n  id         String    @id @default(cuid())\n  propertyId String\n  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)\n  url        String\n  type       MediaType @default(PHOTO)\n  order      Int       @default(0)\n}\n\nenum MediaType {\n  PHOTO\n  VIDEO\n}\n\nmodel Message {\n  id         String    @id @default(cuid())\n  propertyId String\n  property   Property  @relation(fields: [propertyId], references: [id])\n  name       String\n  email      String\n  phone      String?\n  lang       String    @default(\"es\")\n  body       String\n  startDate  DateTime?\n  endDate    DateTime?\n  read       Boolean   @default(false)\n  createdAt  DateTime  @default(now())\n}\n\nmodel IcalFeed {\n  id           String    @id @default(cuid())\n  propertyId   String\n  property     Property  @relation(fields: [propertyId], references: [id])\n  url          String\n  source       String    @default(\"airbnb\")\n  lastSyncedAt DateTime?\n  bookings     Booking[]\n}\n\nmodel Booking {\n  id         String    @id @default(cuid())\n  propertyId String\n  property   Property  @relation(fields: [propertyId], references: [id])\n  icalFeedId String?\n  icalFeed   IcalFeed? @relation(fields: [icalFeedId], references: [id])\n  startDate  DateTime\n  endDate    DateTime\n  source     String    @default(\"manual\")\n  createdAt  DateTime  @default(now())\n\n  @@index([propertyId, startDate, endDate])\n}\n",
+  "inlineSchemaHash": "798cc94c26059162ac126230fb926c13d0a3e3fbcdbbde70948be39f599e89cb",
   "copyEngine": true
 }
 
@@ -282,6 +287,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "src/generated/client/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-rhel-openssl-3.0.x.so.node");
+path.join(process.cwd(), "src/generated/client/libquery_engine-rhel-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "src/generated/client/schema.prisma")

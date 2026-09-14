@@ -1,4 +1,5 @@
 import { pgTable, text, integer, doublePrecision, boolean, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, doublePrecision, boolean, timestamp, date, pgEnum } from 'drizzle-orm/pg-core';
 
 export const roleEnum = pgEnum('Role', ['ADMIN', 'VIEWER']);
 export const mediaTypeEnum = pgEnum('MediaType', ['PHOTO', 'VIDEO']);
@@ -36,4 +37,18 @@ export const media = pgTable('Media', {
   url: text('url').notNull(),
   type: mediaTypeEnum('type').notNull().default('PHOTO'),
   order: integer('order').notNull().default(0),
+});
+
+export const messages = pgTable('Message', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone'),
+  lang: text('lang').notNull().default('es'),
+  body: text('body').notNull(),
+  startDate: date('startDate'),
+  endDate: date('endDate'),
+  read: boolean('read').notNull().default(false),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
 });

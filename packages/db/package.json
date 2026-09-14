@@ -8,11 +8,14 @@
     "seed": "tsx --env-file=.env prisma/seed.ts"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.10",
     "prisma": "^6.0.0",
     "tsx": "^4.0.0"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^6.19.3",
-    "@prisma/client": "^6.0.0"
+    "@prisma/client": "^6.0.0",
+    "drizzle-orm": "^0.45.2"
   }
 }

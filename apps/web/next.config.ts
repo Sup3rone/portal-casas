@@ -1,12 +1,7 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
-const nextConfig: NextConfig = {
-  experimental: {
-    outputFileTracingRoot: '../../',
-    outputFileTracingInclude: ['../../packages/db/src/generated/**']
-  }
-};
+const nextConfig: NextConfig = {};
 
 const withNextIntl = createNextIntlPlugin();
 

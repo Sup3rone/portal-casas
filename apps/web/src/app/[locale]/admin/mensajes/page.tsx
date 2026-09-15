@@ -1,5 +1,6 @@
 import { db, messages, properties } from '@portal/db';
 import { desc, eq } from 'drizzle-orm';
+import MarkAsReadButton from '@/components/MarkAsReadButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,9 +45,12 @@ export default async function AdminMensajesPage() {
                   {' '} · 🌐 {m.lang.toUpperCase()}
                 </p>
               </div>
-              <time className="text-xs text-gray-400">
-                {new Date(m.createdAt).toLocaleString('es')}
-              </time>
+              <div className="flex flex-col items-end gap-2">
+                <time className="text-xs text-gray-400">
+                  {new Date(m.createdAt).toLocaleString('es')}
+                </time>
+                <MarkAsReadButton messageId={m.id} read={m.read} />
+              </div>
             </div>
 
             <p className="text-gray-700 whitespace-pre-wrap my-3">{m.body}</p>

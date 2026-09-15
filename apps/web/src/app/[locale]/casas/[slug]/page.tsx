@@ -3,7 +3,6 @@ import { db, properties, media } from '@portal/db';
 import { eq, and } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import Image from 'next/image';
 import MessageForm from '@/components/MessageForm';
 
 export async function generateStaticParams() {
@@ -51,13 +50,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {mediaList.length > 0 ? (
           mediaList.map((m, idx) => (
-            <div key={m.id} className={`relative aspect-video ${idx === 0 ? 'col-span-1 md:col-span-2 row-span-2' : ''}`}>
-              <Image
+            <div key={m.id} className={`relative aspect-video overflow-hidden rounded-lg ${idx === 0 ? 'md:col-span-2 row-span-2' : ''}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={m.url}
                 alt={`${title} - Foto ${idx + 1}`}
-                fill
-                className="object-cover rounded-lg"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="h-full w-full object-cover"
               />
             </div>
           ))

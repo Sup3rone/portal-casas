@@ -1,0 +1,37 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createHash } from 'crypto';
+
+export async function POST(req: NextRequest) {
+  try {
+    const formData = await req.formData();
+    const password = formData.get('password') as string;
+
+    if (!password || password !== process.env.ADMIN_PASSWORD) {
+      return NextResponse.redirect(new URL('/es/admin/login?error=1', req.url), { status: 303 });
+    }
+
+    // Token = hash del password (nunca guardamos la clave en la cookie)
+    async function generarToken(password: string): Promise<string> {
+      const data = new TextEncoder().encode(`${password}::portal-casas-salt`);
+      const buffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buffer))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    // Y en el POST:
+    const token = await generarToken(process.env.ADMIN_PASSWORD!);
+
+    const res = NextResponse.redirect(new URL('/es/admin/mensajes', req.url), { status: 303 });
+    res.cookies.set('admin_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 días
+    });
+    return res;
+  } catch {
+    return NextResponse.redirect(new URL('/es/admin/login?error=1', req.url), { status: 303 });
+  }
+}

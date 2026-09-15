@@ -1,7 +1,15 @@
 {
+  "details": {
+      "description": "Descripción",
+      "guests": "Huéspedes",
+      "bedrooms": "Recámaras",
+      "bathrooms": "Baños",
+      "inquire": "Consulta de renta"
+    },
   "common": {
     "verMas": "Ver más",
-    "contactar": "Contactar"
+    "contactar": "Contactar",
+    "noImages": "Aún no hay fotos de esta propiedad"
   },
   "home": {
     "titulo": "Encuentra tu próxima estancia",

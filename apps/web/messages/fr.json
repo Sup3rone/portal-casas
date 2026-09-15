@@ -1,7 +1,15 @@
 {
+  "details": {
+    "description": "Description",
+    "guests": "Voyageurs",
+    "bedrooms": "Chambres",
+    "bathrooms": "Salles de bain",
+    "inquire": "Demande de location"
+  },
   "common": {
     "verMas": "Voir plus",
-    "contactar": "Contacter"
+    "contactar": "Contacter",
+    "noImages": "Pas encore de photos pour cette propriété"
   },
   "home": {
     "titre": "Trouvez votre prochain séjour",

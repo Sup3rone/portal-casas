@@ -1,7 +1,15 @@
 {
+  "details": {
+    "description": "Description",
+    "guests": "Guests",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "inquire": "Rental inquiry"
+  },
   "common": {
     "verMas": "See more",
-    "contactar": "Contact"
+    "contactar": "Contact",
+    "noImages": "No photos for this property yet"
   },
   "home": {
     "titulo": "Find your next stay",

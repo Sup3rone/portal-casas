@@ -1,50 +1,64 @@
 import { db, messages, properties } from '@portal/db';
 import { desc, eq } from 'drizzle-orm';
 
-export const dynamic = 'force-dynamic'; // siempre fresco, sin caché
+export const dynamic = 'force-dynamic';
 
-export default function AdminLoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const params = searchParams ? await searchParams : {};
+export default async function AdminMensajesPage() {
+  const rows = await db
+    .select({
+      id: messages.id,
+      name: messages.name,
+      email: messages.email,
+      phone: messages.phone,
+      lang: messages.lang,
+      body: messages.body,
+      startDate: messages.startDate,
+      endDate: messages.endDate,
+      read: messages.read,
+      createdAt: messages.createdAt,
+      propiedad: properties.slug,
+    })
+    .from(messages)
+    .leftJoin(properties, eq(messages.propertyId, properties.id))
+    .orderBy(desc(messages.createdAt));
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="mb-6 text-2xl font-bold text-center">Acceso administrativo</h1>
+    <main className="mx-auto max-w-4xl px-4 py-10">
+      <h1 className="mb-8 text-3xl font-bold">Mensajes recibidos ({rows.length})</h1>
 
-        <form
-          action="/api/admin/login"
-          method="POST"
-          className="space-y-4 rounded-2xl bg-white p-8 shadow-sm border"
-        >
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Contraseña
-            </label>
-            <input
-              required
-              autoFocus
-              type="password"
-              id="password"
-              name="password"
-              className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"
-            />
-          </div>
+      {rows.length === 0 && (
+        <p className="text-gray-500">Todavía no hay mensajes.</p>
+      )}
 
-          {params.error && (
-            <p className="text-sm text-red-600">Contraseña incorrecta. Intenta de nuevo.</p>
-          )}
+      <div className="space-y-4">
+        {rows.map((m) => (
+          <article key={m.id} className="rounded-2xl bg-white p-6 shadow-sm border">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h2 className="font-semibold text-lg">
+                  {m.name} {!m.read && <span className="text-xs bg-purple-600 text-white rounded-full px-2 py-0.5 ml-2 align-middle">NUEVO</span>}
+                </h2>
+                <p className="text-sm text-gray-500">
+                  <a href={`mailto:${m.email}`} className="underline">{m.email}</a>
+                  {m.phone && <> · {m.phone}</>}
+                  {' '} · 🌐 {m.lang.toUpperCase()}
+                </p>
+              </div>
+              <time className="text-xs text-gray-400">
+                {new Date(m.createdAt).toLocaleString('es')}
+              </time>
+            </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-purple-600 py-3 font-bold text-white transition-colors hover:bg-purple-700"
-          >
-            Entrar
-          </button>
-        </form>
+            <p className="text-gray-700 whitespace-pre-wrap my-3">{m.body}</p>
+
+            <div className="text-sm text-gray-500 flex gap-4">
+              <span>🏠 {m.propiedad ?? 'Propiedad eliminada'}</span>
+              {m.startDate && m.endDate && (
+                <span>📅 {m.startDate} → {m.endDate}</span>
+              )}
+            </div>
+          </article>
+        ))}
       </div>
     </main>
   );

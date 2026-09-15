@@ -36,8 +36,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     .orderBy(media.order);
 
   // Determinar textos según idioma
-  const title = property[`title${locale.charAt(0).toUpperCase() + locale.slice(1)}` as keyof typeof property] || property.titleEs;
-  const description = property[`desc${locale.charAt(0).toUpperCase() + locale.slice(1)}` as keyof typeof property] || property.descEs;
+  const localeMap: Record<string, { title: string; desc: string }> = {
+    es: { title: property.titleEs, desc: property.descEs },
+    en: { title: property.titleEn, desc: property.descEn },
+    fr: { title: property.titleFr, desc: property.descFr },
+  };
+  const { title, desc: description } = localeMap[locale] ?? localeMap.es;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

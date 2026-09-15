@@ -17,8 +17,7 @@ function SubmitButton() {
   );
 }
 
-export default function MessageForm({ propertyId, locale }: { propertyId: number; locale: string }) {
-  const router = useRouter();
+export default function MessageForm({ propertyId, locale }: { propertyId: string; locale: string }) {  const router = useRouter();
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 

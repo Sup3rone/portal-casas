@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { useLocale } from 'next-intl';
 
 type DbProperty = {
@@ -22,7 +23,10 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
     : property.titleFr;
 
   return (
-    <article className="group overflow-hidden rounded-2xl bg-white shadow-sm transition hover:shadow-md">
+    <Link
+      href={`/${locale}/casas/${property.slug}`}
+      className="group block overflow-hidden rounded-2xl bg-white shadow-sm transition hover:shadow-md"
+    >
       {property.media?.length > 0 && (
         <div className="relative h-56 w-full overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -40,6 +44,6 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
           {property.maxGuests} huéspedes · {property.bedrooms} hab. · {property.bathrooms} baños
         </p>
       </div>
-    </article>
+    </Link>
   );
 }

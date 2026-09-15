@@ -10,6 +10,6 @@
     "dev": "pnpm --filter @portal/web dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "postinstall": "pnpm --filter @portal/db exec prisma generate"
+    "postinstall": "echo 'No postinstall needed'"
   }
 }

@@ -23,7 +23,7 @@ export default function MessageForm({ propertyId, locale }: { propertyId: string
 
   async function handleSubmit(formData: FormData) {
     try {
-      const res = await fetch(`/api/${locale}/messages`, {
+      const res = await fetch('/api/messages', {
         method: 'POST',
         body: formData,
       });

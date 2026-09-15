@@ -23,7 +23,12 @@ export default async function PropertiesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="mb-8 text-3xl font-bold">Nuestras propiedades</h1>
+      <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-gray-900">
+        Nuestras Propiedades
+      </h1>
+      <p className="mb-10 text-lg text-gray-600 max-w-2xl">
+        Descubre espacios únicos donde cada estancia cuenta una historia.
+      </p>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {propertyList.map((p) => (
           <PropertyCard key={p.id} property={p} />

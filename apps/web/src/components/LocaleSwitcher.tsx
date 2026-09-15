@@ -21,20 +21,10 @@ export default function LocaleSwitcher() {
   };
 
   return (
-    <div className="flex gap-2">
-      {langs.map((l) => (
-        <button
-          key={l.code}
-          onClick={() => change(l.code)}
-          className={`rounded-lg px-3 py-1 text-sm ${
-            locale === l.code
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-100 hover:bg-gray-200'
-          }`}
-        >
-          {l.label}
-        </button>
-      ))}
+    <div className="animate-pulse space-y-4">
+      <div className="h-64 rounded-2xl bg-gray-200"></div>
+      <div className="h-6 w-3/4 rounded bg-gray-200"></div>
+      <div className="h-4 w-1/2 rounded bg-gray-200"></div>
     </div>
   );
 }

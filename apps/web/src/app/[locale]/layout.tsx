@@ -1,6 +1,8 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import '../globals.css';  // ajusta la ruta según la profundidad
+import '../globals.css';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 export function generateStaticParams() {
   return [{ locale: 'es' }, { locale: 'en' }, { locale: 'fr' }];
@@ -8,7 +10,7 @@ export function generateStaticParams() {
 
 export default async function LocaleLayout({
   children,
-  params
+  params,
 }: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
@@ -18,9 +20,11 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body>
+      <body className="min-h-screen bg-gray-50">
         <NextIntlClientProvider messages={messages}>
+          <Navbar />
           {children}
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

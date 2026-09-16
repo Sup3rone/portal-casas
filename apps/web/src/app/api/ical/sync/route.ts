@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, icalFeeds, bookings } from '@portal/db';
-import ical from 'node-ical';
+import * as ical from 'node-ical';
 import { eq, inArray } from 'drizzle-orm';
 import { createHash } from 'crypto';
 
-// Token admin (misma lógica del login para proteger el sync)
+// Token admin
 function tokenValido(password: string | undefined): string {
   return createHash('sha256')
     .update(`${password}::portal-casas-salt`)
@@ -29,30 +29,26 @@ export async function GET(req: NextRequest) {
 
     for (const feed of feedRows) {
       try {
-        // Descargar y parsear el .ics
-        const events = await ical.fromURL(feed.url);
+        // Descargar y parsear el .ics — tipado como any por las typings quisquillosas de node-ical
+        const events: any = await ical.fromURL(feed.url);
 
         if (!events || typeof events !== 'object') {
           console.warn(`Feed vacío o inválido: ${feed.id}`);
           continue;
         }
 
-        // Buscar solo eventos tipo VEVENT (eventos de calendario reales)
-        const eventos = Object.values(events).filter(
-          (item): item is ReturnType<typeof Object> extends never ? never : any =>
-            item && typeof item === 'object' && 'type' in item && (item as any).type === 'VEVENT'
-        );
-
         const currentEventIds: string[] = [];
-        let syncedCount = 0;
 
-        for (const evt of eventos as any[]) {
-          if (!evt.start || !evt.end) continue;
+        for (const evt of Object.values(events) as any[]) {
+          if (!evt || evt.type !== 'VEVENT' || !evt.start || !evt.end) continue;
 
-          const startDate = new Date(evt.start).toISOString().slice(0, 10);
-          const endDate = new Date(evt.end).toISOString().slice(0, 10);
+          const startDate = evt.start instanceof Date
+            ? evt.start.toISOString().slice(0, 10)
+            : String(evt.start).slice(0, 10);
+          const endDate = evt.end instanceof Date
+            ? evt.end.toISOString().slice(0, 10)
+            : String(evt.end).slice(0, 10);
 
-          // UID del evento como ID único para no duplicar
           const uid = String(evt.uid || `${feed.id}_${startDate}_${endDate}`);
           currentEventIds.push(uid);
 
@@ -63,14 +59,13 @@ export async function GET(req: NextRequest) {
             startDate,
             endDate,
             source: feed.source,
-            summary: evt.summary ?? null,
+            summary: evt.summary || null,
           }).onConflictDoNothing({ target: bookings.id });
 
-          syncedCount++;
           totalSynced++;
         }
 
-        // Borrar eventos que ya no están en el feed (cancelaciones)
+        // Borrar reservas que ya no están en el feed (cancelaciones)
         const bookedIdsInDb = await db
           .select({ id: bookings.id })
           .from(bookings)
@@ -82,10 +77,9 @@ export async function GET(req: NextRequest) {
 
         if (idsToRemove.length > 0) {
           await db.delete(bookings).where(inArray(bookings.id, idsToRemove));
-          console.log(`Eliminadas ${idsToRemove.length} cancelaciones en feed ${feed.id}`);
         }
 
-        console.log(`Sincronizados ${syncedCount} eventos del feed ${feed.id}`);
+        console.log(`Feed ${feed.id}: sincronizado (${currentEventIds.length} eventos)`);
       } catch (err) {
         console.error(`Error procesando feed ${feed.id}:`, err);
       }

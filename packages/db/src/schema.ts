@@ -51,3 +51,20 @@ export const messages = pgTable('Message', {
   read: boolean('read').notNull().default(false),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 });
+
+export const icalFeeds = pgTable('IcalFeed', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  source: text('source').notNull().default('MANUAL'),
+});
+
+export const bookings = pgTable('Booking', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  icalFeedId: text('icalFeedId').references(() => icalFeeds.id, { onDelete: 'cascade' }),
+  startDate: date('startDate').notNull(),
+  endDate: date('endDate').notNull(),
+  source: text('source'),
+  summary: text('summary'),
+});

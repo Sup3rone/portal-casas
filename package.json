@@ -14,7 +14,7 @@
   },
   "pnpm": {
       "overrides": {
-        "drizzle-orm": "0.45.2"
+        "drizzle-orm": "12.4.1"
       }
     }
 }

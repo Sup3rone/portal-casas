@@ -11,5 +11,10 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "postinstall": "echo 'No postinstall needed'"
-  }
+  },
+  "pnpm": {
+      "overrides": {
+        "drizzle-orm": "0.45.2"
+      }
+    }
 }

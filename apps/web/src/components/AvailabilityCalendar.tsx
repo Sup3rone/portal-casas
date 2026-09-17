@@ -48,7 +48,7 @@ export default function AvailabilityCalendar({
   const hoyISO = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
 
   return (
-    <div className="max-w-md">
+    <div>
       {/* Cabecera con navegación */}
       <div className="mb-4 flex items-center justify-between">
         <button

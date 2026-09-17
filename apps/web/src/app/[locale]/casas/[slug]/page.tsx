@@ -88,15 +88,18 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
         </div>
 
         <div className="lg:col-span-1">
-          {/* Calendario de disponibilidad */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
-            <h3 className="text-lg font-bold mb-4">Disponibilidad</h3>
-            <AvailabilityCalendar bookings={bookingRows} />
-          </div>
-
-          {/* Formulario de consulta */}
           <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-            <h3 className="text-xl font-bold mb-4">{t('details.inquire')}</h3>
+            {/* Disponibilidad */}
+            <h3 className="text-lg font-bold mb-4 text-gray-900">Disponibilidad</h3>
+            <div className="mb-6">
+              <AvailabilityCalendar bookings={bookingRows} />
+            </div>
+
+            {/* Línea divisoria */}
+            <hr className="my-6 border-gray-200" />
+
+            {/* Formulario de consulta */}
+            <h3 className="text-xl font-bold mb-4 text-gray-900">{t('details.inquire')}</h3>
             <MessageForm propertyId={property.id} locale={locale} />
           </div>
         </div>

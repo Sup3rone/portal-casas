@@ -1,9 +1,10 @@
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
-import { db, properties, media } from '@portal/db';
+import { db, properties, media, bookings  } from '@portal/db';
 import { eq, and } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
+import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -33,6 +34,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     .from(media)
     .where(eq(media.propertyId, property.id))
     .orderBy(media.order);
+
+  // Reservas de esta propiedad
+  const bookingRows = await db
+    .select({
+      startDate: bookings.startDate,
+      endDate: bookings.endDate,
+    })
+    .from(bookings)
+    .where(eq(bookings.propertyId, property.id))
+    .orderBy(bookings.startDate);
 
   // Determinar textos según idioma
   const localeMap: Record<string, { title: string; desc: string }> = {
@@ -77,7 +88,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 sticky top-24">
+          {/* Calendario de disponibilidad */}
+          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
+            <h3 className="text-lg font-bold mb-4">Disponibilidad</h3>
+            <AvailabilityCalendar bookings={bookingRows} />
+          </div>
+
+          {/* Formulario de consulta */}
+          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
             <h3 className="text-xl font-bold mb-4">{t('details.inquire')}</h3>
             <MessageForm propertyId={property.id} locale={locale} />
           </div>

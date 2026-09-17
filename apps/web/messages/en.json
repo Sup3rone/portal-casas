@@ -1,26 +1,43 @@
 {
+  "nav": {
+    "casas": "Homes",
+    "admin": "Admin"
+  },
   "details": {
     "description": "Description",
     "guests": "Guests",
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",
-    "inquire": "Rental inquiry"
+    "inquire": "Rental inquiry",
+    "disponibilidad": "Availability"
   },
   "common": {
     "verMas": "See more",
     "contactar": "Contact",
-    "noImages": "No photos for this property yet"
+    "noImages": "No photos for this property yet",
+    "leido": "Read",
+    "marcarLeido": "Mark as read",
+    "disponible": "Available",
+    "ocupado": "Booked"
   },
   "home": {
     "titulo": "Find your next stay",
-    "subtitulo": "Verified homes, ready for you"
+    "subtitulo": "Verified homes, ready for you. Unique experiences in top destinations.",
+    "explorar": "Explore properties"
   },
   "properties": {
     "titulo": "Our properties",
+    "subtitulo": "Discover unique spaces where every stay tells a story.",
     "huespedes": "{count} guests",
     "habitaciones": "{count} bd.",
     "banos": "{count} baths",
     "verDetalle": "View details",
-    "consultar": "Check dates"
+    "consultar": "Check availability"
+  },
+  "footer": {
+    "descripcion": "Your connection to the finest properties. Unique experiences, unforgettable memories.",
+    "navegacion": "Navigation",
+    "contacto": "Contact",
+    "derechos": "© {year} Portal Casas. All rights reserved."
   }
 }

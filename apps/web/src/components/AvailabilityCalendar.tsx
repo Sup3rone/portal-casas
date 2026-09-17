@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 // Un día está ocupado si cae dentro de algún rango [start, end) — la noche del día de salida NO cuenta (convención Airbnb)
 function diaOcupado(

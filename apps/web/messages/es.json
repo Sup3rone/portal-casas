@@ -1,26 +1,43 @@
 {
+  "nav": {
+    "casas": "Casas",
+    "admin": "Admin"
+  },
   "details": {
-      "description": "Descripción",
-      "guests": "Huéspedes",
-      "bedrooms": "Recámaras",
-      "bathrooms": "Baños",
-      "inquire": "Consulta de renta"
-    },
+    "description": "Descripción",
+    "guests": "Huéspedes",
+    "bedrooms": "Recámaras",
+    "bathrooms": "Baños",
+    "inquire": "Consulta de renta",
+    "disponibilidad": "Disponibilidad"
+  },
   "common": {
     "verMas": "Ver más",
     "contactar": "Contactar",
-    "noImages": "Aún no hay fotos de esta propiedad"
+    "noImages": "Aún no hay fotos de esta propiedad",
+    "leido": "Leído",
+    "marcarLeido": "Marcar como leído",
+    "disponible": "Disponible",
+    "ocupado": "Ocupado"
   },
   "home": {
     "titulo": "Encuentra tu próxima estancia",
-    "subtitulo": "Casas verificadas, listas para ti"
+    "subtitulo": "Casas verificadas, listas para ti. Experiencias únicas en los mejores destinos.",
+    "explorar": "Explorar propiedades"
   },
   "properties": {
     "titulo": "Nuestras propiedades",
+    "subtitulo": "Descubre espacios únicos donde cada estancia cuenta una historia.",
     "huespedes": "{count} huéspedes",
     "habitaciones": "{count} hab.",
     "banos": "{count} baños",
     "verDetalle": "Ver detalle",
     "consultar": "Consultar fechas"
+  },
+  "footer": {
+    "descripcion": "Tu conexión con las mejores propiedades. Experiencias únicas, recuerdos inolvidables.",
+    "navegacion": "Navegación",
+    "contacto": "Contacto",
+    "derechos": "© {year} Portal Casas. Todos los derechos reservados."
   }
 }

@@ -1,26 +1,44 @@
 {
+  "nav": {
+    "casas": "Maisons",
+    "admin": "Admin"
+  },
   "details": {
     "description": "Description",
     "guests": "Voyageurs",
     "bedrooms": "Chambres",
     "bathrooms": "Salles de bain",
-    "inquire": "Demande de location"
+    "inquire": "Demande de location",
+    "disponibilidad": "Disponibilité"
   },
   "common": {
     "verMas": "Voir plus",
     "contactar": "Contacter",
-    "noImages": "Pas encore de photos pour cette propriété"
+    "noImages": "Pas encore de photos pour cette propriété",
+    "leido": "Lu",
+    "marcarLeido": "Marquer comme lu",
+    "disponible": "Disponible",
+    "ocupado": "Réservé"
   },
   "home": {
-    "titre": "Trouvez votre prochain séjour",
-    "sousTitre": "Des maisons vérifiées, prêtes pour vous"
+    "titulo": "Trouvez votre prochain séjour",
+    "subtitulo": "Maisons vérifiées, prêtes pour vous. Des expériences uniques dans les meilleures destinations.",
+    "explorar": "Explorer les propriétés"
   },
   "properties": {
+    "titre": "Nos propriétés",
     "titulo": "Nos propriétés",
+    "subtitulo": "Découvrez des espaces uniques où chaque séjour raconte une histoire.",
     "huespedes": "{count} voyageurs",
     "habitaciones": "{count} ch.",
     "banos": "{count} sdb",
-    "verDetalle": "Voir le détail",
-    "consultar": "Demander les dates"
+    "verDetalle": "Voir les détails",
+    "consultar": "Vérifier les disponibilités"
+  },
+  "footer": {
+    "descripcion": "Votre connexion aux meilleures propriétés. Expériences uniques, souvenirs inoubliables.",
+    "navegacion": "Navigation",
+    "contacto": "Contact",
+    "derechos": "© {year} Portal Casas. Tous droits réservés."
   }
 }

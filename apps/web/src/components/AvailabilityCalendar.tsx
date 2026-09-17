@@ -5,9 +5,9 @@ import { useState } from 'react';
 // Un día está ocupado si cae dentro de algún rango [start, end) — la noche del día de salida NO cuenta (convención Airbnb)
 function diaOcupado(
   fechaISO: string,
-  ranges: { start: string; end: string }[]
+  ranges: { startDate: string; endDate: string }[]
 ): boolean {
-  return ranges.some(({ start, end }) => fechaISO >= start && fechaISO < end);
+  return ranges.some(({ startDate, endDate }) => fechaISO >= startDate && fechaISO < endDate);
 }
 
 export default function AvailabilityCalendar({

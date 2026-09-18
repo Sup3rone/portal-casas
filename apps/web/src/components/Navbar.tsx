@@ -19,10 +19,7 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center gap-4">
-            <Link
-              href={`/${locale}/casas`}
-              className="text-sm font-medium text-gray-700 transition-colors hover:text-purple-600"
-            >
+            <Link href="/casas" className="text-sm font-medium text-gray-700 transition-colors hover:text-purple-600">
               {t('casas')}
             </Link>
             <LocaleSwitcher />

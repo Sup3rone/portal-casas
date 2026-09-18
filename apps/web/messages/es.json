@@ -9,7 +9,8 @@
     "bedrooms": "Recámaras",
     "bathrooms": "Baños",
     "inquire": "Consulta de renta",
-    "disponibilidad": "Disponibilidad"
+    "disponibilidad": "Disponibilidad",
+    "location": "Ubicación"
   },
   "common": {
     "verMas": "Ver más",

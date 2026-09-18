@@ -9,7 +9,8 @@
     "bedrooms": "Chambres",
     "bathrooms": "Salles de bain",
     "inquire": "Demande de location",
-    "disponibilidad": "Disponibilité"
+    "disponibilidad": "Disponibilité",
+    "location": "Emplacement"
   },
   "common": {
     "verMas": "Voir plus",

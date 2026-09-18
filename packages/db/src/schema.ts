@@ -21,6 +21,8 @@ export const properties = pgTable('Property', {
   descEn: text('descEn').notNull(),
   descFr: text('descFr').notNull(),
   address: text('address').notNull(),
+  lat: doublePrecision(),
+  lng: doublePrecision(),
   city: text('city').notNull(),
   maxGuests: integer('maxGuests').notNull(),
   bedrooms: integer('bedrooms').notNull(),

@@ -9,7 +9,8 @@
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",
     "inquire": "Rental inquiry",
-    "disponibilidad": "Availability"
+    "disponibilidad": "Availability",
+    "location": "Location"
   },
   "common": {
     "verMas": "See more",

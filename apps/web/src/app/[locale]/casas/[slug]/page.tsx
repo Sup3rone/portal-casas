@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import Gallery from "@/components/Gallery";
+import LocationMap from "@/components/LocationMap";
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -70,6 +71,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             <div><strong>{t('details.guests')}:</strong> {property.maxGuests}</div>
             <div><strong>{t('details.bedrooms')}:</strong> {property.bedrooms}</div>
             <div><strong>{t('details.bathrooms')}:</strong> {property.bathrooms}</div>
+            {/* Ubicación */}
+            <h2 className="text-2xl font-semibold mt-10 mb-4">{t('details.location')}</h2>
+            {property.lat != null && property.lng != null ? (
+              <LocationMap lat={property.lat} lng={property.lng} address={property.address} />
+            ) : null}
           </div>
         </div>
 

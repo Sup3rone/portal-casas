@@ -1,5 +1,8 @@
-import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { createNavigation } from 'next-intl/navigation';
+import { routing } from './routing';
+
+export const { Link, redirect, usePathname, useRouter, getPathname } =
+  createNavigation(routing);
 
 type DbProperty = {
   id: string;

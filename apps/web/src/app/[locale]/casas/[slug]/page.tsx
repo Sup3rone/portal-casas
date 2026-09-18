@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
+import Gallery from "@/components/Gallery";
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -58,22 +59,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       <h1 className="text-4xl font-bold mb-6">{title}</h1>
 
       {/* Galería Principal */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {mediaList.length > 0 ? (
-          mediaList.map((m, idx) => (
-            <div key={m.id} className={`relative aspect-video overflow-hidden rounded-lg ${idx === 0 ? 'md:col-span-2 row-span-2' : ''}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={m.url}
-                alt={`${title} - Foto ${idx + 1}`}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500 italic">{t('common.noImages')}</p>
-        )}
-      </div>
+      <Gallery media={mediaList} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">

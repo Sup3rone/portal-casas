@@ -1,4 +1,6 @@
 import { getRequestConfig } from 'next-intl/server';
+import { routing } from './routing';
+
 
 const locales = ['es', 'en', 'fr'] as const;
 type Locale = (typeof locales)[number];

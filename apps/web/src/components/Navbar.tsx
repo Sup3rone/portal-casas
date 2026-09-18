@@ -12,7 +12,7 @@ export default function Navbar() {
     <nav className="border-b border-gray-100 bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href={`/${locale}`} className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
               Portal Casas
             </span>
@@ -24,7 +24,7 @@ export default function Navbar() {
             </Link>
             <LocaleSwitcher />
             <Link
-              href={`/${locale}/admin/mensajes`}
+              href="/admin/mensajes"
               className="rounded-full bg-purple-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-purple-700"
             >
               {t('admin')}

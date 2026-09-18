@@ -106,6 +106,27 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
           }}
         />
       )}
+      {selected && (
+        <MessageModal
+          message={selected}
+          onClose={() => setSelected(null)}
+          onSuccess={() => {
+            setSelected(null);
+            window.location.reload();
+          }}
+          onDelete={async (id) => {
+            const res = await fetch("/api/messages/delete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Error al eliminar");
+            setSelected(null);
+            window.location.reload();
+          }}
+        />
+      )}
     </main>
   );
 }

@@ -22,13 +22,13 @@ export async function POST(req: NextRequest) {
     // Y en el POST:
     const token = await generarToken(process.env.ADMIN_PASSWORD!);
 
-    const res = NextResponse.json({ success: true });
+    const res = NextResponse.redirect(new URL('/es/admin/mensajes', req.url), { status: 303 });
     res.cookies.set('admin_session', token, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
-      path: '/',          // ← ESTO es lo que salva la vida, que llegue a TODAS las rutas
-      maxAge: 60 * 60 * 24 * 7  // 7 días, a tu gusto
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7
     });
     return res;
   } catch {

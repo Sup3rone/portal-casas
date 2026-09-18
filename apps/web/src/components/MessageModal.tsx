@@ -20,7 +20,6 @@ function toDateInput(d: string | Date | null | undefined): string {
   if (!d) return "";
 
   if (typeof d === "string") {
-    // Cubre tanto "2026-09-22" como "2026-09-21T00:00:00.000Z"
     if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10);
     const parsed = new Date(d);
     if (!isNaN(parsed.getTime())) {
@@ -40,10 +39,12 @@ export default function MessageModal({
   message,
   onClose,
   onSuccess,
+  onDelete,
 }: {
   message: MessageData;
   onClose: () => void;
   onSuccess: () => void;
+  onDelete: (id: string) => Promise<void>;
 }) {
   const [startDate, setStartDate] = useState(toDateInput(message.startDate));
   const [endDate, setEndDate] = useState(toDateInput(message.endDate));
@@ -76,6 +77,21 @@ export default function MessageModal({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al confirmar");
       onSuccess();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error inesperado");
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmado = window.confirm(
+      "¿Eliminar este mensaje permanentemente?\n\nEsta acción no se puede deshacer."
+    );
+    if (!confirmado) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await onDelete(message.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error inesperado");
       setSaving(false);
@@ -180,6 +196,14 @@ export default function MessageModal({
             Cerrar
           </button>
         </div>
+
+        <button
+          onClick={handleDelete}
+          disabled={saving}
+          className="mt-4 w-full rounded-lg border border-red-200 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          🗑 Eliminar mensaje
+        </button>
       </div>
     </div>
   );

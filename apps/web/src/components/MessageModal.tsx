@@ -15,12 +15,25 @@ export type MessageData = {
   propertySlug: string;
 };
 
-// Formato YYYY-MM-DD seguro (evita desfases de zona horaria)
-function toDateInput(d: string | Date | null): string {
+// Convierte cualquier formato de fecha a YYYY-MM-DD para el input date
+function toDateInput(d: string | Date | null | undefined): string {
   if (!d) return "";
-  const dt = typeof d === "string" ? new Date(`${d}T00:00:00`) : d;
-  if (isNaN(dt.getTime())) return "";
-  return dt.toISOString().slice(0, 10);
+
+  if (typeof d === "string") {
+    // Cubre tanto "2026-09-22" como "2026-09-21T00:00:00.000Z"
+    if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10);
+    const parsed = new Date(d);
+    if (!isNaN(parsed.getTime())) {
+      return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
+    }
+    return "";
+  }
+
+  if (d instanceof Date && !isNaN(d.getTime())) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+
+  return "";
 }
 
 export default function MessageModal({
@@ -44,7 +57,7 @@ export default function MessageModal({
     setError(null);
   }, [message]);
 
-  const valid = startDate && endDate && startDate <= endDate;
+  const valid = Boolean(startDate && endDate && startDate <= endDate);
 
   const handleConfirm = async () => {
     if (!valid || saving) return;
@@ -131,7 +144,7 @@ export default function MessageModal({
                 className="flex-1 rounded-lg border border-gray-300 p-2 focus:border-purple-500 focus:outline-none"
               />
             </div>
-            {!valid && startDate && endDate && (
+            {startDate && endDate && !valid && (
               <p className="mt-1 text-xs text-red-600">
                 La fecha de salida debe ser posterior a la de entrada
               </p>

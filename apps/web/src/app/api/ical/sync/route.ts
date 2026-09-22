@@ -55,14 +55,13 @@ export async function GET(req: NextRequest) {
           })
           .onConflictDoNothing();
 
-        currentEventIds.push();
+        currentEventIds.push(String((event as any).uid ?? `${feed.id}-${start.toISOString()}`));
       }
       console.log(`Feed ${feed.id}: sincronizados ${currentEventIds.length} eventos`);
       totalSynced += currentEventIds.length;
     }
 
     console.log("Skipping lastSyncedAt update (column not ready yet)");
-    }
 
     return NextResponse.json({
       success: true,

@@ -26,7 +26,6 @@ export async function GET(req: NextRequest) {
 
     for (const feed of feedRows) {
       const events: any = await ical.fromURL(feed.url);
-
       if (!events || typeof events !== 'object') {
         console.warn(`Feed vacío: ${feed.id}`);
         continue;
@@ -34,33 +33,35 @@ export async function GET(req: NextRequest) {
 
       const currentEventIds: string[] = [];
 
-      for (const evt of Object.values(events) as any[]) {
-        if (!evt || evt.type !== 'VEVENT' || !evt.start || !evt.end) continue;
+      for (const key in events) {
+        const event = events[key];
+        if (event.type !== 'VEVENT') continue;
 
-        const startDate = evt.start instanceof Date
-          ? evt.start.toISOString().slice(0, 10)
-          : String(evt.start).slice(0, 10);
-        const endDate = evt.end instanceof Date
-          ? evt.end.toISOString().slice(0, 10)
-          : String(evt.end).slice(0, 10);
+        const start = (event as any).start;
+        const end = (event as any).end || (event as any).start;
+        const feedId = feed.id;
+        const propertyId = feed.propertyId;
+        const source = feed.source === 'airbnb' ? 'airbnb' : 'google';
 
-        const uid = String(evt.uid || `${feed.id}_${startDate}_${endDate}`);
-        currentEventIds.push(uid);
+        if (!start || !end) continue;
 
         await db.insert(bookings)
           .values({
-            propertyId,          // ← el ID de la propiedad del feed, NO string vacío
+            propertyId: propertyId,
             icalFeedId: feedId,
             startDate: start.toISOString().slice(0, 10),
             endDate: end.toISOString().slice(0, 10),
-            source: source,      // "airbnb" / "google"
+            source: source as "airbnb" | "google",
           })
           .onConflictDoNothing();
 
-        totalSynced++;
+        currentEventIds.push();
       }
-
       console.log(`Feed ${feed.id}: sincronizados ${currentEventIds.length} eventos`);
+      totalSynced += currentEventIds.length;
+    }
+
+    console.log("Skipping lastSyncedAt update (column not ready yet)");
     }
 
     return NextResponse.json({

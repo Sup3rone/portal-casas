@@ -1,5 +1,5 @@
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
-import { db, properties, media, bookings  } from '@portal/db';
+import { db, properties, media, bookings, seasonRates } from '@portal/db';
 import { eq, and } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -47,6 +47,26 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     .where(eq(bookings.propertyId, property.id))
     .orderBy(bookings.startDate);
 
+  // Tarifas de temporada para esta propiedad
+  const rateRows = await db
+    .select()
+    .from(seasonRates)
+    .where(eq(seasonRates.propertyId, property.id));
+
+  const pricing = {
+    base: {
+      weekday: property.baseWeekdayPrice,
+      weekend: property.baseWeekendPrice,
+    },
+    seasons: rateRows.map(r => ({
+      start: r.startDate,
+      end: r.endDate,
+      weekday: r.weekdayPrice,
+      weekend: r.weekendPrice,
+      priority: r.priority,
+    })),
+    booked: bookingRows.map(b => ({ start: b.startDate, end: b.endDate })),
+  };
   // Determinar textos según idioma
   const localeMap: Record<string, { title: string; desc: string }> = {
     es: { title: property.titleEs, desc: property.descEs },
@@ -92,7 +112,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
             {/* Formulario de consulta */}
             <h3 className="text-xl font-bold mb-4 text-gray-900">{t('details.inquire')}</h3>
-            <MessageForm propertyId={property.id} locale={locale} />
+            <MessageForm propertyId={property.id} locale={locale} pricing={pricing} />
           </div>
         </div>
       </div>

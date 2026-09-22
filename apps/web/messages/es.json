@@ -1,7 +1,11 @@
 {
   "nav": {
     "casas": "Casas",
-    "admin": "Admin"
+    "admin": "Admin",
+    "login": "Entrar",
+    "registro": "Crear cuenta",
+    "cuenta": "Mi cuenta",
+    "salir": "Salir"
   },
   "details": {
     "description": "Descripción",

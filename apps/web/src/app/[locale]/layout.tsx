@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import '../globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AuthProvider from '@/components/AuthProvider';
 
 export function generateStaticParams() {
   return [{ locale: 'es' }, { locale: 'en' }, { locale: 'fr' }];
@@ -20,13 +21,15 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body className="min-h-screen bg-gray-50">
-        <NextIntlClientProvider messages={messages}>
-          <Navbar />
-          {children}
-          <Footer />
-        </NextIntlClientProvider>
-      </body>
-    </html>
+          <body>
+            <NextIntlClientProvider>
+              <AuthProvider>
+                <Navbar />
+                {children}
+                <Footer />
+              </AuthProvider>
+            </NextIntlClientProvider>
+          </body>
+        </html>
   );
 }

@@ -1,39 +1,39 @@
+import NextAuth from 'next-auth';
 import createMiddleware from 'next-intl/middleware';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { routing } from './i18n/routing';
+import { authConfig } from './auth.config';
 
 const intlMiddleware = createMiddleware(routing);
+const { auth } = NextAuth(authConfig);
 
-// Genera el token de sesión con Web Crypto (compatible con Edge Runtime)
-async function generarToken(password: string | undefined): Promise<string> {
-  if (!password) return 'sin-password-configurada';
-  const data = new TextEncoder().encode(`${password}::portal-casas-salt`);
-  const buffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
+type SessionConRol = { user?: { role?: string } } | null | undefined;
 
-export default async function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+export default auth(async (req) => {
+  // req llega tipado por NextAuth, pero leemos auth con cast explícito
+  const session = (req as typeof req & { auth?: SessionConRol }).auth;
+  const pathname = req.nextUrl.pathname;
+  const isAdmin = session?.user?.role === 'ADMIN';
 
-  // 🔒 Protección de rutas /{locale}/admin/*
+  // 🔒 Protección de /{locale}/admin/* — solo rol ADMIN
   const adminMatch = pathname.match(/^\/(es|en|fr)\/admin(\/.*)?$/);
-  if (adminMatch) {
+  if (adminMatch && !isAdmin) {
     const locale = adminMatch[1];
-    const esLogin = pathname.endsWith('/admin/login');
-    const tokenValido = await generarToken(process.env.ADMIN_PASSWORD);
-    const cookieSession = req.cookies.get('admin_session')?.value;
-
-    if (cookieSession !== tokenValido && !esLogin) {
-      return NextResponse.redirect(new URL(`/${locale}/admin/login`, req.url));
-    }
+    return NextResponse.redirect(new URL(`/${locale}/login?reason=admin`, req.url));
   }
 
-  // El resto de rutas pasan por next-intl
+  // 👋 Si ya hay sesión, no mostrar login/registro (redirect por rol)
+  const authPage = pathname.match(/^\/(es|en|fr)\/(login|registro)$/);
+  if (authPage && session) {
+    const locale = authPage[1];
+    const dest = isAdmin ? `/${locale}/admin` : `/${locale}/mi-cuenta`;
+    return NextResponse.redirect(new URL(dest, req.url));
+  }
+
+  // El resto pasa por next-intl
   return intlMiddleware(req);
-}
+});
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: ['/((?!api|_next|.*\\..*).*)'],
 };

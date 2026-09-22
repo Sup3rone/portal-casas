@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db, users, bookings, messages, properties } from "@portal/db";
 import { eq, desc } from "drizzle-orm";
+import { logoutAction } from "./actions";
 
 export default async function MyAccountPage() {
   const session = await auth();
@@ -65,8 +66,6 @@ export default async function MyAccountPage() {
               {session.user.name} ({session.user.email})
             </p>
           </div>
-          import { logoutAction } from "./actions";
-
           <form action={logoutAction}>
             <button
               type="submit"

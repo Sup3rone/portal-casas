@@ -47,15 +47,15 @@ export async function GET(req: NextRequest) {
         const uid = String(evt.uid || `${feed.id}_${startDate}_${endDate}`);
         currentEventIds.push(uid);
 
-        await db.insert(bookings).values({
-          id: uid,
-          propertyId: feed.propertyId,
-          icalFeedId: feed.id,
-          startDate,
-          endDate,
-          source: feed.source,
-          summary: evt.summary || null,
-        }).onConflictDoNothing({ target: bookings.id });
+        await db.insert(bookings)
+          .values({
+            propertyId,          // ← el ID de la propiedad del feed, NO string vacío
+            icalFeedId: feedId,
+            startDate: start.toISOString().slice(0, 10),
+            endDate: end.toISOString().slice(0, 10),
+            source: source,      // "airbnb" / "google"
+          })
+          .onConflictDoNothing();
 
         totalSynced++;
       }

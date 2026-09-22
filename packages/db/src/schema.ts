@@ -1,14 +1,17 @@
-import { pgTable, text, integer, doublePrecision, boolean, timestamp, date, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision } from "drizzle-orm/pg-core";
 
-export const roleEnum = pgEnum('Role', ['ADMIN', 'VIEWER']);
+export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT"]);
 export const mediaTypeEnum = pgEnum('MediaType', ['PHOTO', 'VIDEO']);
 
-export const users = pgTable('User', {
-  id: text('id').primaryKey(),
-  email: text('email').notNull().unique(),
-  name: text('name').notNull(),
-  role: roleEnum('role').notNull().default('ADMIN'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
+export const users = pgTable("User", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  passwordHash: text("passwordHash"),
+  emailVerifiedAt: timestamp("emailVerifiedAt"),
+  role: userRoleEnum("role").notNull().default("CLIENT"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 
 export const properties = pgTable('Property', {
@@ -21,8 +24,8 @@ export const properties = pgTable('Property', {
   descEn: text('descEn').notNull(),
   descFr: text('descFr').notNull(),
   address: text('address').notNull(),
-  lat: doublePrecision(),
-  lng: doublePrecision(),
+  lat: doublePrecision('lat'),
+  lng: doublePrecision('lng'),
   city: text('city').notNull(),
   maxGuests: integer('maxGuests').notNull(),
   bedrooms: integer('bedrooms').notNull(),
@@ -52,6 +55,7 @@ export const messages = pgTable('Message', {
   endDate: date('endDate'),
   read: boolean('read').notNull().default(false),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
+  userId: text('userId').references(() => users.id),
 });
 
 export const icalFeeds = pgTable('IcalFeed', {
@@ -62,11 +66,11 @@ export const icalFeeds = pgTable('IcalFeed', {
 });
 
 export const bookings = pgTable('Booking', {
-  id: text('id').primaryKey(),
-  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
-  icalFeedId: text('icalFeedId').references(() => icalFeeds.id, { onDelete: 'cascade' }),
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  propertyId: text('propertyId').notNull(),
+  icalFeedId: text('icalFeedId').references(() => icalFeeds.id),
   startDate: date('startDate').notNull(),
   endDate: date('endDate').notNull(),
-  source: text('source'),
-  summary: text('summary'),
+  source: text('source').notNull().default('manual'),
+  guestUserId: text('guestUserId').references(() => users.id),
 });

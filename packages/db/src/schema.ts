@@ -74,3 +74,15 @@ export const bookings = pgTable('Booking', {
   source: text('source').notNull().default('manual'),
   guestUserId: text('guestUserId').references(() => users.id),
 });
+
+export const seasonRates = pgTable('SeasonRate', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),                    // ej: "Temporada alta navidad"
+  startDate: date('startDate').notNull(),           // YYYY-MM-DD
+  endDate: date('endDate').notNull(),
+  weekdayPrice: integer('weekdayPrice').notNull(),  // MXN por noche lun-vie
+  weekendPrice: integer('weekendPrice').notNull(),  // MXN por noche sáb-dom
+  priority: integer('priority').notNull().default(0), // mayor = gana si se solapan temporadas
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+});

@@ -65,7 +65,9 @@ export default async function MyAccountPage() {
               {session.user.name} ({session.user.email})
             </p>
           </div>
-          <form action="/api/auth/signout" method="post">
+          import { logoutAction } from "./actions";
+
+          <form action={logoutAction}>
             <button
               type="submit"
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"

@@ -70,6 +70,11 @@ export default async function LoginPage({
             Regístrate
           </Link>
         </p>
+        <p className="mt-2 text-center text-sm">
+          <a href={`/${locale}/olvide-password`} className="text-purple-600 underline">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </p>
       </div>
     </div>
   );

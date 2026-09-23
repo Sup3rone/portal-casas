@@ -2,9 +2,14 @@
   "nav": {
     "casas": "Homes",
     "admin": "Admin",
-    "calendario": "Calendar",
+    "login": "Log in",
+    "registro": "Sign up",
+    "cuenta": "My account",
+    "salir": "Log out",
     "mensajes": "Messages",
-    "tarifas": "Rates"
+    "tarifas": "Rates",
+    "calendario": "Calendar",
+    "forgotLink": "Forgot your password?"
   },
   "details": {
     "description": "Description",
@@ -43,5 +48,18 @@
     "navegacion": "Navigation",
     "contacto": "Contact",
     "derechos": "© {year} Portal Casas. All rights reserved."
+  },
+  "auth": {
+    "forgotTitle": "Forgot your password?",
+    "forgotSubtitle": "Enter your email and we'll send you a recovery link.",
+    "email": "Email",
+    "forgotButton": "Send link",
+    "forgotSent": "If your email is registered, you'll receive a link within minutes. Check your spam folder too.",
+    "resetTitle": "New password",
+    "newPassword": "New password (minimum 8 characters)",
+    "resetButton": "Save password",
+    "resetInvalid": "The link is invalid or expired (it lasts 1 hour). Request a new one.",
+    "resetTooShort": "The password must be at least 8 characters.",
+    "resetTryAgain": "Request a new link"
   }
 }

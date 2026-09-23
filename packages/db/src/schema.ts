@@ -88,3 +88,12 @@ export const seasonRates = pgTable('SeasonRate', {
   priority: integer('priority').notNull().default(0), // mayor = gana si se solapan temporadas
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const passwordResetTokens = pgTable('PasswordResetToken', {
+  id: text('id').primaryKey(),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text('token').notNull().unique(),
+  expiresAt: timestamp('expiresAt', { withTimezone: true }).notNull(),
+  usedAt: timestamp('usedAt', { withTimezone: true }),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+});

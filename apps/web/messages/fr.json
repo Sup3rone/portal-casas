@@ -2,9 +2,14 @@
   "nav": {
     "casas": "Maisons",
     "admin": "Admin",
-    "calendario": "Calendrier",
+    "login": "Connexion",
+    "registro": "Créer un compte",
+    "cuenta": "Mon compte",
+    "salir": "Déconnexion",
     "mensajes": "Messages",
-    "tarifas": "Tarifs"
+    "tarifas": "Tarifs",
+    "calendario": "Calendrier",
+    "forgotLink": "Mot de passe oublié ?"
   },
   "details": {
     "description": "Description",
@@ -44,5 +49,18 @@
     "navegacion": "Navigation",
     "contacto": "Contact",
     "derechos": "© {year} Portal Casas. Tous droits réservés."
+  },
+  "auth": {
+    "forgotTitle": "Mot de passe oublié ?",
+    "forgotSubtitle": "Entrez votre e-mail et nous vous enverrons un lien de récupération.",
+    "email": "E-mail",
+    "forgotButton": "Envoyer le lien",
+    "forgotSent": "Si votre e-mail est enregistré, vous recevrez un lien dans quelques minutes. Vérifiez aussi vos spams.",
+    "resetTitle": "Nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe (minimum 8 caractères)",
+    "resetButton": "Enregistrer le mot de passe",
+    "resetInvalid": "Le lien est invalide ou a expiré (valable 1 heure). Demandez-en un nouveau.",
+    "resetTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+    "resetTryAgain": "Demander un nouveau lien"
   }
 }

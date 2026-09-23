@@ -8,7 +8,8 @@
     "salir": "Salir",
     "mensajes": "Mensajes",
     "tarifas": "Tarifas",
-    "calendario": "Calendario"
+    "calendario": "Calendario",
+    "forgotLink": "¿Olvidaste tu contraseña?"
   },
   "details": {
     "description": "Descripción",
@@ -47,5 +48,18 @@
     "navegacion": "Navegación",
     "contacto": "Contacto",
     "derechos": "© {year} Portal Casas. Todos los derechos reservados."
+  },
+  "auth": {
+    "forgotTitle": "¿Olvidaste tu contraseña?",
+    "forgotSubtitle": "Escribe tu correo y te enviaremos un enlace para recuperarla.",
+    "email": "Correo electrónico",
+    "forgotButton": "Enviar enlace",
+    "forgotSent": "Si tu correo está registrado, recibirás un enlace en unos minutos. Revisa también spam.",
+    "resetTitle": "Nueva contraseña",
+    "newPassword": "Nueva contraseña (mínimo 8 caracteres)",
+    "resetButton": "Guardar contraseña",
+    "resetInvalid": "El enlace es inválido o ya expiró (dura 1 hora). Pide uno nuevo.",
+    "resetTooShort": "La contraseña debe tener al menos 8 caracteres.",
+    "resetTryAgain": "Pedir un nuevo enlace"
   }
 }

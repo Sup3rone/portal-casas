@@ -3,6 +3,7 @@ import { db, icalFeeds, bookings } from '@portal/db';
 import * as ical from 'node-ical';
 import { eq, inArray } from 'drizzle-orm';
 import { createHash } from 'crypto';
+import { auth } from "@/lib/auth";
 
 function tokenValido(password: string | undefined): string {
   return createHash('sha256')
@@ -10,9 +11,10 @@ function tokenValido(password: string | undefined): string {
     .digest('hex');
 }
 
-export async function GET(req: NextRequest) {
-  const cookie = req.cookies.get('admin_session')?.value;
-  if (cookie !== tokenValido(process.env.ADMIN_PASSWORD)) {
+export async function POST(req: NextRequest) {
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== 'ADMIN') {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 

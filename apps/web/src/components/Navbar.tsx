@@ -42,6 +42,9 @@ export default function Navbar() {
                         <Link href="/admin/tarifas" className="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-purple-50 hover:text-purple-700">
                           💰 {t('tarifas')}
                         </Link>
+                        <Link href="/admin/calendario" className="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-purple-50 hover:text-purple-700">
+                          📅 {t('calendario')}
+                        </Link>
                       </div>
                     </div>
                   </div>

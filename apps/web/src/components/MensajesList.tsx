@@ -48,6 +48,7 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
                 propertyId: m.propertyId,
                 propertyName: m.propertyTitle ?? m.propiedad ?? 'Propiedad eliminada',
                 propertySlug: m.propiedad ?? '',
+                userId: m.userId,
               })
             }
             className="cursor-pointer rounded-2xl bg-white p-6 shadow-sm border transition hover:shadow-md"

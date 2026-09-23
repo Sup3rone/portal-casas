@@ -13,6 +13,7 @@ export type MessageData = {
   propertyId: string;
   propertyName: string;
   propertySlug: string;
+  userId: string | null;
 };
 
 // Convierte cualquier formato de fecha a YYYY-MM-DD para el input date
@@ -72,6 +73,7 @@ export default function MessageModal({
           propertyId: message.propertyId,
           startDate,
           endDate,
+          guestUserId: message.userId ?? undefined,
         }),
       });
       const data = await res.json();

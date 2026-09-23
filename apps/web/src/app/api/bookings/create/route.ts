@@ -1,26 +1,18 @@
+// src/app/api/bookings/create/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { db, bookings } from "@portal/db";
-
-// Genera el token de sesión con Web Crypto — IDÉNTICO al de proxy.ts y login
-async function generarToken(password: string | undefined): Promise<string> {
-  if (!password) return 'sin-password-configurada';
-  const data = new TextEncoder().encode(`${password}::portal-casas-salt`);
-  const buffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
+import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
-  const tokenValido = await generarToken(process.env.ADMIN_PASSWORD);
-  const cookieSession = req.cookies.get('admin_session')?.value;
-
-  if (cookieSession !== tokenValido) {
+  // 🔒 Protección con Auth.js (el nuevo sistema, por rol)
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (role !== 'ADMIN') {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
   try {
-    const { propertyId, startDate, endDate } = await req.json();
+    const { propertyId, startDate, endDate, guestUserId } = await req.json();
 
     if (!propertyId || !startDate || !endDate) {
       return NextResponse.json(
@@ -42,6 +34,7 @@ export async function POST(req: NextRequest) {
       startDate,
       endDate,
       source: 'manual',
+      guestUserId: guestUserId || null,   // ← EL NUEVO DATO
     });
 
     return NextResponse.json({ success: true });

@@ -15,6 +15,7 @@ type Row = {
   endDate: string | null;
   read: boolean;
   createdAt: Date;
+  userId: string | null;
   propiedad: string | null;
   propertyId: string;
   propertyTitle: string | null;
@@ -58,6 +59,11 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
                   {!m.read && (
                     <span className="ml-2 inline-block rounded-full bg-purple-600 px-2 py-0.5 align-middle text-xs text-white">
                       NUEVO
+                    </span>
+                  )}
+                  {m.userId && (
+                    <span className="ml-2 inline-block rounded-full bg-indigo-100 px-2 py-0.5 align-middle text-xs font-medium text-indigo-700">
+                      👤 registrado
                     </span>
                   )}
                 </h2>

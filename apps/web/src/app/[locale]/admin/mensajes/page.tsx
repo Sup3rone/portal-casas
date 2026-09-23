@@ -17,6 +17,7 @@ export default async function AdminMensajesPage() {
       endDate: messages.endDate,
       read: messages.read,
       createdAt: messages.createdAt,
+      userId: messages.userId,
       propiedad: properties.slug,
       propertyId: messages.propertyId,
       propertyTitle: properties.titleEs,

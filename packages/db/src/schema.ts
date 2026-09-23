@@ -33,6 +33,8 @@ export const properties = pgTable('Property', {
   published: boolean('published').notNull().default(false),
   ownerId: text('ownerId').notNull().references(() => users.id),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
+  baseWeekdayPrice: integer('baseWeekdayPrice'),
+  baseWeekendPrice: integer('baseWeekendPrice'),
 });
 
 export const media = pgTable('Media', {

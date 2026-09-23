@@ -1,7 +1,9 @@
 {
   "nav": {
     "casas": "Homes",
-    "admin": "Admin"
+    "admin": "Admin",
+    "mensajes": "Messages",
+    "tarifas": "Rates"
   },
   "details": {
     "description": "Description",

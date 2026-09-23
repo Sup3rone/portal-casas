@@ -30,12 +30,21 @@ export default function Navbar() {
             {status === 'loading' ? null : status === 'authenticated' ? (
               <>
                 {isAdmin && (
-                  <Link
-                    href="/admin/mensajes"
-                    className="rounded-full bg-purple-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-purple-700"
-                  >
-                    {t('admin')}
-                  </Link>
+                  <div className="relative group">
+                    <button className="rounded-full bg-purple-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-purple-700">
+                      {t('admin')} ▾
+                    </button>
+                    <div className="invisible absolute right-0 top-full z-50 w-44 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
+                      <div className="overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-gray-100">
+                        <Link href="/admin/mensajes" className="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-purple-50 hover:text-purple-700">
+                          📬 {t('mensajes')}
+                        </Link>
+                        <Link href="/admin/tarifas" className="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-purple-50 hover:text-purple-700">
+                          💰 {t('tarifas')}
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
                 )}
                 <Link href="/mi-cuenta" className="text-sm font-medium text-gray-700 transition-colors hover:text-purple-600">
                   {t('cuenta')}

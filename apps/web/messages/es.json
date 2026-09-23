@@ -5,7 +5,9 @@
     "login": "Entrar",
     "registro": "Crear cuenta",
     "cuenta": "Mi cuenta",
-    "salir": "Salir"
+    "salir": "Salir",
+    "mensajes": "Mensajes",
+    "tarifas": "Tarifas"
   },
   "details": {
     "description": "Descripción",

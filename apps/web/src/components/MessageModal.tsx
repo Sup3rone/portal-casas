@@ -74,6 +74,8 @@ export default function MessageModal({
           startDate,
           endDate,
           guestUserId: message.userId ?? undefined,
+          guestName: message.name,
+          guestEmail: message.email,
         }),
       });
       const data = await res.json();

@@ -2,12 +2,16 @@
 import { db, messages } from '@portal/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
+import { auth } from '@/lib/auth';
 
-export async function POST(req: NextRequest) {   // ← solo req, nada de params
+export async function POST(req: NextRequest) {
   try {
+    // ¿Hay sesión activa? (si no, undefined → mensaje anónimo, como hoy)
+    const session = await auth();
+
     const formData = await req.formData();
 
-    const propertyId = formData.get('propertyId') as string;  // ← OJO: string, no Number()
+    const propertyId = formData.get('propertyId') as string;
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const phone = (formData.get('phone') as string) || null;
@@ -21,8 +25,8 @@ export async function POST(req: NextRequest) {   // ← solo req, nada de params
     }
 
     const [newMessage] = await db.insert(messages).values({
-      id: randomUUID(),      // ← los ids son text en tu schema, hay que generarlos
-      propertyId,            // ← string, porque tu PK es text, no integer
+      id: randomUUID(),
+      propertyId,
       name,
       email,
       phone,
@@ -31,6 +35,7 @@ export async function POST(req: NextRequest) {   // ← solo req, nada de params
       startDate,
       endDate,
       read: false,
+      userId: session?.user?.id ?? null,   // ← LA NUEVA LÍNEA, ESA ES TODA
     }).returning();
 
     return NextResponse.json({ success: true, message: newMessage }, { status: 201 });

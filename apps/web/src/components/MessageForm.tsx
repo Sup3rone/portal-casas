@@ -16,6 +16,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
   );
 }
 
+
 // --- Tipos de pricing (datos de lectura que pasa la página) ---
 export type PricingInfo = {
   base: { weekday: number | null; weekend: number | null };

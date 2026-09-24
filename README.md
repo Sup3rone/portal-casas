@@ -8,7 +8,14 @@ de renta y sincronizar calendarios (Google Calendar + Airbnb).
 👉 Ver [PROGRESO.md](./docs/PROGRESO.md)
 
 ## Vista previa
-*(screenshots por release)*
+### Panel de administración — Calendario de ocupación
+![Calendario de ocupación](docs/capturas/calendario-admin.png)
+
+### Cotizador de precio en vivo
+![Cotizador](docs/capturas/cotizador.png)
+
+### Panel de mensajes con etiquetas de usuario registrado
+![Mensajes](docs/capturas/mensajes-admin.png)
 
 ## Idiomas disponibles
 🇪🇸 Español · 🇬🇧 English · 🇫🇷 Français

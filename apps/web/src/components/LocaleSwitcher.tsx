@@ -51,7 +51,7 @@ export default function LocaleSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-purple-300 hover:text-purple-600"
+        className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:border-gray-400"
         aria-label="Cambiar idioma"
       >
         <span className="text-base leading-none">{actual.flag}</span>
@@ -65,13 +65,13 @@ export default function LocaleSwitcher() {
             <button
               key={l.code}
               onClick={() => cambiar(l.code)}
-              className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-purple-50 ${
-                l.code === locale ? 'font-bold text-purple-600' : 'text-gray-700'
+              className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 ${
+                l.code === locale ? 'font-bold text-gray-900' : 'text-gray-700'
               }`}
             >
               <span className="text-base">{l.flag}</span>
               {l.label}
-              {l.code === locale && <span className="ml-auto text-purple-600">✓</span>}
+              { l.code === locale && <span className="ml-auto text-gray-900">✓</span> }
             </button>
           ))}
         </div>

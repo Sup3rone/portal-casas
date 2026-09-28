@@ -13,7 +13,7 @@ export default function Navbar() {
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
 
   return (
-    <nav className="border-b border-gray-200 bg-white">
+    <nav className="relative z-50 border-b border-gray-200 bg-white">
       <div className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between">
           {/* LOGO — izquierda */}

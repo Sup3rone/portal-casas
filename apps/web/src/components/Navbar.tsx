@@ -1,3 +1,4 @@
+// src/components/Navbar.tsx
 'use client';
 
 import { Link } from '@/i18n/navigation';
@@ -12,63 +13,84 @@ export default function Navbar() {
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
 
   return (
-    <nav className="border-b border-gray-100 bg-white shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 py-4">
+    <nav className="border-b border-gray-200 bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Portal Casas
-            </span>
+          {/* LOGO — izquierda */}
+          <Link href="/" className="text-xl font-semibold tracking-widest text-gray-900">
+            ALIA<span className="ml-1 text-gray-500">FOR</span>RENT
           </Link>
 
-          <div className="flex items-center gap-4">
-            <Link href="/casas" className="text-sm font-medium text-gray-700 transition-colors hover:text-purple-600">
-              {t('casas')}
+          {/* NAV LINKS + ACTIONS — derecha */}
+          <div className="flex items-center gap-6">
+            <Link
+              href={`/casas`}
+              className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600"
+            >
+              PROPIEDADES
             </Link>
+
             <LocaleSwitcher />
 
             {status === 'loading' ? null : status === 'authenticated' ? (
               <>
                 {isAdmin && (
                   <div className="relative group">
-                    <button className="rounded-full bg-purple-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-purple-700">
-                      {t('admin')} ▾
+                    <button className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600">
+                      ADMIN ▾
                     </button>
-                    <div className="invisible absolute right-0 top-full z-50 w-44 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
-                      <div className="overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-gray-100">
-                        <Link href="/admin/mensajes" className="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-purple-50 hover:text-purple-700">
-                          📬 {t('mensajes')}
+                    <div className="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
+                      <div className="overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-gray-200">
+                        <Link
+                          href="/admin/mensajes"
+                          className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:bg-gray-50"
+                        >
+                          MENSAJES
                         </Link>
-                        <Link href="/admin/tarifas" className="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-purple-50 hover:text-purple-700">
-                          💰 {t('tarifas')}
+                        <Link
+                          href="/admin/tarifas"
+                          className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:bg-gray-50"
+                        >
+                          TARIFAS
                         </Link>
-                        <Link href="/admin/calendario" className="block px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-purple-50 hover:text-purple-700">
-                          📅 {t('calendario')}
+                        <Link
+                          href="/admin/calendario"
+                          className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:bg-gray-50"
+                        >
+                          CALENDARIO
                         </Link>
                       </div>
                     </div>
                   </div>
                 )}
-                <Link href="/mi-cuenta" className="text-sm font-medium text-gray-700 transition-colors hover:text-purple-600">
-                  {t('cuenta')}
+
+                <Link
+                  href="/mi-cuenta"
+                  className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600"
+                >
+                  MI CUENTA
                 </Link>
+
                 <button
                   onClick={() => signOut({ callbackUrl: `/${locale}` })}
-                  className="text-sm font-medium text-gray-500 transition-colors hover:text-purple-600"
+                  className="text-sm font-medium tracking-wide text-gray-600 transition-colors hover:text-gray-900"
                 >
-                  {t('salir')}
+                  SALIR
                 </button>
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-medium text-gray-700 transition-colors hover:text-purple-600">
-                  {t('login')}
+                <Link
+                  href="/login"
+                  className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600"
+                >
+                  LOGIN
                 </Link>
                 <Link
                   href="/registro"
-                  className="rounded-full bg-purple-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-purple-700"
+                  className="rounded-full bg-gray-900 px-6 py-2 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-gray-800"
                 >
-                  {t('registro')}
+                  REGISTRARSE
                 </Link>
               </>
             )}

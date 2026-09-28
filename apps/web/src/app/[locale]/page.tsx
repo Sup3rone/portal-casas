@@ -1,21 +1,83 @@
+// src/app/[locale]/page.tsx
 export default function HomePage() {
   return (
     <main>
-      <section className="relative h-[500px] bg-gradient-to-br from-purple-600 to-indigo-700">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative mx-auto max-w-7xl px-4 h-full flex flex-col justify-center items-center text-center">
-          <h1 className="text-5xl font-extrabold text-white mb-6">
-            Encuentra tu próxima estancia
+      {/* HERO con video de fondo */}
+      <section className="relative h-screen min-h-[600px]">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="/videos/hero.mp4" type="video/mp4" />
+        </video>
+
+        {/* Overlay oscuro para legibilidad */}
+        <div className="absolute inset-0 bg-black/40" />
+
+        {/* Contenido centrado */}
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+          <h1 className="mb-4 text-4xl font-light tracking-[0.3em] text-white md:text-6xl">
+            BIENVENIDOS A
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mb-8">
-            Casas verificadas, listas para ti. Experiencias únicas en los mejores destinos.
-          </p>
-          <a
-            href="/es/casas"
-            className="rounded-full bg-white px-8 py-4 text-lg font-bold text-purple-700 transition-all hover:scale-105 hover:shadow-lg"
+          <h2 className="mb-12 text-2xl font-light tracking-[0.25em] text-white/90 md:text-3xl">
+            PROPIEDADES EN RENTA
+          </h2>
+
+          {/* Widget de búsqueda flotante */}
+          <form
+            action="/es/casas"
+            method="GET"
+            className="flex flex-wrap items-end justify-center gap-4 rounded-2xl bg-white p-6 shadow-2xl"
           >
-            Explorar Propiedades
-          </a>
+            <div className="text-left">
+              <label className="mb-1 block text-xs tracking-widest text-gray-500">
+                LLEGADA
+              </label>
+              <input
+                type="date"
+                name="start"
+                className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+              />
+            </div>
+
+            <div className="text-left">
+              <label className="mb-1 block text-xs tracking-widest text-gray-500">
+                SALIDA
+              </label>
+              <input
+                type="date"
+                name="end"
+                className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+              />
+            </div>
+
+            <div className="text-left">
+              <label className="mb-1 block text-xs tracking-widest text-gray-500">
+                HUÉSPEDES
+              </label>
+              <select
+                name="guests"
+                className="w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+              >
+                <option value="">Cualquiera</option>
+                {[1, 2, 3, 4, 6, 8, 10].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              className="rounded-lg bg-black px-8 py-2.5 text-sm font-semibold tracking-widest text-white transition hover:bg-gray-800"
+            >
+              BUSCAR
+            </button>
+          </form>
         </div>
       </section>
     </main>

@@ -109,7 +109,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
         ) : null}
       </section>
 
-      {/* ===== PEQUEÑA DESCRIPCIÓN — "antes de dar scroll" ===== */}
+      {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
       <section className="mx-auto max-w-2xl px-6 py-16 text-center">
         <p className="whitespace-pre-wrap leading-relaxed text-gray-700">{description}</p>
       </section>

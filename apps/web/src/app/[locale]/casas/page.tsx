@@ -12,7 +12,6 @@ export default async function PropertiesPage({
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  // Propiedades publicadas + su primera foto (order asc)
   const rows = await db
     .select({ property: properties, m: media })
     .from(properties)
@@ -20,7 +19,6 @@ export default async function PropertiesPage({
     .where(eq(properties.published, true))
     .orderBy(asc(properties.createdAt), asc(media.order));
 
-  // Deduplicar: nos quedamos la primera foto de cada propiedad
   const seen = new Set<string>();
   const propertyList = [];
   for (const row of rows) {

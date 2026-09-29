@@ -1,3 +1,4 @@
+// src/components/PropertyCard.tsx
 'use client';
 
 import { useLocale } from 'next-intl';
@@ -24,27 +25,35 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
     : locale === 'en' ? property.titleEn
     : property.titleFr;
 
+  const guestsLabel = locale === 'en' ? 'guests' : locale === 'fr' ? 'voyageurs' : 'huéspedes';
+  const bedLabel = locale === 'en' ? 'bedrooms' : locale === 'fr' ? 'chambres' : 'habitaciones';
+
   return (
-    <Link href={`/casas/${property.slug}`}>
-      <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow group">
+    <Link href={`/casas/${property.slug}`} className="group block">
+      {/* Imagen vertical 4:3 con zoom sutil */}
+      <div className="overflow-hidden rounded-lg">
         {property.media.length > 0 ? (
-          <div className="aspect-video overflow-hidden">
+          <div className="aspect-[4/3] overflow-hidden bg-gray-100">
             <img
               src={property.media[0].url}
               alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
-        ) : null}
-        <div className="p-4">
-          <h3 className="text-xl font-bold mb-2 text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-600">{property.city}</p>
-          <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-            <span>{property.maxGuests} huéspedes</span>
-            <span>{property.bedrooms} hab.</span>
-            <span>{property.bathrooms} baños</span>
-          </div>
-        </div>
+        ) : (
+          <div className="aspect-[4/3] bg-gray-100" />
+        )}
+      </div>
+
+      {/* Info — minimalista, sin sombra de tarjeta, texto directo sobre fondo */}
+      <div className="mt-4 space-y-1">
+        <h3 className="text-lg font-medium tracking-wide text-gray-900">
+          {title.toUpperCase()}
+        </h3>
+        <p className="text-sm text-gray-500">{property.city}</p>
+        <p className="pt-1 text-xs text-gray-600">
+          {property.maxGuests} {guestsLabel} · {property.bedrooms} {bedLabel}
+        </p>
       </div>
     </Link>
   );

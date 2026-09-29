@@ -1,8 +1,8 @@
+// src/app/[locale]/casas/page.tsx
 import { getTranslations } from 'next-intl/server';
 import { asc, eq } from 'drizzle-orm';
 import { db, properties, media } from '@portal/db';
 import PropertyCard from '@/components/PropertyCard';
-
 
 export default async function PropertiesPage({
   params,
@@ -12,7 +12,7 @@ export default async function PropertiesPage({
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  // Propiedades publicadas + su primera foto (order asc)
+  // Query y dedupe IGUAL — nada cambia aquí
   const rows = await db
     .select({ property: properties, m: media })
     .from(properties)
@@ -20,9 +20,7 @@ export default async function PropertiesPage({
     .where(eq(properties.published, true))
     .orderBy(asc(properties.createdAt), asc(media.order));
 
-  // Deduplicar: el leftJoin repite la propiedad por cada foto; nos quedamos la primera (order más bajo)
   const seen = new Set<string>();
-
   const propertyList = [];
   for (const row of rows) {
     if (seen.has(row.property.id)) continue;
@@ -31,17 +29,33 @@ export default async function PropertiesPage({
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-16">
-      <h1 className="mb-3 text-4xl font-light tracking-[0.25em] text-gray-900">
-        {t('properties.titulo')}
-      </h1>
-      <p className="mb-12 text-gray-500">
-        {t('properties.subtitulo')}
-      </p>
-      <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-        {propertyList.map((p) => (
-          <PropertyCard key={p.id} property={p} />
-        ))}
+    <main className="relative min-h-screen">
+      {/* IMAGEN DE FONDO COMPLETA — PLAYA/MAR */}
+      <div className="absolute inset-0 h-full w-full">
+        <img
+          src="/images/listado-bg.jpg"
+          alt=""
+          className="h-full w-full object-cover"
+        />
+        {/* Overlay oscuro leve para legibilidad */}
+        <div className="absolute inset-0 bg-black/10" />
+      </div>
+
+      {/* CONTENIDO FLOTANTE ENCIMA — centrado vertical */}
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-6 pb-24">
+        {/* Botón DESTINOS o similar */}
+        <div className="mb-12 rounded-full bg-white/20 px-8 py-3 backdrop-blur-sm">
+          <span className="text-sm font-medium tracking-widest text-white">
+            DESTINOS
+          </span>
+        </div>
+
+        {/* Grid de cards */}
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
+          {propertyList.map((p) => (
+            <PropertyCard key={p.id} property={p} />
+          ))}
+        </div>
       </div>
     </main>
   );

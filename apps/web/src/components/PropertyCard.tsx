@@ -25,35 +25,35 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
     : locale === 'en' ? property.titleEn
     : property.titleFr;
 
-  const guestsLabel = locale === 'en' ? 'guests' : locale === 'fr' ? 'voyageurs' : 'huéspedes';
-  const bedLabel = locale === 'en' ? 'bedrooms' : locale === 'fr' ? 'chambres' : 'habitaciones';
-
   return (
     <Link href={`/casas/${property.slug}`} className="group block">
-      {/* Imagen vertical 4:3 con zoom sutil */}
-      <div className="overflow-hidden rounded-lg">
-        {property.media.length > 0 ? (
-          <div className="aspect-[4/3] overflow-hidden bg-gray-100">
-            <img
-              src={property.media[0].url}
-              alt={title}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          </div>
-        ) : (
-          <div className="aspect-[4/3] bg-gray-100" />
-        )}
-      </div>
+      {/* CARD TRANSPARENTE CON BORDE FINO */}
+      <div className="backdrop-blur-sm transition-transform group-hover:-translate-y-2">
+        {/* Imagen cuadrada grande (como en captura) */}
+        <div className="overflow-hidden rounded-lg border border-white/30 bg-white/5">
+          {property.media.length > 0 ? (
+            <div className="aspect-[4/3] overflow-hidden">
+              <img
+                src={property.media[0].url}
+                alt={title}
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+          ) : (
+            <div className="aspect-[4/3] bg-white/10" />
+          )}
+        </div>
 
-      {/* Info — minimalista, sin sombra de tarjeta, texto directo sobre fondo */}
-      <div className="mt-4 space-y-1">
-        <h3 className="text-lg font-medium tracking-wide text-gray-900">
-          {title.toUpperCase()}
-        </h3>
-        <p className="text-sm text-gray-500">{property.city}</p>
-        <p className="pt-1 text-xs text-gray-600">
-          {property.maxGuests} {guestsLabel} · {property.bedrooms} {bedLabel}
-        </p>
+        {/* Info — centrada debajo de la imagen */}
+        <div className="mt-4 text-center">
+          <h3 className="text-lg font-medium tracking-wide text-white drop-shadow-md">
+            {title.toUpperCase()}
+          </h3>
+          <p className="text-sm text-white/80">{property.city}</p>
+          <p className="pt-1 text-xs text-white/60">
+            {property.maxGuests} huéspedes · {property.bedrooms} hab.
+          </p>
+        </div>
       </div>
     </Link>
   );

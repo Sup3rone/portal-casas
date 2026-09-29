@@ -38,6 +38,7 @@ function addDays(d: Date, n: number): Date {
   return c;
 }
 
+
 // Cuenta noche por noche (checkout no se cobra)
 function calcularCotizacion(startStr: string, endStr: string, pricing: PricingInfo) {
   const start = new Date(startStr + 'T12:00:00');
@@ -73,11 +74,15 @@ function calcularCotizacion(startStr: string, endStr: string, pricing: PricingIn
 }
 
 export default function MessageForm({
-  propertyId, locale, pricing,
+  propertyId,
+  locale,
+  pricing,
+  compact = false,
 }: {
   propertyId: string;
   locale: string;
   pricing: PricingInfo;
+  compact?: boolean;
 }) {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [startDate, setStartDate] = useState('');
@@ -88,6 +93,11 @@ export default function MessageForm({
     () => startDate && endDate ? calcularCotizacion(startDate, endDate, pricing) : null,
     [startDate, endDate, pricing]
   );
+
+  // En globals.css o directamente en el component:
+  const formClasses = compact
+    ? 'bg-white/90 backdrop-blur-md rounded-xl p-4'
+    : '';
 
   async function handleSubmit(formData: FormData) {
     try {
@@ -112,7 +122,10 @@ export default function MessageForm({
   const fechasInvalidas = !!startDate && !!endDate && endDate <= startDate;
 
   return (
-    <form action={handleSubmit} className="space-y-6">
+    <form
+          action={handleSubmit}
+          className={compact ? formClasses + ' space-y-3' : 'space-y-6'}
+        >
       <input type="hidden" name="propertyId" value={propertyId} />
 
       {/* ===== DATOS PERSONALES ===== */}

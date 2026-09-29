@@ -15,48 +15,34 @@ export default function CategorySection({
   slides: Slide[];
   reverse?: boolean;
 }) {
-  if (items.length === 0 && slides.length === 0) return null;
-
   const columnaInfo = (
-    <div className="flex flex-col justify-center px-6 py-12 md:px-12 lg:px-16">
-      <h2 className="mb-8 text-2xl font-light tracking-[0.3em] text-gray-900 md:text-3xl">
+    <div className="flex flex-col justify-center px-6 py-12 md:px-12">
+      <h2 className="mb-8 text-2xl font-light tracking-[0.3em] text-gray-900">
         {label}
       </h2>
       <ul className="space-y-4">
         {items.map((item, i) => (
-          <li
-            key={i}
-            className="flex items-center gap-4 border-b border-gray-100 pb-4 last:border-0"
-          >
+          <li key={i} className="flex items-center gap-4 border-b border-gray-100 pb-4 last:border-0">
             <span className="text-xl">{item.icon}</span>
-            <span className="text-sm font-light tracking-wide text-gray-600">
-              {item.label}
-            </span>
+            <span className="text-sm font-light tracking-wide text-gray-600">{item.label}</span>
           </li>
         ))}
       </ul>
     </div>
   );
 
-  const columnaImagen = (
-    <div className="relative min-h-[60vh] md:min-h-screen">
-      {slides.length > 0 && <SectionSlider slides={slides} />}
-    </div>
-  );
+  const columnaImagen =
+    slides.length > 0 ? (
+      <div className="min-h-[60vh]">
+        <SectionSlider slides={slides} />
+      </div>
+    ) : null;
+
+  if (!columnaImagen) return null;
 
   return (
     <section className="grid grid-cols-1 md:grid-cols-2">
-      {reverse ? (
-        <>
-          {columnaImagen}
-          {columnaInfo}
-        </>
-      ) : (
-        <>
-          {columnaInfo}
-          {columnaImagen}
-        </>
-      )}
+      {reverse ? <>{columnaImagen}{columnaInfo}</> : <>{columnaInfo}{columnaImagen}</>}
     </section>
   );
 }

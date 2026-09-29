@@ -1,3 +1,4 @@
+// apps/web/src/components/SectionSlider.tsx
 'use client';
 
 import { useState } from 'react';
@@ -7,7 +8,13 @@ type Slide = {
   type: 'PHOTO' | 'VIDEO';
 };
 
-export default function SectionSlider({ slides }: { slides: Slide[] }) {
+export default function SectionSlider({
+  slides,
+  fullscreen = false,
+}: {
+  slides: Slide[];
+  fullscreen?: boolean;
+}) {
   const [idx, setIdx] = useState(0);
 
   if (slides.length === 0) return null;
@@ -18,8 +25,14 @@ export default function SectionSlider({ slides }: { slides: Slide[] }) {
   const esVideo = slides[idx].type === 'VIDEO';
 
   return (
-    <div className="relative aspect-[16/9] overflow-hidden rounded-lg bg-gray-100">
-      {/* Foto/video activo — key fuerza remount y dispara la animación */}
+    <div
+      className={
+        fullscreen
+          ? 'absolute inset-0 overflow-hidden'
+          : 'relative aspect-[16/9] overflow-hidden rounded-lg bg-gray-100'
+      }
+    >
+      {/* Slide activo */}
       {esVideo ? (
         <video
           key={idx}
@@ -42,25 +55,25 @@ export default function SectionSlider({ slides }: { slides: Slide[] }) {
         <>
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 p-3 text-gray-900 transition hover:bg-white"
+            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 p-3 text-gray-900 transition hover:bg-white"
             aria-label="Anterior"
           >
             ‹
           </button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 p-3 text-gray-900 transition hover:bg-white"
+            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 p-3 text-gray-900 transition hover:bg-white"
             aria-label="Siguiente"
           >
             ›
           </button>
 
-          {/* Dots — arriba a la derecha para no chocar con controles del video */}
+          {/* Dots — arriba a la derecha en video para no chocar con sus controles */}
           <div
             className={
               esVideo
-                ? 'absolute right-4 top-4 flex gap-2'
-                : 'absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2'
+                ? 'absolute right-4 top-4 z-20 flex gap-2'
+                : 'absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2'
             }
           >
             {slides.map((_, i) => (

@@ -6,7 +6,8 @@ import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import SectionSlider from '@/components/SectionSlider';
-import CategoryGrid from '@/components/CategoryGrid';
+import CategorySection from '@/components/CategorySection';
+import LocationMap from '@/components/LocationMap';
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -60,14 +61,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   const { title, desc: description } = localeMap[locale] ?? localeMap.es;
 
   // Agrupar medias por categoría
-  const categorias = ['principal', 'habitaciones', 'amenidades', 'lugar'] as const;
-  const secciones = categorias.map((cat) => ({
-    categoria: cat,
-    slides: mediaList.filter((m) => m.category === cat),
-  })).filter((s) => s.slides.length > 0);
+  const porCategoria = (cat: string) =>
+    mediaList.filter((m) => m.category === cat);
 
-  const principal = secciones.find((s) => s.categoria === 'principal');
-  const restantes = secciones.filter((s) => s !== principal);
+  const principal = porCategoria('principal').length > 0
+    ? porCategoria('principal')
+    : mediaList; // fallback: si nada tiene categoría, todo es principal
 
   const labels: Record<string, string> = {
     principal: 'EL LUGAR',
@@ -103,67 +102,113 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
   return (
     <main className="min-h-screen bg-white">
-      {/* ===== DIAPOSITIVA 1: título arriba, slider PEGADO ABAJO ===== */}
-      <section className="flex h-screen flex-col items-center justify-start px-6 pt-24 md:pt-32">
-        <h1 className="text-center text-3xl font-light tracking-[0.3em] text-gray-900 md:text-5xl">
-          {title.toUpperCase()}
-        </h1>
-        <p className="mt-4 text-center text-[0.65rem] tracking-[0.25em] text-gray-400">
-          {property.city.toUpperCase()} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
-        </p>
-        {/* Descripción breve ANTES del scroll */}
-        <p className="mx-auto mt-8 max-w-2xl text-center text-sm font-light leading-relaxed text-gray-500">
-          {description.split('\n')[0]}
-        </p>
-        {/* Slider anclado hasta abajo de la pantalla */}
-        <div className="mt-auto w-full max-w-6xl pb-8">
-          {principal ? (
-            <SectionSlider slides={principal.slides} />
-          ) : mediaList.length > 0 ? (
-            <SectionSlider slides={mediaList} />
-          ) : null}
+      {/* ===== HERO: imagen de fondo a pantalla completa ===== */}
+      <section className="relative h-screen overflow-hidden">
+        {principal.length > 0 && <SectionSlider slides={principal} fullscreen />}
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-x-0 top-24 z-10 px-6 text-center">
+          <h1 className="text-3xl font-light tracking-[0.3em] text-white md:text-5xl">
+            {title.toUpperCase()}
+          </h1>
+          <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80">
+            {property.city.toUpperCase()} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
+          </p>
         </div>
       </section>
 
-      {/* ===== DIAPOSITIVA 2: los 4 cuadros (destino/amenidades/habitaciones/lugar) ===== */}
-      <section className="flex h-screen flex-col items-center justify-center px-6">
-        <p className="mb-6 text-[0.65rem] tracking-[0.25em] text-gray-400">ELIGE UNA CATEGORÍA</p>
-        <div className="w-full max-w-4xl">
-          <CategoryGrid data={categoryData} />
-        </div>
-        {/* Slider de apoyo debajo de los cuadros */}
-        {restantes.length > 0 && (
-          <div className="mt-10 hidden w-full max-w-4xl md:block">
-            <SectionSlider slides={restantes[0].slides} />
+      {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
+      <section className="mx-auto max-w-2xl px-6 py-16 text-center">
+        <p className="whitespace-pre-wrap leading-relaxed text-gray-600 font-light">
+          {description}
+        </p>
+      </section>
+
+      {/* ===== EL DESTINO: info + mapa + amenities (3 columnas en desktop) ===== */}
+      {property.lat != null && property.lng != null && (
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6 py-16 max-w-7xl mx-auto">
+          {/* Columna 1: Título + descripción */}
+          <div className="flex flex-col justify-center">
+            <h2 className="mb-8 text-2xl font-light tracking-[0.3em] text-gray-900">
+              EL DESTINO
+            </h2>
+            <p className="text-sm font-light leading-relaxed text-gray-600">
+              {property.address}, {property.city}
+            </p>
           </div>
-        )}
-      </section>
 
-      {/* ===== DIAPOSITIVAS DE CATEGORÍA: título arriba, slider ABAJO ===== */}
-      {restantes.slice(1).map(({ categoria, slides }) => (
-        <section key={categoria} className="flex h-screen flex-col items-center px-6 pt-24">
-          <h2 className="text-center text-2xl font-light tracking-[0.35em] text-gray-900 md:text-3xl">
-            {labels[categoria]}
-          </h2>
-          <div className="mt-auto w-full max-w-6xl pb-8">
-            <SectionSlider slides={slides} />
+          {/* Columna 2: Mapa (cuadro más pequeño) */}
+          <div className="w-full">
+            <LocationMap lat={property.lat} lng={property.lng} address={property.address} />
+          </div>
+
+          {/* Columna 3: Lo que ofrece este lugar */}
+          <div className="flex flex-col justify-center">
+            <h2 className="mb-8 text-2xl font-light tracking-[0.3em] text-gray-900">
+              LO QUE OFRECE ESTE LUGAR
+            </h2>
+            <ul className="space-y-4">
+              {[
+                { icon: '🌊', label: 'Vista al mar' },
+                { icon: '🏊', label: 'Acceso a la playa frente a la playa' },
+                { icon: '📶', label: 'WiFi' },
+                { icon: '🅿️', label: 'Estacionamiento gratuito en las instalaciones' },
+                { icon: '🍳', label: 'Cocina' },
+                { icon: '📺', label: 'Televisión' },
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-0">
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-sm font-light tracking-wide text-gray-600">{item.label}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
-      ))}
+      )}
 
-      {/* ===== DIAPOSITIVA FINAL: RESERVAR ===== */}
-      <section id="reservar" className="flex min-h-screen flex-col items-center justify-center px-6 py-24">
-        <h2 className="mb-10 text-center text-2xl font-light tracking-[0.35em] text-gray-900 md:text-3xl">
-          RESERVAR
-        </h2>
-        <div className="w-full max-w-3xl">
-          <div className="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-100 md:p-12">
-            <h3 className="mb-3 text-[0.65rem] tracking-[0.25em] text-gray-400">
-              DISPONIBILIDAD
-            </h3>
-            <AvailabilityCalendar bookings={bookingRows} />
-            <hr className="my-8 border-gray-200" />
-            <MessageForm propertyId={property.id} locale={locale} pricing={pricing} />
+      {/* ===== AMENIDADES: info + imagen ===== */}
+      <CategorySection
+        label="AMENIDADES"
+        slides={porCategoria('amenidades')}
+        items={[
+          { icon: '📶', label: 'WiFi de alta velocidad' },
+          { icon: '🍳', label: 'Cocina equipada' },
+          { icon: '❄️', label: 'Aire acondicionado' },
+          { icon: '🏊', label: 'Piscina' },
+          { icon: '🅿️', label: 'Estacionamiento gratuito' },
+        ]}
+      />
+
+      {/* ===== HABITACIONES: imagen + info (invertido) ===== */}
+      <CategorySection
+        label="HABITACIONES"
+        slides={porCategoria('habitaciones')}
+        reverse
+        items={[
+          { icon: '🛏️', label: 'Recámaras con ropa de cama premium' },
+          { icon: '🛁', label: 'Baños completos' },
+        ]}
+      />
+
+      {/* ===== RESERVAR: calendario izquierda, formulario derecha ===== */}
+      <section id="reservar" className="px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 md:text-4xl">
+            RESERVAR
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            {/* Columna izquierda: Calendario */}
+            <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-6 shadow-xl ring-1 ring-white/20">
+              <h3 className="mb-3 text-[0.65rem] tracking-[0.25em] text-gray-400 uppercase">
+                DISPONIBILIDAD
+              </h3>
+              <AvailabilityCalendar bookings={bookingRows} />
+            </div>
+
+            {/* Columna derecha: Formulario */}
+            <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-6 shadow-xl ring-1 ring-white/20">
+              <MessageForm propertyId={property.id} locale={locale} pricing={pricing} compact />
+            </div>
           </div>
         </div>
       </section>

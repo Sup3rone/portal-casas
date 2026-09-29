@@ -5,8 +5,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
-import Gallery from "@/components/Gallery";
-import LocationMap from "@/components/LocationMap";
+import LocationMap from '@/components/LocationMap';
 import SectionSlider from '@/components/SectionSlider';
 
 export async function generateStaticParams() {
@@ -68,6 +67,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     })),
     booked: bookingRows.map(b => ({ start: b.startDate, end: b.endDate })),
   };
+
   // Determinar textos según idioma
   const localeMap: Record<string, { title: string; desc: string }> = {
     es: { title: property.titleEs, desc: property.descEs },
@@ -91,6 +91,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     lugar: 'EN EL LUGAR',
   };
 
+  // 👉 AQUÍ está el cambio 1: buscar la sección 'principal' por nombre,
+  //    en vez de confiar en que sea la primera del arreglo
+  const principal = secciones.find((s) => s.categoria === 'principal');
+
+  // 👉 AQUÍ está el cambio 2: las secciones del scroll son TODAS menos la principal
+  const restantes = secciones.filter((s) => s !== principal);
+
   return (
     <main className="min-h-screen">
       {/* ===== SECCIÓN 0: título + slider principal ===== */}
@@ -102,8 +109,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           {property.city} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
         </p>
 
-        {secciones.length > 0 ? (
-          <SectionSlider slides={secciones[0].slides} />
+        {/* 👉 AQUÍ está el cambio 3: en vez de secciones[0], usamos `principal`.
+            Si no hay nada marcado como principal, caemos a TODO el mediaList. */}
+        {principal ? (
+          <SectionSlider slides={principal.slides} />
         ) : mediaList.length > 0 ? (
           <SectionSlider slides={mediaList} />
         ) : null}
@@ -115,7 +124,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       </section>
 
       {/* ===== SECCIONES DE SCROLL ===== */}
-      {secciones.slice(1).map(({ categoria, slides }) => (
+      {/* 👉 AQUÍ está el cambio 4: en vez de secciones.slice(1), usamos `restantes` */}
+      {restantes.map(({ categoria, slides }) => (
         <section key={categoria} className="mx-auto max-w-6xl px-6 pb-24">
           <SectionSlider slides={slides} />
           <h2 className="mt-6 text-center text-2xl font-light tracking-[0.25em] text-gray-900">

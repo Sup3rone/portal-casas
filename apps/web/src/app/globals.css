@@ -41,3 +41,8 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #8b5cf6;
 }
+
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

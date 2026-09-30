@@ -101,7 +101,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main
+      className="min-h-screen"
+      style={{
+        backgroundImage: "url('/images 2/detalle-bg.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       {/* ===== HERO: imagen de fondo a pantalla completa ===== */}
       <section className="relative h-screen overflow-hidden">
         {principal.length > 0 && <SectionSlider slides={principal} fullscreen />}
@@ -118,7 +126,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
       {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
       <section className="mx-auto max-w-2xl px-6 py-16 text-center">
-        <p className="whitespace-pre-wrap leading-relaxed text-gray-600 font-light">
+        <p className="whitespace-pre-wrap leading-relaxed text-gray-900/90 bg-white/70 backdrop-blur-sm p-6 rounded-xl font-light">
           {description}
         </p>
       </section>

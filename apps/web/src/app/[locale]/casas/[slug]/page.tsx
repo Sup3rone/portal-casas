@@ -126,52 +126,60 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
       {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
       <section className="mx-auto max-w-2xl px-6 py-16 text-center">
-        <p className="whitespace-pre-wrap leading-relaxed text-gray-900/90 bg-white/70 backdrop-blur-sm p-6 rounded-xl font-light">
-          {description}
-        </p>
+        <div className="rounded-2xl bg-white/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40">
+          <p className="whitespace-pre-wrap leading-relaxed text-gray-700 font-light">
+            {description}
+          </p>
+        </div>
       </section>
 
-      {/* ===== EL DESTINO: info + mapa + amenities (3 columnas en desktop) ===== */}
-      {property.lat != null && property.lng != null && (
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6 py-16 max-w-7xl mx-auto">
-          {/* Columna 1: Título + descripción */}
-          <div className="flex flex-col justify-center">
-            <h2 className="mb-8 text-2xl font-light tracking-[0.3em] text-gray-900">
-              EL DESTINO
-            </h2>
-            <p className="text-sm font-light leading-relaxed text-gray-600">
-              {property.address}, {property.city}
-            </p>
-          </div>
+      {/* ===== EL DESTINO + LO QUE OFRECE — widgets flotantes ===== */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-7xl">
 
-          {/* Columna 2: Mapa (cuadro más pequeño) */}
-          <div className="w-full">
-            <LocationMap lat={property.lat} lng={property.lng} address={property.address} />
-          </div>
+          {/* Fila de widgets: destino+mapa | lo que ofrece */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-          {/* Columna 3: Lo que ofrece este lugar */}
-          <div className="flex flex-col justify-center">
-            <h2 className="mb-8 text-2xl font-light tracking-[0.3em] text-gray-900">
-              LO QUE OFRECE ESTE LUGAR
-            </h2>
-            <ul className="space-y-4">
-              {[
-                { icon: '🌊', label: 'Vista al mar' },
-                { icon: '🏊', label: 'Acceso a la playa frente a la playa' },
-                { icon: '📶', label: 'WiFi' },
-                { icon: '🅿️', label: 'Estacionamiento gratuito en las instalaciones' },
-                { icon: '🍳', label: 'Cocina' },
-                { icon: '📺', label: 'Televisión' },
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-0">
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="text-sm font-light tracking-wide text-gray-600">{item.label}</span>
-                </li>
-              ))}
-            </ul>
+            {/* Widget 1: EL DESTINO — título arriba, mapa ABAJO */}
+            <div className="rounded-2xl bg-white/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40">
+              <h2 className="mb-4 text-center text-2xl font-light tracking-[0.3em] text-gray-900">
+                EL DESTINO
+              </h2>
+              <p className="mb-6 text-center text-sm font-light leading-relaxed text-gray-600">
+                {property.address}, {property.city}
+              </p>
+              {/* Mapa adentro del cuadro, debajo de las letras */}
+              <div className="overflow-hidden rounded-lg">
+                {property.lat != null && property.lng != null && (
+                  <LocationMap lat={property.lat} lng={property.lng} address={property.address} />
+                )}
+              </div>
+            </div>
+
+            {/* Widget 2: LO QUE OFRECE ESTE LUGAR */}
+            <div className="rounded-2xl bg-white/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40">
+              <h2 className="mb-6 text-center text-2xl font-light tracking-[0.3em] text-gray-900">
+                LO QUE OFRECE ESTE LUGAR
+              </h2>
+              <ul className="space-y-4">
+                {[
+                  { icon: '🌊', label: 'Vista al mar' },
+                  { icon: '🏊', label: 'Acceso a la playa' },
+                  { icon: '📶', label: 'WiFi' },
+                  { icon: '🅿️', label: 'Estacionamiento gratuito' },
+                  { icon: '🍳', label: 'Cocina' },
+                  { icon: '📺', label: 'Televisión' },
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-0">
+                    <span className="text-lg">{item.icon}</span>
+                    <span className="text-sm font-light tracking-wide text-gray-700">{item.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* ===== AMENIDADES: info + imagen ===== */}
       <CategorySection

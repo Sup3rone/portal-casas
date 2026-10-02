@@ -1,66 +1,115 @@
-# Progreso del Proyecto — Portal de Casas
+# Progreso del Proyecto - Portal-Casas
 
-## 🎉 Producción en línea
-✅ Sitio desplegado en Vercel (deploy automático desde push a main)
-✅ Propiedades con galerías de fotos desde base de datos (Neon PostgreSQL)
-✅ Tres idiomas: español, inglés y francés (next-intl, rutas /es /en /fr)
-✅ Mapa Google embebido por propiedad
-✅ Calendario de disponibilidad público
+Última actualización: 02 Oct 2026
 
-## 🔐 Autenticación (Auth.js v5) — COMPLETADO
-✅ Registro, login y logout con Auth.js v5 beta
-✅ Roles: ADMIN / CLIENT (VIEWER reservado para futuro)
-✅ Protección de /admin por rol en el middleware (proxy.ts fusionado con next-intl)
-✅ Redirección post-login por rol (ADMIN → admin, CLIENT → mi cuenta)
-✅ Recuperación de contraseña por email (Resend, token con expiración de 1 hora)
-❌ Sistema antiguo de admin (cookie admin_session SHA-256): EXTINTO y eliminado
+---
 
-## 👤 Perfil de huésped — COMPLETADO
-✅ Página /mi-cuenta con datos del usuario
-✅ Historial de consultas enviadas (con estado leído/pendiente)
-✅ Historial de reservas confirmadas
-✅ Ciclo completo: consulta → confirmación del admin → reserva visible en el perfil
+## ✅ Completado
 
-## 📬 Formulario de consultas — COMPLETADO
-✅ Formulario por propiedad con fechas y mensaje
-✅ Cotizador de precio en vivo (calcula noche por noche según temporada y día de semana)
-✅ Aviso de fechas ocupadas antes de enviar
-✅ Mensajes vinculados a la cuenta del usuario si está logueado (userId)
+### 1. Internacionalización (i18n) - Página de Inicio
+**Fecha:** 02 Oct 2026
+**Archivos modificados:** `apps/web/src/app/[locale]/page.tsx` + diccionarios (`es.json`, `en.json`, `fr.json`)
+**Cambios:**
+- Todos los textos fijos en español reemplazados por claves `t('clave')`.
+- Formulario de búsqueda ya no forza `/es/casas`; mantiene el locale elegido.
+- 7 claves nuevas agregadas en los tres idiomas.
+**Validación:** TypeScript ✓ | ESLint ✓ (3 advertencias preexistentes)
 
-## 💰 Tarifas por temporada — COMPLETADO
-✅ Tabla SeasonRate (precio entre semana / fin de semana / prioridad)
-✅ Precios base por propiedad (columnas en Property)
-✅ Panel admin /admin/tarifas (alta y borrado de temporadas sin SQL)
-✅ Datos cargados: $4,000 entre semana, $4,500 finde, $7,500 del 20-dic al 2-ene
-🔄 Pendiente: Semana Santa (esperando fechas confirmadas del cliente)
+### 2. Conexión Calendario ↔ Formulario de Reserva
+**Fecha:** 02 Oct 2026
+**Archivos creados/modificados:**
+- `ReservationDatesProvider.tsx` (estado compartido)
+- `reservationDates.ts` (reglas de selección)
+- `AvailabilityCalendar.tsx` (selección de rango)
+- `MessageForm.tsx` (inputs sincronizados)
+- `page.tsx` (conexión de componentes)
+**Funcionalidad:**
+- Primer clic en fecha disponible → LLEGADA (check-in).
+- Segundo clic en fecha posterior → SALIDA (check-out).
+- Clic en fecha anterior reinicia selección.
+- Fechas ocupadas bloquean o invalidan la selección.
+- Precio total recalculado automáticamente.
+- Sincronización bidireccional (editar inputs actualiza calendario).
+**Validación:** TypeScript ✓ | 17 pruebas de selección ✓ | ESLint ✓
 
-## 🛠️ Panel de administración — COMPLETADO
-✅ /admin/mensajes: lista de consultas, etiqueta 👤 para usuarios registrados,
-   modal con fechas editables, confirmar crea la reserva, eliminar mensaje
-✅ /admin/tarifas: gestión de temporadas
-✅ /admin/calendario: calendario de ocupación mensual por propiedad con
-   colores por origen (morado manual, rosa Airbnb, azul Google)
-✅ Menú desplegable de admin en el Navbar (solo visible para ADMIN)
+### 3. Contraste Visual del Rango Seleccionado
+**Fecha:** 02 Oct 2026
+**Archivos modificados:** `AvailabilityCalendar.tsx` (estilos)
+**Cambios:**
+- Día de rango seleccionado: tono verde MÁS OSCURO vs. día disponible.
+- Texto blanco sobre fondo oscuro para legibilidad.
+- Mantenida estética de bordes redondeados y tamaño de celda.
+**Validación pendiente:** Prueba visual en navegador
 
-## 📧 Emails automáticos (Resend) — INFRAESTRUCTURA LISTA
-✅ Mailer central (src/lib/mailer.ts)
-✅ Email de recuperación de contraseña — FUNCIONANDO
-✅ Email de confirmación de reserva al huésped — FUNCIONANDO
-   (registrados reciben al correo de su cuenta; anónimos, al del formulario)
-🔄 Modo pruebas: solo entrega al correo de registro de Resend
-🔄 Pendiente: verificar dominio del cliente en Resend para producción
-🔄 Pendiente: botón de WhatsApp (wa.me) en el email y la web
-🔄 Pendiente: notificación al servicio de limpieza (falta decidir diseño de contactos)
+### 4. Glassmorphism en Página de Inicio
+**Fecha:** 02 Oct 2026
+**Archivos modificados:** Estilos de paneles principales en la home
+**Cambios:**
+- Fondo translúcido + desenfoque (`backdrop-filter: blur()`) aplicado.
+- Coherencia con página de detalle de casas.
+- Legibilidad mantenida sobre fondo desenfocado.
+**Validación:** "Se ve bien" ✓ (confirmación manual)
 
-## 🔄 En proceso / esperando al cliente
-- Links iCal de Airbnb (para el botón de sincronización del calendario admin)
-- Verificación del dominio en Resend
-- Fechas exactas de Semana Santa
+---
 
-## 📋 Backlog
-- WhatsApp Cloud API de Meta (con costo por conversación, requiere plantillas aprobadas)
-- Meses del calendario público en los 3 idiomas
-- Limpieza de artefactos Prisma (carpetas viejas y dependencias)
-- i18n completo de páginas de auth y mi-cuenta (hoy hardcodeadas en español)
-- Cron de Vercel para sincronización iCal automática diaria
-- Storage propio de imágenes (MinIO en Raspberry Pi o S3/R2)
+## ⏳ En Proceso
+
+### 5. Eliminación Barra de Progreso Redundante
+**Fecha:** 02 Oct 2026
+**Objetivo:** Quitar barra verde superior, mantener solo skeletons.
+**Estado:** Prompt listo, pendiente de ejecución.
+
+### 6. Internacionalización Completa - Página de Detalle de Casa
+**Fecha:** 02 Oct 2026
+**Archivos afectados:** `apps/web/src/app/[locale]/casas/[slug]/` (+ componentes hijos)
+**Texto identificado:**
+- Sección detalle, amenidades, formulario, calendario, controles de fotos, mapa.
+- Menú y footer compartidos también tienen texto en español.
+- Títulos/descripciones de casas: ya salen de BD por idioma ✓
+**Enfoque:**
+- Usar `Intl` para meses/días del calendario.
+- Inputs `type="date"` mantienen formato día/mes/año según locale del navegador.
+**Estado:** Agent trabajando (inventario de textos en curso)
+
+---
+
+## 🔜 Pendiente de Planificación
+
+| Prioridad | Tema | Notas |
+|-----------|------|-------|
+| High | Validación de formulario de consulta | Email válido, fechas futuras posibles, huéspedes > 0 |
+| Medium | Responsive calendario en móvil | Columnas apretujadas en pantallas pequeñas |
+| Low | Meta título y descripción multilingüe | SEO tags por idioma |
+
+---
+
+## 📝 Decisiones Técnicas
+
+1. **Fecha dd/mm/aaaa:** se mantiene formato en todos los idiomas (no regionalizado).
+2. **Skeletons > Barra de progreso:** preferido por estética limpia.
+3. **Provider compartido:** `ReservationDatesProvider` para estado de reservas.
+4. **i18n en `Intl`:** días/meses del calendario usando `Intl.DateTimeFormat` con el locale activo.
+
+---
+
+## 🐛 Bugs Conocidos / Notas
+
+- Navbar compartido: "PROPIEDADES" sigue en español en `Navbar.tsx:30`.
+- Algunas rutas precargadas pueden abrir sin mostrar loading.
+- Advertencias ESLint preexistentes (3) no fueron alteradas.
+
+---
+
+## 📊 Métricas de este Sprint (02 Oct 2026)
+
+| Tipo | Cantidad |
+|------|----------|
+| Archivos modificados | ~19 archivos |
+| Líneas agregadas | +500 aprox. |
+| Líneas eliminadas | -90 aprox. |
+| Tests pasados | 17 |
+| Errores TS/ESLint | 0 nuevos |
+
+---
+
+*Documento mantenido manualmente. Se recomienda actualizar tras cada sprint o hito importante.*

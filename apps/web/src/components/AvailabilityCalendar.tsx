@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useReservationDates } from './ReservationDatesProvider';
+import { fechaDisponible, rangoDisponible, seleccionarFecha } from '@/lib/reservationDates';
 
 // Un día está ocupado si cae dentro de algún rango [start, end) — la noche del día de salida NO cuenta (convención Airbnb)
 function diaOcupado(
@@ -16,6 +17,7 @@ export default function AvailabilityCalendar({
 }: {
   bookings: { startDate: string; endDate: string }[];
 }) {
+  const { dates, setDates } = useReservationDates();
   const hoy = new Date();
   const [anio, setAnio] = useState(hoy.getFullYear());
   const [mes, setMes] = useState(hoy.getMonth()); // 0-11
@@ -81,20 +83,30 @@ export default function AvailabilityCalendar({
           if (!iso) return <div key={`v-${i}`} />;
           const ocupado = diaOcupado(iso, bookings);
           const esPasado = iso < hoyISO;
+          const seleccionado = dates.endDate
+            ? rangoDisponible(dates, bookings, hoyISO) && iso >= dates.startDate && iso <= dates.endDate
+            : iso === dates.startDate && fechaDisponible(iso, bookings, hoyISO);
 
           return (
-            <div
+            <button
               key={iso}
+              type="button"
+              disabled={ocupado || esPasado}
+              aria-label={iso}
+              aria-pressed={seleccionado}
+              onClick={() => setDates(actual => seleccionarFecha(actual, iso, bookings, hoyISO))}
               className={`aspect-square flex items-center justify-center rounded-lg ${
                 esPasado
                   ? 'text-gray-300'
                   : ocupado
                     ? 'bg-red-100 text-red-400 line-through'
-                    : 'bg-green-50 text-green-700 font-medium'
-              }`}
+                    : seleccionado
+                      ? 'bg-green-700 text-white font-medium'
+                      : 'bg-green-50 text-green-700 font-medium'
+              }${seleccionado ? ' ring-2 ring-green-700' : ''}`}
             >
               {Number(iso.slice(8))}
-            </div>
+            </button>
           );
         })}
       </div>

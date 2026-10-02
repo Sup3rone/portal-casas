@@ -3,6 +3,8 @@
 
 import { useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useReservationDates } from './ReservationDatesProvider';
+import { fechaDisponible } from '@/lib/reservationDates';
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
@@ -85,8 +87,7 @@ export default function MessageForm({
   compact?: boolean;
 }) {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const { dates: { startDate, endDate }, setDates } = useReservationDates();
   const [guests, setGuests] = useState<number>(1);
 
   const cotizacion = useMemo(
@@ -120,6 +121,10 @@ export default function MessageForm({
   }
 
   const fechasInvalidas = !!startDate && !!endDate && endDate <= startDate;
+  const hoy = iso(new Date());
+  const bookings = pricing.booked.map(b => ({ startDate: b.start, endDate: b.end }));
+  const fechasNoDisponibles = (!!startDate && !fechaDisponible(startDate, bookings, hoy)) ||
+    (!!endDate && !fechaDisponible(endDate, bookings, hoy)) || !!cotizacion?.choque;
 
   return (
     <form
@@ -179,7 +184,8 @@ export default function MessageForm({
             id="startDate"
             name="startDate"
             value={startDate}
-            onChange={e => setStartDate(e.target.value)}
+            min={hoy}
+            onChange={e => setDates(actual => ({ ...actual, startDate: e.target.value }))}
             className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
           />
         </div>
@@ -193,8 +199,8 @@ export default function MessageForm({
             id="endDate"
             name="endDate"
             value={endDate}
-            min={startDate || undefined}
-            onChange={e => setEndDate(e.target.value)}
+            min={startDate || hoy}
+            onChange={e => setDates(actual => ({ ...actual, endDate: e.target.value }))}
             className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
           />
         </div>
@@ -230,7 +236,7 @@ export default function MessageForm({
         </div>
       </div>
 
-      {cotizacion?.choque && (
+      {fechasNoDisponibles && (
         <p className="text-red-600 text-xs tracking-wide">
           Algunas fechas están ocupadas — revisa el calendario.
         </p>
@@ -260,7 +266,7 @@ export default function MessageForm({
         <p className="text-red-600 text-xs tracking-wide">Error al enviar. Intenta de nuevo.</p>
       )}
 
-      <SubmitButton disabled={fechasInvalidas} />
+      <SubmitButton disabled={fechasInvalidas || fechasNoDisponibles} />
     </form>
   );
 }

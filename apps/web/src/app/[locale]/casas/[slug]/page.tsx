@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
+import ReservationDatesProvider from '@/components/ReservationDatesProvider';
 import SectionSlider from '@/components/SectionSlider';
 import CategorySection from '@/components/CategorySection';
 import LocationMap from '@/components/LocationMap';
@@ -211,6 +212,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           <h2 className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 md:text-4xl">
             RESERVAR
           </h2>
+          <ReservationDatesProvider key={property.id}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Columna izquierda: Calendario */}
@@ -226,6 +228,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
               <MessageForm propertyId={property.id} locale={locale} pricing={pricing} compact />
             </div>
           </div>
+          </ReservationDatesProvider>
         </div>
       </section>
     </main>

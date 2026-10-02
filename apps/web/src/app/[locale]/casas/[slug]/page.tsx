@@ -216,7 +216,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Columna izquierda: Calendario */}
-            <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-6 shadow-xl ring-1 ring-white/20">
+            <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20">
               <h3 className="mb-3 text-[0.65rem] tracking-[0.25em] text-gray-400 uppercase">
                 DISPONIBILIDAD
               </h3>
@@ -224,7 +224,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Columna derecha: Formulario */}
-            <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-6 shadow-xl ring-1 ring-white/20">
+            <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20">
               <MessageForm propertyId={property.id} locale={locale} pricing={pricing} compact />
             </div>
           </div>

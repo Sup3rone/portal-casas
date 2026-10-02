@@ -34,10 +34,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <form
             action={`/${locale}/casas`}
             method="GET"
-            className="flex flex-wrap items-end justify-center gap-4 rounded-2xl bg-white p-6 shadow-2xl"
+            className="glass-panel flex flex-wrap items-end justify-center gap-4 rounded-2xl p-6 shadow-2xl"
           >
             <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-500">
+              <label className="mb-1 block text-xs tracking-widest text-gray-600">
                 {t('llegada')}
               </label>
               <input
@@ -48,7 +48,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
 
             <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-500">
+              <label className="mb-1 block text-xs tracking-widest text-gray-600">
                 {t('salida')}
               </label>
               <input
@@ -59,7 +59,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
 
             <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-500">
+              <label className="mb-1 block text-xs tracking-widest text-gray-600">
                 {t('huespedes')}
               </label>
               <select

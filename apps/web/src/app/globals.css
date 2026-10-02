@@ -54,3 +54,13 @@ body {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+.page-loading {
+  animation: fade 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loading {
+    animation: none;
+  }
+}

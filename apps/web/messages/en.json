@@ -1,5 +1,6 @@
 {
   "nav": {
+    "cambiarIdioma": "Change language",
     "casas": "Homes",
     "admin": "Admin",
     "login": "Log in",
@@ -12,6 +13,62 @@
     "forgotLink": "Forgot your password?"
   },
   "details": {
+    "destino": "THE DESTINATION",
+    "ofrece": "WHAT THIS PLACE OFFERS",
+    "amenidades": "AMENITIES",
+    "habitaciones": "BEDROOMS",
+    "reservar": "BOOK",
+    "amenities": {
+      "vistaMar": "Ocean view",
+      "accesoPlaya": "Beach access",
+      "wifi": "WiFi",
+      "estacionamiento": "Free parking",
+      "cocina": "Kitchen",
+      "television": "TV",
+      "wifiRapido": "High-speed WiFi",
+      "cocinaEquipada": "Equipped kitchen",
+      "aire": "Air conditioning",
+      "piscina": "Pool",
+      "smartTV": "Smart TV",
+      "frenteMar": "Oceanfront",
+      "lavadora": "Washer and dryer",
+      "terraza": "Terrace with ocean view",
+      "ascensor": "Elevator",
+      "seguridad": "24/7 security",
+      "limpieza": "Professional cleaning",
+      "ropaCama": "Bedrooms with premium bed linen",
+      "banos": "Full bathrooms"
+    },
+    "lugar": "THE PLACE",
+    "enLugar": "AT THE PROPERTY",
+    "calendar": {
+      "mesAnterior": "Previous month",
+      "mesSiguiente": "Next month"
+    },
+    "form": {
+      "nombre": "Name",
+      "email": "Email",
+      "telefono": "Phone (optional)",
+      "llegada": "Check-in",
+      "salida": "Check-out",
+      "huespedes": "Number of guests",
+      "precioTotal": "Total Price",
+      "consultar": "On request",
+      "mensaje": "Message",
+      "enviando": "SENDING...",
+      "enviar": "SEND INQUIRY",
+      "exito": "Message sent. We will contact you soon.",
+      "fechasOcupadas": "Some dates are unavailable — check the calendar.",
+      "fechasInvalidas": "The check-out date must be after the check-in date.",
+      "error": "Could not send your message. Please try again."
+    },
+    "gallery": {
+      "foto": "Photo {number}",
+      "anterior": "Previous",
+      "siguiente": "Next",
+      "irFoto": "Go to photo {number}"
+    },
+    "mapTitle": "Location — {address}",
     "description": "Description",
     "guests": "Guests",
     "bedrooms": "Bedrooms",

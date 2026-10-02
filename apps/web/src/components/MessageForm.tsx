@@ -3,10 +3,12 @@
 
 import { useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useTranslations } from 'next-intl';
 import { useReservationDates } from './ReservationDatesProvider';
 import { fechaDisponible } from '@/lib/reservationDates';
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
+  const t = useTranslations('details.form');
   const { pending } = useFormStatus();
   return (
     <button
@@ -14,7 +16,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
       disabled={pending || disabled}
       className="w-full bg-gray-900 hover:bg-gray-700 text-white font-light tracking-[0.25em] py-4 px-4 transition-colors disabled:opacity-50 uppercase"
     >
-      {pending ? 'ENVIANDO...' : 'ENVIAR CONSULTA'}
+      {pending ? t('enviando') : t('enviar')}
     </button>
   );
 }
@@ -86,6 +88,8 @@ export default function MessageForm({
   pricing: PricingInfo;
   compact?: boolean;
 }) {
+  const t = useTranslations('details.form');
+  const formatoLocale = locale === 'en' ? 'en-GB' : locale === 'fr' ? 'fr-FR' : 'es-MX';
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { dates: { startDate, endDate }, setDates } = useReservationDates();
   const [guests, setGuests] = useState<number>(1);
@@ -103,7 +107,7 @@ export default function MessageForm({
   async function handleSubmit(formData: FormData) {
     try {
       const res = await fetch('/api/messages', { method: 'POST', body: formData });
-      if (!res.ok) throw new Error('Error al enviar');
+      if (!res.ok) throw new Error(t('error'));
       setStatus('success');
       setTimeout(() => setStatus('idle'), 3000);
     } catch (err) {
@@ -115,7 +119,7 @@ export default function MessageForm({
   if (status === 'success') {
     return (
       <div className="text-center text-gray-500 font-light tracking-wide p-8">
-        Mensaje enviado. Te contactaremos pronto.
+        {t('exito')}
       </div>
     );
   }
@@ -128,6 +132,7 @@ export default function MessageForm({
 
   return (
     <form
+          lang={formatoLocale}
           action={handleSubmit}
           className={compact ? formClasses + ' space-y-3' : 'space-y-6'}
         >
@@ -137,7 +142,7 @@ export default function MessageForm({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label htmlFor="name" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
-            Nombre
+            {t('nombre')}
           </label>
           <input
             required
@@ -149,7 +154,7 @@ export default function MessageForm({
         </div>
         <div>
           <label htmlFor="email" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
-            Email
+            {t('email')}
           </label>
           <input
             required
@@ -161,7 +166,7 @@ export default function MessageForm({
         </div>
         <div>
           <label htmlFor="phone" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
-            Teléfono (opcional)
+            {t('telefono')}
           </label>
           <input
             type="tel"
@@ -176,13 +181,14 @@ export default function MessageForm({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label htmlFor="startDate" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
-            Llegada
+            {t('llegada')}
           </label>
           <input
             required
             type="date"
             id="startDate"
             name="startDate"
+            lang={formatoLocale}
             value={startDate}
             min={hoy}
             onChange={e => setDates(actual => ({ ...actual, startDate: e.target.value }))}
@@ -191,13 +197,14 @@ export default function MessageForm({
         </div>
         <div>
           <label htmlFor="endDate" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
-            Salida
+            {t('salida')}
           </label>
           <input
             required
             type="date"
             id="endDate"
             name="endDate"
+            lang={formatoLocale}
             value={endDate}
             min={startDate || hoy}
             onChange={e => setDates(actual => ({ ...actual, endDate: e.target.value }))}
@@ -206,7 +213,7 @@ export default function MessageForm({
         </div>
         <div>
           <label htmlFor="guests" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
-            Nº Huéspedes
+            {t('huespedes')}
           </label>
           <input
             required
@@ -222,13 +229,13 @@ export default function MessageForm({
         </div>
         <div>
           <label className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
-            Precio Total
+            {t('precioTotal')}
           </label>
           <div className="border-b border-gray-300 pb-2 text-lg font-light text-gray-800 h-7 flex items-end">
             {cotizacion?.total != null ? (
-              `$${cotizacion.total.toLocaleString('es-MX')} MXN`
+              `$${cotizacion.total.toLocaleString(formatoLocale)} MXN`
             ) : startDate && endDate ? (
-              <span className="text-gray-400 text-sm">A consultar</span>
+              <span className="text-gray-400 text-sm">{t('consultar')}</span>
             ) : (
               <span className="text-gray-400 text-sm">—</span>
             )}
@@ -238,20 +245,20 @@ export default function MessageForm({
 
       {fechasNoDisponibles && (
         <p className="text-red-600 text-xs tracking-wide">
-          Algunas fechas están ocupadas — revisa el calendario.
+          {t('fechasOcupadas')}
         </p>
       )}
 
       {fechasInvalidas && (
         <p className="text-red-600 text-xs tracking-wide">
-          La fecha de salida debe ser posterior a la llegada.
+          {t('fechasInvalidas')}
         </p>
       )}
 
       {/* ===== MENSAJE ===== */}
       <div>
         <label htmlFor="body" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
-          Mensaje
+          {t('mensaje')}
         </label>
         <textarea
           required
@@ -263,7 +270,7 @@ export default function MessageForm({
       </div>
 
       {status === 'error' && (
-        <p className="text-red-600 text-xs tracking-wide">Error al enviar. Intenta de nuevo.</p>
+        <p className="text-red-600 text-xs tracking-wide">{t('error')}</p>
       )}
 
       <SubmitButton disabled={fechasInvalidas || fechasNoDisponibles} />

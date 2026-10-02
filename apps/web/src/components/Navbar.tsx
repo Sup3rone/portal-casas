@@ -37,7 +37,7 @@ export default function Navbar() {
                 {isAdmin && (
                   <div className="relative group">
                     <button className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600">
-                      ADMIN ▾
+                      {t('admin').toUpperCase()} ▾
                     </button>
                     <div className="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
                       <div className="overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-gray-200">
@@ -45,19 +45,19 @@ export default function Navbar() {
                           href="/admin/mensajes"
                           className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:bg-gray-50"
                         >
-                          MENSAJES
+                          {t('mensajes').toUpperCase()}
                         </Link>
                         <Link
                           href="/admin/tarifas"
                           className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:bg-gray-50"
                         >
-                          TARIFAS
+                          {t('tarifas').toUpperCase()}
                         </Link>
                         <Link
                           href="/admin/calendario"
                           className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:bg-gray-50"
                         >
-                          CALENDARIO
+                          {t('calendario').toUpperCase()}
                         </Link>
                       </div>
                     </div>
@@ -68,14 +68,14 @@ export default function Navbar() {
                   href="/mi-cuenta"
                   className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600"
                 >
-                  MI CUENTA
+                  {t('cuenta').toUpperCase()}
                 </Link>
 
                 <button
                   onClick={() => signOut({ callbackUrl: `/${locale}` })}
                   className="text-sm font-medium tracking-wide text-gray-600 transition-colors hover:text-gray-900"
                 >
-                  SALIR
+                  {t('salir').toUpperCase()}
                 </button>
               </>
             ) : (
@@ -84,13 +84,13 @@ export default function Navbar() {
                   href="/login"
                   className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600"
                 >
-                  LOGIN
+                  {t('login').toUpperCase()}
                 </Link>
                 <Link
                   href="/registro"
                   className="rounded-full bg-gray-900 px-6 py-2 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-gray-800"
                 >
-                  REGISTRARSE
+                  {t('registro').toUpperCase()}
                 </Link>
               </>
             )}

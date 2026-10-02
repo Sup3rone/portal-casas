@@ -70,10 +70,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     : mediaList; // fallback: si nada tiene categoría, todo es principal
 
   const labels: Record<string, string> = {
-    principal: 'EL LUGAR',
-    habitaciones: 'HABITACIONES',
-    amenidades: 'AMENIDADES',
-    lugar: 'EN EL LUGAR',
+    principal: t('details.lugar'),
+    habitaciones: t('details.habitaciones'),
+    amenidades: t('details.amenidades'),
+    lugar: t('details.enLugar'),
   };
 
   // Datos para los 4 cuadros con popup
@@ -83,21 +83,21 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
         ? `https://maps.google.com/maps?q=${property.lat},${property.lng}&z=15&output=embed`
         : null,
     amenities: [
-      { icon: '📶', label: 'WiFi de alta velocidad' },
-      { icon: '🍳', label: 'Cocina equipada' },
-      { icon: '❄️', label: 'Aire acondicionado' },
-      { icon: '🏊', label: 'Piscina' },
-      { icon: '🅿️', label: 'Estacionamiento gratuito' },
-      { icon: '📺', label: 'Smart TV' },
-      { icon: '🌊', label: 'Frente al mar' },
-      { icon: '🧺', label: 'Lavadora y secadora' },
+      { icon: '📶', label: t('details.amenities.wifiRapido') },
+      { icon: '🍳', label: t('details.amenities.cocinaEquipada') },
+      { icon: '❄️', label: t('details.amenities.aire') },
+      { icon: '🏊', label: t('details.amenities.piscina') },
+      { icon: '🅿️', label: t('details.amenities.estacionamiento') },
+      { icon: '📺', label: t('details.amenities.smartTV') },
+      { icon: '🌊', label: t('details.amenities.frenteMar') },
+      { icon: '🧺', label: t('details.amenities.lavadora') },
     ],
     roomSlides: mediaList.filter((m) => m.category === 'habitaciones'),
     placeOffers: [
-      { icon: '🌿', label: 'Terraza con vista al mar' },
-      { icon: '🛗', label: 'Ascensor' },
-      { icon: '🔒', label: 'Seguridad 24/7' },
-      { icon: '🧹', label: 'Limpieza profesional' },
+      { icon: '🌿', label: t('details.amenities.terraza') },
+      { icon: '🛗', label: t('details.amenities.ascensor') },
+      { icon: '🔒', label: t('details.amenities.seguridad') },
+      { icon: '🧹', label: t('details.amenities.limpieza') },
     ],
   };
 
@@ -144,7 +144,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             {/* Widget 1: EL DESTINO — título arriba, mapa ABAJO */}
             <div className="rounded-2xl bg-white/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40">
               <h2 className="mb-4 text-center text-2xl font-light tracking-[0.3em] text-gray-900">
-                EL DESTINO
+                {t('details.destino')}
               </h2>
               <p className="mb-6 text-center text-sm font-light leading-relaxed text-gray-600">
                 {property.address}, {property.city}
@@ -160,16 +160,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             {/* Widget 2: LO QUE OFRECE ESTE LUGAR */}
             <div className="rounded-2xl bg-white/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40">
               <h2 className="mb-6 text-center text-2xl font-light tracking-[0.3em] text-gray-900">
-                LO QUE OFRECE ESTE LUGAR
+                {t('details.ofrece')}
               </h2>
               <ul className="space-y-4">
                 {[
-                  { icon: '🌊', label: 'Vista al mar' },
-                  { icon: '🏊', label: 'Acceso a la playa' },
-                  { icon: '📶', label: 'WiFi' },
-                  { icon: '🅿️', label: 'Estacionamiento gratuito' },
-                  { icon: '🍳', label: 'Cocina' },
-                  { icon: '📺', label: 'Televisión' },
+                  { icon: '🌊', label: t('details.amenities.vistaMar') },
+                  { icon: '🏊', label: t('details.amenities.accesoPlaya') },
+                  { icon: '📶', label: t('details.amenities.wifi') },
+                  { icon: '🅿️', label: t('details.amenities.estacionamiento') },
+                  { icon: '🍳', label: t('details.amenities.cocina') },
+                  { icon: '📺', label: t('details.amenities.television') },
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-0">
                     <span className="text-lg">{item.icon}</span>
@@ -184,25 +184,25 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
       {/* ===== AMENIDADES: info + imagen ===== */}
       <CategorySection
-        label="AMENIDADES"
+        label={t('details.amenidades')}
         slides={porCategoria('amenidades')}
         items={[
-          { icon: '📶', label: 'WiFi de alta velocidad' },
-          { icon: '🍳', label: 'Cocina equipada' },
-          { icon: '❄️', label: 'Aire acondicionado' },
-          { icon: '🏊', label: 'Piscina' },
-          { icon: '🅿️', label: 'Estacionamiento gratuito' },
+          { icon: '📶', label: t('details.amenities.wifiRapido') },
+          { icon: '🍳', label: t('details.amenities.cocinaEquipada') },
+          { icon: '❄️', label: t('details.amenities.aire') },
+          { icon: '🏊', label: t('details.amenities.piscina') },
+          { icon: '🅿️', label: t('details.amenities.estacionamiento') },
         ]}
       />
 
       {/* ===== HABITACIONES: imagen + info (invertido) ===== */}
       <CategorySection
-        label="HABITACIONES"
+        label={t('details.habitaciones')}
         slides={porCategoria('habitaciones')}
         reverse
         items={[
-          { icon: '🛏️', label: 'Recámaras con ropa de cama premium' },
-          { icon: '🛁', label: 'Baños completos' },
+          { icon: '🛏️', label: t('details.amenities.ropaCama') },
+          { icon: '🛁', label: t('details.amenities.banos') },
         ]}
       />
 
@@ -210,7 +210,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       <section id="reservar" className="px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <h2 className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 md:text-4xl">
-            RESERVAR
+            {t('details.reservar')}
           </h2>
           <ReservationDatesProvider key={property.id}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -218,7 +218,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             {/* Columna izquierda: Calendario */}
             <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20">
               <h3 className="mb-3 text-[0.65rem] tracking-[0.25em] text-gray-400 uppercase">
-                DISPONIBILIDAD
+                {t('details.disponibilidad').toUpperCase()}
               </h3>
               <AvailabilityCalendar bookings={bookingRows} />
             </div>

@@ -1,15 +1,19 @@
+import { getLocale, getTranslations } from 'next-intl/server';
+
 type Props = {
   lat: number;
   lng: number;
   address: string;
 };
 
-export default function LocationMap({ lat, lng, address }: Props) {
+export default async function LocationMap({ lat, lng, address }: Props) {
+  const locale = await getLocale();
+  const t = await getTranslations('details');
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
       <iframe
-        title={`Ubicación — ${address}`}
-        src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&hl=es&output=embed`}
+        title={t('mapTitle', { address })}
+        src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&hl=${locale}&output=embed`}
         className="aspect-square w-full"
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"

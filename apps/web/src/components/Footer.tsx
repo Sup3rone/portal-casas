@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 export default function Footer() {
   const t = useTranslations('footer');
+  const nav = useTranslations('nav');
 
   return (
     <footer className="mt-20 border-t border-gray-200 bg-white py-12">
@@ -16,7 +17,7 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-900 mb-4">{t('navegacion')}</h4>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li><a href="/es/casas" className="hover:text-purple-600">Casas</a></li>
+              <li><a href="/es/casas" className="hover:text-purple-600">{nav('casas')}</a></li>
             </ul>
           </div>
           <div>

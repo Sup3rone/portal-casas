@@ -1,5 +1,6 @@
 {
   "nav": {
+    "cambiarIdioma": "Cambiar idioma",
     "casas": "Casas",
     "admin": "Admin",
     "login": "Entrar",
@@ -12,6 +13,62 @@
     "forgotLink": "¿Olvidaste tu contraseña?"
   },
   "details": {
+    "destino": "EL DESTINO",
+    "ofrece": "LO QUE OFRECE ESTE LUGAR",
+    "amenidades": "AMENIDADES",
+    "habitaciones": "HABITACIONES",
+    "reservar": "RESERVAR",
+    "amenities": {
+      "vistaMar": "Vista al mar",
+      "accesoPlaya": "Acceso a la playa",
+      "wifi": "WiFi",
+      "estacionamiento": "Estacionamiento gratuito",
+      "cocina": "Cocina",
+      "television": "Televisión",
+      "wifiRapido": "WiFi de alta velocidad",
+      "cocinaEquipada": "Cocina equipada",
+      "aire": "Aire acondicionado",
+      "piscina": "Piscina",
+      "smartTV": "Smart TV",
+      "frenteMar": "Frente al mar",
+      "lavadora": "Lavadora y secadora",
+      "terraza": "Terraza con vista al mar",
+      "ascensor": "Ascensor",
+      "seguridad": "Seguridad 24/7",
+      "limpieza": "Limpieza profesional",
+      "ropaCama": "Recámaras con ropa de cama premium",
+      "banos": "Baños completos"
+    },
+    "lugar": "EL LUGAR",
+    "enLugar": "EN EL LUGAR",
+    "calendar": {
+      "mesAnterior": "Mes anterior",
+      "mesSiguiente": "Mes siguiente"
+    },
+    "form": {
+      "nombre": "Nombre",
+      "email": "Email",
+      "telefono": "Teléfono (opcional)",
+      "llegada": "Llegada",
+      "salida": "Salida",
+      "huespedes": "Nº Huéspedes",
+      "precioTotal": "Precio Total",
+      "consultar": "A consultar",
+      "mensaje": "Mensaje",
+      "enviando": "ENVIANDO...",
+      "enviar": "ENVIAR CONSULTA",
+      "exito": "Mensaje enviado. Te contactaremos pronto.",
+      "fechasOcupadas": "Algunas fechas están ocupadas — revisa el calendario.",
+      "fechasInvalidas": "La fecha de salida debe ser posterior a la llegada.",
+      "error": "Error al enviar. Intenta de nuevo."
+    },
+    "gallery": {
+      "foto": "Foto {number}",
+      "anterior": "Anterior",
+      "siguiente": "Siguiente",
+      "irFoto": "Ir a foto {number}"
+    },
+    "mapTitle": "Ubicación — {address}",
     "description": "Descripción",
     "guests": "Huéspedes",
     "bedrooms": "Recámaras",

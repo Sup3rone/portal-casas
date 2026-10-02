@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 const LOCALES = [
   { code: 'es', label: 'Español', flag: '🇪🇸' },
@@ -13,6 +13,7 @@ const LOCALES = [
 
 export default function LocaleSwitcher() {
   const locale = useLocale();
+  const t = useTranslations('nav');
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -52,7 +53,7 @@ export default function LocaleSwitcher() {
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:border-gray-400"
-        aria-label="Cambiar idioma"
+        aria-label={t('cambiarIdioma')}
       >
         <span className="text-base leading-none">{actual.flag}</span>
         <span>{actual.code.toUpperCase()}</span>

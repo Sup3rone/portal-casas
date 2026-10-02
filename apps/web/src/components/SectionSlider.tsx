@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 type Slide = {
   url: string;
@@ -15,6 +16,7 @@ export default function SectionSlider({
   slides: Slide[];
   fullscreen?: boolean;
 }) {
+  const t = useTranslations('details.gallery');
   const [idx, setIdx] = useState(0);
 
   if (slides.length === 0) return null;
@@ -45,7 +47,7 @@ export default function SectionSlider({
         <img
           key={idx}
           src={slides[idx].url}
-          alt={`Foto ${idx + 1}`}
+          alt={t('foto', { number: idx + 1 })}
           className="h-full w-full animate-[fade_.4s_ease] object-cover"
         />
       )}
@@ -56,14 +58,14 @@ export default function SectionSlider({
           <button
             onClick={prev}
             className="absolute left-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 p-3 text-gray-900 transition hover:bg-white"
-            aria-label="Anterior"
+            aria-label={t('anterior')}
           >
             ‹
           </button>
           <button
             onClick={next}
             className="absolute right-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 p-3 text-gray-900 transition hover:bg-white"
-            aria-label="Siguiente"
+            aria-label={t('siguiente')}
           >
             ›
           </button>
@@ -83,7 +85,7 @@ export default function SectionSlider({
                 className={`h-2 w-2 cursor-pointer rounded-full transition-colors ${
                   i === idx ? 'bg-white' : 'bg-white/50'
                 }`}
-                aria-label={`Ir a foto ${i + 1}`}
+                aria-label={t('irFoto', { number: i + 1 })}
               />
             ))}
           </div>

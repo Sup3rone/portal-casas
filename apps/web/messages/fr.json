@@ -1,5 +1,6 @@
 {
   "nav": {
+    "cambiarIdioma": "Changer de langue",
     "casas": "Maisons",
     "admin": "Admin",
     "login": "Connexion",
@@ -12,6 +13,62 @@
     "forgotLink": "Mot de passe oublié ?"
   },
   "details": {
+    "destino": "LA DESTINATION",
+    "ofrece": "CE QUE PROPOSE CE LOGEMENT",
+    "amenidades": "ÉQUIPEMENTS",
+    "habitaciones": "CHAMBRES",
+    "reservar": "RÉSERVER",
+    "amenities": {
+      "vistaMar": "Vue sur la mer",
+      "accesoPlaya": "Accès à la plage",
+      "wifi": "WiFi",
+      "estacionamiento": "Stationnement gratuit",
+      "cocina": "Cuisine",
+      "television": "Télévision",
+      "wifiRapido": "WiFi haut débit",
+      "cocinaEquipada": "Cuisine équipée",
+      "aire": "Climatisation",
+      "piscina": "Piscine",
+      "smartTV": "Télévision connectée",
+      "frenteMar": "En bord de mer",
+      "lavadora": "Lave-linge et sèche-linge",
+      "terraza": "Terrasse avec vue sur la mer",
+      "ascensor": "Ascenseur",
+      "seguridad": "Sécurité 24 h/24",
+      "limpieza": "Ménage professionnel",
+      "ropaCama": "Chambres avec linge de lit haut de gamme",
+      "banos": "Salles de bains complètes"
+    },
+    "lugar": "LE LOGEMENT",
+    "enLugar": "SUR PLACE",
+    "calendar": {
+      "mesAnterior": "Mois précédent",
+      "mesSiguiente": "Mois suivant"
+    },
+    "form": {
+      "nombre": "Nom",
+      "email": "E-mail",
+      "telefono": "Téléphone (facultatif)",
+      "llegada": "Arrivée",
+      "salida": "Départ",
+      "huespedes": "Nombre de voyageurs",
+      "precioTotal": "Prix total",
+      "consultar": "Sur demande",
+      "mensaje": "Message",
+      "enviando": "ENVOI EN COURS...",
+      "enviar": "ENVOYER LA DEMANDE",
+      "exito": "Message envoyé. Nous vous contacterons bientôt.",
+      "fechasOcupadas": "Certaines dates sont indisponibles — consultez le calendrier.",
+      "fechasInvalidas": "La date de départ doit être postérieure à la date d’arrivée.",
+      "error": "Impossible d’envoyer votre message. Réessayez."
+    },
+    "gallery": {
+      "foto": "Photo {number}",
+      "anterior": "Précédent",
+      "siguiente": "Suivant",
+      "irFoto": "Aller à la photo {number}"
+    },
+    "mapTitle": "Emplacement — {address}",
     "description": "Description",
     "guests": "Voyageurs",
     "bedrooms": "Chambres",

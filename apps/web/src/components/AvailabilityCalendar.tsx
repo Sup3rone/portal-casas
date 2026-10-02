@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useReservationDates } from './ReservationDatesProvider';
 import { fechaDisponible, rangoDisponible, seleccionarFecha } from '@/lib/reservationDates';
 
@@ -17,6 +18,8 @@ export default function AvailabilityCalendar({
 }: {
   bookings: { startDate: string; endDate: string }[];
 }) {
+  const locale = useLocale();
+  const t = useTranslations();
   const { dates, setDates } = useReservationDates();
   const hoy = new Date();
   const [anio, setAnio] = useState(hoy.getFullYear());
@@ -28,10 +31,10 @@ export default function AvailabilityCalendar({
   // Día de la semana del día 1 (Lu=0...Do=6, formato europeo)
   const offset = (primerDia.getDay() + 6) % 7;
 
-  const nombresMeses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ];
+  const mesVisible = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(primerDia);
+  const formatoDia = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+  const diasSemana = Array.from({ length: 7 }, (_, i) => formatoDia.format(new Date(2026, 0, 5 + i)));
+  const formatoFecha = new Intl.DateTimeFormat(locale, { dateStyle: 'full' });
 
   function mesAnterior() {
     if (mes === 0) { setMes(11); setAnio(a => a - 1); } else setMes(m => m - 1);
@@ -57,17 +60,17 @@ export default function AvailabilityCalendar({
         <button
           onClick={mesAnterior}
           className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
-          aria-label="Mes anterior"
+          aria-label={t('details.calendar.mesAnterior')}
         >
           ◀
         </button>
         <h3 className="text-lg font-bold">
-          {nombresMeses[mes]} {anio}
+          {mesVisible}
         </h3>
         <button
           onClick={mesSiguiente}
           className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
-          aria-label="Mes siguiente"
+          aria-label={t('details.calendar.mesSiguiente')}
         >
           ▶
         </button>
@@ -75,7 +78,7 @@ export default function AvailabilityCalendar({
 
       {/* Grilla del calendario */}
       <div className="grid grid-cols-7 gap-1 text-center text-sm">
-        {['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'].map((d) => (
+        {diasSemana.map((d) => (
           <div key={d} className="py-2 text-xs font-semibold text-gray-500">{d}</div>
         ))}
 
@@ -92,7 +95,7 @@ export default function AvailabilityCalendar({
               key={iso}
               type="button"
               disabled={ocupado || esPasado}
-              aria-label={iso}
+              aria-label={formatoFecha.format(new Date(iso + 'T12:00:00'))}
               aria-pressed={seleccionado}
               onClick={() => setDates(actual => seleccionarFecha(actual, iso, bookings, hoyISO))}
               className={`aspect-square flex items-center justify-center rounded-lg ${
@@ -114,10 +117,10 @@ export default function AvailabilityCalendar({
       {/* Leyenda */}
       <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-green-50 ring-1 ring-green-200" /> Disponible
+          <span className="inline-block h-3 w-3 rounded bg-green-50 ring-1 ring-green-200" /> {t('common.disponible')}
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-red-100" /> Ocupado
+          <span className="inline-block h-3 w-3 rounded bg-red-100" /> {t('common.ocupado')}
         </span>
       </div>
     </div>

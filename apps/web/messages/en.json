@@ -30,6 +30,13 @@
     "ocupado": "Booked"
   },
   "home": {
+    "bienvenida": "WELCOME TO",
+    "propiedadesEnRenta": "RENTAL PROPERTIES",
+    "llegada": "ARRIVAL",
+    "salida": "DEPARTURE",
+    "huespedes": "GUESTS",
+    "cualquiera": "Any",
+    "buscar": "SEARCH",
     "titulo": "Find your next stay",
     "subtitulo": "Verified homes, ready for you. Unique experiences in top destinations.",
     "explorar": "Explore properties"

@@ -30,6 +30,13 @@
     "ocupado": "Ocupado"
   },
   "home": {
+    "bienvenida": "BIENVENIDOS A",
+    "propiedadesEnRenta": "PROPIEDADES EN RENTA",
+    "llegada": "LLEGADA",
+    "salida": "SALIDA",
+    "huespedes": "HUÉSPEDES",
+    "cualquiera": "Cualquiera",
+    "buscar": "BUSCAR",
     "titulo": "Encuentra tu próxima estancia",
     "subtitulo": "Casas verificadas, listas para ti. Experiencias únicas en los mejores destinos.",
     "explorar": "Explorar propiedades"

@@ -27,7 +27,7 @@ export default function Navbar() {
               href={`/casas`}
               className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600"
             >
-              PROPIEDADES
+              {t('casas')}
             </Link>
 
             <LocaleSwitcher />

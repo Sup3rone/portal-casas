@@ -1,5 +1,9 @@
 // src/app/[locale]/page.tsx
-export default function HomePage() {
+import { getTranslations } from 'next-intl/server';
+
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'home' });
   return (
     <main>
       {/* HERO con video de fondo */}
@@ -20,21 +24,21 @@ export default function HomePage() {
         {/* Contenido centrado */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
           <h1 className="mb-4 text-4xl font-light tracking-[0.3em] text-white md:text-6xl">
-            BIENVENIDOS A
+            {t('bienvenida')}
           </h1>
           <h2 className="mb-12 text-2xl font-light tracking-[0.25em] text-white/90 md:text-3xl">
-            PROPIEDADES EN RENTA
+            {t('propiedadesEnRenta')}
           </h2>
 
           {/* Widget de búsqueda flotante */}
           <form
-            action="/es/casas"
+            action={`/${locale}/casas`}
             method="GET"
             className="flex flex-wrap items-end justify-center gap-4 rounded-2xl bg-white p-6 shadow-2xl"
           >
             <div className="text-left">
               <label className="mb-1 block text-xs tracking-widest text-gray-500">
-                LLEGADA
+                {t('llegada')}
               </label>
               <input
                 type="date"
@@ -45,7 +49,7 @@ export default function HomePage() {
 
             <div className="text-left">
               <label className="mb-1 block text-xs tracking-widest text-gray-500">
-                SALIDA
+                {t('salida')}
               </label>
               <input
                 type="date"
@@ -56,13 +60,13 @@ export default function HomePage() {
 
             <div className="text-left">
               <label className="mb-1 block text-xs tracking-widest text-gray-500">
-                HUÉSPEDES
+                {t('huespedes')}
               </label>
               <select
                 name="guests"
                 className="w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
               >
-                <option value="">Cualquiera</option>
+                <option value="">{t('cualquiera')}</option>
                 {[1, 2, 3, 4, 6, 8, 10].map((n) => (
                   <option key={n} value={n}>
                     {n}
@@ -75,7 +79,7 @@ export default function HomePage() {
               type="submit"
               className="rounded-lg bg-black px-8 py-2.5 text-sm font-semibold tracking-widest text-white transition hover:bg-gray-800"
             >
-              BUSCAR
+              {t('buscar')}
             </button>
           </form>
         </div>

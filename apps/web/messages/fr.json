@@ -30,6 +30,13 @@
     "ocupado": "Réservé"
   },
   "home": {
+    "bienvenida": "BIENVENUE À",
+    "propiedadesEnRenta": "PROPRIÉTÉS À LOUER",
+    "llegada": "ARRIVÉE",
+    "salida": "DÉPART",
+    "huespedes": "VOYAGEURS",
+    "cualquiera": "Peu importe",
+    "buscar": "RECHERCHER",
     "titulo": "Trouvez votre prochain séjour",
     "subtitulo": "Maisons vérifiées, prêtes pour vous. Des expériences uniques dans les meilleures destinations.",
     "explorar": "Explorer les propriétés"

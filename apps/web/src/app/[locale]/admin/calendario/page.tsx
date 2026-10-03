@@ -1,13 +1,16 @@
 import { db, properties, bookings } from '@portal/db';
 import { asc } from 'drizzle-orm';
 import CalendarBoard from '@/components/CalendarBoard';
+import { managedProperties, managedResource, requireAdmin } from '@/lib/property-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminCalendarioPage() {
+  const manager = await requireAdmin();
   const propiedades = await db
     .select({ id: properties.id, slug: properties.slug, title: properties.titleEs })
     .from(properties)
+    .where(managedProperties(manager))
     .orderBy(asc(properties.slug));
 
   const bookingRows = await db
@@ -18,6 +21,7 @@ export default async function AdminCalendarioPage() {
       source: bookings.source,
     })
     .from(bookings)
+    .where(managedResource(bookings.propertyId, manager))
     .orderBy(asc(bookings.startDate));
 
   return (

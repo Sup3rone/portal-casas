@@ -1,14 +1,14 @@
 import { db, properties, seasonRates } from '@portal/db';
 import { asc } from 'drizzle-orm';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { managedProperties, managedResource, requireAdmin } from '@/lib/property-access';
 import { AddTarifaForm, DeleteTarifaButton } from './components';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminTarifasPage() {
-  const propiedades = await db.select().from(properties).orderBy(asc(properties.slug));
-  const tarifas = await db.select().from(seasonRates).orderBy(asc(seasonRates.propertyId), asc(seasonRates.startDate));
+  const manager = await requireAdmin();
+  const propiedades = await db.select().from(properties).where(managedProperties(manager)).orderBy(asc(properties.slug));
+  const tarifas = await db.select().from(seasonRates).where(managedResource(seasonRates.propertyId, manager)).orderBy(asc(seasonRates.propertyId), asc(seasonRates.startDate));
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">

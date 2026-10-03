@@ -1,21 +1,16 @@
 // src/app/api/bookings/create/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db, bookings, properties, users } from "@portal/db";
-import { eq } from "drizzle-orm";
-import { auth } from "@/lib/auth";
+import { db, properties, users } from "@portal/db";
+import { and, eq, sql } from "drizzle-orm";
+import { AccessError, accessFailure, managedProperties, requirePropertyManager } from '@/lib/property-access';
 import { sendEmail } from "@/lib/mailer";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  const role = (session?.user as { role?: string } | undefined)?.role;
-  if (role !== 'ADMIN') {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
   try {
+    const manager = await requirePropertyManager();
     const { propertyId, startDate, endDate, guestUserId, guestName, guestEmail } = await req.json();
 
-    if (!propertyId || !startDate || !endDate) {
+    if (typeof propertyId !== 'string' || !propertyId || typeof startDate !== 'string' || typeof endDate !== 'string' || !startDate || !endDate || (guestUserId != null && typeof guestUserId !== 'string')) {
       return NextResponse.json(
         { error: 'Faltan datos (propertyId, startDate, endDate)' },
         { status: 400 }
@@ -29,14 +24,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await db.insert(bookings).values({
-      id: crypto.randomUUID(),
-      propertyId,
-      startDate,
-      endDate,
-      source: 'manual',
-      guestUserId: guestUserId || null,
-    });
+    // Un colaborador no puede usar ids de huéspedes ajenos a su propiedad.
+    const guestAccess = guestUserId ? sql`exists (
+      select 1 from "User" actor where actor."id" = ${manager.id} and (
+        actor."role" = 'ADMIN' or exists (
+          select 1 from "Message" m where m."propertyId" = ${properties.id} and m."userId" = ${guestUserId}
+        ) or exists (
+          select 1 from "Booking" b where b."propertyId" = ${properties.id} and b."guestUserId" = ${guestUserId}
+        )
+      )
+    )` : sql`true`;
+    const result = await db.execute(sql`
+      insert into "Booking" ("id", "propertyId", "startDate", "endDate", "source", "guestUserId")
+      select ${crypto.randomUUID()}, ${properties.id}, ${startDate}::date, ${endDate}::date, 'manual', ${guestUserId || null}
+      from ${properties} where ${and(eq(properties.id, propertyId), managedProperties(manager), guestAccess)}
+      returning "id"
+    `);
+    if (!result.rows.length) throw new AccessError(404);
 
     // 📧 Email de confirmación — NUNCA rompe la reserva si falla
     try {
@@ -44,7 +48,7 @@ export async function POST(req: NextRequest) {
       const [prop] = await db
         .select({ title: properties.titleEs, slug: properties.slug })
         .from(properties)
-        .where(eq(properties.id, propertyId))
+        .where(and(eq(properties.id, propertyId), managedProperties(manager)))
         .limit(1);
 
       // Si es usuario registrado, su correo de cuenta manda
@@ -95,6 +99,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (e) {
+    const denied = accessFailure(e);
+    if (denied) return NextResponse.json({ error: denied.message }, { status: denied.status });
     console.error('Error creando booking:', e);
     return NextResponse.json({ error: 'Error interno al crear la reserva' }, { status: 500 });
   }

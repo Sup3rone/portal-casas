@@ -1,37 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
-import { db, messages } from "@portal/db";
-import { eq } from "drizzle-orm";
-
-// Genera el token de sesión — IDÉNTICO al de proxy.ts y login
-async function generarToken(password: string | undefined): Promise<string> {
-  if (!password) return 'sin-password-configurada';
-  const data = new TextEncoder().encode(`${password}::portal-casas-salt`);
-  const buffer = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
+import { NextRequest, NextResponse } from 'next/server';
+import { db, messages } from '@portal/db';
+import { and, eq } from 'drizzle-orm';
+import { AccessError, accessFailure, managedResource, requirePropertyManager } from '@/lib/property-access';
 
 export async function POST(req: NextRequest) {
-  const tokenValido = await generarToken(process.env.ADMIN_PASSWORD);
-  const cookieSession = req.cookies.get('admin_session')?.value;
-
-  if (cookieSession !== tokenValido) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
   try {
-    const { id } = await req.json();
-
-    if (!id) {
-      return NextResponse.json({ error: 'Falta el id del mensaje' }, { status: 400 });
+    const manager = await requirePropertyManager();
+    const body = await req.json().catch(() => null);
+    const id = body?.id;
+    if (typeof id !== 'string' || !id) {
+      return NextResponse.json({ error: 'id requerido' }, { status: 400 });
     }
 
-    await db.delete(messages).where(eq(messages.id, id));
-
+    const rows = await db.delete(messages)
+      .where(and(eq(messages.id, id), managedResource(messages.propertyId, manager)))
+      .returning({ id: messages.id });
+    if (!rows.length) throw new AccessError(404);
     return NextResponse.json({ success: true });
-  } catch (e) {
-    console.error('Error eliminando mensaje:', e);
-    return NextResponse.json({ error: 'Error interno al eliminar' }, { status: 500 });
+  } catch (error) {
+    const denied = accessFailure(error);
+    if (denied) return NextResponse.json({ error: denied.message }, { status: denied.status });
+    console.error('Error eliminando mensaje:', error);
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

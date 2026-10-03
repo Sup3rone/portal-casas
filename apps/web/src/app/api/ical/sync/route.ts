@@ -1,25 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db, icalFeeds, bookings } from '@portal/db';
+import { NextResponse } from 'next/server';
+import { db, icalFeeds, properties } from '@portal/db';
 import * as ical from 'node-ical';
-import { eq, inArray } from 'drizzle-orm';
-import { createHash } from 'crypto';
-import { auth } from "@/lib/auth";
+import { and, eq, sql } from 'drizzle-orm';
+import { AccessError, accessFailure, managedProperties, requirePropertyManager } from '@/lib/property-access';
 
-function tokenValido(password: string | undefined): string {
-  return createHash('sha256')
-    .update(`${password}::portal-casas-salt`)
-    .digest('hex');
-}
-
-export async function POST(req: NextRequest) {
-  const session = await auth();
-  const role = (session?.user as { role?: string } | undefined)?.role;
-  if (role !== 'ADMIN') {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
+export async function POST() {
   try {
-    const feedRows = await db.select().from(icalFeeds);
+    const manager = await requirePropertyManager();
+    const feeds = await db.select({ feed: icalFeeds }).from(icalFeeds)
+      .innerJoin(properties, eq(icalFeeds.propertyId, properties.id))
+      .where(managedProperties(manager));
+    const feedRows = feeds.map(row => row.feed);
     if (feedRows.length === 0) {
       return NextResponse.json({ success: true, synced: 0, message: 'No hay feeds configurados' });
     }
@@ -27,7 +18,7 @@ export async function POST(req: NextRequest) {
     let totalSynced = 0;
 
     for (const feed of feedRows) {
-      const events: any = await ical.fromURL(feed.url);
+      const events = await ical.fromURL(feed.url);
       if (!events || typeof events !== 'object') {
         console.warn(`Feed vacío: ${feed.id}`);
         continue;
@@ -37,27 +28,28 @@ export async function POST(req: NextRequest) {
 
       for (const key in events) {
         const event = events[key];
-        if (event.type !== 'VEVENT') continue;
+        if (!event || event.type !== 'VEVENT') continue;
 
-        const start = (event as any).start;
-        const end = (event as any).end || (event as any).start;
+        const start = event.start;
+        const end = event.end || event.start;
         const feedId = feed.id;
         const propertyId = feed.propertyId;
         const source = feed.source === 'airbnb' ? 'airbnb' : 'google';
 
         if (!start || !end) continue;
 
-        await db.insert(bookings)
-          .values({
-            propertyId: propertyId,
-            icalFeedId: feedId,
-            startDate: start.toISOString().slice(0, 10),
-            endDate: end.toISOString().slice(0, 10),
-            source: source as "airbnb" | "google",
-          })
-          .onConflictDoNothing();
+        // Revalidar dueño y relación del feed al insertar, incluso después del fetch remoto.
+        const result = await db.execute(sql`
+          insert into "Booking" ("id", "propertyId", "icalFeedId", "startDate", "endDate", "source")
+          select ${crypto.randomUUID()}, ${properties.id}, ${icalFeeds.id},
+            ${start.toISOString().slice(0, 10)}::date, ${end.toISOString().slice(0, 10)}::date, ${source}
+          from ${properties} inner join ${icalFeeds} on ${eq(icalFeeds.propertyId, properties.id)}
+          where ${and(eq(properties.id, propertyId), eq(icalFeeds.id, feedId), managedProperties(manager))}
+          returning "id"
+        `);
+        if (!result.rows.length) throw new AccessError(404);
 
-        currentEventIds.push(String((event as any).uid ?? `${feed.id}-${start.toISOString()}`));
+        currentEventIds.push(String(event.uid ?? `${feed.id}-${start.toISOString()}`));
       }
       console.log(`Feed ${feed.id}: sincronizados ${currentEventIds.length} eventos`);
       totalSynced += currentEventIds.length;
@@ -71,6 +63,8 @@ export async function POST(req: NextRequest) {
       message: `Sincronización completada: ${totalSynced} eventos`
     });
   } catch (error) {
+    const denied = accessFailure(error);
+    if (denied) return NextResponse.json({ error: denied.message }, { status: denied.status });
     console.error('Error en sync:', error);
     return NextResponse.json({ error: 'Error en sincronización' }, { status: 500 });
   }

@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db, users, bookings, messages, properties } from "@portal/db";
-import { eq, desc } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { logoutAction } from "./actions";
 
 export default async function MyAccountPage() {
@@ -36,7 +36,7 @@ export default async function MyAccountPage() {
       read: messages.read,
     })
     .from(messages)
-    .leftJoin(properties, eq(messages.propertyId, properties.id))
+    .leftJoin(properties, and(eq(messages.propertyId, properties.id), eq(properties.published, true)))
     .where(eq(messages.userId, userData.id))
     .orderBy(desc(messages.createdAt))
     .limit(10);
@@ -51,7 +51,7 @@ export default async function MyAccountPage() {
       propertyTitle: properties.titleEs,
     })
     .from(bookings)
-    .leftJoin(properties, eq(bookings.propertyId, properties.id))
+    .leftJoin(properties, and(eq(bookings.propertyId, properties.id), eq(properties.published, true)))
     .where(eq(bookings.guestUserId, userData.id))
     .orderBy(desc(bookings.startDate))
     .limit(10);

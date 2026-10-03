@@ -48,11 +48,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     // Metemos el rol en el JWT para tenerlo en cada request
     async jwt({ token, user }) {
-      if (user?.id) {
+      const id = user?.id ?? token.sub;
+      if (id) {
         const [dbUser] = await db
           .select({ role: users.role })
           .from(users)
-          .where(eq(users.id, user.id))
+          .where(eq(users.id, id))
           .limit(1);
         token.role = dbUser?.role ?? "CLIENT";
       }

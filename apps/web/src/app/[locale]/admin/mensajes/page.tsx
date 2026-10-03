@@ -1,10 +1,12 @@
 import { db, messages, properties } from '@portal/db';
 import { desc, eq } from 'drizzle-orm';
 import MensajesList from '@/components/MensajesList';
+import { managedResource, requireAdmin } from '@/lib/property-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminMensajesPage() {
+  const manager = await requireAdmin();
   const rows = await db
     .select({
       id: messages.id,
@@ -24,6 +26,7 @@ export default async function AdminMensajesPage() {
     })
     .from(messages)
     .leftJoin(properties, eq(messages.propertyId, properties.id))
+    .where(managedResource(messages.propertyId, manager))
     .orderBy(desc(messages.createdAt));
 
   return <MensajesList rows={rows} />;

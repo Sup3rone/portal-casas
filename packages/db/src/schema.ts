@@ -1,6 +1,6 @@
-import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey } from "drizzle-orm/pg-core";
 
-export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT"]);
+export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT", "COLLABORATOR"]);
 export const mediaTypeEnum = pgEnum('MediaType', ['PHOTO', 'VIDEO']);
 
 export const users = pgTable("User", {
@@ -35,7 +35,7 @@ export const properties = pgTable('Property', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   baseWeekdayPrice: integer('baseWeekdayPrice'),
   baseWeekendPrice: integer('baseWeekendPrice'),
-});
+}, table => [index('Property_ownerId_idx').on(table.ownerId)]);
 
 export const media = pgTable('Media', {
   id: text('id').primaryKey(),
@@ -66,17 +66,21 @@ export const icalFeeds = pgTable('IcalFeed', {
   propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
   url: text('url').notNull(),
   source: text('source').notNull().default('MANUAL'),
-});
+}, table => [unique('IcalFeed_id_propertyId_unique').on(table.id, table.propertyId)]);
 
 export const bookings = pgTable('Booking', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  propertyId: text('propertyId').notNull(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
   icalFeedId: text('icalFeedId').references(() => icalFeeds.id),
   startDate: date('startDate').notNull(),
   endDate: date('endDate').notNull(),
   source: text('source').notNull().default('manual'),
   guestUserId: text('guestUserId').references(() => users.id),
-});
+}, table => [foreignKey({
+  name: 'Booking_icalFeed_property_fk',
+  columns: [table.icalFeedId, table.propertyId],
+  foreignColumns: [icalFeeds.id, icalFeeds.propertyId],
+})]);
 
 export const seasonRates = pgTable('SeasonRate', {
   id: text('id').primaryKey(),
@@ -98,3 +102,22 @@ export const passwordResetTokens = pgTable('PasswordResetToken', {
   usedAt: timestamp('usedAt', { withTimezone: true }),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Historial sin FK: debe sobrevivir a la eliminación de recursos de negocio.
+export const ownershipMigrations = pgTable('OwnershipMigration', {
+  key: text('key').primaryKey(),
+  defaultOwnerId: text('defaultOwnerId').notNull(),
+  ownerColumnExisted: boolean('ownerColumnExisted').notNull(),
+  ownerWasRequired: boolean('ownerWasRequired').notNull(),
+  appliedAt: timestamp('appliedAt', { withTimezone: true }).notNull().defaultNow(),
+  revertedAt: timestamp('revertedAt', { withTimezone: true }),
+});
+
+export const ownershipMigrationAudit = pgTable('OwnershipMigrationAudit', {
+  migrationKey: text('migrationKey').notNull(),
+  propertyId: text('propertyId').notNull(),
+  previousOwnerId: text('previousOwnerId'),
+  assignedOwnerId: text('assignedOwnerId').notNull(),
+  changed: boolean('changed').notNull(),
+  recordedAt: timestamp('recordedAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [primaryKey({ columns: [table.migrationKey, table.propertyId] })]);

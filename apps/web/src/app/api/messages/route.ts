@@ -1,5 +1,6 @@
 // apps/web/src/app/api/messages/route.ts
-import { db, messages } from '@portal/db';
+import { db, properties } from '@portal/db';
+import { and, eq, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { auth } from '@/lib/auth';
@@ -24,19 +25,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
     }
 
-    const [newMessage] = await db.insert(messages).values({
-      id: randomUUID(),
-      propertyId,
-      name,
-      email,
-      phone,
-      lang,
-      body,
-      startDate,
-      endDate,
-      read: false,
-      userId: session?.user?.id ?? null,   // ← LA NUEVA LÍNEA, ESA ES TODA
-    }).returning();
+    // La consulta pública solo puede dirigirse a una propiedad publicada.
+    const result = await db.execute(sql`
+      insert into "Message" ("id", "propertyId", "name", "email", "phone", "lang", "body", "startDate", "endDate", "userId")
+      select ${randomUUID()}, ${properties.id}, ${name}, ${email}, ${phone}, ${lang}, ${body},
+        ${startDate}::date, ${endDate}::date, ${session?.user?.id ?? null}
+      from ${properties} where ${and(eq(properties.id, propertyId), eq(properties.published, true))}
+      returning *
+    `);
+    const newMessage = result.rows[0];
+    if (!newMessage) return NextResponse.json({ error: 'Propiedad no encontrada' }, { status: 404 });
 
     return NextResponse.json({ success: true, message: newMessage }, { status: 201 });
   } catch (error) {

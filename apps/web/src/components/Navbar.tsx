@@ -11,6 +11,8 @@ export default function Navbar() {
   const t = useTranslations('nav');
   const { data: session, status } = useSession();
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
+  const isManager = isAdmin || (session?.user as { role?: string } | undefined)?.role === 'COLLABORATOR';
+  const panel = useTranslations('panel');
 
   return (
     <nav className="relative z-50 border-b border-gray-200 bg-white">
@@ -34,6 +36,7 @@ export default function Navbar() {
 
             {status === 'loading' ? null : status === 'authenticated' ? (
               <>
+                {isManager && <Link href="/panel" className="text-sm font-medium tracking-wide text-green-700">{panel('title')}</Link>}
                 {isAdmin && (
                   <div className="relative group">
                     <button className="text-sm font-medium tracking-wide text-gray-900 transition-colors hover:text-gray-600">

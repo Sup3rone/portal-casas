@@ -13,6 +13,7 @@ const { getTableConfig } = req('drizzle-orm/pg-core');
 const memory = new DatabaseSync(':memory:');
 let session = null;
 let portal;
+let testLocale = 'es';
 const cache = new Map();
 const revalidated = [];
 const readFeeds = [];
@@ -22,7 +23,7 @@ function load(file) {
   const module = { exports: {} };
   cache.set(file, module);
   const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   function localRequire(name) {
     if (name === 'server-only') return {};
@@ -32,19 +33,37 @@ function load(file) {
     }
     if (name === '@/lib/mailer') return { sendEmail: async () => {} };
     if (name === 'next/cache') return { revalidatePath: (...args) => revalidated.push(args) };
-    if (name === 'next/navigation') return { redirect: url => { throw new Error('redirect: ' + url); } };
+    if (name === 'next/navigation') return {
+      redirect: url => { throw new Error('redirect: ' + url); },
+      notFound: () => { const error = new Error('notFound'); error.status = 404; throw error; },
+    };
+    if (name === '@/i18n/navigation') return {
+      Link: ({ href, children, ...props }) => req('react').createElement('a', { ...props, href: `/${testLocale}${href}` }, children),
+      useRouter: () => ({ push() {}, refresh() {} }),
+    };
+    if (name === 'next-intl/server') return {
+      getLocale: async () => testLocale,
+      getTranslations: async options => {
+        const locale = options?.locale ?? testLocale;
+        const messages = JSON.parse(fs.readFileSync(path.join(root, 'apps/web/messages/' + locale + '.json'), 'utf8'));
+        return req('next-intl').createTranslator({ locale, messages, namespace: typeof options === 'string' ? options : options?.namespace, onError(error) { throw error; } });
+      },
+    };
     if (name === 'node-ical') return { fromURL: async url => {
       readFeeds.push(url);
       return { test: { type: 'VEVENT', start: new Date('2027-02-01'), end: new Date('2027-02-03'), uid: 'test' } };
     } };
-    if (name.startsWith('@/')) return load('apps/web/src/' + name.slice(2) + '.ts');
+    if (name.startsWith('@/') || name.startsWith('.')) {
+      const target = name.startsWith('@/') ? path.join(root, 'apps/web/src', name.slice(2)) : path.resolve(path.dirname(file), name);
+      return load(target + (fs.existsSync(target + '.ts') ? '.ts' : '.tsx'));
+    }
     return req(name);
   }
   new Function('require', 'exports', code)(localRequire, module.exports);
   return module.exports;
 }
 const schema = load('packages/db/src/schema.ts');
-for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds']) {
+for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds', 'media']) {
   const config = getTableConfig(schema[name]);
   memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => {
     const numeric = /integer|boolean|double/.test(column.getSQLType());
@@ -96,7 +115,8 @@ async function main() {
   assert.deepEqual((await (await inventory.GET()).json()).properties.map(p => p.id).sort(), ['hidden', 'pa']);
   assert.equal((await property.PATCH(json({ titleEs: 'Own' }, 'PATCH'), { params: Promise.resolve({ id: 'pa' }) })).status, 200);
   assert.equal((await property.PATCH(json({ titleEs: 'Foreign' }, 'PATCH'), { params: Promise.resolve({ id: 'pb' }) })).status, 404);
-  assert.equal((await property.PATCH(json({ ownerId: 'a' }, 'PATCH'), { params: Promise.resolve({ id: 'pb' }) })).status, 400);
+  assert.equal((await property.PATCH(json({ ownerId: 'a' }, 'PATCH'), { params: Promise.resolve({ id: 'pb' }) })).status, 404);
+  assert.equal((await property.PATCH(json({ ownerId: 'b' }, 'PATCH'), { params: Promise.resolve({ id: 'pa' }) })).status, 400);
   assert.equal(memory.prepare('SELECT "titleEs" FROM "Property" WHERE id = ?').get('pb').titleEs, 'pb');
   assert.equal((await mark.POST(json({ id: 'ma' }))).status, 200);
   assert.equal((await mark.POST(json({ id: 'mb' }))).status, 404);
@@ -132,4 +152,7 @@ async function main() {
   memory.close();
   console.log('OK: acceso por rol/dueño, APIs directas, acciones, revocación y consulta pública. Sin red ni BD real.');
 }
-main().catch(error => { console.error(error); process.exitCode = 1; });
+module.exports = { load, portal, req, memory, setSession: value => { session = value; }, setLocale: value => { testLocale = value; } };
+if (require.main === module) {
+  main().catch(error => { console.error(error); process.exitCode = 1; });
+}

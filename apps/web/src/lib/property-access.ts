@@ -7,7 +7,7 @@ import { auth } from './auth';
 export type PropertyManager = { id: string; role: 'ADMIN' | 'COLLABORATOR' };
 
 export class AccessError extends Error {
-  constructor(public status: 401 | 403 | 404) {
+  constructor(public status: 401 | 403 | 404, public code?: 'SESSION_USER_NOT_FOUND' | 'ROLE_NOT_ALLOWED') {
     super(status === 404 ? 'Recurso no encontrado' : 'No autorizado');
   }
 }
@@ -19,8 +19,9 @@ export async function requirePropertyManager(): Promise<PropertyManager> {
   if (!id) throw new AccessError(401);
   const [user] = await db.select({ id: users.id, role: users.role })
     .from(users).where(eq(users.id, id)).limit(1);
-  if (!user || (user.role !== 'ADMIN' && user.role !== 'COLLABORATOR')) {
-    throw new AccessError(403);
+  if (!user) throw new AccessError(403, 'SESSION_USER_NOT_FOUND');
+  if (user.role !== 'ADMIN' && user.role !== 'COLLABORATOR') {
+    throw new AccessError(403, 'ROLE_NOT_ALLOWED');
   }
   return { id: user.id, role: user.role };
 }

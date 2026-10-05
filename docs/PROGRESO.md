@@ -1,6 +1,6 @@
 # Progreso del Proyecto - Portal-Casas
 
-Última actualización: 02 Oct 2026
+Última actualización: 05 Oct 2026
 
 ---
 
@@ -111,5 +111,23 @@
 | Errores TS/ESLint | 0 nuevos |
 
 ---
+
+### 7. Fase 1 — Rol colaborador y propiedad con dueño
+**Estado:** Completada y validada en Respaldo según confirmación del usuario.
+- Autorización Auth.js/rol vigente y filtros por dueño en el servidor.
+- Colaborador: 200 propia / 404 ajena; admin: 200 en ambas.
+- Se conserva la prueba de login/cookie/sesión sin red en `scripts/test-auth-session.cjs`.
+
+### 8. Fase 2 — Panel del colaborador
+**Fecha:** 05 Oct 2026
+**Estado:** Implementado y validado con pruebas automatizadas sin red; pendiente checklist manual en navegador contra Respaldo.
+- Panel privado es/en/fr: propiedades propias, creación, edición, temporadas, imágenes por URL, disponibilidad y consultas/reservas filtradas.
+- Toda creación asigna dueño desde sesión y nace en borrador; publicación solo por admin. Despublicación disponible; sin borrado físico de propiedades.
+- Reutiliza AvailabilityCalendar/ReservationDatesProvider y SectionSlider, sin modificar sus archivos ni el flujo público.
+- Nuevas APIs verifican rol y dueño antes de tocar datos y dentro del SQL. Recursos ajenos: 404.
+- Sin migraciones, despliegues ni escrituras de prueba en Neon/main.
+- Validación: tests de APIs/permisos y render SSR es/en/fr, regresiones Fase 1/Auth.js, TypeScript y ESLint de los archivos de Fase 2.
+- Checklist pendiente: prueba visual móvil/escritorio, edición real y aprobación/publicación por admin en Respaldo.
+- Decisiones S1–S4, inventario de archivos y mapa de rutas: `docs/FASE2-PANEL.md`.
 
 *Documento mantenido manualmente. Se recomienda actualizar tras cada sprint o hito importante.*

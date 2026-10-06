@@ -234,5 +234,41 @@
     "resetInvalid": "The link is invalid or expired (it lasts 1 hour). Request a new one.",
     "resetTooShort": "The password must be at least 8 characters.",
     "resetTryAgain": "Request a new link"
+  },
+  "adminUsers": {
+    "title": "Users",
+    "email": "Email",
+    "role": "Role",
+    "properties": "Properties",
+    "created": "Registration date",
+    "status": "Access status",
+    "all": "All roles",
+    "search": "Search",
+    "empty": "No matching users.",
+    "withPassword": "Password configured",
+    "withoutPassword": "No password",
+    "pagination": "User pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {number}",
+    "back": "Back to users",
+    "noProperties": "This user has no properties.",
+    "actions": "Administrative actions",
+    "promote": "Promote to collaborator",
+    "demote": "Revert to client",
+    "reset": "Assign temporary password",
+    "confirmRole": "Confirm the role change? Reverting to client removes panel access; property ownership remains unchanged.",
+    "confirmReset": "Confirm the password reset? The current password will stop working. Active sessions will remain open.",
+    "sessionWarning": "Resetting does not close active JWT sessions. The temporary password does not expire or require an automatic change; the user can change it through the existing recovery flow.",
+    "roleProtected": "You cannot change your own role or demote an administrator.",
+    "oneTime": "Temporary password: shown only here. Share it through a secure channel before hiding it or leaving; it cannot be retrieved.",
+    "dismiss": "Saved: hide password",
+    "saved": "Role updated.",
+    "roles": {
+      "ADMIN": "Administrator",
+      "CLIENT": "Client",
+      "COLLABORATOR": "Collaborator",
+      "VIEWER": "Viewer"
+    }
   }
 }

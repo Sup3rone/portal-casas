@@ -234,5 +234,41 @@
     "resetInvalid": "El enlace es inválido o ya expiró (dura 1 hora). Pide uno nuevo.",
     "resetTooShort": "La contraseña debe tener al menos 8 caracteres.",
     "resetTryAgain": "Pedir un nuevo enlace"
+  },
+  "adminUsers": {
+    "title": "Usuarios",
+    "email": "Email",
+    "role": "Rol",
+    "properties": "Propiedades",
+    "created": "Fecha de registro",
+    "status": "Estado de acceso",
+    "all": "Todos los roles",
+    "search": "Buscar",
+    "empty": "No hay usuarios que coincidan.",
+    "withPassword": "Contraseña configurada",
+    "withoutPassword": "Sin contraseña",
+    "pagination": "Paginación de usuarios",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {number}",
+    "back": "Volver a usuarios",
+    "noProperties": "Este usuario no tiene propiedades.",
+    "actions": "Acciones administrativas",
+    "promote": "Promover a colaborador",
+    "demote": "Revertir a cliente",
+    "reset": "Asignar contraseña temporal",
+    "confirmRole": "¿Confirmas el cambio de rol? Al revertir a cliente perderá acceso al panel; sus propiedades conservan el dueño.",
+    "confirmReset": "¿Confirmas el reset de contraseña? La contraseña actual dejará de servir. Las sesiones activas seguirán abiertas.",
+    "sessionWarning": "El reset no cierra sesiones JWT activas. La contraseña temporal no caduca ni exige cambio automático; el usuario puede cambiarla con el flujo de recuperación existente.",
+    "roleProtected": "No puedes cambiar tu propio rol ni degradar a un administrador.",
+    "oneTime": "Contraseña temporal: se muestra solo aquí. Compártela por un canal seguro antes de ocultarla o salir; no podrá recuperarse.",
+    "dismiss": "Ya la guardé: ocultar",
+    "saved": "Rol actualizado.",
+    "roles": {
+      "ADMIN": "Administrador",
+      "CLIENT": "Cliente",
+      "COLLABORATOR": "Colaborador",
+      "VIEWER": "Lector"
+    }
   }
 }

@@ -235,5 +235,41 @@
     "resetInvalid": "Le lien est invalide ou a expiré (valable 1 heure). Demandez-en un nouveau.",
     "resetTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
     "resetTryAgain": "Demander un nouveau lien"
+  },
+  "adminUsers": {
+    "title": "Utilisateurs",
+    "email": "E-mail",
+    "role": "Rôle",
+    "properties": "Propriétés",
+    "created": "Date d’inscription",
+    "status": "État d’accès",
+    "all": "Tous les rôles",
+    "search": "Rechercher",
+    "empty": "Aucun utilisateur correspondant.",
+    "withPassword": "Mot de passe configuré",
+    "withoutPassword": "Sans mot de passe",
+    "pagination": "Pagination des utilisateurs",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {number}",
+    "back": "Retour aux utilisateurs",
+    "noProperties": "Cet utilisateur ne possède aucune propriété.",
+    "actions": "Actions administratives",
+    "promote": "Promouvoir en collaborateur",
+    "demote": "Rétablir le rôle client",
+    "reset": "Attribuer un mot de passe temporaire",
+    "confirmRole": "Confirmer le changement de rôle ? Le retour au rôle client supprime l’accès au panneau ; la propriété des biens reste inchangée.",
+    "confirmReset": "Confirmer la réinitialisation du mot de passe ? Le mot de passe actuel ne fonctionnera plus. Les sessions actives resteront ouvertes.",
+    "sessionWarning": "La réinitialisation ne ferme pas les sessions JWT actives. Le mot de passe temporaire n’expire pas et ne nécessite pas de changement automatique ; l’utilisateur peut le modifier via la récupération existante.",
+    "roleProtected": "Vous ne pouvez pas changer votre propre rôle ni rétrograder un administrateur.",
+    "oneTime": "Mot de passe temporaire : affiché uniquement ici. Partagez-le par un canal sécurisé avant de le masquer ou de quitter ; il ne pourra pas être récupéré.",
+    "dismiss": "Enregistré : masquer",
+    "saved": "Rôle mis à jour.",
+    "roles": {
+      "ADMIN": "Administrateur",
+      "CLIENT": "Client",
+      "COLLABORATOR": "Collaborateur",
+      "VIEWER": "Lecteur"
+    }
   }
 }

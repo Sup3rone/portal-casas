@@ -103,6 +103,18 @@ export const passwordResetTokens = pgTable('PasswordResetToken', {
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Migración propuesta en scripts/sql/admin-user-audit.sql; aplicación manual.
+// Sin FK: preservar el historial aunque se eliminen usuarios. Nunca guardar secretos.
+export const adminUserAudit = pgTable('AdminUserAudit', {
+  id: text('id').primaryKey(),
+  actorId: text('actorId').notNull(),
+  targetUserId: text('targetUserId').notNull(),
+  action: text('action').notNull(),
+  previousRole: text('previousRole'),
+  newRole: text('newRole'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [index('AdminUserAudit_target_created_idx').on(table.targetUserId, table.createdAt)]);
+
 // Historial sin FK: debe sobrevivir a la eliminación de recursos de negocio.
 export const ownershipMigrations = pgTable('OwnershipMigration', {
   key: text('key').primaryKey(),

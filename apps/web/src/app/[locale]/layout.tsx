@@ -20,7 +20,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className="dark" suppressHydrationWarning>
+    <html lang={locale} className="light" suppressHydrationWarning>
           <head>
             <script src="/theme-init.js" async fetchPriority="high" />
           </head>

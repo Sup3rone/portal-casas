@@ -1,13 +1,16 @@
-# Modo oscuro — implementación en Respaldo
+# Modo oscuro — implementación integrada en main
 
 ## Funcionamiento
 
-- Rama Git de trabajo: Respaldo, creada desde el checkout actual porque solo
+- Rama Git actual: main, tras integrar Respaldo sin conflictos. La rama local
+  Respaldo se retira después de verificar la integración. Antes de desplegar,
+  aplicar las migraciones necesarias en main de Neon con autorización expresa.
+- Historial de implementación: Respaldo se creó desde el checkout porque solo
   existían main y feature/i18n. No se hicieron push, despliegues ni operaciones
   sobre Neon. La configuración de BD se conserva. PROGRESO.md ya tenía cambios
   del usuario antes de esta tarea y se conserva esa edición.
 - Tailwind CSS 4: custom-variant dark por clase en globals.css. Las variantes
-  no siguen prefers-color-scheme. El SSR conserva html.dark; el bootstrap aplica light por defecto al inicializar.
+  no siguen prefers-color-scheme. El SSR emite html.light para evitar el flash oscuro sin preferencia; el bootstrap aplica la preferencia guardada o light.
 - ThemeToggle está junto al selector de idioma en Navbar, con icono de sol/luna
   y nombres de acción localizados en es/en/fr. Botón nativo de 44px que funciona
   también con teclado. El header permite wrapping móvil para mantenerlo visible.
@@ -37,7 +40,7 @@ Los paths de la siguiente tabla son relativos a la raíz del repositorio.
 | apps/web/src/lib/theme.ts | Lectura, aplicación, persistencia y suscripción del tema |
 | apps/web/public/theme-init.js | Bootstrap local, claro inicial y preferencia guardada |
 | apps/web/src/components/ThemeToggle.tsx | Botón nuevo, iconos y sincronización al cambiar locale |
-| apps/web/src/app/[locale]/layout.tsx | Clase SSR dark y recurso de inicialización |
+| apps/web/src/app/[locale]/layout.tsx | Clase SSR light y recurso de inicialización |
 | apps/web/src/app/globals.css | Estrategia dark por clase, variables, glass y scrollbar |
 | apps/web/messages/es.json | Acciones del toggle en español |
 | apps/web/messages/en.json | Acciones del toggle en inglés |
@@ -109,7 +112,7 @@ git branch --show-current
 pnpm dev
 ```
 
-Debe indicar Respaldo antes de trabajar. Las pruebas sin red:
+Debe indicar main antes de trabajar. Las pruebas sin red:
 
 ```powershell
 node scripts/test-theme.cjs

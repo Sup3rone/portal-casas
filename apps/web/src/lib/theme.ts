@@ -15,11 +15,11 @@ export function getStoredTheme(): Theme {
     const saved = localStorage.getItem(themeStorageKey);
     if (saved === 'light' || saved === 'dark') return saved;
   } catch {}
-  return 'dark';
+  return 'light';
 }
 
 export function getTheme(): Theme {
-  return document.documentElement.classList.contains('light') ? 'light' : 'dark';
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
 
 export function subscribeTheme(callback: () => void) {
@@ -27,4 +27,4 @@ export function subscribeTheme(callback: () => void) {
   return () => window.removeEventListener(themeChangeEvent, callback);
 }
 
-export const getServerTheme = (): Theme => 'dark';
+export const getServerTheme = (): Theme => 'light';

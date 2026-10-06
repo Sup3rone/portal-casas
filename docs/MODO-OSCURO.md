@@ -7,7 +7,7 @@
   sobre Neon. La configuración de BD se conserva. PROGRESO.md ya tenía cambios
   del usuario antes de esta tarea y se conserva esa edición.
 - Tailwind CSS 4: custom-variant dark por clase en globals.css. Las variantes
-  no siguen prefers-color-scheme. El SSR emite html.dark como valor inicial.
+  no siguen prefers-color-scheme. El SSR conserva html.dark; el bootstrap aplica light por defecto al inicializar.
 - ThemeToggle está junto al selector de idioma en Navbar, con icono de sol/luna
   y nombres de acción localizados en es/en/fr. Botón nativo de 44px que funciona
   también con teclado. El header permite wrapping móvil para mantenerlo visible.
@@ -18,9 +18,9 @@
   useLayoutEffect en ThemeToggle restaura la preferencia cuando el layout de otro
   locale vuelve a aplicar su clase SSR; el tema se sincroniza antes del siguiente
   pintado de React. useSyncExternalStore mantiene el botón alineado con el html.
-- Sin preferencia o con valor inválido: dark. Si el navegador bloquea localStorage,
+- Sin preferencia o con valor inválido: light. Si el navegador bloquea localStorage,
   el toggle sigue funcionando, pero la elección no puede persistir y la siguiente
-  carga vuelve a dark. No se añaden cookies ni preferencias en la BD.
+  carga vuelve a light. No se añaden cookies ni preferencias en la BD.
 - color-scheme adapta controles nativos; fondo/texto usan variables de la paleta
   Tailwind. Se mantiene la gama gris, verde, púrpura y los colores de estados.
 - Las modificaciones de componentes/páginas existentes son de clases de color,
@@ -35,7 +35,7 @@ Los paths de la siguiente tabla son relativos a la raíz del repositorio.
 | Archivo | Cambio |
 | --- | --- |
 | apps/web/src/lib/theme.ts | Lectura, aplicación, persistencia y suscripción del tema |
-| apps/web/public/theme-init.js | Bootstrap local, oscuro inicial y preferencia guardada |
+| apps/web/public/theme-init.js | Bootstrap local, claro inicial y preferencia guardada |
 | apps/web/src/components/ThemeToggle.tsx | Botón nuevo, iconos y sincronización al cambiar locale |
 | apps/web/src/app/[locale]/layout.tsx | Clase SSR dark y recurso de inicialización |
 | apps/web/src/app/globals.css | Estrategia dark por clase, variables, glass y scrollbar |
@@ -92,7 +92,7 @@ Los paths de la siguiente tabla son relativos a la raíz del repositorio.
   por messages sin usar en layout. Comparación de los 37 archivos existentes
   modificados con HEAD: 4 errores/7 warnings antes y después; ninguna incidencia
   nueva. Causas preexistentes detalladas abajo.
-- Navegador local: primera carga observada en oscuro; alternancia de clases y
+- Navegador local: primera carga observada en oscuro en la implementación original (default actualizado a claro); alternancia de clases y
   color-scheme; colores reales de Navbar, Footer, glass e inputs de home/login.
   Claro y oscuro se conservan al recargar; claro se conserva al cambiar de es
   a en y fr. Toggle por Enter funciona. Control visible a 360px. Navegación
@@ -119,11 +119,11 @@ node scripts/test-panel-render.cjs
 node scripts/test-property-access.cjs
 ```
 
-1. Abrir localhost en un perfil sin preferencia de tema: html debe tener dark.
+1. Abrir localhost en un perfil sin preferencia de tema: html debe tener light tras la inicialización.
    Para repetir solo esa primera carga, quitar únicamente portal-casas-theme
    desde Application → Local Storage de DevTools; conservar el resto del storage.
-2. Pulsar sol junto al selector de idioma: html pasa a light, sin dark. Recargar
-   y confirmar light. Pulsar luna: vuelve a dark y persiste tras recargar.
+2. Pulsar luna junto al selector de idioma: html pasa a dark, sin light. Recargar
+   y confirmar dark. Pulsar sol: vuelve a light y persiste tras recargar.
 3. Revisar la clave portal-casas-theme en DevTools y cambiar es/en/fr: conservar
    tema y localizar tooltip/aria-label. Probar el botón con Tab y Enter/Espacio.
 4. A 360px y desktop comprobar el control visible. Revisar Navbar/Footer, búsqueda,

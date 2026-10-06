@@ -1,6 +1,6 @@
-// Bootstrap local: oscuro por defecto; la preferencia guardada tiene prioridad.
+// Bootstrap local: claro por defecto; la preferencia guardada tiene prioridad.
 (() => {
-  let theme = 'dark';
+  let theme = 'light';
   try {
     const saved = localStorage.getItem('portal-casas-theme');
     if (saved === 'light' || saved === 'dark') theme = saved;

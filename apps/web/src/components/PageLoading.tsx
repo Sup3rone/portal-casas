@@ -1,10 +1,6 @@
 export default function PageLoading({ variant }: { variant: 'home' | 'list' | 'detail' }) {
   return (
     <main className="page-loading relative min-h-screen bg-background" aria-busy="true">
-      {/* Indicador indeterminado: no representa un porcentaje de progreso. */}
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-green-100">
-        <div className="h-full w-1/3 rounded-full bg-green-700 motion-safe:animate-pulse" />
-      </div>
       <div aria-hidden="true" className="motion-safe:animate-pulse">
         {variant === 'list' ? (
           <div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-6 py-16">

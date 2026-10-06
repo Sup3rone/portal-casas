@@ -125,6 +125,20 @@
       "mesSiguiente": "Mes siguiente"
     },
     "form": {
+      "validation": {
+        "nameLength": "Escribe un nombre de entre 2 y 100 caracteres.",
+        "emailFormat": "Escribe un correo electrónico válido.",
+        "phoneFormat": "Usa solo dígitos, espacios y un + inicial; entre 7 y 15 dígitos, hasta 25 caracteres.",
+        "startRequired": "Selecciona la fecha de llegada.",
+        "dateInvalid": "Selecciona una fecha válida.",
+        "startPast": "La llegada debe ser hoy o una fecha posterior.",
+        "endRequired": "Selecciona la fecha de salida.",
+        "endOrder": "La salida debe ser posterior a la llegada.",
+        "datesOccupied": "Las fechas seleccionadas incluyen días ocupados.",
+        "guestsRange": "Indica un número entero de huéspedes entre 1 y {maxGuests}.",
+        "messageRequired": "Escribe un mensaje para tu consulta.",
+        "availabilityChanged": "La disponibilidad o capacidad cambió. Actualiza la página y revisa las fechas y huéspedes."
+      },
       "nombre": "Nombre",
       "email": "Email",
       "telefono": "Teléfono (opcional)",

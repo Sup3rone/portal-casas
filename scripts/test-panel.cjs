@@ -66,7 +66,7 @@ async function main() {
   assert.equal((await property.PATCH(request({ published: true }, 'PATCH'), context('pb'))).status, 200);
   assert.equal(memory.prepare('SELECT published FROM "Property" WHERE id = ?').get(id).published, 1);
   as(null);
-  const form = new FormData(); for (const [key, value] of Object.entries({ propertyId: id, name: 'Guest', email: 'guest@test.invalid', startDate: '2027-01-01', endDate: '2027-01-03', body: 'Inquiry' })) form.set(key, value);
+  const form = new FormData(); for (const [key, value] of Object.entries({ propertyId: id, name: 'Guest', email: 'guest@test.invalid', startDate: '2027-01-01', endDate: '2027-01-03', guests: '1', body: 'Inquiry' })) form.set(key, value);
   assert.equal((await inquiry.POST(new Request('http://localhost/api/messages', { method: 'POST', body: form }))).status, 201);
   as('a'); assert.equal((await property.PATCH(request({ published: false }, 'PATCH'), context(id))).status, 200);
   assert.equal(memory.prepare('SELECT published FROM "Property" WHERE id = ?').get(id).published, 0);

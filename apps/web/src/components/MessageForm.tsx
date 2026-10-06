@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { useReservationDates } from './ReservationDatesProvider';
-import { fechaDisponible } from '@/lib/reservationDates';
+import { inquiryFields, inquiryFromFormData, inquiryToday, validateInquiry, type InquiryErrors, type InquiryField } from '@/lib/inquiry-validation';
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
   const t = useTranslations('details.form');
@@ -81,11 +81,13 @@ export default function MessageForm({
   propertyId,
   locale,
   pricing,
+  maxGuests,
   compact = false,
 }: {
   propertyId: string;
   locale: string;
   pricing: PricingInfo;
+  maxGuests: number;
   compact?: boolean;
 }) {
   const t = useTranslations('details.form');
@@ -93,6 +95,19 @@ export default function MessageForm({
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { dates: { startDate, endDate }, setDates } = useReservationDates();
   const [guests, setGuests] = useState<number>(1);
+  const [fields, setFields] = useState({ name: '', email: '', phone: '', body: '' });
+  const [serverValidation, setServerValidation] = useState<{ signature: string; errors: InquiryErrors; maxGuests?: number } | null>(null);
+  const hoy = inquiryToday();
+  const input = { ...fields, guests, startDate, endDate };
+  const signature = JSON.stringify(input);
+  const localErrors = validateInquiry(input, { today: hoy, maxGuests, bookings: pricing.booked.map(booking => ({ startDate: booking.start, endDate: booking.end })) });
+  const serverErrors = serverValidation?.signature === signature ? serverValidation : null;
+  const errors: InquiryErrors = { ...localErrors, ...serverErrors?.errors };
+  function fieldError(field: InquiryField) {
+    return errors[field] ? <p id={`${field}-error`} className="text-red-600 text-xs tracking-wide" aria-live="polite">
+      {t(`validation.${errors[field]}`, { maxGuests: serverErrors?.maxGuests ?? maxGuests })}
+    </p> : null;
+  }
 
   const cotizacion = useMemo(
     () => startDate && endDate ? calcularCotizacion(startDate, endDate, pricing) : null,
@@ -105,9 +120,22 @@ export default function MessageForm({
     : '';
 
   async function handleSubmit(formData: FormData) {
+    const submitted = inquiryFromFormData(formData);
+    const checked = validateInquiry(submitted, { today: inquiryToday(), maxGuests, bookings: pricing.booked.map(booking => ({ startDate: booking.start, endDate: booking.end })) });
+    if (Object.keys(checked).length) return;
     try {
       const res = await fetch('/api/messages', { method: 'POST', body: formData });
+      if (res.status === 400) {
+        const response = await res.json();
+        const fieldErrors: InquiryErrors = {};
+        for (const field of inquiryFields) if (response.fields?.[field]) fieldErrors[field] = response.fields[field];
+        setServerValidation({ signature, errors: fieldErrors, maxGuests: response.maxGuests });
+        if (!Object.keys(fieldErrors).length) setStatus('error');
+        return;
+      }
       if (!res.ok) throw new Error(t('error'));
+      setFields({ name: '', email: '', phone: '', body: '' });
+      setServerValidation(null);
       setStatus('success');
       setTimeout(() => setStatus('idle'), 3000);
     } catch (err) {
@@ -124,14 +152,9 @@ export default function MessageForm({
     );
   }
 
-  const fechasInvalidas = !!startDate && !!endDate && endDate <= startDate;
-  const hoy = iso(new Date());
-  const bookings = pricing.booked.map(b => ({ startDate: b.start, endDate: b.end }));
-  const fechasNoDisponibles = (!!startDate && !fechaDisponible(startDate, bookings, hoy)) ||
-    (!!endDate && !fechaDisponible(endDate, bookings, hoy)) || !!cotizacion?.choque;
-
   return (
     <form
+          noValidate
           lang={formatoLocale}
           action={handleSubmit}
           className={compact ? formClasses + ' space-y-3' : 'space-y-6'}
@@ -149,8 +172,15 @@ export default function MessageForm({
             type="text"
             id="name"
             name="name"
+            minLength={2}
+            maxLength={100}
+            value={fields.name}
+            onChange={event => setFields(current => ({ ...current, name: event.target.value }))}
+            aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? 'name-error' : undefined}
             className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
           />
+          {fieldError('name')}
         </div>
         <div>
           <label htmlFor="email" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
@@ -161,8 +191,13 @@ export default function MessageForm({
             type="email"
             id="email"
             name="email"
+            value={fields.email}
+            onChange={event => setFields(current => ({ ...current, email: event.target.value }))}
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? 'email-error' : undefined}
             className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
           />
+          {fieldError('email')}
         </div>
         <div>
           <label htmlFor="phone" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
@@ -172,8 +207,14 @@ export default function MessageForm({
             type="tel"
             id="phone"
             name="phone"
+            value={fields.phone}
+            maxLength={25}
+            onChange={event => setFields(current => ({ ...current, phone: event.target.value }))}
+            aria-invalid={!!errors.phone}
+            aria-describedby={errors.phone ? 'phone-error' : undefined}
             className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
           />
+          {fieldError('phone')}
         </div>
       </div>
 
@@ -188,12 +229,15 @@ export default function MessageForm({
             type="date"
             id="startDate"
             name="startDate"
+            aria-invalid={!!errors.startDate}
+            aria-describedby={errors.startDate ? 'startDate-error' : undefined}
             lang={formatoLocale}
             value={startDate}
             min={hoy}
             onChange={e => setDates(actual => ({ ...actual, startDate: e.target.value }))}
             className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
           />
+          {fieldError('startDate')}
         </div>
         <div>
           <label htmlFor="endDate" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
@@ -204,12 +248,15 @@ export default function MessageForm({
             type="date"
             id="endDate"
             name="endDate"
+            aria-invalid={!!errors.endDate}
+            aria-describedby={errors.endDate ? 'endDate-error' : undefined}
             lang={formatoLocale}
             value={endDate}
             min={startDate || hoy}
             onChange={e => setDates(actual => ({ ...actual, endDate: e.target.value }))}
             className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
           />
+          {fieldError('endDate')}
         </div>
         <div>
           <label htmlFor="guests" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
@@ -221,11 +268,15 @@ export default function MessageForm({
             id="guests"
             name="guests"
             min="1"
-            max={8}
+            max={maxGuests}
+            step={1}
+            aria-invalid={!!errors.guests}
+            aria-describedby={errors.guests ? 'guests-error' : undefined}
             value={guests}
             onChange={e => setGuests(Number(e.target.value))}
             className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
           />
+          {fieldError('guests')}
         </div>
         <div>
           <label className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
@@ -243,18 +294,6 @@ export default function MessageForm({
         </div>
       </div>
 
-      {fechasNoDisponibles && (
-        <p className="text-red-600 text-xs tracking-wide">
-          {t('fechasOcupadas')}
-        </p>
-      )}
-
-      {fechasInvalidas && (
-        <p className="text-red-600 text-xs tracking-wide">
-          {t('fechasInvalidas')}
-        </p>
-      )}
-
       {/* ===== MENSAJE ===== */}
       <div>
         <label htmlFor="body" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
@@ -265,15 +304,20 @@ export default function MessageForm({
           id="body"
           name="body"
           rows={3}
+          value={fields.body}
+          onChange={event => setFields(current => ({ ...current, body: event.target.value }))}
+          aria-invalid={!!errors.body}
+          aria-describedby={errors.body ? 'body-error' : undefined}
           className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent resize-none"
         ></textarea>
+        {fieldError('body')}
       </div>
 
       {status === 'error' && (
         <p className="text-red-600 text-xs tracking-wide">{t('error')}</p>
       )}
 
-      <SubmitButton disabled={fechasInvalidas || fechasNoDisponibles} />
+      <SubmitButton disabled={Object.keys(errors).length > 0} />
     </form>
   );
 }

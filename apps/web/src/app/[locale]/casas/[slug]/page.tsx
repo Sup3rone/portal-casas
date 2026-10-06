@@ -225,7 +225,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
             {/* Columna derecha: Formulario */}
             <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20">
-              <MessageForm propertyId={property.id} locale={locale} pricing={pricing} compact />
+              <MessageForm propertyId={property.id} locale={locale} pricing={pricing} maxGuests={property.maxGuests} compact />
             </div>
           </div>
           </ReservationDatesProvider>

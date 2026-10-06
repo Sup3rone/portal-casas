@@ -125,6 +125,20 @@
       "mesSiguiente": "Mois suivant"
     },
     "form": {
+      "validation": {
+        "nameLength": "Saisissez un nom de 2 à 100 caractères.",
+        "emailFormat": "Saisissez une adresse e-mail valide.",
+        "phoneFormat": "Utilisez uniquement des chiffres, des espaces et un + initial facultatif ; 7 à 15 chiffres, 25 caractères maximum.",
+        "startRequired": "Sélectionnez une date d’arrivée.",
+        "dateInvalid": "Sélectionnez une date valide.",
+        "startPast": "L’arrivée doit être aujourd’hui ou à une date ultérieure.",
+        "endRequired": "Sélectionnez une date de départ.",
+        "endOrder": "Le départ doit être postérieur à l’arrivée.",
+        "datesOccupied": "Les dates sélectionnées incluent des jours indisponibles.",
+        "guestsRange": "Indiquez un nombre entier de voyageurs entre 1 et {maxGuests}.",
+        "messageRequired": "Saisissez un message pour votre demande.",
+        "availabilityChanged": "La disponibilité ou la capacité a changé. Actualisez la page et vérifiez les dates et le nombre de voyageurs."
+      },
       "nombre": "Nom",
       "email": "E-mail",
       "telefono": "Téléphone (facultatif)",

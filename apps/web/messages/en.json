@@ -125,6 +125,20 @@
       "mesSiguiente": "Next month"
     },
     "form": {
+      "validation": {
+        "nameLength": "Enter a name between 2 and 100 characters.",
+        "emailFormat": "Enter a valid email address.",
+        "phoneFormat": "Use only digits, spaces and an optional leading +; 7–15 digits, up to 25 characters.",
+        "startRequired": "Select a check-in date.",
+        "dateInvalid": "Select a valid date.",
+        "startPast": "Check-in must be today or later.",
+        "endRequired": "Select a check-out date.",
+        "endOrder": "Check-out must be after check-in.",
+        "datesOccupied": "The selected dates include unavailable days.",
+        "guestsRange": "Enter a whole number of guests between 1 and {maxGuests}.",
+        "messageRequired": "Enter a message for your inquiry.",
+        "availabilityChanged": "Availability or capacity changed. Refresh the page and check dates and guests."
+      },
       "nombre": "Name",
       "email": "Email",
       "telefono": "Phone (optional)",

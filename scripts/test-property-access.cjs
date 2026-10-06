@@ -17,6 +17,7 @@ let testLocale = 'es';
 const cache = new Map();
 const revalidated = [];
 const readFeeds = [];
+const queryLog = [];
 function load(file) {
   file = path.resolve(root, file);
   if (cache.has(file)) return cache.get(file).exports;
@@ -71,6 +72,7 @@ for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates'
   }).join(', ')})`);
 }
 const client = { query: async (query, values, options) => {
+  queryLog.push(query);
   const bindings = [];
   const translated = query.replace(/::(?:text|date)/g, '').replace(/\$(\d+)/g, (_, n) => {
     const value = values[Number(n) - 1];
@@ -85,7 +87,7 @@ portal = { ...schema, db: drizzle(client, { schema }) };
 const insert = (table, row) => memory.prepare(`INSERT INTO "${table}" (${Object.keys(row).map(k => `"${k}"`).join(',')}) VALUES (${Object.keys(row).map(() => '?').join(',')})`).run(...Object.values(row));
 for (const [id, role] of [['admin', 'ADMIN'], ['a', 'COLLABORATOR'], ['b', 'COLLABORATOR'], ['client', 'CLIENT'], ['viewer', 'VIEWER']]) insert('User', { id, role, email: id + '@test.invalid', name: id });
 for (const [id, ownerId, published] of [['pa', 'a', 1], ['pb', 'b', 1], ['hidden', 'a', 0]]) {
-  insert('Property', { id, ownerId, published, slug: id, titleEs: id, titleEn: id, titleFr: id });
+  insert('Property', { id, ownerId, published, slug: id, titleEs: id, titleEn: id, titleFr: id, maxGuests: 8 });
 }
 for (const [id, propertyId, userId] of [['ma', 'pa', 'client'], ['mb', 'pb', 'viewer']]) insert('Message', { id, propertyId, userId, read: 0 });
 for (const [id, propertyId] of [['ra', 'pa'], ['rb', 'pb']]) insert('SeasonRate', { id, propertyId });
@@ -145,14 +147,14 @@ async function main() {
   assert.equal((await remove.POST(json({ id: 'mb' }))).status, 200);
   as(null);
   for (const [id, status] of [['pa', 201], ['hidden', 404], ['missing', 404]]) {
-    const form = new FormData(); for (const [key, value] of Object.entries({ propertyId: id, name: 'Guest', email: 'guest@test.invalid', startDate: '2027-01-01', endDate: '2027-01-03', body: 'Test' })) form.set(key, value);
+    const form = new FormData(); for (const [key, value] of Object.entries({ propertyId: id, name: 'Guest', email: 'guest@test.invalid', startDate: '2027-05-01', endDate: '2027-05-03', guests: '1', body: 'Test' })) form.set(key, value);
     assert.equal((await inquiry.POST(new Request('http://localhost/test', { method: 'POST', body: form }))).status, status);
   }
   assert.ok(revalidated.length);
   memory.close();
   console.log('OK: acceso por rol/dueño, APIs directas, acciones, revocación y consulta pública. Sin red ni BD real.');
 }
-module.exports = { load, portal, req, memory, setSession: value => { session = value; }, setLocale: value => { testLocale = value; } };
+module.exports = { load, portal, req, memory, queryLog, setSession: value => { session = value; }, setLocale: value => { testLocale = value; } };
 if (require.main === module) {
   main().catch(error => { console.error(error); process.exitCode = 1; });
 }

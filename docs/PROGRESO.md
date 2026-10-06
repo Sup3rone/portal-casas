@@ -130,4 +130,25 @@
 - Checklist pendiente: prueba visual móvil/escritorio, edición real y aprobación/publicación por admin en Respaldo.
 - Decisiones S1–S4, inventario de archivos y mapa de rutas: `docs/FASE2-PANEL.md`.
 
+### 9. Lote de limpieza — correcciones menores acumuladas
+**Fecha:** 05 Oct 2026
+**Estado:** Los cuatro pendientes resueltos en código; comprobación del idioma en BD Respaldo pendiente de ejecución manual.
+- [x] Footer es/en/fr localizado y error ESLint del enlace corregido; navegación comprobada en navegador en en/fr.
+- [x] Galería: dots limitados al ancho disponible y con wrapping. Comprobados 55 puntos: tres filas a 360px, una a 1440px, sin overflow y con selección del último punto funcionando.
+- [x] CategorySection: investigación previa confirmó regresión (map eliminado en 36db0df1). Listado restaurado con estilos anteriores, sin borrar props/datos ni alterar su ocultación sin fotos.
+- [x] Consultas: el formulario envía lang desde el locale activo; API y esquema existentes se conservan. Persistencia es/en/fr verificada en memoria.
+- Validación: TypeScript, ESLint de los componentes (0 errores; advertencia previa de img en slider), tests de consultas y render del panel es/en/fr.
+- Sin migraciones, conexión directa a Neon, borrados ni cambios de validación/calendario/panel.
+- Inventario, diagnóstico y pruebas manuales: `docs/LIMPIEZA-MENOR.md`.
+
+### 10. Detalle — mosaico/lightbox y compartir desde el mapa
+**Fecha:** 05 Oct 2026
+**Estado:** Implementado; pruebas automatizadas y de navegador realizadas. Envío nativo a una app móvil y reproducción de videos pendientes de comprobación manual.
+- PropertyGallery sustituye el hero de detalle; SectionSlider se conserva en categorías, CategoryGrid y panel.
+- Mosaico de 2/3/4 columnas con 8 miniaturas y acceso a todos los medios mediante lightbox; dialog, teclado, foco, cierre, scroll y animación accesibles.
+- Botón del mapa comparte título y URL con locale; fallback de copia y feedback es/en/fr. Cancelación nativa probada sin enviar datos a otra app.
+- Es/en/fr comprobados a 360, 375, 768 y 1440px sin scroll horizontal; imágenes verticales y horizontales mantienen proporción.
+- TypeScript, ESLint (solo warnings previos de datos sin uso en la página), test-gallery-share y regresiones de consultas/panel pasan.
+- Sin librerías, backend, migraciones ni cambios en calendario/formulario/validación. Checklist y decisión en `docs/GALERIA-COMPARTIR.md`.
+
 *Documento mantenido manualmente. Se recomienda actualizar tras cada sprint o hito importante.*

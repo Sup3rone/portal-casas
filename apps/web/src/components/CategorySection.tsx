@@ -23,7 +23,12 @@ export default function CategorySection({
           {label}
         </h2>
         <ul className="space-y-4">
-          {/* ...igual que antes... */}
+          {items.map((item, i) => (
+            <li key={i} className="flex items-center gap-4 border-b border-gray-100 pb-4 last:border-0">
+              <span className="text-xl">{item.icon}</span>
+              <span className="text-sm font-light tracking-wide text-gray-600">{item.label}</span>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

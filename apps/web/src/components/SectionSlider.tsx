@@ -74,15 +74,15 @@ export default function SectionSlider({
           <div
             className={
               esVideo
-                ? 'absolute right-4 top-4 z-20 flex gap-2'
-                : 'absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2'
+                ? 'absolute left-4 right-4 top-4 z-20 flex flex-wrap justify-end gap-2'
+                : 'absolute bottom-4 left-4 right-4 z-20 flex flex-wrap justify-center gap-2'
             }
           >
             {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setIdx(i)}
-                className={`h-2 w-2 cursor-pointer rounded-full transition-colors ${
+                className={`h-2 w-2 shrink-0 cursor-pointer rounded-full transition-colors ${
                   i === idx ? 'bg-white' : 'bg-white/50'
                 }`}
                 aria-label={t('irFoto', { number: i + 1 })}

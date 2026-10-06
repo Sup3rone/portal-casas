@@ -2,7 +2,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { load, req, memory, queryLog } = require('./test-property-access.cjs');
+const { load, req, memory, queryLog, setLocale } = require('./test-property-access.cjs');
 const { validateInquiry, inquiryToday } = load('apps/web/src/lib/inquiry-validation.ts');
 const { POST } = load('apps/web/src/app/api/messages/route.ts');
 const today = inquiryToday();
@@ -45,20 +45,39 @@ async function main() {
   memory.prepare('INSERT INTO "Booking" (id, propertyId, startDate, endDate, source) VALUES (?, ?, ?, ?, ?)').run('occupied', 'pa', day(2), day(5), 'manual');
   const conflict = await send(valid); assert.equal(conflict.status, 400); assert.equal((await conflict.json()).fields.endDate, 'datesOccupied'); assert.equal(count(), before);
   const accepted = await send({ ...valid, startDate: day(5), endDate: day(6), guests: 8 }); assert.equal(accepted.status, 201); assert.equal(count(), before + 1);
+  assert.equal((await accepted.json()).message.lang, 'es');
+  for (const lang of ['en', 'fr']) {
+    const response = await send({ ...valid, startDate: day(5), endDate: day(6), lang });
+    assert.equal(response.status, 201);
+    const { message } = await response.json();
+    assert.equal(message.lang, lang);
+    assert.equal(memory.prepare('SELECT lang FROM "Message" WHERE id = ?').get(message.id).lang, lang);
+  }
   assert.equal((await send({ ...valid, propertyId: 'hidden', startDate: day(5), endDate: day(6) })).status, 404);
   assert.equal((await POST(new Request('http://localhost/api/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }))).status, 400);
   const React = req('react'), { renderToStaticMarkup } = req('react-dom/server'), { NextIntlClientProvider } = req('next-intl');
   const Form = load('apps/web/src/components/MessageForm.tsx').default, Provider = load('apps/web/src/components/ReservationDatesProvider.tsx').default;
+  const Footer = load('apps/web/src/components/Footer.tsx').default;
+  const CategorySection = load('apps/web/src/components/CategorySection.tsx').default;
   for (const locale of ['es', 'en', 'fr']) {
+    setLocale(locale);
     const messages = JSON.parse(fs.readFileSync(path.join(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
     const html = renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } },
       React.createElement(Provider, null, React.createElement(Form, { propertyId: 'pa', locale, maxGuests: 4, pricing: { base: { weekday: 100, weekend: 200 }, seasons: [], booked: [] } }))));
     for (const key of ['nameLength', 'emailFormat', 'startRequired', 'endRequired', 'messageRequired']) assert.ok(html.includes(messages.details.form.validation[key]));
     for (const field of ['name', 'email', 'startDate', 'endDate', 'body']) assert.ok(html.includes(`id="${field}-error"`));
     assert.ok(/type="submit"[^>]*disabled/.test(html)); assert.ok(html.includes('max="4"'));
+    assert.ok(html.includes(`name="lang" value="${locale}"`));
+    const wrap = child => React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } }, child);
+    assert.ok(renderToStaticMarkup(wrap(React.createElement(Footer))).includes(`href="/${locale}/casas"`));
+    const items = [{ icon: '🛏️', label: messages.details.amenities.ropaCama }, { icon: '🛁', label: messages.details.amenities.banos }];
+    const category = renderToStaticMarkup(wrap(React.createElement(CategorySection, { label: messages.details.habitaciones, items, slides: [{ url: '/test.jpg', type: 'PHOTO' }] })));
+    for (const item of items) assert.ok(category.includes(item.label));
+    assert.equal((category.match(/<li\b/g) ?? []).length, items.length);
+    assert.equal(renderToStaticMarkup(wrap(React.createElement(CategorySection, { label: 'Empty', items, slides: [] }))), '');
     console.log(locale + ': errores inline, accesibilidad, capacidad y botón deshabilitado OK');
   }
   memory.close();
-  console.log('OK: reglas, límites, fechas/ocupación, API 400 sin escritura y consulta válida 201. Sin red.');
+  console.log('OK: reglas, API 400/201, idioma persistido es/en/fr, footer localizado y listado de categorías. Sin red.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

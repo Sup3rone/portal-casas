@@ -85,8 +85,6 @@ Se reutilizan details.disponibilidad, details.guests, details.bedrooms, details.
 
 ## Fuera de alcance
 
-- Footer conserva su enlace fijo /es/casas: cambiarlo alteraría navegación, fuera de esta tarea de textos.
-- CategorySection recibe items pero no los renderiza; no se restaura el listado ni se cambia su estructura.
-- El formulario no envía lang; el API usa es por defecto para la consulta guardada. No se cambia el payload ni el backend.
+- Resueltos posteriormente en el lote de limpieza (05 Oct 2026): enlace localizado del footer, listado de items de CategorySection y envío del locale en lang del formulario. Ver `docs/LIMPIEZA-MENOR.md`.
 - Login/registro, listado y pantallas de administración conservan otros textos fijos; no se revisan ni corrigen aquí.
 

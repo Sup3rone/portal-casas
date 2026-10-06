@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 export default function Footer() {
   const t = useTranslations('footer');
@@ -17,7 +18,7 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-900 mb-4">{t('navegacion')}</h4>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li><a href="/es/casas" className="hover:text-purple-600">{nav('casas')}</a></li>
+              <li><Link href="/casas" className="hover:text-purple-600">{nav('casas')}</Link></li>
             </ul>
           </div>
           <div>

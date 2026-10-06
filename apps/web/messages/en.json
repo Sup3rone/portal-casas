@@ -159,7 +159,19 @@
       "foto": "Photo {number}",
       "anterior": "Previous",
       "siguiente": "Next",
-      "irFoto": "Go to photo {number}"
+      "irFoto": "Go to photo {number}",
+      "abrirFoto": "Open photo {number}",
+      "abrirVideo": "Open video {number}",
+      "verTodas": "View all {count} property photos and videos",
+      "lightbox": "Property gallery",
+      "cerrar": "Close gallery",
+      "posicion": "Photo or video {number} of {count}"
+    },
+    "share": {
+      "action": "Share this property",
+      "copied": "Link copied",
+      "shared": "Link shared",
+      "error": "Could not share the link. Try again."
     },
     "mapTitle": "Location — {address}",
     "description": "Description",

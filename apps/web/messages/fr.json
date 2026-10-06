@@ -159,7 +159,19 @@
       "foto": "Photo {number}",
       "anterior": "Précédent",
       "siguiente": "Suivant",
-      "irFoto": "Aller à la photo {number}"
+      "irFoto": "Aller à la photo {number}",
+      "abrirFoto": "Ouvrir la photo {number}",
+      "abrirVideo": "Ouvrir la vidéo {number}",
+      "verTodas": "Voir les {count} photos et vidéos du logement",
+      "lightbox": "Galerie du logement",
+      "cerrar": "Fermer la galerie",
+      "posicion": "Photo ou vidéo {number} sur {count}"
+    },
+    "share": {
+      "action": "Partager ce logement",
+      "copied": "Lien copié",
+      "shared": "Lien partagé",
+      "error": "Impossible de partager le lien. Réessayez."
     },
     "mapTitle": "Emplacement — {address}",
     "description": "Description",

@@ -1,16 +1,19 @@
 import { getLocale, getTranslations } from 'next-intl/server';
+import PropertyShareButton from './PropertyShareButton';
 
 type Props = {
   lat: number;
   lng: number;
   address: string;
+  propertyTitle: string;
 };
 
-export default async function LocationMap({ lat, lng, address }: Props) {
+export default async function LocationMap({ lat, lng, address, propertyTitle }: Props) {
   const locale = await getLocale();
   const t = await getTranslations('details');
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+    <div className="relative overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+      <PropertyShareButton title={propertyTitle} />
       <iframe
         title={t('mapTitle', { address })}
         src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&hl=${locale}&output=embed`}

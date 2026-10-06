@@ -160,6 +160,7 @@ export default function MessageForm({
           className={compact ? formClasses + ' space-y-3' : 'space-y-6'}
         >
       <input type="hidden" name="propertyId" value={propertyId} />
+      <input type="hidden" name="lang" value={locale} />
 
       {/* ===== DATOS PERSONALES ===== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

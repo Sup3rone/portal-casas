@@ -32,6 +32,58 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Detalle de casa: ajustes táctiles antes del layout de dos paneles (lg). */
+@media (width < 64rem) {
+  #reservar .glass-panel {
+    min-width: 0;
+  }
+
+  #reservar input:not([type="hidden"]),
+  #reservar textarea,
+  #reservar button:not([aria-pressed]) {
+    min-height: 44px;
+  }
+
+  #reservar button:not([aria-pressed]):not([type="submit"]) {
+    min-width: 44px;
+  }
+
+  #reservar button[aria-pressed] {
+    min-height: 40px;
+  }
+
+  #reservar .mt-4.flex {
+    flex-wrap: wrap;
+  }
+
+  #reservar form p {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Móvil (md): recuperar ancho para las siete columnas sin ocultar overflow. */
+@media (width < 48rem) {
+  body:has(#reservar) nav > div > div {
+    @apply flex-wrap gap-4;
+  }
+
+  body:has(#reservar) nav > div > div > div {
+    @apply w-full flex-wrap gap-4;
+  }
+
+  #reservar {
+    @apply px-3;
+  }
+
+  #reservar .glass-panel:first-child {
+    @apply p-2;
+  }
+
+  #reservar .glass-panel:last-child {
+    @apply p-3;
+  }
+}
+
 /* Scrollbar discreta y moderna */
 ::-webkit-scrollbar {
   width: 10px;
@@ -59,8 +111,13 @@ body {
   animation: fade 200ms ease-out;
 }
 
+.property-lightbox[open] {
+  animation: fade 200ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .page-loading {
+  .page-loading,
+  .property-lightbox[open] {
     animation: none;
   }
 }

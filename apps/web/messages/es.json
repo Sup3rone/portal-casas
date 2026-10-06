@@ -159,7 +159,19 @@
       "foto": "Foto {number}",
       "anterior": "Anterior",
       "siguiente": "Siguiente",
-      "irFoto": "Ir a foto {number}"
+      "irFoto": "Ir a foto {number}",
+      "abrirFoto": "Abrir foto {number}",
+      "abrirVideo": "Abrir video {number}",
+      "verTodas": "Ver las {count} fotos y videos de la propiedad",
+      "lightbox": "Galería de la propiedad",
+      "cerrar": "Cerrar galería",
+      "posicion": "Foto o video {number} de {count}"
+    },
+    "share": {
+      "action": "Compartir esta propiedad",
+      "copied": "Enlace copiado",
+      "shared": "Enlace compartido",
+      "error": "No se pudo compartir el enlace. Intenta de nuevo."
     },
     "mapTitle": "Ubicación — {address}",
     "description": "Descripción",

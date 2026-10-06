@@ -6,7 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import ReservationDatesProvider from '@/components/ReservationDatesProvider';
-import SectionSlider from '@/components/SectionSlider';
+import PropertyGallery from '@/components/PropertyGallery';
 import CategorySection from '@/components/CategorySection';
 import LocationMap from '@/components/LocationMap';
 
@@ -111,18 +111,17 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* ===== HERO: imagen de fondo a pantalla completa ===== */}
-      <section className="relative h-screen overflow-hidden">
-        {principal.length > 0 && <SectionSlider slides={principal} fullscreen />}
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="absolute inset-x-0 top-24 z-10 px-6 text-center">
-          <h1 className="text-3xl font-light tracking-[0.3em] text-white md:text-5xl">
+      {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
+      <section className="mx-auto max-w-7xl px-3 py-8 md:px-6">
+        <div className="mb-6 rounded-2xl bg-black/30 p-6 text-center">
+          <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
             {title.toUpperCase()}
           </h1>
           <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80">
             {property.city.toUpperCase()} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
           </p>
         </div>
+        <PropertyGallery slides={principal} />
       </section>
 
       {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
@@ -152,7 +151,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
               {/* Mapa adentro del cuadro, debajo de las letras */}
               <div className="overflow-hidden rounded-lg">
                 {property.lat != null && property.lng != null && (
-                  <LocationMap lat={property.lat} lng={property.lng} address={property.address} />
+                  <LocationMap lat={property.lat} lng={property.lng} address={property.address} propertyTitle={title} />
                 )}
               </div>
             </div>

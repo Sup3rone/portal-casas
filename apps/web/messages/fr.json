@@ -93,7 +93,9 @@
     "mensajes": "Messages",
     "tarifas": "Tarifs",
     "calendario": "Calendrier",
-    "forgotLink": "Mot de passe oublié ?"
+    "forgotLink": "Mot de passe oublié ?",
+    "panelAdmin": "Panneau admin",
+    "panelCollaborator": "Panneau du collaborateur"
   },
   "details": {
     "destino": "LA DESTINATION",

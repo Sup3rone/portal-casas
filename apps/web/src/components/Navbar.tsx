@@ -13,7 +13,6 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
   const isManager = isAdmin || (session?.user as { role?: string } | undefined)?.role === 'COLLABORATOR';
-  const panel = useTranslations('panel');
 
   return (
     <nav className="relative z-50 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
@@ -38,36 +37,7 @@ export default function Navbar() {
 
             {status === 'loading' ? null : status === 'authenticated' ? (
               <>
-                {isManager && <Link href="/panel" className="text-sm font-medium tracking-wide text-green-700 dark:text-green-400">{panel('title')}</Link>}
-                {isAdmin && (
-                  <div className="relative group">
-                    <button className="text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:text-gray-600 dark:hover:text-gray-300">
-                      {t('admin').toUpperCase()} ▾
-                    </button>
-                    <div className="invisible absolute right-0 top-full z-50 w-48 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
-                      <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-900 shadow-lg ring-1 ring-gray-200 dark:ring-gray-700">
-                        <Link
-                          href="/admin/mensajes"
-                          className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:bg-gray-50 dark:hover:bg-gray-950"
-                        >
-                          {t('mensajes').toUpperCase()}
-                        </Link>
-                        <Link
-                          href="/admin/tarifas"
-                          className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:bg-gray-50 dark:hover:bg-gray-950"
-                        >
-                          {t('tarifas').toUpperCase()}
-                        </Link>
-                        <Link
-                          href="/admin/calendario"
-                          className="block px-4 py-3 text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:bg-gray-50 dark:hover:bg-gray-950"
-                        >
-                          {t('calendario').toUpperCase()}
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {isManager && <Link href="/panel" className="text-sm font-medium tracking-wide text-green-700 dark:text-green-400">{t(isAdmin ? 'panelAdmin' : 'panelCollaborator')}</Link>}
 
                 <Link
                   href="/mi-cuenta"

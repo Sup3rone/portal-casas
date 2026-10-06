@@ -93,7 +93,9 @@
     "mensajes": "Messages",
     "tarifas": "Rates",
     "calendario": "Calendar",
-    "forgotLink": "Forgot your password?"
+    "forgotLink": "Forgot your password?",
+    "panelAdmin": "Admin panel",
+    "panelCollaborator": "Collaborator panel"
   },
   "details": {
     "destino": "THE DESTINATION",

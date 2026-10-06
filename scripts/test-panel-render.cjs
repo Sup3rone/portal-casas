@@ -21,6 +21,7 @@ async function main() {
     const params = Promise.resolve({ locale });
     const render = value => renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } }, value));
     const listed = render(await layout({ params, children: await list({ params }) }));
+    assert.ok(!listed.includes('/admin/mensajes')); assert.ok(!listed.includes('/admin/tarifas')); assert.ok(!listed.includes('/admin/calendario'));
     assert.ok(listed.includes(t('properties'))); assert.ok(listed.includes('pa')); assert.ok(!listed.includes('/propiedades/pb'));
     const newForm = render(await create({ params }));
     for (const name of ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address', 'city', 'maxGuests', 'bedrooms', 'bathrooms', 'lat', 'lng', 'baseWeekdayPrice', 'baseWeekendPrice']) assert.ok(newForm.includes(`name="${name}"`));
@@ -36,6 +37,8 @@ async function main() {
     await assert.rejects(() => create({ params }), error => error.message === `redirect: /${locale}`);
     setSession({ user: { id: 'admin' } });
     const admin = render(await list({ params }));
+    const adminLayout = render(await layout({ params, children: null }));
+    for (const route of ['mensajes', 'tarifas', 'calendario']) assert.ok(adminLayout.includes(`/${locale}/admin/${route}`));
     assert.ok(admin.includes(t('approve'))); assert.ok(admin.includes('/propiedades/pb'));
     console.log(locale + ': listado/formulario/calendario/consultas, acceso propio/ajeno, redirecciones y aprobación admin OK');
   }

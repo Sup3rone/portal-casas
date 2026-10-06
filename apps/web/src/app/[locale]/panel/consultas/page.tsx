@@ -20,7 +20,7 @@ export default async function PanelInquiriesPage({ params }: { params: Promise<{
   return <div className="space-y-8"><Inquiries rows={rows.map(row => ({ ...row, createdAt: row.createdAt.toISOString() }))} />
     <section className="space-y-4"><h2 className="text-2xl font-semibold">{t('bookings')}</h2>
       {!reservations.length && <p>{t('emptyBookings')}</p>}
-      {reservations.map(reservation => <article key={reservation.id} className="rounded-2xl border bg-white p-4">
+      {reservations.map(reservation => <article key={reservation.id} className="rounded-2xl border bg-white dark:bg-gray-900 p-4 dark:border-gray-700">
         {reservation.title} · {reservation.startDate} → {reservation.endDate} · {reservation.source === 'host-block' ? t('blockSource') : t('bookingSource', { source: reservation.source })}
       </article>)}
     </section></div>;

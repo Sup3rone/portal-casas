@@ -8,9 +8,9 @@ type Booking = { propertyId: string; start: string; end: string; source: string 
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
 const SOURCE_STYLE: Record<string, { bg: string; label: string }> = {
-  manual:  { bg: 'bg-purple-600 text-white',      label: 'Manual (portal)' },
-  airbnb:  { bg: 'bg-rose-500 text-white',        label: 'Airbnb' },
-  google:  { bg: 'bg-blue-500 text-white',        label: 'Google Calendar' },
+  manual:  { bg: 'bg-purple-600 text-white dark:text-gray-100',      label: 'Manual (portal)' },
+  airbnb:  { bg: 'bg-rose-500 text-white dark:text-gray-100',        label: 'Airbnb' },
+  google:  { bg: 'bg-blue-500 text-white dark:text-gray-100',        label: 'Google Calendar' },
 };
 
 function iso(d: Date) {
@@ -69,7 +69,7 @@ export default function CalendarBoard({ propiedades, bookings }: { propiedades: 
         <button
           onClick={sincronizar}
           disabled={syncing}
-          className="rounded-full bg-rose-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-rose-600 disabled:opacity-50"
+          className="rounded-full bg-rose-500 px-4 py-2 text-sm font-bold text-white dark:text-gray-100 transition hover:bg-rose-600 disabled:opacity-50"
         >
           {syncing ? '🔄 Sincronizando...' : '🔄 Sincronizar Airbnb (iCal)'}
         </button>
@@ -78,9 +78,9 @@ export default function CalendarBoard({ propiedades, bookings }: { propiedades: 
 
       {/* Controles de mes */}
       <div className="mb-8 flex items-center justify-center gap-6">
-        <button onClick={() => cambiarMes(-1)} className="rounded-lg border px-4 py-2 hover:bg-gray-50">←</button>
+        <button onClick={() => cambiarMes(-1)} className="rounded-lg border px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-950 dark:border-gray-700">←</button>
         <h2 className="w-56 text-center text-xl font-semibold capitalize">{nombreMes}</h2>
-        <button onClick={() => cambiarMes(1)} className="rounded-lg border px-4 py-2 hover:bg-gray-50">→</button>
+        <button onClick={() => cambiarMes(1)} className="rounded-lg border px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-950 dark:border-gray-700">→</button>
       </div>
 
       {/* Leyenda */}
@@ -94,9 +94,9 @@ export default function CalendarBoard({ propiedades, bookings }: { propiedades: 
 
       <div className="space-y-10">
         {propiedades.map(p => (
-          <section key={p.id} className="rounded-2xl bg-white p-6 shadow-sm border">
+          <section key={p.id} className="rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm border dark:border-gray-700">
             <h3 className="mb-4 text-lg font-bold">{p.title ?? p.slug}</h3>
-            <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500">
+            <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 dark:text-gray-400">
               {DIAS.map(d => <div key={d}>{d}</div>)}
             </div>
             <div className="grid grid-cols-7 gap-1">
@@ -104,13 +104,13 @@ export default function CalendarBoard({ propiedades, bookings }: { propiedades: 
                 if (!d) return <div key={`e${i}`} />;
                 const dia = iso(d);
                 const booking = bookingDelDia(bookings, p.id, dia);
-                const style = booking ? SOURCE_STYLE[booking.source] ?? { bg: 'bg-gray-300 text-gray-800', label: booking.source } : null;
+                const style = booking ? SOURCE_STYLE[booking.source] ?? { bg: 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-100', label: booking.source } : null;
                 return (
                   <div
                     key={dia}
                     title={booking ? `${style!.label}: ${booking.start} → ${booking.end}` : 'Libre'}
                     className={`flex h-10 items-center justify-center rounded-lg text-sm font-medium ${
-                      style ? style.bg : 'bg-gray-50 text-gray-400'
+                      style ? style.bg : 'bg-gray-50 dark:bg-gray-950 text-gray-400 dark:text-gray-300'
                     }`}
                   >
                     {d.getDate()}

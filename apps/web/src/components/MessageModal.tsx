@@ -104,49 +104,49 @@ export default function MessageModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/75 p-4"
       onClick={onClose}
     >
       <div
-        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-2xl"
+        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white dark:bg-gray-900 p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute right-3 top-3 text-gray-400 hover:text-gray-700"
+          className="absolute right-3 top-3 text-gray-400 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200"
           aria-label="Cerrar"
         >
           ✕
         </button>
 
-        <h3 className="mb-4 text-xl font-bold text-gray-900">
+        <h3 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
           Consulta de renta
         </h3>
 
         <div className="space-y-4 text-sm">
           <div>
-            <strong className="block text-xs uppercase text-gray-500">Propiedad</strong>
-            <span className="font-semibold text-purple-600">
+            <strong className="block text-xs uppercase text-gray-500 dark:text-gray-400">Propiedad</strong>
+            <span className="font-semibold text-purple-600 dark:text-purple-400">
               {message.propertyName}
             </span>
           </div>
 
           <div>
-            <strong className="block text-xs uppercase text-gray-500">Remitente</strong>
-            <p className="font-medium text-gray-900">{message.name}</p>
+            <strong className="block text-xs uppercase text-gray-500 dark:text-gray-400">Remitente</strong>
+            <p className="font-medium text-gray-900 dark:text-gray-100">{message.name}</p>
             <a
               href={`mailto:${message.email}`}
-              className="text-gray-600 underline-offset-2 hover:underline"
+              className="text-gray-600 dark:text-gray-300 underline-offset-2 hover:underline"
             >
               {message.email}
             </a>
             {message.phone && (
-              <p className="text-gray-600">📞 {message.phone}</p>
+              <p className="text-gray-600 dark:text-gray-300">📞 {message.phone}</p>
             )}
           </div>
 
           <div>
-            <strong className="block mb-2 text-xs uppercase text-gray-500">
+            <strong className="block mb-2 text-xs uppercase text-gray-500 dark:text-gray-400">
               Fechas (editable)
             </strong>
             <div className="flex items-center gap-3">
@@ -154,33 +154,33 @@ export default function MessageModal({
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 p-2 focus:border-purple-500 focus:outline-none"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:border-purple-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
               />
-              <span className="text-gray-400">→</span>
+              <span className="text-gray-400 dark:text-gray-300">→</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 p-2 focus:border-purple-500 focus:outline-none"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:border-purple-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
             {startDate && endDate && !valid && (
-              <p className="mt-1 text-xs text-red-600">
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
                 La fecha de salida debe ser posterior a la de entrada
               </p>
             )}
           </div>
 
           <div>
-            <strong className="block text-xs uppercase text-gray-500">Mensaje</strong>
-            <p className="whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-gray-700">
+            <strong className="block text-xs uppercase text-gray-500 dark:text-gray-400">Mensaje</strong>
+            <p className="whitespace-pre-wrap rounded-lg bg-gray-50 dark:bg-gray-950 p-3 text-gray-700 dark:text-gray-200">
               {message.body}
             </p>
           </div>
         </div>
 
         {error && (
-          <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          <p className="mt-4 rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-400">
             {error}
           </p>
         )}
@@ -189,13 +189,13 @@ export default function MessageModal({
           <button
             onClick={handleConfirm}
             disabled={!valid || saving}
-            className="flex-1 rounded-lg bg-purple-600 py-3 font-bold text-white transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-lg bg-purple-600 py-3 font-bold text-white dark:text-gray-100 transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "Confirmando..." : "✅ Confirmar fechas"}
           </button>
           <button
             onClick={onClose}
-            className="flex-1 rounded-lg bg-gray-200 py-3 font-bold text-gray-800 transition hover:bg-gray-300"
+            className="flex-1 rounded-lg bg-gray-200 dark:bg-gray-700 py-3 font-bold text-gray-800 dark:text-gray-100 transition hover:bg-gray-300 dark:hover:bg-gray-600"
           >
             Cerrar
           </button>
@@ -204,7 +204,7 @@ export default function MessageModal({
         <button
           onClick={handleDelete}
           disabled={saving}
-          className="mt-4 w-full rounded-lg border border-red-200 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-4 w-full rounded-lg border border-red-200 dark:border-red-800 py-2 text-sm font-medium text-red-600 dark:text-red-400 transition hover:bg-red-50 dark:hover:bg-red-950 disabled:cursor-not-allowed disabled:opacity-50"
         >
           🗑 Eliminar mensaje
         </button>

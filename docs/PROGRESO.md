@@ -151,4 +151,33 @@
 - TypeScript, ESLint (solo warnings previos de datos sin uso en la página), test-gallery-share y regresiones de consultas/panel pasan.
 - Sin librerías, backend, migraciones ni cambios en calendario/formulario/validación. Checklist y decisión en `docs/GALERIA-COMPARTIR.md`.
 
-*Documento mantenido manualmente. Se recomienda actualizar tras cada sprint o hito importante.*
+## Actualización — 6 de octubre 2026
+
+### ✅ COMPLETADO Y DEPLOYADO EN PRODUCCIÓN
+- i18n completo home/detalle/panel (es/en/fr)
+- Calendario ↔ formulario de reserva bidireccional con precio dinámico
+- Glassmorphism, skeletons con shimmer (barra verde eliminada)
+- Fase 1: rol COLLABORATOR + ownerId + property-access.ts (matriz 200/404 validada)
+- Fase 2: panel del colaborador (crear/editar propiedades, temporadas, imágenes, bloques, consultas propias)
+- Deploy a producción: migración en main de Neon ANTES del código (checkpoint creado)
+- Validación formulario de consulta: cliente + servidor (inquiry-validation.ts), 400 con code/fields
+- Responsive de reserva: celdas 41-43px, flechas/inputs 44px, sin scroll horizontal (ver RESPONSIVE-RESERVA.md)
+- Lote de limpieza: footer locale, dots galería, CategorySection restaurada (regresión commit 36db0df1), lang de consultas (ver LIMPIEZA-MENOR.md)
+- Galería en mosaico + lightbox accesible + botón compartir mapa (Web Share API + fallback copiar) (ver GALERIA-COMPARTIR.md)
+
+### 📋 PENDIENTES
+- **Fase 3 — Invitaciones/gestión usuarios: BLOQUEADA esperando las 4 respuestas del cliente**
+  (calendarios/Airbnb, manejo de mensajes, aprobación de publicación, reglas de precio)
+- Columna huéspedes en Message (se valida, no se persiste) — requiere migración BD
+- lastSyncedAt/iCal: columna de sincronización sin terminar — investigar
+- Advertencia <img> en detalle (ESLint) — cosmética
+- Pruebas pendientes en dispositivo real: compartir nativo en móvil, Safari/iOS, reproducción de videos en lightbox
+- Cuenta meniblu@hotmail.com quedó COLLABORATOR en producción — cuenta de pruebas documentada
+- Supuestos vigentes: "hoy" = America/Mexico_City en validación; mosaico diseñado para ≤8 miniaturas
+
+### 🔑 INFRAESTRUCTURA ACTUAL
+- Producción: código nuevo + main de Neon migrado (Vercel)
+- Desarrollo local: branch Neon "Respaldo" (todo el testing aquí)
+- Regla de deploy: migración en main ANTES de desplegar código, siempre con checkpoint previo
+- Usuarios: admin susudone@proton.me; colaborador prueba meniblu@hotmail.com
+- Convención de trabajo con el agente: prompts cerrados, reportes EN TEXTO (no capturas), auditoría manual tras cada entrega, verificar que NO toque main de Neon

@@ -24,8 +24,8 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
     finally { setBusy(false); }
   }
   return (
-    <form onSubmit={submit} className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm">
-      <p className="text-sm text-gray-600">{t('approvalHint')}</p>
+    <form onSubmit={submit} className="space-y-6 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
+      <p className="text-sm text-gray-600 dark:text-gray-300">{t('approvalHint')}</p>
       <div className="grid gap-4 md:grid-cols-2">
         {texts.map(key => <label key={key} className="block text-sm">{t(`fields.${key}`)}
           {key.startsWith('desc') ? <textarea name={key} required rows={4} defaultValue={property?.[key]} className={inputClass} />

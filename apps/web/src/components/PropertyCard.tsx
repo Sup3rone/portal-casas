@@ -28,9 +28,9 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
   return (
     <Link href={`/casas/${property.slug}`} className="group block">
       {/* CARD TRANSPARENTE CON BORDE FINO */}
-      <div className="backdrop-blur-sm transition-transform group-hover:-translate-y-2">
+      <div className="backdrop-blur-sm transition-transform group-hover:-translate-y-2 dark:rounded-lg dark:bg-gray-900/80">
         {/* Imagen cuadrada grande (como en captura) */}
-        <div className="overflow-hidden rounded-lg border border-white/30 bg-white/5">
+        <div className="overflow-hidden rounded-lg border border-white/30 dark:border-gray-700 bg-white/5 dark:bg-white/5">
           {property.media.length > 0 ? (
             <div className="aspect-[4/3] overflow-hidden">
               <img
@@ -40,17 +40,17 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
               />
             </div>
           ) : (
-            <div className="aspect-[4/3] bg-white/10" />
+            <div className="aspect-[4/3] bg-white/10 dark:bg-white/10" />
           )}
         </div>
 
         {/* Info — centrada debajo de la imagen */}
         <div className="mt-4 text-center">
-          <h3 className="text-lg font-medium tracking-wide text-white drop-shadow-md">
+          <h3 className="text-lg font-medium tracking-wide text-white dark:text-gray-100 drop-shadow-md">
             {title.toUpperCase()}
           </h3>
-          <p className="text-sm text-white/80">{property.city}</p>
-          <p className="pt-1 text-xs text-white/60">
+          <p className="text-sm text-white/80 dark:text-gray-200">{property.city}</p>
+          <p className="pt-1 text-xs text-white/60 dark:text-gray-400">
             {property.maxGuests} huéspedes · {property.bedrooms} hab.
           </p>
         </div>

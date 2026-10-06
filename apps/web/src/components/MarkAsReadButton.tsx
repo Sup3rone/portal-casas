@@ -28,14 +28,14 @@ export default function MarkAsReadButton({
   }
 
   if (read) {
-    return <span className="text-xs text-gray-400">✓ Leído</span>;
+    return <span className="text-xs text-gray-400 dark:text-gray-300">✓ Leído</span>;
   }
 
   return (
     <button
       onClick={handleClick}
       disabled={loading}
-      className="text-xs font-medium text-purple-600 underline hover:text-purple-800 disabled:opacity-50"
+      className="text-xs font-medium text-purple-600 dark:text-purple-400 underline hover:text-purple-800 dark:hover:text-purple-400 disabled:opacity-50"
     >
       {loading ? 'Marcando...' : 'Marcar como leído'}
     </button>

@@ -36,13 +36,13 @@ export default async function PropertiesPage({
           alt=""
           className="h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0 bg-black/10 dark:bg-black/60" />
       </div>
 
       {/* CONTENIDO FLOTANTE ENCIMA */}
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-6 pb-24">
-        <div className="mb-12 rounded-full bg-white/20 px-8 py-3 backdrop-blur-sm">
-          <span className="text-sm font-medium tracking-widest text-white">
+        <div className="mb-12 rounded-full bg-white/20 dark:bg-white/20 px-8 py-3 backdrop-blur-sm">
+          <span className="text-sm font-medium tracking-widest text-white dark:text-gray-100">
             DESTINOS
           </span>
         </div>

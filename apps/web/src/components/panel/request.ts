@@ -6,5 +6,5 @@ export async function panelRequest(url: string, method: string, body?: unknown) 
   if (!response.ok) throw new Error(response.status === 404 ? 'notFound' : response.status === 403 || response.status === 401 ? 'forbidden' : response.status === 400 ? 'validation' : response.status === 409 ? 'conflict' : 'error');
   return data;
 }
-export const inputClass = 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-green-700 focus:outline-none';
-export const buttonClass = 'rounded-lg bg-green-700 px-4 py-2 font-medium text-white disabled:opacity-50';
+export const inputClass = 'w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-gray-900 dark:text-gray-100 focus:border-green-700 focus:outline-none';
+export const buttonClass = 'rounded-lg bg-green-700 px-4 py-2 font-medium text-white dark:text-gray-100 disabled:opacity-50';

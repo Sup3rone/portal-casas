@@ -50,14 +50,14 @@ export default function PropertyGallery({ slides }: { slides: Slide[] }) {
             <button key={`${slide.url}-${i}`} type="button" aria-haspopup="dialog"
               aria-label={remaining > 0 ? t('verTodas', { count: slides.length }) : t(slide.type === 'VIDEO' ? 'abrirVideo' : 'abrirFoto', { number: i + 1 })}
               onClick={event => { openerRef.current = event.currentTarget; setIndex(i); }}
-              className="relative aspect-[4/3] min-w-0 overflow-hidden rounded-lg bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700">
+              className="relative aspect-[4/3] min-w-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700">
               {slide.type === 'VIDEO' ? (
                 <><video src={slide.url} preload="metadata" muted playsInline aria-hidden="true" className="h-full w-full object-cover" />
-                  <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-black/30 text-3xl text-white">▶</span></>
+                  <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-black/30 dark:bg-black/50 text-3xl text-white dark:text-gray-100">▶</span></>
               ) : (
                 <Image src={slide.url} alt={t('foto', { number: i + 1 })} fill unoptimized sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover" />
               )}
-              {remaining > 0 && <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-black/60 text-2xl font-medium text-white">+{remaining}</span>}
+              {remaining > 0 && <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-black/60 dark:bg-black/75 text-2xl font-medium text-white dark:text-gray-100">+{remaining}</span>}
             </button>
           );
         })}
@@ -79,14 +79,14 @@ export default function PropertyGallery({ slides }: { slides: Slide[] }) {
           if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
           if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
         }}
-        className="property-lightbox fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-0 text-white backdrop:bg-black/85 open:flex open:flex-col">
+        className="property-lightbox fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-0 text-white dark:text-gray-100 backdrop:bg-black/85 open:flex open:flex-col">
         {current && <>
           <div className="flex shrink-0 items-center justify-between gap-4 px-4 py-3">
             <p role="status" aria-live="polite" aria-label={t('posicion', { number: index! + 1, count: slides.length })}>
               {index! + 1}/{slides.length}
             </p>
             <button ref={closeRef} type="button" onClick={close} aria-label={t('cerrar')} title={t('cerrar')}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-2xl hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white">×</button>
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 dark:bg-white/10 text-2xl hover:bg-white/20 dark:hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white">×</button>
           </div>
           <div className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-8">
             {current.type === 'VIDEO' ? (
@@ -97,9 +97,9 @@ export default function PropertyGallery({ slides }: { slides: Slide[] }) {
           </div>
           {slides.length > 1 && <div className="flex shrink-0 justify-between gap-4 px-4 py-3">
             <button type="button" onClick={() => move(-1)} aria-label={t('anterior')} title={t('anterior')}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-2xl hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white">‹</button>
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 dark:bg-white/10 text-2xl hover:bg-white/20 dark:hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white">‹</button>
             <button type="button" onClick={() => move(1)} aria-label={t('siguiente')} title={t('siguiente')}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-2xl hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white">›</button>
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 dark:bg-white/10 text-2xl hover:bg-white/20 dark:hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white">›</button>
           </div>}
         </>}
       </dialog>

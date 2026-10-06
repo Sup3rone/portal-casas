@@ -1,4 +1,8 @@
 {
+  "theme": {
+    "light": "Switch to light mode",
+    "dark": "Switch to dark mode"
+  },
   "panel": {
     "title": "Host panel",
     "properties": "My properties",

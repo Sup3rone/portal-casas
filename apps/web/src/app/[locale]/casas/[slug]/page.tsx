@@ -103,7 +103,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
   return (
     <main
-      className="min-h-screen"
+      className="min-h-screen dark:bg-gray-700 dark:bg-blend-multiply"
       style={{
         backgroundImage: "url('/images 2/detalle-bg.jpg')",
         backgroundSize: 'cover',
@@ -113,11 +113,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     >
       {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <section className="mx-auto max-w-7xl px-3 py-8 md:px-6">
-        <div className="mb-6 rounded-2xl bg-black/30 p-6 text-center">
-          <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
+        <div className="mb-6 rounded-2xl bg-black/30 dark:bg-black/50 p-6 text-center">
+          <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
             {title.toUpperCase()}
           </h1>
-          <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80">
+          <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80 dark:text-gray-200">
             {property.city.toUpperCase()} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
           </p>
         </div>
@@ -126,8 +126,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
       {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
       <section className="mx-auto max-w-2xl px-6 py-16 text-center">
-        <div className="rounded-2xl bg-white/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40">
-          <p className="whitespace-pre-wrap leading-relaxed text-gray-700 font-light">
+        <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
+          <p className="whitespace-pre-wrap leading-relaxed text-gray-700 dark:text-gray-200 font-light">
             {description}
           </p>
         </div>
@@ -141,11 +141,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Widget 1: EL DESTINO — título arriba, mapa ABAJO */}
-            <div className="rounded-2xl bg-white/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40">
-              <h2 className="mb-4 text-center text-2xl font-light tracking-[0.3em] text-gray-900">
+            <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
+              <h2 className="mb-4 text-center text-2xl font-light tracking-[0.3em] text-gray-900 dark:text-gray-100">
                 {t('details.destino')}
               </h2>
-              <p className="mb-6 text-center text-sm font-light leading-relaxed text-gray-600">
+              <p className="mb-6 text-center text-sm font-light leading-relaxed text-gray-600 dark:text-gray-300">
                 {property.address}, {property.city}
               </p>
               {/* Mapa adentro del cuadro, debajo de las letras */}
@@ -157,8 +157,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             </div>
 
             {/* Widget 2: LO QUE OFRECE ESTE LUGAR */}
-            <div className="rounded-2xl bg-white/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40">
-              <h2 className="mb-6 text-center text-2xl font-light tracking-[0.3em] text-gray-900">
+            <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
+              <h2 className="mb-6 text-center text-2xl font-light tracking-[0.3em] text-gray-900 dark:text-gray-100">
                 {t('details.ofrece')}
               </h2>
               <ul className="space-y-4">
@@ -170,9 +170,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
                   { icon: '🍳', label: t('details.amenities.cocina') },
                   { icon: '📺', label: t('details.amenities.television') },
                 ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-0">
+                  <li key={i} className="flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 pb-3 last:border-0">
                     <span className="text-lg">{item.icon}</span>
-                    <span className="text-sm font-light tracking-wide text-gray-700">{item.label}</span>
+                    <span className="text-sm font-light tracking-wide text-gray-700 dark:text-gray-200">{item.label}</span>
                   </li>
                 ))}
               </ul>
@@ -208,22 +208,22 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       {/* ===== RESERVAR: calendario izquierda, formulario derecha ===== */}
       <section id="reservar" className="px-6 py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 md:text-4xl">
+          <h2 className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl">
             {t('details.reservar')}
           </h2>
           <ReservationDatesProvider key={property.id}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Columna izquierda: Calendario */}
-            <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20">
-              <h3 className="mb-3 text-[0.65rem] tracking-[0.25em] text-gray-400 uppercase">
+            <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
+              <h3 className="mb-3 text-[0.65rem] tracking-[0.25em] text-gray-400 dark:text-gray-300 uppercase">
                 {t('details.disponibilidad').toUpperCase()}
               </h3>
               <AvailabilityCalendar bookings={bookingRows} />
             </div>
 
             {/* Columna derecha: Formulario */}
-            <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20">
+            <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
               <MessageForm propertyId={property.id} locale={locale} pricing={pricing} maxGuests={property.maxGuests} compact />
             </div>
           </div>

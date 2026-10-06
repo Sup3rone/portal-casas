@@ -8,10 +8,10 @@ export default async function PanelLayout({ children, params }: { children: Reac
   await panelManager(locale);
   const t = await getTranslations({ locale, namespace: 'panel' });
   return <main className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-    <nav aria-label={t('title')} className="flex flex-wrap gap-6 border-b pb-4">
-      <Link href="/panel" className="font-semibold text-green-700">{t('properties')}</Link>
-      <Link href="/panel/nueva" className="text-green-700">{t('newProperty')}</Link>
-      <Link href="/panel/consultas" className="text-green-700">{t('messages')}</Link>
+    <nav aria-label={t('title')} className="flex flex-wrap gap-6 border-b pb-4 dark:border-gray-700">
+      <Link href="/panel" className="font-semibold text-green-700 dark:text-green-400">{t('properties')}</Link>
+      <Link href="/panel/nueva" className="text-green-700 dark:text-green-400">{t('newProperty')}</Link>
+      <Link href="/panel/consultas" className="text-green-700 dark:text-green-400">{t('messages')}</Link>
     </nav>
     {children}
   </main>;

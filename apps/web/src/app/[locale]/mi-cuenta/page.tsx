@@ -20,7 +20,7 @@ export default async function MyAccountPage() {
 
   if (!userData) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-gray-600">
+      <div className="flex min-h-screen items-center justify-center text-gray-600 dark:text-gray-300">
         Usuario no encontrado.
       </div>
     );
@@ -57,19 +57,19 @@ export default async function MyAccountPage() {
     .limit(10);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
       <div className="mx-auto max-w-4xl">
         <header className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Mi cuenta</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Mi cuenta</h1>
+            <p className="text-gray-600 dark:text-gray-300">
               {session.user.name} ({session.user.email})
             </p>
           </div>
           <form action={logoutAction}>
             <button
               type="submit"
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Cerrar sesión
             </button>
@@ -78,28 +78,28 @@ export default async function MyAccountPage() {
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Consultas enviadas */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">Mis consultas</h2>
+          <section className="rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm">
+            <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Mis consultas</h2>
             {userMessages.length === 0 ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Aún no has enviado consultas.{" "}
-                <a href="/es/casas" className="text-purple-600 underline">
+                <a href="/es/casas" className="text-purple-600 dark:text-purple-400 underline">
                   Explora las propiedades
                 </a>
               </p>
             ) : (
               <ul className="space-y-3">
                 {userMessages.map((msg) => (
-                  <li key={msg.id} className="rounded-lg border border-gray-200 p-3">
-                    <p className="font-medium text-gray-900">{msg.propertyTitle ?? "Propiedad"}</p>
-                    <p className="text-sm text-gray-600">
+                  <li key={msg.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{msg.propertyTitle ?? "Propiedad"}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       {msg.createdAt
                         ? new Date(msg.createdAt).toLocaleDateString("es-MX")
                         : ""}
                     </p>
-                    <p className="mt-1 line-clamp-2 text-sm text-gray-500">{msg.body}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">{msg.body}</p>
                     {msg.read ? (
-                      <span className="mt-1 inline-block rounded bg-green-100 px-2 py-1 text-xs text-green-700">
+                      <span className="mt-1 inline-block rounded bg-green-100 dark:bg-green-900/50 px-2 py-1 text-xs text-green-700 dark:text-green-400">
                         Leída
                       </span>
                     ) : (
@@ -114,27 +114,27 @@ export default async function MyAccountPage() {
           </section>
 
           {/* Mis reservas */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">Mis reservas</h2>
+          <section className="rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm">
+            <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Mis reservas</h2>
             {userBookings.length === 0 ? (
-              <p className="text-sm text-gray-500">Aún no tienes reservas.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Aún no tienes reservas.</p>
             ) : (
               <ul className="space-y-3">
                 {userBookings.map((booking) => (
-                  <li key={booking.id} className="rounded-lg border border-gray-200 p-3">
-                    <p className="font-medium text-gray-900">
+                  <li key={booking.id} className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       {booking.propertyTitle ?? "Propiedad"}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       {new Date(booking.startDate).toLocaleDateString("es-MX")} —{" "}
                       {new Date(booking.endDate).toLocaleDateString("es-MX")}
                     </p>
                     {booking.source === "manual" ? (
-                      <span className="mt-1 inline-block rounded bg-green-100 px-2 py-1 text-xs text-green-700">
+                      <span className="mt-1 inline-block rounded bg-green-100 dark:bg-green-900/50 px-2 py-1 text-xs text-green-700 dark:text-green-400">
                         Confirmada
                       </span>
                     ) : (
-                      <span className="mt-1 inline-block rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                      <span className="mt-1 inline-block rounded bg-blue-100 dark:bg-blue-900/50 px-2 py-1 text-xs text-blue-700 dark:text-blue-400">
                         Sincronizada de {booking.source}
                       </span>
                     )}

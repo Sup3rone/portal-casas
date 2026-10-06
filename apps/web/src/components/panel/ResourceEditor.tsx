@@ -31,11 +31,11 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
     catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
-  return <section className="space-y-4 rounded-2xl border bg-white p-6 shadow-sm">
+  return <section className="space-y-4 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
     <h2 className="text-xl font-semibold">{t(resource === 'rates' ? 'rates' : 'photos')}</h2>
-    {resource === 'media' && <p className="text-sm text-gray-600">{t('photoHint')}</p>}
+    {resource === 'media' && <p className="text-sm text-gray-600 dark:text-gray-300">{t('photoHint')}</p>}
     {!items.length && <p>{t(resource === 'rates' ? 'emptyRates' : 'emptyPhotos')}</p>}
-    <ul className="space-y-3">{items.map(item => <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+    <ul className="space-y-3">{items.map(item => <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 dark:border-gray-700">
       <span className="min-w-0 break-all">{'name' in item ? `${item.name} · ${item.startDate} → ${item.endDate} · ${item.weekdayPrice}/${item.weekendPrice} MXN` : item.url}</span>
       <div className="flex gap-3"><button type="button" disabled={busy} onClick={() => { setEditing(item); setMessage(''); }} className="underline">{t('edit')}</button>
         <button type="button" disabled={busy} onClick={() => remove(item.id)} className="underline">{t('remove')}</button></div>

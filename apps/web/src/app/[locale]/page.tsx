@@ -19,14 +19,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </video>
 
         {/* Overlay oscuro para legibilidad */}
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/40 dark:bg-black/60" />
 
         {/* Contenido centrado */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
-          <h1 className="mb-4 text-4xl font-light tracking-[0.3em] text-white md:text-6xl">
+          <h1 className="mb-4 text-4xl font-light tracking-[0.3em] text-white dark:text-gray-100 md:text-6xl">
             {t('bienvenida')}
           </h1>
-          <h2 className="mb-12 text-2xl font-light tracking-[0.25em] text-white/90 md:text-3xl">
+          <h2 className="mb-12 text-2xl font-light tracking-[0.25em] text-white/90 dark:text-gray-200 md:text-3xl">
             {t('propiedadesEnRenta')}
           </h2>
 
@@ -37,34 +37,34 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             className="glass-panel flex flex-wrap items-end justify-center gap-4 rounded-2xl p-6 shadow-2xl"
           >
             <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-600">
+              <label className="mb-1 block text-xs tracking-widest text-gray-600 dark:text-gray-300">
                 {t('llegada')}
               </label>
               <input
                 type="date"
                 name="start"
-                className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+                className="w-40 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-gray-900 dark:focus:border-green-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
 
             <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-600">
+              <label className="mb-1 block text-xs tracking-widest text-gray-600 dark:text-gray-300">
                 {t('salida')}
               </label>
               <input
                 type="date"
                 name="end"
-                className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+                className="w-40 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-gray-900 dark:focus:border-green-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
 
             <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-600">
+              <label className="mb-1 block text-xs tracking-widest text-gray-600 dark:text-gray-300">
                 {t('huespedes')}
               </label>
               <select
                 name="guests"
-                className="w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+                className="w-32 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-gray-900 dark:focus:border-green-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
               >
                 <option value="">{t('cualquiera')}</option>
                 {[1, 2, 3, 4, 6, 8, 10].map((n) => (
@@ -77,7 +77,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
             <button
               type="submit"
-              className="rounded-lg bg-black px-8 py-2.5 text-sm font-semibold tracking-widest text-white transition hover:bg-gray-800"
+              className="rounded-lg bg-black dark:bg-green-700 px-8 py-2.5 text-sm font-semibold tracking-widest text-white dark:text-gray-100 transition hover:bg-gray-800 dark:hover:bg-green-600"
             >
               {t('buscar')}
             </button>

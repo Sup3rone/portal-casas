@@ -1,4 +1,8 @@
 {
+  "theme": {
+    "light": "Activar modo claro",
+    "dark": "Activar modo oscuro"
+  },
   "panel": {
     "title": "Panel del colaborador",
     "properties": "Mis propiedades",

@@ -31,7 +31,7 @@ export default function SectionSlider({
       className={
         fullscreen
           ? 'absolute inset-0 overflow-hidden'
-          : 'relative aspect-[16/9] overflow-hidden rounded-lg bg-gray-100'
+          : 'relative aspect-[16/9] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800'
       }
     >
       {/* Slide activo */}
@@ -57,14 +57,14 @@ export default function SectionSlider({
         <>
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 p-3 text-gray-900 transition hover:bg-white"
+            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 dark:bg-gray-900/90 p-3 text-gray-900 dark:text-gray-100 transition hover:bg-white dark:hover:bg-gray-900"
             aria-label={t('anterior')}
           >
             ‹
           </button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 p-3 text-gray-900 transition hover:bg-white"
+            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-white/90 dark:bg-gray-900/90 p-3 text-gray-900 dark:text-gray-100 transition hover:bg-white dark:hover:bg-gray-900"
             aria-label={t('siguiente')}
           >
             ›
@@ -83,7 +83,7 @@ export default function SectionSlider({
                 key={i}
                 onClick={() => setIdx(i)}
                 className={`h-2 w-2 shrink-0 cursor-pointer rounded-full transition-colors ${
-                  i === idx ? 'bg-white' : 'bg-white/50'
+                  i === idx ? 'bg-white dark:bg-gray-900' : 'bg-white/50 dark:bg-gray-900/50'
                 }`}
                 aria-label={t('irFoto', { number: i + 1 })}
               />

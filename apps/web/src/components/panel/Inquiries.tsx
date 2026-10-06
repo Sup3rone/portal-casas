@@ -23,12 +23,12 @@ export default function Inquiries({ rows }: { rows: Inquiry[] }) {
       <label>{t('filterStatus')}<select value={status} onChange={event => setStatus(event.target.value)} className={inputClass}>
         <option value="">{t('all')}</option><option value="unread">{t('unread')}</option><option value="read">{t('read')}</option></select></label></div>
     {!filtered.length && <p>{t('emptyMessages')}</p>}
-    {filtered.map(row => <article key={row.id} className="space-y-3 rounded-2xl border bg-white p-6 shadow-sm">
+    {filtered.map(row => <article key={row.id} className="space-y-3 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
       <div className="flex flex-wrap justify-between gap-3"><h2 className="font-semibold">{row.title} · {row.name}</h2><span>{t(row.read ? 'read' : 'unread')}</span></div>
       <p><a href={`mailto:${row.email}`} className="underline">{row.email}</a>{row.phone && ` · ${row.phone}`}</p>
       <p className="whitespace-pre-wrap">{row.body}</p>
       <p>{row.startDate} → {row.endDate}</p>
-      <time dateTime={row.createdAt} className="text-sm text-gray-500">{new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Mexico_City' }).format(new Date(row.createdAt))}</time>
+      <time dateTime={row.createdAt} className="text-sm text-gray-500 dark:text-gray-400">{new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Mexico_City' }).format(new Date(row.createdAt))}</time>
       {!row.read && <div><button disabled={busy === row.id} onClick={() => mark(row.id)} className="underline">{t('markRead')}</button></div>}
     </article>)}
     {error && <p role="alert">{t(error)}</p>}

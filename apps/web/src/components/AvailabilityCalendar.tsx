@@ -59,7 +59,7 @@ export default function AvailabilityCalendar({
       <div className="mb-4 flex items-center justify-between">
         <button
           onClick={mesAnterior}
-          className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+          className="rounded-full p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label={t('details.calendar.mesAnterior')}
         >
           ◀
@@ -69,7 +69,7 @@ export default function AvailabilityCalendar({
         </h3>
         <button
           onClick={mesSiguiente}
-          className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+          className="rounded-full p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label={t('details.calendar.mesSiguiente')}
         >
           ▶
@@ -79,7 +79,7 @@ export default function AvailabilityCalendar({
       {/* Grilla del calendario */}
       <div className="grid grid-cols-7 gap-1 text-center text-sm">
         {diasSemana.map((d) => (
-          <div key={d} className="py-2 text-xs font-semibold text-gray-500">{d}</div>
+          <div key={d} className="py-2 text-xs font-semibold text-gray-500 dark:text-gray-400">{d}</div>
         ))}
 
         {celdas.map((iso, i) => {
@@ -100,12 +100,12 @@ export default function AvailabilityCalendar({
               onClick={() => setDates(actual => seleccionarFecha(actual, iso, bookings, hoyISO))}
               className={`aspect-square flex items-center justify-center rounded-lg ${
                 esPasado
-                  ? 'text-gray-300'
+                  ? 'text-gray-300 dark:text-gray-600'
                   : ocupado
-                    ? 'bg-red-100 text-red-400 line-through'
+                    ? 'bg-red-100 dark:bg-red-900/50 text-red-400 line-through'
                     : seleccionado
-                      ? 'bg-green-700 text-white font-medium'
-                      : 'bg-green-50 text-green-700 font-medium'
+                      ? 'bg-green-700 text-white dark:text-gray-100 font-medium'
+                      : 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 font-medium'
               }${seleccionado ? ' ring-2 ring-green-700' : ''}`}
             >
               {Number(iso.slice(8))}
@@ -115,12 +115,12 @@ export default function AvailabilityCalendar({
       </div>
 
       {/* Leyenda */}
-      <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+      <div className="mt-4 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-green-50 ring-1 ring-green-200" /> {t('common.disponible')}
+          <span className="inline-block h-3 w-3 rounded bg-green-50 dark:bg-green-950 ring-1 ring-green-200 dark:ring-green-800" /> {t('common.disponible')}
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-red-100" /> {t('common.ocupado')}
+          <span className="inline-block h-3 w-3 rounded bg-red-100 dark:bg-red-900/50" /> {t('common.ocupado')}
         </span>
       </div>
     </div>

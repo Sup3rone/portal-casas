@@ -2,6 +2,7 @@
 
 - Monorepo pnpm: aplicación en `apps/web`, paquetes compartidos en `packages`.
 - Web: Next.js 16 (App Router), React 19, TypeScript y Tailwind CSS 4.
+- Tema: Tailwind 4 usa `@custom-variant dark (&:where(.dark, .dark *))` en globals.css, no un tailwind.config.js. El html SSR comienza con class=dark; ThemeToggle en Navbar alterna exclusivamente light/dark y persiste en localStorage (portal-casas-theme). public/theme-init.js es un recurso local async de prioridad alta; el toggle sincroniza la preferencia con useLayoutEffect cuando cambia el locale para evitar el reinicio de la clase del layout. Sin preferencia válida se usa oscuro, independientemente del sistema; color-scheme y variables background/foreground siguen la clase. Variantes dark en superficies, textos, formularios, CTAs, calendario, cards y modales públicos/privados; glass conserva su desenfoque con fondo gris translúcido. Inventario, pruebas y notas fuera de alcance en `docs/MODO-OSCURO.md`; test sin red: `node scripts/test-theme.cjs`.
 - Internacionalización: next-intl 4, rutas `/es`, `/en` y `/fr`; español por defecto.
 - Configuración en `apps/web/src/i18n/{routing,request,navigation}`; `src/proxy.ts` combina Auth.js con el middleware de next-intl.
 - El layout `src/app/[locale]/layout.tsx` incluye `NextIntlClientProvider`, navegación y pie de página.

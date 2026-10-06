@@ -14,7 +14,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
     <button
       type="submit"
       disabled={pending || disabled}
-      className="w-full bg-gray-900 hover:bg-gray-700 text-white font-light tracking-[0.25em] py-4 px-4 transition-colors disabled:opacity-50 uppercase"
+      className="w-full bg-gray-900 dark:bg-green-700 hover:bg-gray-700 dark:hover:bg-green-600 text-white dark:text-gray-100 font-light tracking-[0.25em] py-4 px-4 transition-colors disabled:opacity-50 uppercase"
     >
       {pending ? t('enviando') : t('enviar')}
     </button>
@@ -104,7 +104,7 @@ export default function MessageForm({
   const serverErrors = serverValidation?.signature === signature ? serverValidation : null;
   const errors: InquiryErrors = { ...localErrors, ...serverErrors?.errors };
   function fieldError(field: InquiryField) {
-    return errors[field] ? <p id={`${field}-error`} className="text-red-600 text-xs tracking-wide" aria-live="polite">
+    return errors[field] ? <p id={`${field}-error`} className="text-red-600 dark:text-red-400 text-xs tracking-wide" aria-live="polite">
       {t(`validation.${errors[field]}`, { maxGuests: serverErrors?.maxGuests ?? maxGuests })}
     </p> : null;
   }
@@ -116,7 +116,7 @@ export default function MessageForm({
 
   // En globals.css o directamente en el component:
   const formClasses = compact
-    ? 'bg-white/90 backdrop-blur-md rounded-xl p-4'
+    ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-xl p-4'
     : '';
 
   async function handleSubmit(formData: FormData) {
@@ -146,7 +146,7 @@ export default function MessageForm({
 
   if (status === 'success') {
     return (
-      <div className="text-center text-gray-500 font-light tracking-wide p-8">
+      <div className="text-center text-gray-500 dark:text-gray-400 font-light tracking-wide p-8">
         {t('exito')}
       </div>
     );
@@ -165,7 +165,7 @@ export default function MessageForm({
       {/* ===== DATOS PERSONALES ===== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label htmlFor="name" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
+          <label htmlFor="name" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
             {t('nombre')}
           </label>
           <input
@@ -179,12 +179,12 @@ export default function MessageForm({
             onChange={event => setFields(current => ({ ...current, name: event.target.value }))}
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? 'name-error' : undefined}
-            className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
+            className="w-full border-b border-gray-300 dark:border-gray-600 pb-2 text-gray-800 dark:text-gray-100 font-light focus:border-gray-900 dark:focus:border-green-500 focus:outline-none bg-transparent"
           />
           {fieldError('name')}
         </div>
         <div>
-          <label htmlFor="email" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
+          <label htmlFor="email" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
             {t('email')}
           </label>
           <input
@@ -196,12 +196,12 @@ export default function MessageForm({
             onChange={event => setFields(current => ({ ...current, email: event.target.value }))}
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'email-error' : undefined}
-            className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
+            className="w-full border-b border-gray-300 dark:border-gray-600 pb-2 text-gray-800 dark:text-gray-100 font-light focus:border-gray-900 dark:focus:border-green-500 focus:outline-none bg-transparent"
           />
           {fieldError('email')}
         </div>
         <div>
-          <label htmlFor="phone" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
+          <label htmlFor="phone" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
             {t('telefono')}
           </label>
           <input
@@ -213,7 +213,7 @@ export default function MessageForm({
             onChange={event => setFields(current => ({ ...current, phone: event.target.value }))}
             aria-invalid={!!errors.phone}
             aria-describedby={errors.phone ? 'phone-error' : undefined}
-            className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
+            className="w-full border-b border-gray-300 dark:border-gray-600 pb-2 text-gray-800 dark:text-gray-100 font-light focus:border-gray-900 dark:focus:border-green-500 focus:outline-none bg-transparent"
           />
           {fieldError('phone')}
         </div>
@@ -222,7 +222,7 @@ export default function MessageForm({
       {/* ===== FECHAS + HUESPEDES ===== */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label htmlFor="startDate" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
+          <label htmlFor="startDate" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
             {t('llegada')}
           </label>
           <input
@@ -236,12 +236,12 @@ export default function MessageForm({
             value={startDate}
             min={hoy}
             onChange={e => setDates(actual => ({ ...actual, startDate: e.target.value }))}
-            className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
+            className="w-full border-b border-gray-300 dark:border-gray-600 pb-2 text-gray-800 dark:text-gray-100 font-light focus:border-gray-900 dark:focus:border-green-500 focus:outline-none bg-transparent"
           />
           {fieldError('startDate')}
         </div>
         <div>
-          <label htmlFor="endDate" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
+          <label htmlFor="endDate" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
             {t('salida')}
           </label>
           <input
@@ -255,12 +255,12 @@ export default function MessageForm({
             value={endDate}
             min={startDate || hoy}
             onChange={e => setDates(actual => ({ ...actual, endDate: e.target.value }))}
-            className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
+            className="w-full border-b border-gray-300 dark:border-gray-600 pb-2 text-gray-800 dark:text-gray-100 font-light focus:border-gray-900 dark:focus:border-green-500 focus:outline-none bg-transparent"
           />
           {fieldError('endDate')}
         </div>
         <div>
-          <label htmlFor="guests" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
+          <label htmlFor="guests" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
             {t('huespedes')}
           </label>
           <input
@@ -275,21 +275,21 @@ export default function MessageForm({
             aria-describedby={errors.guests ? 'guests-error' : undefined}
             value={guests}
             onChange={e => setGuests(Number(e.target.value))}
-            className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent"
+            className="w-full border-b border-gray-300 dark:border-gray-600 pb-2 text-gray-800 dark:text-gray-100 font-light focus:border-gray-900 dark:focus:border-green-500 focus:outline-none bg-transparent"
           />
           {fieldError('guests')}
         </div>
         <div>
-          <label className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
+          <label className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
             {t('precioTotal')}
           </label>
-          <div className="border-b border-gray-300 pb-2 text-lg font-light text-gray-800 h-7 flex items-end">
+          <div className="border-b border-gray-300 dark:border-gray-600 pb-2 text-lg font-light text-gray-800 dark:text-gray-100 h-7 flex items-end">
             {cotizacion?.total != null ? (
               `$${cotizacion.total.toLocaleString(formatoLocale)} MXN`
             ) : startDate && endDate ? (
-              <span className="text-gray-400 text-sm">{t('consultar')}</span>
+              <span className="text-gray-400 dark:text-gray-300 text-sm">{t('consultar')}</span>
             ) : (
-              <span className="text-gray-400 text-sm">—</span>
+              <span className="text-gray-400 dark:text-gray-300 text-sm">—</span>
             )}
           </div>
         </div>
@@ -297,7 +297,7 @@ export default function MessageForm({
 
       {/* ===== MENSAJE ===== */}
       <div>
-        <label htmlFor="body" className="block text-xs tracking-[0.25em] text-gray-400 mb-2 uppercase">
+        <label htmlFor="body" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
           {t('mensaje')}
         </label>
         <textarea
@@ -309,13 +309,13 @@ export default function MessageForm({
           onChange={event => setFields(current => ({ ...current, body: event.target.value }))}
           aria-invalid={!!errors.body}
           aria-describedby={errors.body ? 'body-error' : undefined}
-          className="w-full border-b border-gray-300 pb-2 text-gray-800 font-light focus:border-gray-900 focus:outline-none bg-transparent resize-none"
+          className="w-full border-b border-gray-300 dark:border-gray-600 pb-2 text-gray-800 dark:text-gray-100 font-light focus:border-gray-900 dark:focus:border-green-500 focus:outline-none bg-transparent resize-none"
         ></textarea>
         {fieldError('body')}
       </div>
 
       {status === 'error' && (
-        <p className="text-red-600 text-xs tracking-wide">{t('error')}</p>
+        <p className="text-red-600 dark:text-red-400 text-xs tracking-wide">{t('error')}</p>
       )}
 
       <SubmitButton disabled={Object.keys(errors).length > 0} />

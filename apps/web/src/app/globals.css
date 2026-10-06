@@ -1,16 +1,24 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer components {
   .glass-panel {
-    @apply bg-white/80 backdrop-blur-sm;
+    @apply bg-white/80 backdrop-blur-sm dark:bg-gray-900/85;
   }
 }
 
 html { scroll-behavior: smooth; }
 
 :root {
-  --background: #f9fafb;
-  --foreground: #171717;
+  --background: var(--color-gray-50);
+  --foreground: var(--color-gray-900);
+  color-scheme: light;
+}
+
+html.dark {
+  --background: var(--color-gray-950);
+  --foreground: var(--color-gray-100);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -100,6 +108,21 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #8b5cf6;
+}
+
+html.dark::-webkit-scrollbar-track,
+html.dark ::-webkit-scrollbar-track {
+  background: var(--color-gray-950);
+}
+
+html.dark::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-gray-600);
+}
+
+html.dark::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-500);
 }
 
 @keyframes fade {

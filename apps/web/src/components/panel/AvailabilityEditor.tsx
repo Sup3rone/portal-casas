@@ -27,9 +27,9 @@ function Editor({ propertyId, bookings }: { propertyId: string; bookings: PanelR
     catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
-  return <section className="space-y-4 rounded-2xl border bg-white p-6 shadow-sm">
+  return <section className="space-y-4 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
     <h2 className="text-xl font-semibold">{t('availability')}</h2>
-    <p className="text-sm text-gray-600">{t('blockHint')}</p>
+    <p className="text-sm text-gray-600 dark:text-gray-300">{t('blockHint')}</p>
     <div className="grid gap-6 lg:grid-cols-2">
       <AvailabilityCalendar bookings={occupied} />
       <form onSubmit={save} className="space-y-4">
@@ -41,7 +41,7 @@ function Editor({ propertyId, bookings }: { propertyId: string; bookings: PanelR
       </form>
     </div>
     {!bookings.length && <p>{t('emptyBookings')}</p>}
-    <ul className="space-y-3">{bookings.map(booking => <li key={booking.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+    <ul className="space-y-3">{bookings.map(booking => <li key={booking.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 dark:border-gray-700">
       <span>{booking.startDate} → {booking.endDate} · {booking.source === 'host-block' ? t('blockSource') : t('bookingSource', { source: booking.source })}</span>
       {booking.source === 'host-block' && <div className="flex gap-3"><button type="button" disabled={busy} onClick={() => { setEditing(booking.id); setDates({ startDate: booking.startDate, endDate: booking.endDate }); }} className="underline">{t('editBlock')}</button>
         <button type="button" disabled={busy} onClick={() => remove(booking.id)} className="underline">{t('remove')}</button></div>}

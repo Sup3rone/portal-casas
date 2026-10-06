@@ -30,30 +30,30 @@ export default async function ResetPasswordPage({
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
       <div className="w-full max-w-md">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">{t('resetTitle')}</h1>
+        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">{t('resetTitle')}</h1>
 
         {!tokenValido ? (
-          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-lg bg-red-50 dark:bg-red-950 p-4 text-sm text-red-700 dark:text-red-400">
             {error === 'corta'
               ? t('resetTooShort')
               : t('resetInvalid')}
-            <a href={`/${locale}/olvide-password`} className="mt-2 block font-medium text-purple-600 underline">
+            <a href={`/${locale}/olvide-password`} className="mt-2 block font-medium text-purple-600 dark:text-purple-400 underline">
               {t('resetTryAgain')}
             </a>
           </div>
         ) : (
-          <form action={resetPassword} className="space-y-4 rounded-2xl bg-white p-6 shadow-sm border">
+          <form action={resetPassword} className="space-y-4 rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm border dark:border-gray-700">
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="token" value={token} />
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">{t('newPassword')}</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200">{t('newPassword')}</label>
               <input required type="password" id="password" name="password" minLength={8}
-                className="mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-purple-500 focus:ring-purple-500" />
+                className="mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
             </div>
             <button type="submit"
-              className="w-full rounded-lg bg-purple-600 py-3 font-bold text-white transition-colors hover:bg-purple-700">
+              className="w-full rounded-lg bg-purple-600 py-3 font-bold text-white dark:text-gray-100 transition-colors hover:bg-purple-700">
               {t('resetButton')}
             </button>
           </form>

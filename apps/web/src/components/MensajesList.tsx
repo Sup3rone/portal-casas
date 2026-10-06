@@ -29,7 +29,7 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
       <h1 className="mb-8 text-3xl font-bold">Mensajes recibidos ({rows.length})</h1>
 
       {rows.length === 0 && (
-        <p className="text-gray-500">Todavía no hay mensajes.</p>
+        <p className="text-gray-500 dark:text-gray-400">Todavía no hay mensajes.</p>
       )}
 
       <div className="space-y-4">
@@ -51,24 +51,24 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
                 userId: m.userId,
               })
             }
-            className="cursor-pointer rounded-2xl bg-white p-6 shadow-sm border transition hover:shadow-md"
+            className="cursor-pointer rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm border transition hover:shadow-md dark:border-gray-700"
           >
             <div className="flex justify-between items-start mb-2">
               <div>
                 <h2 className="font-semibold text-lg">
                   {m.name}{" "}
                   {!m.read && (
-                    <span className="ml-2 inline-block rounded-full bg-purple-600 px-2 py-0.5 align-middle text-xs text-white">
+                    <span className="ml-2 inline-block rounded-full bg-purple-600 px-2 py-0.5 align-middle text-xs text-white dark:text-gray-100">
                       NUEVO
                     </span>
                   )}
                   {m.userId && (
-                    <span className="ml-2 inline-block rounded-full bg-indigo-100 px-2 py-0.5 align-middle text-xs font-medium text-indigo-700">
+                    <span className="ml-2 inline-block rounded-full bg-indigo-100 dark:bg-indigo-900/50 px-2 py-0.5 align-middle text-xs font-medium text-indigo-700 dark:text-indigo-400">
                       👤 registrado
                     </span>
                   )}
                 </h2>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   <a href={`mailto:${m.email}`} className="underline">
                     {m.email}
                   </a>
@@ -76,18 +76,18 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
                 </p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <time className="text-xs text-gray-400">
+                <time className="text-xs text-gray-400 dark:text-gray-300">
                   {new Date(m.createdAt).toLocaleString("es")}
                 </time>
                 <MarkAsReadButton messageId={m.id} read={m.read} />
               </div>
             </div>
 
-            <p className="my-3 whitespace-pre-wrap text-gray-700">
+            <p className="my-3 whitespace-pre-wrap text-gray-700 dark:text-gray-200">
               {m.body.length > 150 ? `${m.body.slice(0, 150)}…` : m.body}
             </p>
 
-            <div className="flex gap-4 text-sm text-gray-500">
+            <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
               <span>🏠 {m.propertyTitle ?? m.propiedad ?? "Propiedad eliminada"}</span>
               {m.startDate && m.endDate && (
                 <span>
@@ -96,7 +96,7 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
                 </span>
               )}
             </div>
-            <p className="mt-2 text-right text-xs font-medium text-purple-600">
+            <p className="mt-2 text-right text-xs font-medium text-purple-600 dark:text-purple-400">
               Click para ver detalle y confirmar fechas →
             </p>
           </article>

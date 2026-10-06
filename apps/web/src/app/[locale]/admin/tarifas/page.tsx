@@ -17,17 +17,17 @@ export default async function AdminTarifasPage() {
       <AddTarifaForm propiedades={propiedades.map(p => ({ id: p.id, slug: p.slug }))} />
 
       <div className="mt-8 space-y-4">
-        {tarifas.length === 0 && <p className="text-gray-500">Todavía no hay tarifas de temporada.</p>}
+        {tarifas.length === 0 && <p className="text-gray-500 dark:text-gray-400">Todavía no hay tarifas de temporada.</p>}
         {tarifas.map((t) => (
-          <article key={t.id} className="flex items-center justify-between rounded-2xl bg-white p-6 shadow-sm border">
+          <article key={t.id} className="flex items-center justify-between rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm border dark:border-gray-700">
             <div>
               <h2 className="font-semibold text-lg">
-                {t.name} <span className="text-sm text-gray-400">· {propiedades.find(p => p.id === t.propertyId)?.slug ?? '?'}</span>
+                {t.name} <span className="text-sm text-gray-400 dark:text-gray-300">· {propiedades.find(p => p.id === t.propertyId)?.slug ?? '?'}</span>
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 📅 {t.startDate} → {t.endDate} · Prioridad {t.priority}
               </p>
-              <p className="text-sm font-medium text-purple-600">
+              <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
                 ${t.weekdayPrice.toLocaleString('es-MX')} entre semana · ${t.weekendPrice.toLocaleString('es-MX')} fin de semana
               </p>
             </div>

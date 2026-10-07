@@ -14,6 +14,7 @@ export default async function PanelLayout({ children, params }: { children: Reac
       <Link href="/panel" className="font-semibold text-green-700 dark:text-green-400">{t('properties')}</Link>
       <Link href="/panel/nueva" className="text-green-700 dark:text-green-400">{t('newProperty')}</Link>
       <Link href="/panel/consultas" className="text-green-700 dark:text-green-400">{t('messages')}</Link>
+      {manager.role === 'COLLABORATOR' && <Link href="/panel/calendario" className="text-green-700 dark:text-green-400">{nav('calendario')}</Link>}
       {manager.role === 'ADMIN' && <Link href="/panel/usuarios" className="text-green-700 dark:text-green-400">{admin('title')}</Link>}
       {manager.role === 'ADMIN' && <>
         <Link href="/admin/mensajes" className="text-green-700 dark:text-green-400">{nav('mensajes')}</Link>

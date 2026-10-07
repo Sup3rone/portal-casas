@@ -294,5 +294,29 @@
     "sectionPhotos": "Section photos (maximum 2)",
     "sectionPhotosHint": "Selection order defines the first photo. Without a selection, the first two category photos are used.",
     "clearPhotos": "Use category photos"
+  },
+  "occupationCalendar": {
+    "title": "Occupancy calendar",
+    "sync": "Sync Airbnb (iCal)",
+    "syncing": "Syncing…",
+    "synced": "Synced",
+    "previous": "Previous month",
+    "next": "Next month",
+    "manual": "Manual (portal)",
+    "airbnb": "Airbnb",
+    "google": "Google Calendar",
+    "hint": "Select start and end, then save the block. The end date remains available.",
+    "occupied": "The range crosses occupied dates. Choose another end date.",
+    "error": "Unable to save or sync. Check availability and try again.",
+    "saved": "Block saved",
+    "saving": "Saving…",
+    "block": "Save block",
+    "cancel": "Cancel",
+    "blockedByYou": "Blocked by you",
+    "blocked": "Manual block",
+    "reservedBy": "Reserved by {name}",
+    "unknownGuest": "guest without a recorded name",
+    "free": "Available",
+    "empty": "No properties"
   }
 }

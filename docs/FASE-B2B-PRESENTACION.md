@@ -290,3 +290,85 @@ QA realizada sin BD: TypeScript; tests reales API/SQL en SQLite en memoria y SSR
 - docs/FASE-B2B-PRESENTACION.md y CONTEXTO.md: implementación, SQL y QA pendiente/manual.
 
 Supuestos: intro se elimina solo en casas editoriales para cumplir cero regresión en casas vacías; las dos fotos rotan mostrando una a la vez; hero y selección son independientes. Nota: jsonb no tiene FK por elemento, por lo que quitar Media puede dejar ids guardados; la lectura omite referencias retiradas y el editor permite limpiar la selección. Sin nuevos cambios al borrado de Media.
+
+
+## Calendario de ocupación para colaboradores — 07 Oct 2026
+
+Implementado en código; BlockDate PENDIENTE de migración manual por Emma. No se ejecutaron migraciones ni operaciones Neon. Login/property-access permanecen intactos.
+
+### Rutas y permisos
+
+| Entrada | ADMIN | COLLABORATOR | CLIENT/VIEWER |
+| --- | --- | --- | --- |
+| /[locale]/panel/calendario | Todas las propiedades y sync | Solo ownerId propio, sin sync | Redirección a home en servidor |
+| /[locale]/admin/calendario | Todas las propiedades y sync | 403 en servidor, conserva gate anterior | 403 |
+| POST /api/properties/[id]/calendar-blocks | Cualquier propiedad | Solo propia, ajena 404 | 403 (anónimo 401) |
+
+Se reutilizan requireAdmin/requirePropertyManager, panelManager, managedProperty y filtros managedProperties/managedResource. Ownership también se comprueba en INSERT SELECT; createdBy viene de sesión, nunca del cuerpo. Fechas ISO reales, fin posterior, sin cruces con Booking/BlockDate. Cuerpo inválido 400, recurso ajeno 404. Si hay ocupación nueva desde la selección, no se escribe y responde 404 siguiendo el patrón conservador del editor actual; UI informa que revise disponibilidad.
+
+Calendario conserva leyenda Manual/Airbnb/Google en ambos roles. Cada propiedad es una sección vertical de siete columnas en móvil y desktop. Selección por clic en inicio y fin (también teclado con botones), resaltado de extremos, confirmación Guardar bloqueo. El guardado ocupa [startDate,endDate): el día final queda libre, igual que Booking. Fechas anteriores al inicio reinician; rango completo seguido de clic inicia uno nuevo. Meses/días/textos localizados es/en/fr.
+
+Tooltip/title y aria-label: reservas con guestUserId muestran nombre de User; sin nombre registrado se indica ese límite. BlockDate creada por la sesión muestra Bloqueado por ti; de otro actor muestra Bloqueo manual. Booking host-block histórica no tiene createdBy y usa etiqueta neutral, sin inventar autor. Feeds externos no contienen nombre de huésped en el modelo actual.
+
+### Migración propuesta (no ejecutada)
+
+Convención existente: script transaccional, no idempotente; ejecutar una vez. Archivo scripts/sql/block-date.sql:
+
+```sql
+-- Emma: ejecutar manualmente en Respaldo y luego main antes de desplegar.
+-- No modifica ni mueve los bloqueos históricos Booking.source = host-block.
+BEGIN;
+CREATE TABLE "BlockDate" (
+  "id" text PRIMARY KEY,
+  "propertyId" text NOT NULL REFERENCES "Property"("id") ON DELETE CASCADE,
+  "startDate" date NOT NULL,
+  "endDate" date NOT NULL,
+  "createdBy" text NOT NULL REFERENCES "User"("id") ON DELETE NO ACTION,
+  "createdAt" timestamp NOT NULL DEFAULT now(),
+  CONSTRAINT "BlockDate_range_check" CHECK ("endDate" > "startDate")
+);
+CREATE INDEX "BlockDate_property_dates_idx" ON "BlockDate" ("propertyId", "startDate", "endDate");
+COMMIT;
+```
+
+Emma: confirmar destino Respaldo, aplicar manualmente y probar. Antes de desplegar, restore point y aplicación en main autorizada; después deploy solo con orden expresa. El código requiere BlockDate: no desplegar antes del SQL. No se mueven ni eliminan Booking históricas. Si falla antes de COMMIT: ROLLBACK. Para revertir después, revertir primero la app y revisar/resguardar nuevos bloqueos; DROP TABLE "BlockDate" manual elimina todos los bloqueos nuevos, por lo que requiere aprobación. No ejecutado aquí.
+
+### Integración con disponibilidad
+
+Nuevos bloqueos se guardan solo en BlockDate, sin duplicar Booking. Se combinan en lectura con reservas para el detalle público y el editor individual. POST /api/messages valida ambas fuentes en lectura y de nuevo en INSERT. /api/bookings/create impide reservas directas sobre BlockDate. Los bloqueos host-block del editor existente conservan almacenamiento/edición/borrado actuales y comprueban también BlockDate para evitar cruces. No se cambia la selección/validación del calendario público ni la lógica de precios.
+
+### Archivos de este ajuste
+
+- packages/db/src/schema.ts: tabla blockDates con autor, fechas, FK y CHECK.
+- scripts/sql/block-date.sql: SQL propuesto para Emma, sin modificación de datos existentes.
+- apps/web/src/lib/occupation-calendar.ts: lectura consolidada con ownership/nombre de huésped y creación protegida de bloques.
+- apps/web/src/app/[locale]/panel/calendario/page.tsx: página accesible a managers y datos filtrados.
+- apps/web/src/app/[locale]/admin/calendario/page.tsx: conserva requireAdmin y reutiliza carga completa.
+- apps/web/src/app/[locale]/panel/layout.tsx: enlace Calendario para colaborador; enlaces admin anteriores conservados.
+- apps/web/src/components/CalendarBoard.tsx: selección/guardado, sync por rol, tooltips, stack móvil e i18n.
+- apps/web/src/app/api/properties/[id]/calendar-blocks/route.ts: POST con autorización, validación y revalidación de vistas.
+- apps/web/src/app/[locale]/casas/[slug]/page.tsx: incorpora BlockDate a rangos ocupados enviados a los componentes existentes.
+- apps/web/src/app/api/messages/route.ts: rechaza consultas que cruzan BlockDate antes de guardar.
+- apps/web/src/app/api/bookings/create/route.ts: impide reserva directa sobre BlockDate.
+- apps/web/src/lib/panel-resources.ts: incorpora nuevos bloqueos a la ocupación del editor individual.
+- apps/web/src/lib/panel-mutations.ts: bloqueos históricos respetan los nuevos rangos ocupados.
+- apps/web/messages/es.json, en.json, fr.json: namespace occupationCalendar completo.
+- scripts/test-property-access.cjs: fixture SQLite para nueva tabla.
+- scripts/test-occupation-calendar.cjs: permisos, filtros de propiedades/reservas, autor, validación, solapes, SSR roles/idiomas y bloqueo de consulta/reserva.
+- scripts/qa-occupation-calendar.cjs: fixture interactivo sin BD para layout/selección, no guarda datos reales.
+- docs/FASE-B2B-PRESENTACION.md y CONTEXTO.md: SQL, alcance, pruebas y límites.
+
+### Cómo probar
+
+Tras aplicar SQL en Respaldo: pnpm dev. Tests offline: node scripts/test-occupation-calendar.cjs; node scripts/test-panel.cjs; node scripts/test-panel-render.cjs; node scripts/test-inquiry.cjs; node scripts/test-editorial-presentation.cjs; node scripts/test-property-access.cjs.
+
+1. COLLABORATOR: /es/panel → Calendario. Solo sus propiedades, leyenda completa, sin botón sync. Repetir /en y /fr.
+2. Clic inicio libre y final posterior, Guardar bloqueo. Recargar; SELECT "propertyId", "startDate", "endDate", "createdBy", "createdAt" FROM "BlockDate" ORDER BY "createdAt" DESC LIMIT 10; autor correcto, tooltip Bloqueado por ti.
+3. Rango que cruza reserva/bloqueo: rechazo. POST directo a propiedad ajena con el mismo payload: 404, ninguna fila nueva. Body con createdBy/ownerId: 400.
+4. CLIENT/VIEWER: no panel/calendario; URL directa redirige y API da 403. ADMIN: ambas rutas muestran todas y botón sincronizar. No ejecutar sync en producción para esta QA.
+5. Abrir detalle público: fechas bloqueadas no seleccionables; POST consulta y reserva directa sobre el bloque se rechazan. La salida del bloqueo queda libre bajo convención [inicio,fin).
+6. Verificar tooltip de huésped registrado, datos sin huésped y bloques propios/ajenos. Probar 360/375/768/1440 px, teclado y ambos temas.
+
+Verificación realizada: TypeScript y ESLint focalizados sin errores; tests anteriores pasando sin red/Neon. Fixture real de CalendarBoard con CSS local verificó rango y rechazo de cruce, leyenda, botón admin y 360/375/768/1440 sin overflow. No se ha validado PostgreSQL real ni el guardado desde navegador contra Respaldo. El fixture simula sesiones/datos; prueba de permisos se hace con handlers y SQL reales en memoria.
+
+Supuestos: fin exclusivo; selección por dos clics satisface el alcance (sin arrastre); no se trasladan bloqueos históricos. Notas: edición/borrado de BlockDate nuevos no forma parte del alcance y no se añade; el editor individual los muestra como ocupación sin controles de edición. No se corrige la duplicación de sync iCal ni el solape entre Booking reales preexistente. Las comprobaciones INSERT no son una garantía serializable frente a escrituras simultáneas de sistemas externos; no se añadieron exclusiones ni cambios al importador iCal.

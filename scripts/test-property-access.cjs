@@ -65,7 +65,7 @@ function load(file, source) {
   return module.exports;
 }
 const schema = load('packages/db/src/schema.ts');
-for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds', 'media', 'propertySections']) {
+for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds', 'media', 'propertySections', 'blockDates']) {
   const config = getTableConfig(schema[name]);
   memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => {
     const numeric = /integer|boolean|double/.test(column.getSQLType());

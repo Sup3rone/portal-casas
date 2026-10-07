@@ -24,7 +24,8 @@ export async function createResource(id: string, resource: string, input: unknow
       from ${properties} where ${scope} and not exists (
         select 1 from "Booking" occupied where occupied."propertyId" = ${properties.id}
           and occupied."startDate" < ${block.endDate}::date and occupied."endDate" > ${block.startDate}::date
-      ) returning "id"
+      ) and not exists (select 1 from "BlockDate" occupied where occupied."propertyId" = ${properties.id}
+        and occupied."startDate" < ${block.endDate}::date and occupied."endDate" > ${block.startDate}::date) returning "id"
     `);
   } else if (resource === 'media') {
     const photo = value as typeof media.$inferInsert;
@@ -49,7 +50,9 @@ export async function changeResource(id: string, resource: string, resourceId: s
     const block = value as { startDate: string; endDate: string } | null;
     const scope = and(eq(bookings.id, resourceId), eq(bookings.propertyId, id), eq(bookings.source, 'host-block'), managedResource(bookings.propertyId, manager),
       block ? sql`not exists (select 1 from "Booking" occupied where occupied."propertyId" = ${id}
-        and occupied."id" <> ${resourceId} and occupied."startDate" < ${block.endDate}::date and occupied."endDate" > ${block.startDate}::date)` : sql`true`);
+        and occupied."id" <> ${resourceId} and occupied."startDate" < ${block.endDate}::date and occupied."endDate" > ${block.startDate}::date)
+        and not exists (select 1 from "BlockDate" occupied where occupied."propertyId" = ${id}
+          and occupied."startDate" < ${block.endDate}::date and occupied."endDate" > ${block.startDate}::date)` : sql`true`);
     rows = removing ? await db.delete(bookings).where(scope).returning({ id: bookings.id })
       : await db.update(bookings).set(block!).where(scope).returning({ id: bookings.id });
   } else if (resource === 'media') {

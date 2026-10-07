@@ -1,38 +1,10 @@
-import { db, properties, bookings } from '@portal/db';
-import { asc } from 'drizzle-orm';
 import CalendarBoard from '@/components/CalendarBoard';
-import { managedProperties, managedResource, requireAdmin } from '@/lib/property-access';
+import { requireAdmin } from '@/lib/property-access';
+import { occupationCalendar } from '@/lib/occupation-calendar';
 
 export const dynamic = 'force-dynamic';
-
-export default async function AdminCalendarioPage() {
+export default async function AdminCalendarioPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const manager = await requireAdmin();
-  const propiedades = await db
-    .select({ id: properties.id, slug: properties.slug, title: properties.titleEs })
-    .from(properties)
-    .where(managedProperties(manager))
-    .orderBy(asc(properties.slug));
-
-  const bookingRows = await db
-    .select({
-      propertyId: bookings.propertyId,
-      startDate: bookings.startDate,
-      endDate: bookings.endDate,
-      source: bookings.source,
-    })
-    .from(bookings)
-    .where(managedResource(bookings.propertyId, manager))
-    .orderBy(asc(bookings.startDate));
-
-  return (
-    <CalendarBoard
-      propiedades={propiedades}
-      bookings={bookingRows.map(b => ({
-        propertyId: b.propertyId,
-        start: String(b.startDate).slice(0, 10),
-        end: String(b.endDate).slice(0, 10),
-        source: b.source,
-      }))}
-    />
-  );
+  return <CalendarBoard {...await occupationCalendar(manager, locale)} canSync />;
 }

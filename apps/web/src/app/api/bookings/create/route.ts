@@ -38,6 +38,8 @@ export async function POST(req: NextRequest) {
       insert into "Booking" ("id", "propertyId", "startDate", "endDate", "source", "guestUserId")
       select ${crypto.randomUUID()}, ${properties.id}, ${startDate}::date, ${endDate}::date, 'manual', ${guestUserId || null}
       from ${properties} where ${and(eq(properties.id, propertyId), managedProperties(manager), guestAccess)}
+        and not exists (select 1 from "BlockDate" b where b."propertyId" = ${properties.id}
+          and b."startDate" < ${endDate}::date and b."endDate" > ${startDate}::date)
       returning "id"
     `);
     if (!result.rows.length) throw new AccessError(404);

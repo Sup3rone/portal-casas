@@ -294,5 +294,29 @@
     "sectionPhotos": "Fotos de la sección (máximo 2)",
     "sectionPhotosHint": "El orden de selección define la primera foto. Sin selección se usan las dos primeras de la categoría.",
     "clearPhotos": "Usar fotos de la categoría"
+  },
+  "occupationCalendar": {
+    "title": "Calendario de ocupación",
+    "sync": "Sincronizar Airbnb (iCal)",
+    "syncing": "Sincronizando…",
+    "synced": "Sincronizado",
+    "previous": "Mes anterior",
+    "next": "Mes siguiente",
+    "manual": "Manual (portal)",
+    "airbnb": "Airbnb",
+    "google": "Google Calendar",
+    "hint": "Selecciona inicio y fin, después guarda el bloqueo. La fecha final no queda ocupada.",
+    "occupied": "El rango cruza fechas ocupadas. Elige otro final.",
+    "error": "No se pudo guardar o sincronizar. Revisa la disponibilidad y vuelve a intentar.",
+    "saved": "Bloqueo guardado",
+    "saving": "Guardando…",
+    "block": "Guardar bloqueo",
+    "cancel": "Cancelar",
+    "blockedByYou": "Bloqueado por ti",
+    "blocked": "Bloqueo manual",
+    "reservedBy": "Reservado por {name}",
+    "unknownGuest": "huésped sin nombre registrado",
+    "free": "Libre",
+    "empty": "No hay propiedades"
   }
 }

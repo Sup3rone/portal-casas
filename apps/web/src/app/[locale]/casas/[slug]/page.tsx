@@ -13,6 +13,7 @@ import PropertyShareButton from '@/components/PropertyShareButton';
 import Image from 'next/image';
 import EditorialPresentation from '@/components/EditorialPresentation';
 import { editorialPresentation } from '@/lib/editorial-presentation';
+import { propertyBlocks } from '@/lib/occupation-calendar';
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -51,6 +52,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     .from(bookings)
     .where(eq(bookings.propertyId, property.id))
     .orderBy(bookings.startDate);
+  bookingRows.push(...await propertyBlocks(property.id));
 
   const rateRows = await db
     .select()

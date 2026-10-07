@@ -99,6 +99,18 @@ export const bookings = pgTable('Booking', {
   foreignColumns: [icalFeeds.id, icalFeeds.propertyId],
 })]);
 
+export const blockDates = pgTable('BlockDate', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  startDate: date('startDate').notNull(),
+  endDate: date('endDate').notNull(),
+  createdBy: text('createdBy').notNull().references(() => users.id),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+}, table => [
+  check('BlockDate_range_check', sql`${table.endDate} > ${table.startDate}`),
+  index('BlockDate_property_dates_idx').on(table.propertyId, table.startDate, table.endDate),
+]);
+
 export const seasonRates = pgTable('SeasonRate', {
   id: text('id').primaryKey(),
   propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),

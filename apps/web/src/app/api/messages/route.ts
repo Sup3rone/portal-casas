@@ -4,6 +4,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { auth } from '@/lib/auth';
+import { propertyBlocks } from '@/lib/occupation-calendar';
 import { inquiryFromFormData, inquiryToday, normalizeInquiry, validateInquiry, type InquiryErrors } from '@/lib/inquiry-validation';
 
 const invalid = (fields: InquiryErrors, maxGuests?: number) =>
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest) {
     if (!property) return NextResponse.json({ code: 'PROPERTY_NOT_FOUND' }, { status: 404 });
     const occupied = await db.select({ startDate: bookings.startDate, endDate: bookings.endDate })
       .from(bookings).where(eq(bookings.propertyId, propertyId));
+    occupied.push(...await propertyBlocks(propertyId));
     const errors = validateInquiry(input, { today: inquiryToday(), maxGuests: property.maxGuests, bookings: occupied });
     if (Object.keys(errors).length) return invalid(errors, property.maxGuests);
 
@@ -44,6 +46,8 @@ export async function POST(req: NextRequest) {
       from ${properties} where ${and(eq(properties.id, propertyId), eq(properties.published, true))}
         and ${properties.maxGuests} >= ${value.guests}
         and not exists (select 1 from "Booking" occupied where occupied."propertyId" = ${properties.id}
+          and occupied."startDate" <= ${value.endDate}::date and occupied."endDate" > ${value.startDate}::date)
+        and not exists (select 1 from "BlockDate" occupied where occupied."propertyId" = ${properties.id}
           and occupied."startDate" <= ${value.endDate}::date and occupied."endDate" > ${value.startDate}::date)
       returning *
     `);

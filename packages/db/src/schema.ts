@@ -1,4 +1,5 @@
-import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check } from "drizzle-orm/pg-core";
+import { sql } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT", "COLLABORATOR"]);
 export const mediaTypeEnum = pgEnum('MediaType', ['PHOTO', 'VIDEO']);
@@ -44,7 +45,21 @@ export const media = pgTable('Media', {
   type: mediaTypeEnum('type').notNull().default('PHOTO'),
   order: integer('order').notNull().default(0),
   category: varchar('category', { length: 50 }).default('principal').notNull(),
-});
+}, table => [unique('Media_id_propertyId_unique').on(table.id, table.propertyId)]);
+
+export const propertySections = pgTable('PropertySection', {
+  propertyId: text('propertyId').notNull(),
+  section: varchar('section', { length: 20 }).notNull(),
+  descriptionEs: text('descriptionEs'),
+  descriptionEn: text('descriptionEn'),
+  descriptionFr: text('descriptionFr'),
+  heroMediaId: text('heroMediaId'),
+}, table => [
+  primaryKey({ columns: [table.propertyId, table.section] }),
+  check('PropertySection_section_check', sql`${table.section} in ('destino', 'amenidades', 'habitaciones', 'lugar')`),
+  foreignKey({ name: 'PropertySection_property_fk', columns: [table.propertyId], foreignColumns: [properties.id] }).onDelete('cascade'),
+  foreignKey({ name: 'PropertySection_hero_property_fk', columns: [table.heroMediaId, table.propertyId], foreignColumns: [media.id, media.propertyId] }).onDelete('no action'),
+]);
 
 export const messages = pgTable('Message', {
   id: text('id').primaryKey(),

@@ -1,5 +1,37 @@
 # Fase C1 — Subida de imágenes al panel
 
+## Implementación vigente — pivote a servidor (07 Oct 2026)
+
+El usuario decidió retirar client-upload tras fallos 400/403 no legibles por CORS tanto en localhost como producción. Se adopta el [patrón oficial de server uploads con put()](https://vercel.com/docs/vercel-blob/server-upload). **Todo el historial bajo este bloque corresponde al flujo anterior y no describe el contrato actual.**
+
+- El navegador envía FormData con un único campo `file` a POST `/api/properties/[id]/upload`; no utiliza upload(), handleUpload ni tokens cliente. No establecer Content-Type manualmente: el navegador genera el boundary multipart.
+- El servidor usa requirePropertyManager/managedProperty existentes: ADMIN cualquiera, COLLABORATOR propia (ajena 404), CLIENT/VIEWER 403, anónimo 401. Revalida propiedad antes de escribir. No se modifica property-access.
+- Validación del archivo recibido: JPEG/PNG/WebP, no vacío, máximo **4 MB = 4.000.000 bytes**. Campo ausente, texto en lugar de File, varios archivos o campos adicionales: 400 INVALID_UPLOAD_REQUEST. Formato/tamaño: 400 INVALID_FILE_TYPE/INVALID_FILE_SIZE.
+- El servidor genera UUID/extensión y llama a put() con ruta `properties/<id codificado>/<uuid>.<ext>`, access public, contentType validado, addRandomSuffix false y allowOverwrite false. Nunca utiliza el nombre original. BLOB_READ_WRITE_TOKEN se lee solo en el servidor.
+- Respuesta **201 `{ url }`**, no-store. Errores de SDK/configuración: 500 UPLOAD_FAILED sin detalles sensibles. El editor crea Media PHOTO por el API existente, manteniendo categoría/orden y URL manual. La URL queda disponible si falla ese segundo guardado.
+- Progreso indeterminado mientras fetch envía el archivo y el servidor lo guarda; no se inventa un porcentaje. Estados de subida/éxito/error y textos en es/en/fr se mantienen; UI anuncia 4 MB/4 Mo.
+- El límite se reduce porque [Vercel Functions acepta cuerpos de hasta 4.5 MB](https://vercel.com/docs/functions/limitations): 4 MB deja margen para el multipart. En pruebas manuales de rechazo 400, usar 4.000.001 bytes y cuerpo menor que 4.5 MB. Un cuerpo que supera el límite de plataforma puede recibir 413 antes del handler. Cliente siempre rechaza archivos mayores que 4 MB antes de enviar.
+- Sin cambios a Media/esquema, URL manual, sitio público, galería/lightbox, presentación, videos o permisos. No se despliega ni se escribe en BD/Blob real en esta implementación. Sin compresión/optimización ni limpieza automática de huérfanos.
+
+### Pruebas del pivote
+
+Desde raíz: `node scripts/test-photo-upload.cjs`, `node scripts/test-panel.cjs`, `node scripts/test-panel-render.cjs`, `node scripts/test-gallery-share.cjs` y `pnpm lint`. Typecheck desde apps/web: `node node_modules/typescript/bin/tsc --noEmit --incremental false`.
+
+Resultado: todos pasan; lint 0 errores/9 warnings preexistentes, TypeScript limpio. Tests ahora mockean put() y cubren multipart único, roles/ajena, MIME/tamaño, límite exacto, nombres ignorados/UUID/extensión, no sobrescritura, URL pública, creación Media con categoría/orden y SSR es/en/fr. Se retiró la prueba del transporte de client-upload.
+
+QA manual, pendiente con credencial real:
+
+1. Local: configurar el token del store público en el entorno de apps/web, reiniciar `pnpm dev`, entrar como colaborador y subir una foto propia por selector y drag & drop. Revisar POST multipart → 201 con url; no debe aparecer PUT del navegador a Vercel. Confirmar archivo en dashboard Storage → Blob y Media PHOTO/categoría/orden.
+2. Verificar URL manual y foto pública de una propiedad publicada. Repetir es/en/fr y ambos temas; probar archivo de exactamente 4.000.000 bytes.
+3. POST autenticado a propiedad ajena: 404 sin llamada a put. CLIENT/VIEWER 403. Formato inválido y archivo de 4.000.001 bytes: 400; vacío/múltiples archivos: 400. ADMIN puede subir a cualquier propiedad.
+4. Producción: después del despliegue autorizado y con token configurado, repetir el mismo flujo y verificar archivo en Storage. Esta tarea no ejecuta ni autoriza despliegue; no se probó upload real local/producción.
+
+Archivos del pivote: upload/route.ts (put multipart), photo-upload.ts (4 MB y eliminación de reglas de token), ResourceEditor.tsx (FormData/progreso indeterminado), es/en/fr.json (límite visible), test-photo-upload.cjs (put mock), este documento y CONTEXTO.md. No cambia package.json/lockfile en este pivote.
+
+Supuestos: store público y token preparados por Emma, como en C1; 4 MB decimal; una foto por petición. El pivote elimina CORS del navegador hacia Blob, pero no puede garantizar corregir una credencial inválida o un store suspendido: esos fallos ahora llegan como error del endpoint del servidor.
+
+## Historial del flujo client-upload retirado
+
 Fecha: 07 Oct 2026. Implementada en código, sin migraciones, deploy ni acceso a Neon/Blob real. Pruebas con SDK mockeado. TypeScript y ESLint pendientes: su ejecución fuera del sandbox fue rechazada; no se reintentó por otra vía.
 
 ## Transporte elegido

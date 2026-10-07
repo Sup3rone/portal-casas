@@ -18,6 +18,8 @@ const cache = new Map();
 const revalidated = [];
 const readFeeds = [];
 const queryLog = [];
+const moduleMocks = new Map();
+function mockModule(name, value) { moduleMocks.set(name, value); }
 function load(file, source) {
   file = path.resolve(root, file);
   if (cache.has(file)) return cache.get(file).exports;
@@ -27,6 +29,7 @@ function load(file, source) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   function localRequire(name) {
+    if (moduleMocks.has(name)) return moduleMocks.get(name);
     if (name.endsWith('.module.css')) return new Proxy({}, { get: (_, key) => key === '__esModule' ? false : String(key) });
     if (name === 'server-only') return {};
     if (name === '@portal/db') return portal;
@@ -155,7 +158,7 @@ async function main() {
   memory.close();
   console.log('OK: acceso por rol/dueño, APIs directas, acciones, revocación y consulta pública. Sin red ni BD real.');
 }
-module.exports = { load, portal, req, memory, queryLog, setSession: value => { session = value; }, setLocale: value => { testLocale = value; } };
+module.exports = { load, portal, req, memory, queryLog, mockModule, setSession: value => { session = value; }, setLocale: value => { testLocale = value; } };
 if (require.main === module) {
   main().catch(error => { console.error(error); process.exitCode = 1; });
 }

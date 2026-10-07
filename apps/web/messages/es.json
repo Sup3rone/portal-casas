@@ -318,5 +318,19 @@
     "unknownGuest": "huésped sin nombre registrado",
     "free": "Libre",
     "empty": "No hay propiedades"
+  },
+  "photoUpload": {
+    "drop": "Arrastra una foto aquí",
+    "hint": "JPEG, PNG o WebP · máximo 5 MB · una foto por subida. Usa la categoría y el orden del formulario; también puedes añadir una URL manual.",
+    "choose": "Elegir archivo",
+    "uploading": "Subiendo…",
+    "success": "Foto subida y añadida",
+    "typeError": "Elige una imagen JPEG, PNG o WebP.",
+    "sizeError": "La imagen debe tener contenido y pesar como máximo 5 MB.",
+    "oneFile": "Sube una sola foto cada vez.",
+    "orderError": "El orden debe ser un número entero válido mayor o igual a cero.",
+    "accessError": "No tienes acceso a esta propiedad.",
+    "uploadError": "No se pudo completar la subida o guardar la foto. Si aparece una URL, puedes guardarla mediante el formulario manual.",
+    "uploadedUrl": "URL de la foto subida:"
   }
 }

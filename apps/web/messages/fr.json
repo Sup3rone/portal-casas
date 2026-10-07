@@ -319,5 +319,19 @@
     "unknownGuest": "voyageur sans nom enregistré",
     "free": "Disponible",
     "empty": "Aucune propriété"
+  },
+  "photoUpload": {
+    "drop": "Déposez une photo ici",
+    "hint": "JPEG, PNG ou WebP · 5 Mo maximum · une photo par envoi. Utilise la catégorie et l’ordre du formulaire ; vous pouvez aussi ajouter une URL manuelle.",
+    "choose": "Choisir un fichier",
+    "uploading": "Envoi…",
+    "success": "Photo envoyée et ajoutée",
+    "typeError": "Choisissez une image JPEG, PNG ou WebP.",
+    "sizeError": "L’image ne doit pas être vide et ne doit pas dépasser 5 Mo.",
+    "oneFile": "Envoyez une seule photo à la fois.",
+    "orderError": "L’ordre doit être un entier valide supérieur ou égal à zéro.",
+    "accessError": "Vous n’avez pas accès à cette propriété.",
+    "uploadError": "Impossible de terminer l’envoi ou d’enregistrer la photo. Si une URL apparaît, vous pouvez l’enregistrer avec le formulaire manuel.",
+    "uploadedUrl": "URL de la photo envoyée :"
   }
 }

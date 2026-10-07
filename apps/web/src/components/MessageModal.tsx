@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export type MessageData = {
   id: string;
@@ -51,13 +51,15 @@ export default function MessageModal({
   const [endDate, setEndDate] = useState(toDateInput(message.endDate));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [prevMessage, setPrevMessage] = useState(message);
 
   // Resetear fechas si se abre otro mensaje
-  useEffect(() => {
+  if (message !== prevMessage) {
+    setPrevMessage(message);
     setStartDate(toDateInput(message.startDate));
     setEndDate(toDateInput(message.endDate));
     setError(null);
-  }, [message]);
+  }
 
   const valid = Boolean(startDate && endDate && startDate <= endDate);
 

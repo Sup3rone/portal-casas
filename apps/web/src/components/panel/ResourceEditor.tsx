@@ -1,14 +1,46 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { upload } from '@vercel/blob/client';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { PanelResources } from '@/lib/panel-resources';
 import { panelRequest, inputClass, buttonClass } from './request';
+import { photoMetadata, photoPath, PhotoUploadError } from '@/lib/photo-upload';
 
 type Item = PanelResources['rates'][number] | PanelResources['media'][number];
 export default function ResourceEditor({ propertyId, resource, items }: { propertyId: string; resource: 'rates' | 'media'; items: Item[] }) {
   const t = useTranslations('panel'), router = useRouter();
   const [editing, setEditing] = useState<Item | null>(null), [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
+  const uploader = useTranslations('photoUpload');
+  const formRef = useRef<HTMLFormElement>(null), fileRef = useRef<HTMLInputElement>(null), uploadLock = useRef(false);
+  const [uploading, setUploading] = useState(false), [progress, setProgress] = useState(0), [uploadMessage, setUploadMessage] = useState('');
+  const [uploadedUrl, setUploadedUrl] = useState('');
+  async function uploadPhoto(files: FileList | null) {
+    if (!files?.length || uploadLock.current || busy || editing) return;
+    if (files.length !== 1) { setUploadMessage('oneFile'); return; }
+    const file = files[0];
+    try { photoMetadata(file.type, file.size); }
+    catch (error) { setUploadMessage(error instanceof PhotoUploadError && error.code === 'INVALID_FILE_SIZE' ? 'sizeError' : 'typeError'); return; }
+    const form = new FormData(formRef.current!);
+    const category = String(form.get('category') || 'principal'), order = Number(form.get('order'));
+    if (!Number.isSafeInteger(order) || order < 0 || order > 2147483647) { setUploadMessage('orderError'); return; }
+    uploadLock.current = true; setUploading(true); setProgress(0); setUploadMessage(''); setUploadedUrl('');
+    try {
+      const metadata = photoMetadata(file.type, file.size);
+      const blob = await upload(photoPath(propertyId, crypto.randomUUID(), metadata.contentType), file, {
+        access: 'public', contentType: metadata.contentType, multipart: false,
+        handleUploadUrl: `/api/properties/${encodeURIComponent(propertyId)}/upload`,
+        clientPayload: JSON.stringify(metadata), onUploadProgress: event => setProgress(Math.round(event.percentage)),
+      });
+      setUploadedUrl(blob.url);
+      const urlField = formRef.current?.elements.namedItem('url');
+      if (urlField instanceof HTMLInputElement) urlField.value = blob.url;
+      await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}/media`, 'POST', { url: blob.url, category, order });
+      if (urlField instanceof HTMLInputElement) urlField.value = '';
+      setUploadMessage('success'); router.refresh();
+    } catch (error) { setUploadMessage(error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError'); }
+    finally { uploadLock.current = false; setUploading(false); if (fileRef.current) fileRef.current.value = ''; }
+  }
   const fields = resource === 'rates' ? ['name', 'startDate', 'endDate', 'weekdayPrice', 'weekendPrice', 'priority'] : ['url', 'category', 'order'];
   function initial(field: string) {
     const value = (editing as unknown as Record<string, unknown> | null)?.[field];
@@ -37,18 +69,28 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
     {!items.length && <p>{t(resource === 'rates' ? 'emptyRates' : 'emptyPhotos')}</p>}
     <ul className="space-y-3">{items.map(item => <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 dark:border-gray-700">
       <span className="min-w-0 break-all">{'name' in item ? `${item.name} · ${item.startDate} → ${item.endDate} · ${item.weekdayPrice}/${item.weekendPrice} MXN` : item.url}</span>
-      <div className="flex gap-3"><button type="button" disabled={busy} onClick={() => { setEditing(item); setMessage(''); }} className="underline">{t('edit')}</button>
-        <button type="button" disabled={busy} onClick={() => remove(item.id)} className="underline">{t('remove')}</button></div>
+      <div className="flex gap-3"><button type="button" disabled={busy || uploading} onClick={() => { setEditing(item); setMessage(''); }} className="underline">{t('edit')}</button>
+        <button type="button" disabled={busy || uploading} onClick={() => remove(item.id)} className="underline">{t('remove')}</button></div>
     </li>)}</ul>
-    <form key={editing?.id ?? 'new'} onSubmit={submit} className="grid gap-4 md:grid-cols-2">
+    <form ref={formRef} key={editing?.id ?? 'new'} onSubmit={submit} className="grid gap-4 md:grid-cols-2">
       {fields.map(field => <label key={field} className="block text-sm">{t(field === 'url' ? 'photoUrl' : field)}
-        {field === 'category' ? <select name={field} defaultValue={initial(field)} className={inputClass}>{['principal', 'habitaciones', 'amenidades', 'lugar'].map(value => <option key={value} value={value}>{t(value)}</option>)}</select>
+        {field === 'category' ? <select name={field} disabled={busy || uploading} defaultValue={initial(field)} className={inputClass}>{['principal', 'habitaciones', 'amenidades', 'lugar'].map(value => <option key={value} value={value}>{t(value)}</option>)}</select>
           : <input name={field} required type={['startDate', 'endDate'].includes(field) ? 'date' : ['weekdayPrice', 'weekendPrice', 'priority', 'order'].includes(field) ? 'number' : 'text'}
-            min={['weekdayPrice', 'weekendPrice', 'order'].includes(field) ? 0 : undefined} step={1} defaultValue={initial(field)} className={inputClass} />}
+            disabled={busy || uploading} min={['weekdayPrice', 'weekendPrice', 'order'].includes(field) ? 0 : undefined} step={1} defaultValue={initial(field)} className={inputClass} />}
       </label>)}
-      <div className="flex gap-3"><button disabled={busy} className={buttonClass}>{t(busy ? 'saving' : editing ? 'save' : resource === 'rates' ? 'addRate' : 'addPhoto')}</button>
-        {editing && <button type="button" onClick={() => setEditing(null)}>{t('cancel')}</button>}</div>
+      <div className="flex gap-3"><button disabled={busy || uploading} className={buttonClass}>{t(busy ? 'saving' : editing ? 'save' : resource === 'rates' ? 'addRate' : 'addPhoto')}</button>
+        {editing && <button type="button" disabled={busy || uploading} onClick={() => setEditing(null)}>{t('cancel')}</button>}</div>
     </form>
+    {resource === 'media' && !editing && <div className="space-y-3 rounded-xl border-2 border-dashed border-gray-300 p-4 dark:border-gray-600"
+      onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void uploadPhoto(event.dataTransfer.files); }} aria-busy={uploading}>
+      <p className="font-medium">{uploader('drop')}</p><p className="text-sm text-gray-600 dark:text-gray-300">{uploader('hint')}</p>
+      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" tabIndex={-1} disabled={busy || uploading}
+        onChange={event => { void uploadPhoto(event.currentTarget.files); }} aria-label={uploader('choose')} />
+      <button type="button" disabled={busy || uploading} onClick={() => fileRef.current?.click()} className={buttonClass}>{uploader(uploading ? 'uploading' : 'choose')}</button>
+      {uploading && <div><label htmlFor={`upload-${propertyId}`}>{uploader('uploading')} {progress}%</label><progress id={`upload-${propertyId}`} value={progress} max={100} className="w-full accent-green-700" /></div>}
+      {uploadMessage && <p role={uploadMessage === 'success' ? 'status' : 'alert'}>{uploader(uploadMessage)}</p>}
+      {uploadedUrl && <p className="break-all text-sm">{uploader('uploadedUrl')} <a href={uploadedUrl} target="_blank" rel="noreferrer" className="underline">{uploadedUrl}</a></p>}
+    </div>}
     {message && <p role="status">{t(message)}</p>}
   </section>;
 }

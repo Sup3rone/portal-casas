@@ -3,9 +3,12 @@ import { redirect } from "next/navigation";
 import { db, users, bookings, messages, properties } from "@portal/db";
 import { and, eq, desc } from "drizzle-orm";
 import { logoutAction } from "./actions";
+import Link from "next/link";
+import { getLocale } from "next-intl/server";
 
 export default async function MyAccountPage() {
   const session = await auth();
+  const locale = await getLocale();
 
   if (!session?.user?.email) {
     redirect("/es/login");
@@ -83,9 +86,9 @@ export default async function MyAccountPage() {
             {userMessages.length === 0 ? (
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Aún no has enviado consultas.{" "}
-                <a href="/es/casas" className="text-purple-600 dark:text-purple-400 underline">
+                <Link href={`/${locale}/casas`} className="text-purple-600 dark:text-purple-400 underline">
                   Explora las propiedades
-                </a>
+                </Link>
               </p>
             ) : (
               <ul className="space-y-3">

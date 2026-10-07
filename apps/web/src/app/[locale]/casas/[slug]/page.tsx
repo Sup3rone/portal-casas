@@ -1,5 +1,5 @@
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
-import { db, properties, media, bookings, seasonRates } from '@portal/db';
+import { db, properties, media, bookings, seasonRates, propertySections } from '@portal/db';
 import { eq, and } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -9,6 +9,10 @@ import ReservationDatesProvider from '@/components/ReservationDatesProvider';
 import PropertyGallery from '@/components/PropertyGallery';
 import CategorySection from '@/components/CategorySection';
 import LocationMap from '@/components/LocationMap';
+import PropertyShareButton from '@/components/PropertyShareButton';
+import Image from 'next/image';
+import EditorialPresentation from '@/components/EditorialPresentation';
+import { editorialPresentation } from '@/lib/editorial-presentation';
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -33,6 +37,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     .from(media)
     .where(eq(media.propertyId, property.id))
     .orderBy(media.order);
+  const sectionRows = await db.select().from(propertySections).where(eq(propertySections.propertyId, property.id));
+  const editorial = editorialPresentation(property.id, locale, sectionRows, mediaList);
+  const warnings = sectionRows.find(row => row.section === 'advertencias');
+  const warningDescription = (locale === 'en' ? warnings?.descriptionEn : locale === 'fr' ? warnings?.descriptionFr : warnings?.descriptionEs)?.trim() || '';
+  const warningHero = mediaList.find(item => item.id === warnings?.heroMediaId && item.type === 'PHOTO');
+  const hasWarnings = Boolean(warningDescription || warnings?.heroMediaId);
+  const hasMap = property.lat != null && property.lng != null;
+  const hasEditorial = (name: string) => editorial.some(slide => slide.section === name);
 
   const bookingRows = await db
     .select({ startDate: bookings.startDate, endDate: bookings.endDate })
@@ -113,10 +125,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     >
       {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <section className="mx-auto max-w-7xl px-3 py-8 md:px-6">
-        <div className="mb-6 rounded-2xl bg-black/30 dark:bg-black/50 p-6 text-center">
+        <div className="relative mb-6 rounded-2xl bg-black/30 dark:bg-black/50 p-6 pr-16 text-center">
+          <PropertyShareButton title={title} />
           <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
             {title.toUpperCase()}
           </h1>
+          {editorial.length > 0 && <p className="mt-3 break-words text-sm text-white/80">{property.address}, {property.city}</p>}
           <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80 dark:text-gray-200">
             {property.city.toUpperCase()} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
           </p>
@@ -134,6 +148,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       </section>
 
       {/* ===== EL DESTINO + LO QUE OFRECE — widgets flotantes ===== */}
+      {(editorial.length === 0 || !hasEditorial('lugar')) && (
       <section className="px-6 py-16">
         <div className="mx-auto max-w-7xl">
 
@@ -141,6 +156,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Widget 1: EL DESTINO — título arriba, mapa ABAJO */}
+            {editorial.length === 0 && (
             <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
               <h2 className="mb-4 text-center text-2xl font-light tracking-[0.3em] text-gray-900 dark:text-gray-100">
                 {t('details.destino')}
@@ -148,15 +164,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
               <p className="mb-6 text-center text-sm font-light leading-relaxed text-gray-600 dark:text-gray-300">
                 {property.address}, {property.city}
               </p>
-              {/* Mapa adentro del cuadro, debajo de las letras */}
-              <div className="overflow-hidden rounded-lg">
-                {property.lat != null && property.lng != null && (
-                  <LocationMap lat={property.lat} lng={property.lng} address={property.address} propertyTitle={title} />
-                )}
-              </div>
+
             </div>
 
+            )}
             {/* Widget 2: LO QUE OFRECE ESTE LUGAR */}
+            {!hasEditorial('lugar') && (
             <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
               <h2 className="mb-6 text-center text-2xl font-light tracking-[0.3em] text-gray-900 dark:text-gray-100">
                 {t('details.ofrece')}
@@ -177,11 +190,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
                 ))}
               </ul>
             </div>
+            )}
           </div>
         </div>
       </section>
+      )}
+
+      {editorial.length > 0 && <>
+        <EditorialPresentation slides={editorial} />
+        <a href="#reservar" className="fixed bottom-6 right-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{t('details.reservar')}</a>
+      </>}
 
       {/* ===== AMENIDADES: info + imagen ===== */}
+      {(!hasEditorial('amenidades') || porCategoria('amenidades').some(item => item.type === 'VIDEO')) && (
       <CategorySection
         label={t('details.amenidades')}
         slides={porCategoria('amenidades')}
@@ -193,8 +214,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           { icon: '🅿️', label: t('details.amenities.estacionamiento') },
         ]}
       />
+      )}
 
       {/* ===== HABITACIONES: imagen + info (invertido) ===== */}
+      {(!hasEditorial('habitaciones') || porCategoria('habitaciones').some(item => item.type === 'VIDEO')) && (
       <CategorySection
         label={t('details.habitaciones')}
         slides={porCategoria('habitaciones')}
@@ -204,6 +227,18 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           { icon: '🛁', label: t('details.amenities.banos') },
         ]}
       />
+      )}
+
+      {(hasMap || hasWarnings) && <section className="px-4 py-16 md:px-6" aria-label={t('details.mapWarnings')}>
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
+          {hasMap && <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} />}
+          {hasWarnings && <div className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
+            <h2 className="mb-4 text-2xl font-light tracking-wide">{t('details.advertencias')}</h2>
+            {warningHero && <Image src={warningHero.url} alt={t('details.advertencias')} width={600} height={400} unoptimized className="mb-4 h-auto w-full rounded-lg object-cover" />}
+            {warningDescription && <p className="whitespace-pre-wrap break-words leading-relaxed">{warningDescription}</p>}
+          </div>}
+        </div>
+      </section>}
 
       {/* ===== RESERVAR: calendario izquierda, formulario derecha ===== */}
       <section id="reservar" className="px-6 py-24">

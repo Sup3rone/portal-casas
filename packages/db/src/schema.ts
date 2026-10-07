@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check, jsonb } from "drizzle-orm/pg-core";
 import { sql } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT", "COLLABORATOR"]);
@@ -54,9 +54,11 @@ export const propertySections = pgTable('PropertySection', {
   descriptionEn: text('descriptionEn'),
   descriptionFr: text('descriptionFr'),
   heroMediaId: text('heroMediaId'),
+  photoMediaIds: jsonb('photoMediaIds').$type<string[]>(),
 }, table => [
   primaryKey({ columns: [table.propertyId, table.section] }),
-  check('PropertySection_section_check', sql`${table.section} in ('destino', 'amenidades', 'habitaciones', 'lugar')`),
+  check('PropertySection_section_check', sql`${table.section} in ('destino', 'amenidades', 'habitaciones', 'lugar', 'advertencias')`),
+  check('PropertySection_photos_check', sql`${table.photoMediaIds} is null or case when jsonb_typeof(${table.photoMediaIds}) = 'array' then jsonb_array_length(${table.photoMediaIds}) <= 2 else false end`),
   foreignKey({ name: 'PropertySection_property_fk', columns: [table.propertyId], foreignColumns: [properties.id] }).onDelete('cascade'),
   foreignKey({ name: 'PropertySection_hero_property_fk', columns: [table.heroMediaId, table.propertyId], foreignColumns: [media.id, media.propertyId] }).onDelete('no action'),
 ]);

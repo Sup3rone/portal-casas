@@ -18,15 +18,16 @@ const cache = new Map();
 const revalidated = [];
 const readFeeds = [];
 const queryLog = [];
-function load(file) {
+function load(file, source) {
   file = path.resolve(root, file);
   if (cache.has(file)) return cache.get(file).exports;
   const module = { exports: {} };
   cache.set(file, module);
-  const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+  const code = ts.transpileModule(source ?? fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   function localRequire(name) {
+    if (name.endsWith('.module.css')) return new Proxy({}, { get: (_, key) => key === '__esModule' ? false : String(key) });
     if (name === 'server-only') return {};
     if (name === '@portal/db') return portal;
     if (name === '@/lib/auth' || (name === './auth' && file.endsWith('property-access.ts'))) {
@@ -64,12 +65,12 @@ function load(file) {
   return module.exports;
 }
 const schema = load('packages/db/src/schema.ts');
-for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds', 'media']) {
+for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds', 'media', 'propertySections']) {
   const config = getTableConfig(schema[name]);
   memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => {
     const numeric = /integer|boolean|double/.test(column.getSQLType());
     return `"${column.name}" ${numeric ? 'REAL' : 'TEXT'}${column.primary ? ' PRIMARY KEY' : ''}`;
-  }).join(', ')})`);
+  }).join(', ')}${config.primaryKeys.map(key => `, PRIMARY KEY (${key.columns.map(column => `"${column.name}"`).join(', ')})`).join('')})`);
 }
 const client = { query: async (query, values, options) => {
   queryLog.push(query);

@@ -186,7 +186,13 @@
     "bathrooms": "Bathrooms",
     "inquire": "Rental inquiry",
     "disponibilidad": "Availability",
-    "location": "Location"
+    "location": "Location",
+    "presentation": {
+      "slideshow": "{section} slideshow",
+      "description": "{section} description"
+    },
+    "advertencias": "Property notices",
+    "mapWarnings": "Map and property notices"
   },
   "common": {
     "verMas": "See more",
@@ -272,5 +278,21 @@
       "COLLABORATOR": "Collaborator",
       "VIEWER": "Viewer"
     }
+  },
+  "panelSections": {
+    "title": "Property sections",
+    "descriptionEs": "Description (Spanish)",
+    "descriptionEn": "Description (English)",
+    "descriptionFr": "Description (French)",
+    "hero": "Hero image",
+    "noImage": "No image",
+    "photoOrder": "Image · order {order}",
+    "preview": "Hero image preview",
+    "noPhotos": "Add images in the image editor to choose one.",
+    "unavailable": "Image no longer available: choose another or no image",
+    "clearHint": "To clear the content, empty all three descriptions, choose No image, clear the photo selection and save.",
+    "sectionPhotos": "Section photos (maximum 2)",
+    "sectionPhotosHint": "Selection order defines the first photo. Without a selection, the first two category photos are used.",
+    "clearPhotos": "Use category photos"
   }
 }

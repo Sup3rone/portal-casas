@@ -186,7 +186,13 @@
     "bathrooms": "Salles de bain",
     "inquire": "Demande de location",
     "disponibilidad": "Disponibilité",
-    "location": "Emplacement"
+    "location": "Emplacement",
+    "presentation": {
+      "slideshow": "Diaporama : {section}",
+      "description": "Description : {section}"
+    },
+    "advertencias": "Avertissements du lieu",
+    "mapWarnings": "Carte et avertissements du lieu"
   },
   "common": {
     "verMas": "Voir plus",
@@ -273,5 +279,21 @@
       "COLLABORATOR": "Collaborateur",
       "VIEWER": "Lecteur"
     }
+  },
+  "panelSections": {
+    "title": "Sections de la propriété",
+    "descriptionEs": "Description (espagnol)",
+    "descriptionEn": "Description (anglais)",
+    "descriptionFr": "Description (français)",
+    "hero": "Image principale",
+    "noImage": "Sans image",
+    "photoOrder": "Image · ordre {order}",
+    "preview": "Aperçu de l’image principale",
+    "noPhotos": "Ajoutez des images dans l’éditeur d’images pour en choisir une.",
+    "unavailable": "Image indisponible : choisissez une autre image ou Sans image",
+    "clearHint": "Pour effacer le contenu, videz les trois descriptions, choisissez Sans image, effacez la sélection de photos et enregistrez.",
+    "sectionPhotos": "Photos de la section (2 maximum)",
+    "sectionPhotosHint": "L’ordre de sélection définit la première photo. Sans sélection, les deux premières photos de la catégorie sont utilisées.",
+    "clearPhotos": "Utiliser les photos de la catégorie"
   }
 }

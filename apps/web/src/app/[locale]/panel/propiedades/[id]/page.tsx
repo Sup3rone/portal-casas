@@ -7,10 +7,13 @@ import PublicationButton from '@/components/panel/PublicationButton';
 import ResourceEditor from '@/components/panel/ResourceEditor';
 import AvailabilityEditor from '@/components/panel/AvailabilityEditor';
 import SectionSlider from '@/components/SectionSlider';
+import PropertySectionsEditor from '@/components/panel/PropertySectionsEditor';
+import { sectionsForProperty } from '@/lib/property-sections';
 
 export default async function EditPropertyPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params, { manager, property } = await panelProperty(id, locale);
   const resources = await propertyResources(id, manager);
+  const sections = await sectionsForProperty(id, manager);
   const t = await getTranslations({ locale, namespace: 'panel' });
   return <section className="space-y-8">
     <Link href="/panel" className="text-green-700 dark:text-green-400 underline">{t('back')}</Link>
@@ -21,5 +24,6 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
     <AvailabilityEditor propertyId={id} bookings={resources.bookings} />
     {resources.media.length > 0 && <SectionSlider slides={resources.media} />}
     <ResourceEditor propertyId={id} resource="media" items={resources.media.filter(item => item.type === 'PHOTO')} />
+    <PropertySectionsEditor propertyId={id} sections={sections} media={resources.media} />
   </section>;
 }

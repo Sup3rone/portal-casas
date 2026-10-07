@@ -186,7 +186,13 @@
     "bathrooms": "Baños",
     "inquire": "Consulta de renta",
     "disponibilidad": "Disponibilidad",
-    "location": "Ubicación"
+    "location": "Ubicación",
+    "presentation": {
+      "slideshow": "Galería de {section}",
+      "description": "Descripción de {section}"
+    },
+    "advertencias": "Advertencias del lugar",
+    "mapWarnings": "Mapa y advertencias del lugar"
   },
   "common": {
     "verMas": "Ver más",
@@ -272,5 +278,21 @@
       "COLLABORATOR": "Colaborador",
       "VIEWER": "Lector"
     }
+  },
+  "panelSections": {
+    "title": "Secciones de la propiedad",
+    "descriptionEs": "Descripción (español)",
+    "descriptionEn": "Descripción (inglés)",
+    "descriptionFr": "Descripción (francés)",
+    "hero": "Imagen protagonista",
+    "noImage": "Sin imagen",
+    "photoOrder": "Imagen · orden {order}",
+    "preview": "Vista previa de la imagen protagonista",
+    "noPhotos": "Añade imágenes en el editor de imágenes para poder elegir una.",
+    "unavailable": "Imagen ya no disponible: selecciona otra o sin imagen",
+    "clearHint": "Para borrar el contenido, vacía las tres descripciones, elige Sin imagen, limpia la selección de fotos y guarda.",
+    "sectionPhotos": "Fotos de la sección (máximo 2)",
+    "sectionPhotosHint": "El orden de selección define la primera foto. Sin selección se usan las dos primeras de la categoría.",
+    "clearPhotos": "Usar fotos de la categoría"
   }
 }

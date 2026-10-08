@@ -10,12 +10,6 @@
 .frames { position: relative; height: clamp(140px, 30svh, 320px); }
 .photo { position: absolute; inset: 0; border-radius: .75rem; overflow: hidden; transition: opacity 400ms ease; }
 .description { max-height: 48svh; overflow-y: auto; margin-top: 1rem; overflow-wrap: anywhere; }
-.controls { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: 1rem; }
-.arrow { height: 44px; width: 44px; border-radius: 9999px; background: var(--color-green-700); color: var(--color-white); font-size: 1.5rem; }
-.indicators { display: flex; flex-wrap: wrap; max-height: 88px; overflow-y: auto; }
-.indicator { display: grid; place-items: center; height: 44px; width: 44px; }
-.indicator span { height: 8px; width: 8px; border-radius: 9999px; background: var(--color-green-700); }
-:global(.dark) .indicator span { background: var(--color-green-400); }
 :global(.dark) .images:focus-visible { outline-color: var(--color-green-400); }
 @media (max-width: 1023px) { .floating { inset: 1rem; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-content: center; } .frames { height: clamp(110px, 22svh, 220px); } .description { max-height: 27svh; } }
 @media (max-height: 650px) { .floating { align-content: start; } }

@@ -54,14 +54,6 @@ function EditorialScreen({ slide }: { slide: EditorialSlide }) {
           </div>;
         })}
       </div>
-      {count > 1 && <div className={styles.controls}>
-        <button type="button" className={styles.arrow} onClick={() => move(-1)} aria-label={gallery('anterior')}>‹</button>
-        <span>{gallery('posicion', { number: index + 1, count })}</span>
-        <button type="button" className={styles.arrow} onClick={() => move(1)} aria-label={gallery('siguiente')}>›</button>
-        <div className={styles.indicators}>{slide.photos.map((photo, number) => <button key={photo.id} type="button"
-          onClick={() => move(number - index)} aria-label={gallery('irFoto', { number: number + 1 })} aria-current={number === index ? 'true' : undefined}
-          className={styles.indicator}><span style={{ opacity: number === index ? 1 : 0.4 }} /></button>)}</div>
-      </div>}
     </div>
     <div className={`${styles.narrative} glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`}>
       <h2 className="break-words text-2xl font-light tracking-widest md:text-4xl">{t(titles[slide.section])}</h2>

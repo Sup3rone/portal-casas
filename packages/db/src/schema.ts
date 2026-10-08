@@ -45,7 +45,12 @@ export const media = pgTable('Media', {
   type: mediaTypeEnum('type').notNull().default('PHOTO'),
   order: integer('order').notNull().default(0),
   category: varchar('category', { length: 50 }).default('principal').notNull(),
-}, table => [unique('Media_id_propertyId_unique').on(table.id, table.propertyId)]);
+  isCover: boolean('isCover').notNull().default(false),
+  coverOrder: integer('coverOrder'),
+}, table => [
+  unique('Media_id_propertyId_unique').on(table.id, table.propertyId),
+  check('Media_cover_check', sql`(${table.isCover} and ${table.type} = 'PHOTO' and ${table.coverOrder} is not null and ${table.coverOrder} between 0 and 4) or (not ${table.isCover} and ${table.coverOrder} is null)`),
+]);
 
 export const propertySections = pgTable('PropertySection', {
   propertyId: text('propertyId').notNull(),

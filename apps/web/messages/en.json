@@ -40,7 +40,7 @@
     "removeConfirm": "Remove this item?",
     "photos": "Images",
     "photoUrl": "Image URL",
-    "photoHint": "Use an HTTPS URL or an existing local path. File uploads are not available in this panel.",
+    "photoHint": "Complete photo library: upload, edit, categorise and order the detail images. Select listing images separately in Cover.",
     "category": "Category",
     "order": "Order",
     "addPhoto": "Add image",
@@ -214,6 +214,17 @@
     "titulo": "Find your next stay",
     "subtitulo": "Verified homes, ready for you. Unique experiences in top destinations.",
     "explorar": "Explore properties"
+  },
+  "coverEditor": {
+    "title": "Cover",
+    "hint": "Choose up to 5 library photos and order them with the buttons. Files cannot be uploaded here. Without a selection, listings use the first photo by order.",
+    "photo": "Photo {number}",
+    "select": "Select",
+    "empty": "Upload photos in Images to choose a cover.",
+    "up": "Move up",
+    "down": "Move down",
+    "upPhoto": "Move photo {number} up",
+    "downPhoto": "Move photo {number} down"
   },
   "properties": {
     "guests": "guests",

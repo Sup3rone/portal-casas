@@ -40,7 +40,7 @@
     "removeConfirm": "Retirer cet élément ?",
     "photos": "Images",
     "photoUrl": "URL de l’image",
-    "photoHint": "Utilisez une URL HTTPS ou un chemin local existant. Cet espace ne permet pas de téléverser des fichiers.",
+    "photoHint": "Photothèque complète : téléversez, modifiez, classez et ordonnez les images du détail. Choisissez séparément les images de la liste dans Couverture.",
     "category": "Catégorie",
     "order": "Ordre",
     "addPhoto": "Ajouter une image",
@@ -214,6 +214,17 @@
     "titulo": "Trouvez votre prochain séjour",
     "subtitulo": "Maisons vérifiées, prêtes pour vous. Des expériences uniques dans les meilleures destinations.",
     "explorar": "Explorer les propriétés"
+  },
+  "coverEditor": {
+    "title": "Couverture",
+    "hint": "Choisissez jusqu'à 5 photos de la photothèque et ordonnez-les avec les boutons. Aucun téléversement ici. Sans sélection, la liste utilise la première photo par ordre.",
+    "photo": "Photo {number}",
+    "select": "Sélectionner",
+    "empty": "Téléversez des photos dans Images pour choisir une couverture.",
+    "up": "Monter",
+    "down": "Descendre",
+    "upPhoto": "Déplacer la photo {number} vers le haut",
+    "downPhoto": "Déplacer la photo {number} vers le bas"
   },
   "properties": {
     "guests": "voyageurs",

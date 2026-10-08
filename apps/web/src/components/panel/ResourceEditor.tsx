@@ -5,6 +5,7 @@ import { useRouter } from '@/i18n/navigation';
 import type { PanelResources } from '@/lib/panel-resources';
 import { panelRequest, inputClass, buttonClass } from './request';
 import { photoMetadata, PhotoUploadError } from '@/lib/photo-upload';
+import CoverEditor from './CoverEditor';
 
 type Item = PanelResources['rates'][number] | PanelResources['media'][number];
 export default function ResourceEditor({ propertyId, resource, items }: { propertyId: string; resource: 'rates' | 'media'; items: Item[] }) {
@@ -64,7 +65,8 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
     catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
-  return <section className="space-y-4 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
+  const photos = items.filter((item): item is PanelResources['media'][number] => 'url' in item && item.type === 'PHOTO');
+  return <><section className="space-y-4 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
     <h2 className="text-xl font-semibold">{t(resource === 'rates' ? 'rates' : 'photos')}</h2>
     {resource === 'media' && <p className="text-sm text-gray-600 dark:text-gray-300">{t('photoHint')}</p>}
     {!items.length && <p>{t(resource === 'rates' ? 'emptyRates' : 'emptyPhotos')}</p>}
@@ -93,5 +95,7 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       {uploadedUrl && <p className="break-all text-sm">{uploader('uploadedUrl')} <a href={uploadedUrl} target="_blank" rel="noreferrer" className="underline">{uploadedUrl}</a></p>}
     </div>}
     {message && <p role="status">{t(message)}</p>}
-  </section>;
+  </section>
+    {resource === 'media' && <CoverEditor key={`${propertyId}:${JSON.stringify(photos.map(photo => [photo.id, photo.isCover, photo.coverOrder]))}`} propertyId={propertyId} photos={photos} />}
+  </>;
 }

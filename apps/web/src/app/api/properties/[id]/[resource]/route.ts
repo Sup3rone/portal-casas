@@ -12,6 +12,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const resourceId = await createResource(id, resource, await req.json().catch(() => null), manager);
     revalidatePath('/[locale]/panel', 'layout');
     revalidatePath('/[locale]/casas/[slug]', 'page');
+    if (resource === 'media') revalidatePath('/[locale]/casas', 'page');
     return NextResponse.json({ id: resourceId }, { status: 201 });
   } catch (error) { return panelError(error); }
 }

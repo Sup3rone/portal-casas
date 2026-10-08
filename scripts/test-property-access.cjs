@@ -78,7 +78,15 @@ for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates'
 const client = { query: async (query, values, options) => {
   queryLog.push(query);
   const bindings = [];
-  const translated = query.replace(/::(?:text|date)/g, '').replace(/\$(\d+)/g, (_, n) => {
+  // SQLite no admite DEFAULT en VALUES. Resolver defaults de Media añadidos al schema.
+  const compatible = query.replace(/insert into "Media" \(([^)]+)\) values \(([^)]+)\)/i, (match, columns, entries) => {
+    const names = columns.split(',').map(name => name.trim().replaceAll('"', ''));
+    const fields = entries.split(',').map((entry, index) => entry.trim() === 'default'
+      ? names[index] === 'isCover' ? 'false' : names[index] === 'coverOrder' ? 'null' : entry
+      : entry);
+    return `insert into "Media" (${columns}) values (${fields.join(',')})`;
+  });
+  const translated = compatible.replace(/::(?:text|date)/g, '').replace(/\$(\d+)/g, (_, n) => {
     const value = values[Number(n) - 1];
     bindings.push(typeof value === 'boolean' ? Number(value) : value);
     return '?';

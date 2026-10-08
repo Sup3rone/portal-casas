@@ -13,6 +13,7 @@ async function mutate(req: NextRequest, context: Context, removing: boolean) {
     await changeResource(id, resource, resourceId, removing ? null : await req.json().catch(() => null), manager, removing);
     revalidatePath('/[locale]/panel', 'layout');
     revalidatePath('/[locale]/casas/[slug]', 'page');
+    if (resource === 'media') revalidatePath('/[locale]/casas', 'page');
     return NextResponse.json({ success: true });
   } catch (error) { return panelError(error); }
 }

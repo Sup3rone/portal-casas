@@ -20,6 +20,7 @@ type DbProperty = {
 export default function PropertyCard({ property }: { property: DbProperty }) {
   const locale = useLocale() as 'es' | 'en' | 'fr';
   const t = useTranslations('properties');
+  const photos = property.media.filter(item => item.type === 'PHOTO').slice(0, 5);
 
   const title =
     locale === 'es' ? property.titleEs
@@ -32,13 +33,13 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
       <div className="backdrop-blur-sm transition-transform group-hover:-translate-y-2 dark:rounded-lg dark:bg-gray-900/80">
         {/* Imagen cuadrada grande (como en captura) */}
         <div className="overflow-hidden rounded-lg border border-white/30 dark:border-gray-700 bg-white/5 dark:bg-white/5">
-          {property.media.length > 0 ? (
-            <div className="aspect-[4/3] overflow-hidden">
-              <img
-                src={property.media[0].url}
+          {photos.length > 0 ? (
+            <div className={`aspect-[4/3] overflow-hidden grid gap-1 ${photos.length === 1 ? 'grid-cols-1 grid-rows-1' : photos.length === 2 ? 'grid-cols-2 grid-rows-1' : photos.length === 5 ? 'grid-cols-2 grid-rows-3' : 'grid-cols-2 grid-rows-2'}`}>
+              {photos.map((photo, index) => <img key={photo.url + index}
+                src={photo.url}
                 alt={title}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
+                className={`min-h-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 ${index === 0 && (photos.length === 3 || photos.length === 5) ? 'col-span-2' : ''}`}
+              />)}
             </div>
           ) : (
             <div className="aspect-[4/3] bg-white/10 dark:bg-white/10" />

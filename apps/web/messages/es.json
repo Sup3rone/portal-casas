@@ -40,7 +40,7 @@
     "removeConfirm": "¿Quieres quitar este recurso?",
     "photos": "Imágenes",
     "photoUrl": "URL de imagen",
-    "photoHint": "Usa una URL HTTPS o una ruta local existente. No se suben archivos desde el panel.",
+    "photoHint": "Biblioteca completa de fotos: sube, edita, categoriza y ordena las imágenes del detalle. La selección para el listado se gestiona por separado en Portada.",
     "category": "Categoría",
     "order": "Orden",
     "addPhoto": "Añadir imagen",
@@ -214,6 +214,17 @@
     "titulo": "Encuentra tu próxima estancia",
     "subtitulo": "Casas verificadas, listas para ti. Experiencias únicas en los mejores destinos.",
     "explorar": "Explorar propiedades"
+  },
+  "coverEditor": {
+    "title": "Portada",
+    "hint": "Elige hasta 5 fotos de la biblioteca y ordénalas con los botones. No se suben archivos aquí. Sin selección, el listado usa la primera foto por orden.",
+    "photo": "Foto {number}",
+    "select": "Seleccionar",
+    "empty": "Sube fotos en Imágenes para elegir una portada.",
+    "up": "Subir",
+    "down": "Bajar",
+    "upPhoto": "Mover la foto {number} hacia arriba",
+    "downPhoto": "Mover la foto {number} hacia abajo"
   },
   "properties": {
     "guests": "huéspedes",

@@ -1,6 +1,6 @@
 // src/app/[locale]/casas/page.tsx
 import { getTranslations } from 'next-intl/server';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import { db, properties, media } from '@portal/db';
 import PropertyCard from '@/components/PropertyCard';
 
@@ -15,17 +15,30 @@ export default async function PropertiesPage({
   const rows = await db
     .select({ property: properties, m: media })
     .from(properties)
-    .leftJoin(media, eq(media.propertyId, properties.id))
+    // Portada explícita (máximo cinco); sin selección, una PHOTO por orden.
+    .leftJoin(media, and(eq(media.propertyId, properties.id), sql`${media.id} in (
+      select candidate.id from "Media" candidate
+      where candidate."propertyId" = ${properties.id} and candidate.type = 'PHOTO'
+        and (candidate."isCover" or (not exists (
+          select 1 from "Media" cover where cover."propertyId" = ${properties.id} and cover.type = 'PHOTO' and cover."isCover"
+        ) and candidate.id = (
+          select fallback.id from "Media" fallback
+          where fallback."propertyId" = candidate."propertyId" and fallback.type = 'PHOTO'
+          order by fallback."order" asc, fallback.id asc limit 1
+        )))
+      order by case when candidate."isCover" then candidate."coverOrder" else candidate."order" end asc, candidate.id asc
+      limit 5
+    )`))
     .where(eq(properties.published, true))
-    .orderBy(asc(properties.createdAt), asc(media.order));
+    .orderBy(asc(properties.createdAt), asc(properties.id), asc(media.coverOrder), asc(media.id));
 
-  const seen = new Set<string>();
-  const propertyList = [];
+  const grouped = new Map<string, typeof rows[number]['property'] & { media: NonNullable<typeof rows[number]['m']>[] }>();
   for (const row of rows) {
-    if (seen.has(row.property.id)) continue;
-    seen.add(row.property.id);
-    propertyList.push({ ...row.property, media: row.m ? [row.m] : [] });
+    const property = grouped.get(row.property.id) ?? { ...row.property, media: [] };
+    if (row.m) property.media.push(row.m);
+    grouped.set(row.property.id, property);
   }
+  const propertyList = [...grouped.values()];
 
   return (
     <main className="relative min-h-screen">

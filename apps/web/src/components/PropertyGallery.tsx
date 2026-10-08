@@ -5,9 +5,10 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 type Slide = { url: string; type: 'PHOTO' | 'VIDEO' };
-const thumbnailLimit = 8;
+const DETAIL_GALLERY_LIMIT = 8;
 
-export default function PropertyGallery({ slides }: { slides: Slide[] }) {
+export default function PropertyGallery({ slides: allSlides }: { slides: Slide[] }) {
+  const slides = allSlides.slice(0, DETAIL_GALLERY_LIMIT);
   const t = useTranslations('details.gallery');
   const [index, setIndex] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -44,11 +45,10 @@ export default function PropertyGallery({ slides }: { slides: Slide[] }) {
   return (
     <>
       <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
-        {slides.slice(0, thumbnailLimit).map((slide, i) => {
-          const remaining = i === thumbnailLimit - 1 ? slides.length - thumbnailLimit : 0;
+        {slides.map((slide, i) => {
           return (
             <button key={`${slide.url}-${i}`} type="button" aria-haspopup="dialog"
-              aria-label={remaining > 0 ? t('verTodas', { count: slides.length }) : t(slide.type === 'VIDEO' ? 'abrirVideo' : 'abrirFoto', { number: i + 1 })}
+              aria-label={t(slide.type === 'VIDEO' ? 'abrirVideo' : 'abrirFoto', { number: i + 1 })}
               onClick={event => { openerRef.current = event.currentTarget; setIndex(i); }}
               className="relative aspect-[4/3] min-w-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700">
               {slide.type === 'VIDEO' ? (
@@ -57,7 +57,6 @@ export default function PropertyGallery({ slides }: { slides: Slide[] }) {
               ) : (
                 <Image src={slide.url} alt={t('foto', { number: i + 1 })} fill unoptimized sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover" />
               )}
-              {remaining > 0 && <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-black/60 dark:bg-black/75 text-2xl font-medium text-white dark:text-gray-100">+{remaining}</span>}
             </button>
           );
         })}

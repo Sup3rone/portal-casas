@@ -14,6 +14,7 @@ import Image from 'next/image';
 import EditorialPresentation from '@/components/EditorialPresentation';
 import { editorialPresentation } from '@/lib/editorial-presentation';
 import { propertyBlocks } from '@/lib/occupation-calendar';
+import Reveal from '@/components/Reveal';
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -127,7 +128,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     >
       {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <section className="mx-auto max-w-7xl px-3 py-8 md:px-6">
-        <div className="relative mb-6 rounded-2xl bg-black/30 dark:bg-black/50 p-6 pr-16 text-center">
+        <Reveal className="relative mb-6 rounded-2xl bg-black/30 dark:bg-black/50 p-6 pr-16 text-center">
           <PropertyShareButton title={title} />
           <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
             {title.toUpperCase()}
@@ -136,18 +137,18 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80 dark:text-gray-200">
             {property.city.toUpperCase()} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
           </p>
-        </div>
+        </Reveal>
         <PropertyGallery slides={principal} />
       </section>
 
       {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
-      <section className="mx-auto max-w-2xl px-6 py-16 text-center">
+      <Reveal as="section" className="mx-auto max-w-2xl px-6 py-16 text-center">
         <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
           <p className="whitespace-pre-wrap leading-relaxed text-gray-700 dark:text-gray-200 font-light">
             {description}
           </p>
         </div>
-      </section>
+      </Reveal>
 
       {/* ===== EL DESTINO + LO QUE OFRECE — widgets flotantes ===== */}
       {(editorial.length === 0 || !hasEditorial('lugar')) && (
@@ -159,7 +160,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
             {/* Widget 1: EL DESTINO — título arriba, mapa ABAJO */}
             {editorial.length === 0 && (
-            <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
+            <Reveal className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
               <h2 className="mb-4 text-center text-2xl font-light tracking-[0.3em] text-gray-900 dark:text-gray-100">
                 {t('details.destino')}
               </h2>
@@ -167,12 +168,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
                 {property.address}, {property.city}
               </p>
 
-            </div>
+            </Reveal>
 
             )}
             {/* Widget 2: LO QUE OFRECE ESTE LUGAR */}
             {!hasEditorial('lugar') && (
-            <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
+            <Reveal className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
               <h2 className="mb-6 text-center text-2xl font-light tracking-[0.3em] text-gray-900 dark:text-gray-100">
                 {t('details.ofrece')}
               </h2>
@@ -191,7 +192,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
                   </li>
                 ))}
               </ul>
-            </div>
+            </Reveal>
             )}
           </div>
         </div>
@@ -234,11 +235,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       {(hasMap || hasWarnings) && <section className="px-4 py-16 md:px-6" aria-label={t('details.mapWarnings')}>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {hasMap && <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} />}
-          {hasWarnings && <div className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
+          {hasWarnings && <Reveal className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
             <h2 className="mb-4 text-2xl font-light tracking-wide">{t('details.advertencias')}</h2>
             {warningHero && <Image src={warningHero.url} alt={t('details.advertencias')} width={600} height={400} unoptimized className="mb-4 h-auto w-full rounded-lg object-cover" />}
             {warningDescription && <p className="whitespace-pre-wrap break-words leading-relaxed">{warningDescription}</p>}
-          </div>}
+          </Reveal>}
         </div>
       </section>}
 

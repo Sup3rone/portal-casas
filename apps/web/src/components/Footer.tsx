@@ -1,15 +1,18 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
+import Reveal from './Reveal';
 
 export default function Footer() {
   const t = useTranslations('footer');
   const nav = useTranslations('nav');
+  const pathname = usePathname();
+  const Content = /^\/(?:(?:es|en|fr)\/)?(?:panel|admin)(?:\/|$)/.test(pathname) ? 'div' : Reveal;
 
   return (
     <footer className="mt-20 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-12">
-      <div className="mx-auto max-w-7xl px-4">
+      <Content className="mx-auto max-w-7xl px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Portal Casas</h3>
@@ -29,7 +32,7 @@ export default function Footer() {
         <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8 text-center text-sm text-gray-500 dark:text-gray-400">
           {t('derechos', { year: new Date().getFullYear() })}
         </div>
-      </div>
+      </Content>
     </footer>
   );
 }

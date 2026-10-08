@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import Reveal from './Reveal';
 
 type Slide = { url: string; type: 'PHOTO' | 'VIDEO' };
 const DETAIL_GALLERY_LIMIT = 8;
@@ -44,7 +45,7 @@ export default function PropertyGallery({ slides: allSlides }: { slides: Slide[]
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
+      <Reveal className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
         {slides.map((slide, i) => {
           return (
             <button key={`${slide.url}-${i}`} type="button" aria-haspopup="dialog"
@@ -60,7 +61,7 @@ export default function PropertyGallery({ slides: allSlides }: { slides: Slide[]
             </button>
           );
         })}
-      </div>
+      </Reveal>
 
       <dialog ref={dialogRef} aria-label={t('lightbox')} aria-modal="true"
         onCancel={event => { event.preventDefault(); close(); }}

@@ -43,6 +43,7 @@ function load(file, source) {
       notFound: () => { const error = new Error('notFound'); error.status = 404; throw error; },
     };
     if (name === '@/i18n/navigation') return {
+      usePathname: () => '/',
       Link: ({ href, children, ...props }) => req('react').createElement('a', { ...props, href: `/${testLocale}${href}` }, children),
       useRouter: () => ({ push() {}, refresh() {} }),
     };

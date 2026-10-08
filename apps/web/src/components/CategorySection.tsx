@@ -1,5 +1,6 @@
 // apps/web/src/components/CategorySection.tsx
 import SectionSlider from './SectionSlider';
+import Reveal from './Reveal';
 
 type Slide = { url: string; type: 'PHOTO' | 'VIDEO' };
 type Item = { icon: string; label: string };
@@ -17,7 +18,7 @@ export default function CategorySection({
 }) {
 
   const columnaInfo = (
-    <div className="flex flex-col justify-center px-6 py-12 md:px-12">
+    <Reveal className="flex flex-col justify-center px-6 py-12 md:px-12">
       <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
         <h2 className="mb-8 text-2xl font-light tracking-[0.3em] text-gray-900 dark:text-gray-100">
           {label}
@@ -31,7 +32,7 @@ export default function CategorySection({
           ))}
         </ul>
       </div>
-    </div>
+    </Reveal>
   );
 
   const columnaImagen =

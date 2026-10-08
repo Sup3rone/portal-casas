@@ -1,5 +1,6 @@
 // src/app/[locale]/page.tsx
 import { getTranslations } from 'next-intl/server';
+import Reveal from '@/components/Reveal';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -22,7 +23,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className="absolute inset-0 bg-black/40 dark:bg-black/60" />
 
         {/* Contenido centrado */}
-        <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+        <Reveal className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
           <h1 className="mb-4 text-4xl font-light tracking-[0.3em] text-white dark:text-gray-100 md:text-6xl">
             {t('bienvenida')}
           </h1>
@@ -82,7 +83,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {t('buscar')}
             </button>
           </form>
-        </div>
+        </Reveal>
       </section>
     </main>
   );

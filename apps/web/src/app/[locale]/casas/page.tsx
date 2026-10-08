@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import { db, properties, media } from '@portal/db';
 import PropertyCard from '@/components/PropertyCard';
+import Reveal from '@/components/Reveal';
 
 export default async function PropertiesPage({
   params,
@@ -61,8 +62,10 @@ export default async function PropertiesPage({
         </div>
 
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
-          {propertyList.map((p) => (
-            <PropertyCard key={p.id} property={p} />
+          {propertyList.map((p, index) => (
+            <Reveal key={p.id} delay={Math.min(index * 120, 600)} className="min-w-0">
+              <PropertyCard property={p} />
+            </Reveal>
           ))}
         </div>
       </div>

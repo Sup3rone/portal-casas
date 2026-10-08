@@ -9,6 +9,17 @@
 
 html { scroll-behavior: smooth; }
 
+.reveal {
+  opacity: 0;
+  transform: translateY(var(--reveal-distance, 48px));
+  transition: opacity .7s ease-out, transform .7s ease-out;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.reveal-visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
 :root {
   --background: var(--color-gray-50);
   --foreground: var(--color-gray-900);

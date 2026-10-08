@@ -1,19 +1,28 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import AuthForm from '@/components/AuthForm';
 import { registerAction } from "./actions";
 
-export default async function RegisterPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function RegisterPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ error?: string }> }) {
+  const { locale } = await params;
+  const { error } = await searchParams;
+  const t = await getTranslations({ locale, namespace: 'auth' });
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-lg">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">Crear cuenta</h1>
+        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">{t('registerTitle')}</h1>
         <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-          Regístrate para ver tus reservas y consultas en un solo lugar.
+          {t('registerSubtitle')}
         </p>
 
-        <form action={registerAction} className="space-y-4">
+        {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-400">
+          {t(error === 'duplicado' ? 'duplicateEmail' : 'invalidRegistration')}
+        </p>}
+        <AuthForm action={registerAction}>
+          <input type="hidden" name="locale" value={locale} />
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Nombre completo
+              {t('fullName')}
             </label>
             <input
               id="name"
@@ -27,7 +36,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ local
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Correo electrónico
+              {t('email')}
             </label>
             <input
               id="email"
@@ -41,7 +50,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ local
 
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Teléfono (opcional)
+              {t('phoneOptional')}
             </label>
             <input
               id="phone"
@@ -54,7 +63,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ local
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Contraseña
+              {t('password')}
             </label>
             <input
               id="password"
@@ -71,14 +80,14 @@ export default async function RegisterPage({ params }: { params: Promise<{ local
             type="submit"
             className="w-full rounded-lg bg-purple-600 py-3 font-semibold text-white dark:text-gray-100 transition hover:bg-purple-700"
           >
-            Registrarme
+            {t('registerButton')}
           </button>
-        </form>
+        </AuthForm>
 
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
-          ¿Ya tienes cuenta?{" "}
-          <Link href={`/${(await params).locale}/login`} className="text-purple-600 dark:text-purple-400 underline">
-            Inicia sesión
+          {t('hasAccount')}{" "}
+          <Link href={`/${locale}/login`} className="text-purple-600 dark:text-purple-400 underline">
+            {t('loginLink')}
           </Link>
         </p>
       </div>

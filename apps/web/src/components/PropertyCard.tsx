@@ -1,7 +1,7 @@
 // src/components/PropertyCard.tsx
 'use client';
 
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
 type DbProperty = {
@@ -19,6 +19,7 @@ type DbProperty = {
 
 export default function PropertyCard({ property }: { property: DbProperty }) {
   const locale = useLocale() as 'es' | 'en' | 'fr';
+  const t = useTranslations('properties');
 
   const title =
     locale === 'es' ? property.titleEs
@@ -51,7 +52,7 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
           </h3>
           <p className="text-sm text-white/80 dark:text-gray-200">{property.city}</p>
           <p className="pt-1 text-xs text-white/60 dark:text-gray-400">
-            {property.maxGuests} huéspedes · {property.bedrooms} hab.
+            {property.maxGuests} {t('guests')} · {property.bedrooms} {t('bedrooms')}
           </p>
         </div>
       </div>

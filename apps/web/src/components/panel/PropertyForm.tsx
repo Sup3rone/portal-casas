@@ -32,7 +32,7 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
             : <input name={key} required defaultValue={property?.[key]} className={inputClass} />}
         </label>)}
         {numbers.map(key => <label key={key} className="block text-sm">{t(`fields.${key}`)}
-          <input name={key} type="number" required={['maxGuests', 'bedrooms', 'bathrooms'].includes(key)}
+          <input key={`${key}:${property?.[key] ?? ''}`} name={key} type="number" required={['maxGuests', 'bedrooms', 'bathrooms'].includes(key)}
             min={key === 'maxGuests' ? 1 : key === 'lat' ? -90 : key === 'lng' ? -180 : 0}
             max={key === 'lat' ? 90 : key === 'lng' ? 180 : undefined}
             step={['bathrooms', 'lat', 'lng'].includes(key) ? 'any' : 1}

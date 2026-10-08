@@ -43,7 +43,7 @@ export default async function PropertiesPage({
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-6 pb-24">
         <div className="mb-12 rounded-full bg-white/20 dark:bg-white/20 px-8 py-3 backdrop-blur-sm">
           <span className="text-sm font-medium tracking-widest text-white dark:text-gray-100">
-            DESTINOS
+            {t('properties.destinations')}
           </span>
         </div>
 

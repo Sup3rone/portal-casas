@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import AuthForm from '@/components/AuthForm';
 import { loginAction } from "./actions";
 
 export default async function LoginPage({
@@ -10,27 +12,28 @@ export default async function LoginPage({
 }) {
   const { locale } = await params;
   const { error } = await searchParams;
+  const t = await getTranslations({ locale, namespace: 'auth' });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-lg">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">Iniciar sesión</h1>
+        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">{t('loginTitle')}</h1>
         <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-          Accede a tu cuenta para gestionar reservas y mensajes.
+          {t('loginSubtitle')}
         </p>
 
         {error && (
           <p className="mb-4 rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-400">
-            Credenciales incorrectas. Verifica tu correo y contraseña.
+            {t('invalidCredentials')}
           </p>
         )}
 
-        <form action={loginAction} className="space-y-4">
+        <AuthForm action={loginAction}>
           <input type="hidden" name="locale" value={locale} />
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Correo electrónico
+              {t('email')}
             </label>
             <input
               id="email"
@@ -44,7 +47,7 @@ export default async function LoginPage({
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Contraseña
+              {t('password')}
             </label>
             <input
               id="password"
@@ -60,19 +63,19 @@ export default async function LoginPage({
             type="submit"
             className="w-full rounded-lg bg-purple-600 py-3 font-semibold text-white dark:text-gray-100 transition hover:bg-purple-700"
           >
-            Entrar
+            {t('loginButton')}
           </button>
-        </form>
+        </AuthForm>
 
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
-          ¿No tienes cuenta?{" "}
+          {t('noAccount')}{" "}
           <Link href={`/${locale}/registro`} className="text-purple-600 dark:text-purple-400 underline">
-            Regístrate
+            {t('registerLink')}
           </Link>
         </p>
         <p className="mt-2 text-center text-sm">
           <a href={`/${locale}/olvide-password`} className="text-purple-600 dark:text-purple-400 underline">
-            ¿Olvidaste tu contraseña?
+            {t('forgotTitle')}
           </a>
         </p>
       </div>

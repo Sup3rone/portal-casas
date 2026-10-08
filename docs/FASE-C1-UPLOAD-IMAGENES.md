@@ -30,6 +30,18 @@ Archivos del pivote: upload/route.ts (put multipart), photo-upload.ts (4 MB y el
 
 Supuestos: store público y token preparados por Emma, como en C1; 4 MB decimal; una foto por petición. El pivote elimina CORS del navegador hacia Blob, pero no puede garantizar corregir una credencial inválida o un store suspendido: esos fallos ahora llegan como error del endpoint del servidor.
 
+### Aislamiento de editor A → B (07 Oct 2026)
+
+No se encontró `prop-001` ni IDs `prop-N` quemados en apps/web/src. Cadena revisada: params.id → panelProperty/managedProperty (query exacta) → ResourceEditor.propertyId → POST /api/properties/[id]/upload → photoPath(id, UUID, MIME) → put. En el cliente photo-upload.ts solo valida MIME/tamaño; el pathname se construye en servidor. No hay fallback de ID de ejemplo.
+
+El estado de edición/subida no estaba ligado a la identidad de propiedad, y una continuación asíncrona de A podía sobrevivir al cambio de pantalla. Se añade key=property.id al contenedor del editor del panel, reiniciando el árbol completo al cambiar propiedad (tarifas, imágenes, disponibilidad, formularios y secciones). ResourceEditor cancela su fetch pendiente con AbortController al desmontarse/cambiar propiedad y evita crear Media tras una respuesta cancelada. No se reescribe el uploader ni las APIs.
+
+Prueba nueva: `node scripts/test-photo-upload-property-switch.cjs`, con handlers cliente/servidor reales, hooks/DOM mínimos simulados, put mock y SQLite en memoria. Dos propiedades consecutivas verifican rutas, pathnames y Media; cambio con A pendiente comprueba cancelación y ausencia de POST Media tardío. Esto no es una prueba en navegador/producción.
+
+QA manual: subir en A, navegar a B y subir; revisar Network /api/properties/A/upload y /B/upload, URL Blob properties/A/ y properties/B/, categoría/orden y recarga. Repetir con red lenta y cambiar a B mientras A está pendiente. Cancelar fetch no revierte un put que el servidor ya hubiera recibido; no se borra automáticamente un Blob. Un 500 de producción no queda atribuido exclusivamente al ID sin la prueba real: permisos ajenos responden 404, y fallos del SDK responden 500.
+
+Archivos: panel/propiedades/[id]/page.tsx (key por propiedad); ResourceEditor.tsx (cancelación); test-photo-upload-property-switch.cjs (regresión A/B); este informe (traza y límites). Sin cambios a property-access, Media, sitio público ni BD.
+
 ## Historial del flujo client-upload retirado
 
 Fecha: 07 Oct 2026. Implementada en código, sin migraciones, deploy ni acceso a Neon/Blob real. Pruebas con SDK mockeado. TypeScript y ESLint pendientes: su ejecución fuera del sandbox fue rechazada; no se reintentó por otra vía.

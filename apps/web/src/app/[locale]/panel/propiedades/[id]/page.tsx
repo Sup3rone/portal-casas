@@ -15,7 +15,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
   const resources = await propertyResources(id, manager);
   const sections = await sectionsForProperty(id, manager);
   const t = await getTranslations({ locale, namespace: 'panel' });
-  return <section className="space-y-8">
+  return <section key={property.id} className="space-y-8">
     <Link href="/panel" className="text-green-700 dark:text-green-400 underline">{t('back')}</Link>
     <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-3xl font-semibold">{t('edit')}</h1>
       <span>{t(property.published ? 'published' : 'draft')}</span><PublicationButton id={id} published={property.published} admin={manager.role === 'ADMIN'} /></div>

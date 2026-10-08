@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { PanelResources } from '@/lib/panel-resources';
@@ -14,6 +14,8 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
   const formRef = useRef<HTMLFormElement>(null), fileRef = useRef<HTMLInputElement>(null), uploadLock = useRef(false);
   const [uploading, setUploading] = useState(false), [uploadMessage, setUploadMessage] = useState('');
   const [uploadedUrl, setUploadedUrl] = useState('');
+  const uploadRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => { uploadRequest.current?.abort(); }, [propertyId, resource]);
   async function uploadPhoto(files: FileList | null) {
     if (!files?.length || uploadLock.current || busy || editing) return;
     if (files.length !== 1) { setUploadMessage('oneFile'); return; }
@@ -24,10 +26,12 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
     const category = String(form.get('category') || 'principal'), order = Number(form.get('order'));
     if (!Number.isSafeInteger(order) || order < 0 || order > 2147483647) { setUploadMessage('orderError'); return; }
     uploadLock.current = true; setUploading(true); setUploadMessage(''); setUploadedUrl('');
+    const controller = new AbortController(); uploadRequest.current = controller;
     try {
       const data = new FormData(); data.set('file', file);
-      const response = await fetch(`/api/properties/${encodeURIComponent(propertyId)}/upload`, { method: 'POST', body: data });
+      const response = await fetch(`/api/properties/${encodeURIComponent(propertyId)}/upload`, { method: 'POST', body: data, signal: controller.signal });
       const blob = await response.json().catch(() => ({}));
+      if (controller.signal.aborted) return;
       if (!response.ok || typeof blob.url !== 'string') throw new Error(response.status === 401 || response.status === 403 || response.status === 404 ? 'forbidden' : 'error');
       setUploadedUrl(blob.url);
       const urlField = formRef.current?.elements.namedItem('url');
@@ -35,8 +39,8 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}/media`, 'POST', { url: blob.url, category, order });
       if (urlField instanceof HTMLInputElement) urlField.value = '';
       setUploadMessage('success'); router.refresh();
-    } catch (error) { setUploadMessage(error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError'); }
-    finally { uploadLock.current = false; setUploading(false); if (fileRef.current) fileRef.current.value = ''; }
+    } catch (error) { if (!controller.signal.aborted) setUploadMessage(error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError'); }
+    finally { uploadRequest.current = null; uploadLock.current = false; setUploading(false); if (fileRef.current) fileRef.current.value = ''; }
   }
   const fields = resource === 'rates' ? ['name', 'startDate', 'endDate', 'weekdayPrice', 'weekendPrice', 'priority'] : ['url', 'category', 'order'];
   function initial(field: string) {

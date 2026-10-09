@@ -14,6 +14,10 @@ export async function POST(req: NextRequest) {
   let formData: FormData;
   try { formData = await req.formData(); }
   catch { return NextResponse.json({ code: 'INVALID_FORM_DATA' }, { status: 400 }); }
+  const lang = formData.get('lang') ?? 'es';
+  if (typeof lang !== 'string' || !['es', 'en', 'fr'].includes(lang)) {
+    return NextResponse.json({ code: 'INVALID_LANG' }, { status: 400 });
+  }
   const propertyId = formData.get('propertyId');
   if (typeof propertyId !== 'string' || !propertyId.trim()) {
     return NextResponse.json({ code: 'INVALID_PROPERTY' }, { status: 400 });
@@ -35,7 +39,6 @@ export async function POST(req: NextRequest) {
 
     const value = normalizeInquiry(input);
     const session = await auth();
-    const lang = (formData.get('lang') as string) || 'es';
     // Revalidar publicación, capacidad y ocupación en el INSERT por cambios concurrentes.
     // La salida también debe ser seleccionable, como exige rangoDisponible.
     const result = await db.execute(sql`

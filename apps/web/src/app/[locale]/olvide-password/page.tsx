@@ -25,7 +25,7 @@ export default async function ForgotPasswordPage({
           <form action={requestPasswordReset} className="space-y-4 rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm border dark:border-gray-700">
             <input type="hidden" name="locale" value={locale} />
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">Correo electrónico</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">{t('email')}</label>
               <input required type="email" id="email" name="email"
                 className="mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
             </div>

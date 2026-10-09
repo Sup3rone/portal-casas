@@ -61,7 +61,7 @@ export default function MessageModal({
     setError(null);
   }
 
-  const valid = Boolean(startDate && endDate && startDate <= endDate);
+  const valid = Boolean(startDate && endDate && startDate < endDate);
 
   const handleConfirm = async () => {
     if (!valid || saving) return;

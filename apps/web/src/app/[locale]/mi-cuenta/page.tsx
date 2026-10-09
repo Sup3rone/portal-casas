@@ -11,7 +11,7 @@ export default async function MyAccountPage() {
   const locale = await getLocale();
 
   if (!session?.user?.email) {
-    redirect("/es/login");
+    redirect(`/${locale}/login`);
   }
 
   // Buscar el usuario en DB para saber su id

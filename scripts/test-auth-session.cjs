@@ -60,6 +60,12 @@ async function patch(id) {
   }), { params: Promise.resolve({ id }) });
 }
 async function main() {
+  for (const locale of ['es', 'en', 'fr']) {
+    const response = await handlers.GET(new NextRequest(`http://localhost/api/auth/signin?callbackUrl=http://localhost/${locale}/mi-cuenta`));
+    assert.ok(response.headers.get('location').includes(`/${locale}/login`));
+    const cookieResponse = await handlers.GET(new NextRequest('http://localhost/api/auth/signin', { headers: { cookie: `NEXT_LOCALE=${locale}` } }));
+    assert.ok(cookieResponse.headers.get('location').includes(`/${locale}/login`));
+  }
   const hash = await bcrypt.hash('test-password', 4);
   memory.prepare('UPDATE "User" SET "passwordHash" = ?').run(hash);
   const host = await login('a');

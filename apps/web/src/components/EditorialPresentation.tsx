@@ -61,7 +61,6 @@ export function EditorialStage({ scenes }: { scenes: EditorialScene[] }) {
           panel.inert = false; panel.removeAttribute('aria-hidden'); panel.style.opacity = '1'; panel.style.pointerEvents = 'auto';
           panel.setAttribute('data-reveal-entered', 'true');
           panel.style.setProperty('--editorial-photo-progress', '0');
-          panel.querySelector<HTMLElement>('[data-scene-body]')!.scrollTop = 0;
           panel.querySelectorAll<HTMLElement>('[data-editorial-photo]').forEach(photo => photo.setAttribute('aria-hidden', 'false'));
         });
         return;

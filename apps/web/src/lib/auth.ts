@@ -3,13 +3,21 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, users } from "@portal/db";
+import { getLocale } from 'next-intl/server';
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth(async request => {
+  // API Auth.js: conservar el locale del destino/referer o la cookie de next-intl.
+  const requestLocale = request ? [request.nextUrl.searchParams.get('callbackUrl'), request.headers.get('referer'), request.url]
+    .flatMap(value => { try { return value ? [new URL(value, request.url).pathname.split('/')[1]] : []; } catch { return []; } })
+    .find(value => ['es', 'en', 'fr'].includes(value)) : await getLocale();
+  const cookieLocale = request?.cookies.get('NEXT_LOCALE')?.value;
+  const locale = requestLocale ?? (cookieLocale && ['es', 'en', 'fr'].includes(cookieLocale) ? cookieLocale : 'es');
+  return {
   session: { strategy: "jwt" },
 
   // A dónde manda si intentan entrar a página protegida sin sesión
   pages: {
-    signIn: "/es/login",
+    signIn: `/${locale}/login`,
   },
 
   providers: [
@@ -68,4 +76,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
+  };
 });

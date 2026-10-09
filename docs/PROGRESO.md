@@ -184,6 +184,12 @@
 
 ## Actualización — 9 de octubre 2026
 
+### Correcciones menores/medianas de auditoría
+
+- Implementados los nueve puntos autorizados: config Drizzle sin safe, label email traducido, error de contraseña corta visible con token válido, lang inválido 400 INVALID_LANG, modal con salida estrictamente posterior, Date inválido 400 INVALID_DATES, reduced-motion sin reset de scroll, login por locale y .env.example sin secretos.
+- Pruebas offline específicas: test-audit-fixes.cjs y extensiones de auth-session, inquiry y detail-scroll. Sin operaciones Neon/migraciones ni cambios a permisos, schema o flujos del panel.
+- QA manual: en localhost/Respaldo verificar olvide/reset en es/en/fr (para probar el rechazo servidor, omitir validación HTML temporalmente), modal con fechas iguales deshabilitado y scroll interno conservado con reduced-motion. Solapamientos e iCal siguen pendientes y fuera de este lote.
+
 ### ✅ COMPLETADO (validado localmente por Emma; PENDIENTE de push/deploy)
 
 **Sistema de imágenes — migración a Vercel Blob (CERRADA)**

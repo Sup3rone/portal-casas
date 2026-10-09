@@ -45,6 +45,7 @@ export default async function ResetPasswordPage({
           </div>
         ) : (
           <form action={resetPassword} className="space-y-4 rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm border dark:border-gray-700">
+            {error === 'corta' && <p role="alert" className="text-sm text-red-700 dark:text-red-400">{t('resetTooShort')}</p>}
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="token" value={token} />
             <div>

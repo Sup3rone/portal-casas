@@ -8,6 +8,5 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
-  // Agregado: evita drops automáticos
-  safe: true,
+  // Revisar manualmente el SQL antes de aplicar cambios; esta configuración no evita drops.
 });

@@ -33,6 +33,12 @@ const form = values => { const data = new FormData(); for (const [key, value] of
 const send = values => POST(new Request('http://localhost/api/messages', { method: 'POST', body: form(values) }));
 const count = () => memory.prepare('SELECT count(*) AS count FROM "Message"').get().count;
 async function main() {
+  for (const lang of ['', 'zz-invalid', 'EN']) {
+    const reads = queryLog.length, before = count();
+    const response = await send({ ...valid, lang });
+    assert.equal(response.status, 400); assert.equal((await response.json()).code, 'INVALID_LANG');
+    assert.equal(queryLog.length, reads); assert.equal(count(), before);
+  }
   for (const [field, value, code] of cases.filter(([field]) => field !== 'guests')) {
     const before = count(), reads = queryLog.length;
     const response = await send({ ...valid, [field]: value });

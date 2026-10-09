@@ -17,7 +17,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (new Date(startDate) >= new Date(endDate)) {
+    const start = new Date(startDate), end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return NextResponse.json({ error: 'Fechas inválidas', code: 'INVALID_DATES' }, { status: 400 });
+    }
+    if (start >= end) {
       return NextResponse.json(
         { error: 'La fecha de salida debe ser posterior a la de entrada' },
         { status: 400 }

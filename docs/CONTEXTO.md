@@ -2,6 +2,12 @@
 
 ## HECHO Y FUNCIONANDO
 
+### Correcciones quirúrgicas de auditoría (09 Oct 2026)
+
+Drizzle config elimina safe (opción inválida); revisar SQL manualmente, sin protección automática prometida. Recuperación usa auth.email existente en es/en/fr y muestra resetTooShort junto al formulario también con token válido. POST /api/messages rechaza lang explícito fuera de es/en/fr con 400 INVALID_LANG antes de consultar datos; omitir lang conserva es para clientes antiguos. MessageModal exige llegada < salida; bookings/create rechaza Date inválido con 400 INVALID_DATES antes del cast. Reduced-motion editorial conserva scrollTop interno, sin cambiar escenas ni fundidos.
+
+Auth.js conserva Credentials/JWT/permisos y usa configuración lazy solo para pages.signIn: locale del callbackUrl/referer/ruta o cookie NEXT_LOCALE; llamadas de servidor usan getLocale(), fallback es si no hay contexto de request. Mi Cuenta redirige al login del locale activo. .env.example raíz documenta DATABASE_URL, AUTH_SECRET y BLOB_READ_WRITE_TOKEN sin secretos: copiar a apps/web/.env.local; Drizzle CLI carga su entorno por separado. Tests test-audit-fixes, auth-session, inquiry y detail-scroll cubren las regresiones. No se corrigen solapamientos de Booking ni deduplicación iCal; no hay cambios de schema/BD ni migraciones. QA real del flujo de recuperación y scroll móvil permanece manual.
+
 ### Footer en flujo normal después del stage (09 Oct 2026, vigente)
 
 El detalle termina sus escenas en Reserva. `app/[locale]/casas/[slug]/page.tsx` retira Footer de afterScenes y lo monta una vez después del escenario, con Footer inDetail existente. No se modifica Footer.tsx, su contenido/estilos/Reveal propio, EditorialPresentation, fondos, navbar/↑ ni #reservar. Casa completa: siete escenas + footer normal, sin altura de 100dvh, capa, fundido editorial ni snap propio en el footer.

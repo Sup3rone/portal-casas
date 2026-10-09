@@ -165,6 +165,9 @@ async function main() {
     assert.ok(prevented);assert.equal(global.window.lastScroll.top,global.window.scrollY-distance+2000);
     motion.matches=true;motion.listeners.get('change')();callback();
     assert.equal(element.style.height,'auto');assert.ok(panels.every(panel=>!panel.inert && panel.style.opacity==='1'));
+    panels[2].body.scrollTop=420;editorialScroll(2500);
+    assert.equal(panels[2].body.scrollTop,420,'Reduced-motion conserva el scroll interno');
+    global.window.listeners.get('resize')();callback();assert.equal(panels[2].body.scrollTop,420);
     motion.matches=false;motion.listeners.get('change')();callback();editorialScroll(0);
     assert.equal(panels[0].style.opacity,'1');assert.equal(panels[0].values.get('--editorial-photo-progress'),'0');
     stop();assert.equal(global.window.listeners.size,0);

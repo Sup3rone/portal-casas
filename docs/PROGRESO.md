@@ -181,3 +181,53 @@
 - Regla de deploy: migración en main ANTES de desplegar código, siempre con checkpoint previo
 - Usuarios: admin susudone@proton.me; colaborador prueba meniblu@hotmail.com
 - Convención de trabajo con el agente: prompts cerrados, reportes EN TEXTO (no capturas), auditoría manual tras cada entrega, verificar que NO toque main de Neon
+
+## Actualización — 9 de octubre 2026
+
+### ✅ COMPLETADO (validado localmente por Emma; PENDIENTE de push/deploy)
+
+**Sistema de imágenes — migración a Vercel Blob (CERRADA)**
+- 84 fotos servidas desde Blob (dominio
+  `eorinf4h9dcvcdit.public.blob.vercel-storage.com`), URLs de Media
+  corregidas en main.
+- Carpeta `apps/web/public/fotos` eliminada del repo.
+
+**Scroll reveal público (08 Oct)**
+- `components/Reveal.tsx`: IntersectionObserver, 700ms ease-out,
+  distancia 48px, revelado único. Cascada en cards del listado
+  (index*120ms, tope 600ms). Respeta prefers-reduced-motion y SSR.
+  Aplicado a home, listado, detalle y footer público.
+
+**Renta anual + contacto WhatsApp por propiedad**
+- Schema: `rentalType` ('nocturna'|'anual', default 'nocturna'),
+  `contactName`, `whatsapp` en Property.
+- Panel: campos en PropertyForm + validación servidor
+  (panel-validation.ts). Badge "Renta anual" en PropertyCard.
+- Detalle: botón de WhatsApp secundario debajo del botón de
+  reserva, con mensaje prellenado por idioma.
+- ⚠️ Migración `scripts/sql/property-rental-contact.sql` PROPUESTA,
+  AÚN NO EJECUTADA en Neon (Respaldo → main).
+
+**Detalle — viaje de escenas full-screen (09 Oct) ✅ confirmado por Emma**
+- Estructura: mosaico → 4 editoriales (destino/amenidades/
+  habitaciones/lugar) → mapa/advertencias → reserva+WhatsApp.
+- EditorialPresentation.tsx: avance por scroll (sin autoplay),
+  contenidos y estilos internos conservados.
+- Secciones no-editoriales con imagen de fondo personalizable
+  elegida desde el panel (biblioteca de fotos; "ninguna" = blanco).
+- Navbar inteligente (se oculta al bajar, reaparece al subir) y
+  botón flotante ↑ (PropertyDetailScroll.tsx).
+- Footer fuera del snap, pie de página normal al final del scroll.
+- Eliminado velo blanco que lavaba la imagen de fondo.
+- Docs: DETALLE-SCROLL-SNAP.md (checklist), CONTEXTO.md.
+- Nota de entorno: navegador automatizado de QA caído en Windows
+  (sandbox); el QA visual fue manual (checklist de Emma).
+
+### 📋 PENDIENTES (prioridad)
+
+1. **Bugs conocidos:** iCal sync no deduplica eventos (reservas
+   duplicadas al repetir sync); `bookings/create` no valida
+   solapamientos de fechas.
+2. Calendario para colaboradores (diseño pendiente).
+3. Navbar post-login: fix aplicado, falta confirmación final.
+4. Compresión de imágenes en subida (fotos de cámara > 5MB).

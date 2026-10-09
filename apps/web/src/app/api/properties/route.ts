@@ -13,11 +13,12 @@ export async function POST(req: NextRequest) {
     const id = crypto.randomUUID();
     const slug = `${values.titleEs!.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'property'}-${id.slice(0, 8)}`;
     const result = await db.execute(sql`
-      insert into "Property" ("id", "slug", "titleEs", "titleEn", "titleFr", "descEs", "descEn", "descFr", "address", "city", "lat", "lng", "maxGuests", "bedrooms", "bathrooms", "baseWeekdayPrice", "baseWeekendPrice", "ownerId", "published")
+      insert into "Property" ("id", "slug", "titleEs", "titleEn", "titleFr", "descEs", "descEn", "descFr", "address", "city", "lat", "lng", "maxGuests", "bedrooms", "bathrooms", "baseWeekdayPrice", "baseWeekendPrice", "ownerId", "published", "rentalType", "contactName", "whatsapp")
       select ${id}, ${slug}, ${values.titleEs}, ${values.titleEn}, ${values.titleFr},
         ${values.descEs}, ${values.descEn}, ${values.descFr}, ${values.address}, ${values.city},
         ${values.lat ?? null}, ${values.lng ?? null}, ${values.maxGuests}, ${values.bedrooms}, ${values.bathrooms},
-        ${values.baseWeekdayPrice ?? null}, ${values.baseWeekendPrice ?? null}, actor."id", false
+        ${values.baseWeekdayPrice ?? null}, ${values.baseWeekendPrice ?? null}, actor."id", false,
+        ${values.rentalType}, ${values.contactName ?? null}, ${values.whatsapp ?? null}
       from "User" actor where actor."id" = ${manager.id} and actor."role"::text in ('ADMIN', 'COLLABORATOR')
       returning "id"
     `);

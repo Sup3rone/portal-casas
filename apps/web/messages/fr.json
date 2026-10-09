@@ -4,6 +4,9 @@
     "dark": "Activer le mode sombre"
   },
   "panel": {
+    "rentalNocturna": "Location à la nuitée",
+    "rentalAnual": "Location annuelle",
+    "whatsappHint": "Incluez l'indicatif du pays : 8 à 15 chiffres, sans + ni espaces. Exemple : 5215512345678.",
     "title": "Espace hôte",
     "properties": "Mes propriétés",
     "allProperties": "Toutes les propriétés",
@@ -65,6 +68,9 @@
     "conflict": "Cet élément existe déjà ou les dates sont indisponibles.",
     "back": "Retour aux logements",
     "fields": {
+      "rentalType": "Type de location",
+      "contactName": "Nom du contact (facultatif)",
+      "whatsapp": "WhatsApp (facultatif)",
       "titleEs": "Titre (espagnol)",
       "titleEn": "Titre (anglais)",
       "titleFr": "Titre (français)",
@@ -98,6 +104,9 @@
     "panelCollaborator": "Panneau du collaborateur"
   },
   "details": {
+    "contactTitle": "Contact",
+    "whatsappButton": "Contact pour locations personnalisées",
+    "whatsappMessage": "Bonjour, je suis intéressé par {propertyName}.",
     "destino": "LA DESTINATION",
     "ofrece": "CE QUE PROPOSE CE LOGEMENT",
     "amenidades": "ÉQUIPEMENTS",
@@ -227,6 +236,7 @@
     "downPhoto": "Déplacer la photo {number} vers le bas"
   },
   "properties": {
+    "annualRent": "Location annuelle",
     "guests": "voyageurs",
     "bedrooms": "chambres",
     "bathrooms": "salles de bain",

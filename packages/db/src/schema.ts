@@ -36,7 +36,14 @@ export const properties = pgTable('Property', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   baseWeekdayPrice: integer('baseWeekdayPrice'),
   baseWeekendPrice: integer('baseWeekendPrice'),
-}, table => [index('Property_ownerId_idx').on(table.ownerId)]);
+  rentalType: text('rentalType').$type<'nocturna' | 'anual'>().notNull().default('nocturna'),
+  contactName: text('contactName'),
+  whatsapp: text('whatsapp'),
+}, table => [
+  index('Property_ownerId_idx').on(table.ownerId),
+  check('Property_rentalType_check', sql`${table.rentalType} in ('nocturna', 'anual')`),
+  check('Property_whatsapp_check', sql`${table.whatsapp} is null or ${table.whatsapp} ~ '^[0-9]{8,15}$'`),
+]);
 
 export const media = pgTable('Media', {
   id: text('id').primaryKey(),

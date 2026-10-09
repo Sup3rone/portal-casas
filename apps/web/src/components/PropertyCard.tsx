@@ -14,6 +14,7 @@ type DbProperty = {
   maxGuests: number;
   bedrooms: number;
   bathrooms: number;
+  rentalType: 'nocturna' | 'anual';
   media: { url: string; type: string }[];
 };
 
@@ -52,6 +53,7 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
             {title.toUpperCase()}
           </h3>
           <p className="text-sm text-white/80 dark:text-gray-200">{property.city}</p>
+          {property.rentalType === 'anual' && <span className="mt-2 inline-block rounded-full bg-white/85 px-3 py-1 text-xs text-green-800 dark:bg-gray-900/85 dark:text-green-300">{t('annualRent')}</span>}
           <p className="pt-1 text-xs text-white/60 dark:text-gray-400">
             {property.maxGuests} {t('guests')} · {property.bedrooms} {t('bedrooms')}
           </p>

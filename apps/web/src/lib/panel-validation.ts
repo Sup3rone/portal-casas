@@ -27,11 +27,23 @@ export function dateRange(body: Record<string, unknown>) {
 const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address', 'city'] as const;
 const integers = ['maxGuests', 'bedrooms'] as const;
 const prices = ['baseWeekdayPrice', 'baseWeekendPrice'] as const;
-const allowed = new Set<string>([...texts, ...integers, ...prices, 'bathrooms', 'lat', 'lng', 'published']);
+const allowed = new Set<string>([...texts, ...integers, ...prices, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'whatsapp']);
 export function propertyInput(value: unknown, creating = false) {
   const body = objectBody(value);
   if (!Object.keys(body).length || Object.keys(body).some(key => !allowed.has(key))) throw new PanelValidationError('validation');
   const changes: Partial<typeof properties.$inferInsert> = {};
+  if ('rentalType' in body || creating) {
+    const rentalType = body.rentalType === undefined ? 'nocturna' : body.rentalType;
+    if (rentalType !== 'nocturna' && rentalType !== 'anual') throw new PanelValidationError('validation');
+    changes.rentalType = rentalType;
+  }
+  for (const key of ['contactName', 'whatsapp'] as const) {
+    if (!(key in body)) continue;
+    if (body[key] !== null && typeof body[key] !== 'string') throw new PanelValidationError('validation');
+    const value = typeof body[key] === 'string' ? body[key].trim() || null : null;
+    if (value !== null && (key === 'contactName' ? value.length > 100 : !/^[0-9]{8,15}$/.test(value))) throw new PanelValidationError('validation');
+    changes[key] = value;
+  }
   for (const key of texts) if (key in body || creating) changes[key] = text(body[key]);
   for (const key of integers) if (key in body || creating) changes[key] = number(body[key], key === 'maxGuests' ? 1 : 0, true)!;
   for (const key of prices) if (key in body) changes[key] = number(body[key], 0, true, true);

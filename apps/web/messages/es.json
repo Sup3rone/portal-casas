@@ -4,6 +4,9 @@
     "dark": "Activar modo oscuro"
   },
   "panel": {
+    "rentalNocturna": "Renta por noche",
+    "rentalAnual": "Renta anual",
+    "whatsappHint": "Incluye el código de país: de 8 a 15 dígitos, sin + ni espacios. Ejemplo: 5215512345678.",
     "title": "Panel del colaborador",
     "properties": "Mis propiedades",
     "allProperties": "Todas las propiedades",
@@ -65,6 +68,9 @@
     "conflict": "El recurso ya existe o las fechas no están disponibles.",
     "back": "Volver a propiedades",
     "fields": {
+      "rentalType": "Tipo de renta",
+      "contactName": "Nombre de contacto (opcional)",
+      "whatsapp": "WhatsApp (opcional)",
       "titleEs": "Título (español)",
       "titleEn": "Título (inglés)",
       "titleFr": "Título (francés)",
@@ -98,6 +104,9 @@
     "panelCollaborator": "Panel del colaborador"
   },
   "details": {
+    "contactTitle": "Contacto",
+    "whatsappButton": "Contacto para rentas personalizadas",
+    "whatsappMessage": "Hola, me interesa {propertyName}.",
     "destino": "EL DESTINO",
     "ofrece": "LO QUE OFRECE ESTE LUGAR",
     "amenidades": "AMENIDADES",
@@ -227,6 +236,7 @@
     "downPhoto": "Mover la foto {number} hacia abajo"
   },
   "properties": {
+    "annualRent": "Renta anual",
     "guests": "huéspedes",
     "bedrooms": "recámaras",
     "bathrooms": "baños",

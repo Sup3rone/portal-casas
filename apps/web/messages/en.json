@@ -4,6 +4,9 @@
     "dark": "Switch to dark mode"
   },
   "panel": {
+    "rentalNocturna": "Nightly rental",
+    "rentalAnual": "Annual rent",
+    "whatsappHint": "Include the country code: 8 to 15 digits, without + or spaces. Example: 5215512345678.",
     "title": "Host panel",
     "properties": "My properties",
     "allProperties": "All properties",
@@ -65,6 +68,9 @@
     "conflict": "The item already exists or the dates are unavailable.",
     "back": "Back to properties",
     "fields": {
+      "rentalType": "Rental type",
+      "contactName": "Contact name (optional)",
+      "whatsapp": "WhatsApp (optional)",
       "titleEs": "Title (Spanish)",
       "titleEn": "Title (English)",
       "titleFr": "Title (French)",
@@ -98,6 +104,9 @@
     "panelCollaborator": "Collaborator panel"
   },
   "details": {
+    "contactTitle": "Contact",
+    "whatsappButton": "Contact for custom rentals",
+    "whatsappMessage": "Hello, I'm interested in {propertyName}.",
     "destino": "THE DESTINATION",
     "ofrece": "WHAT THIS PLACE OFFERS",
     "amenidades": "AMENITIES",
@@ -227,6 +236,7 @@
     "downPhoto": "Move photo {number} down"
   },
   "properties": {
+    "annualRent": "Annual rent",
     "guests": "guests",
     "bedrooms": "bedrooms",
     "bathrooms": "bathrooms",

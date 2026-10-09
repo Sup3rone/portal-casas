@@ -353,6 +353,18 @@
     "clearPhotos": "Usar fotos de la categoría"
   },
   "occupationCalendar": {
+    "directOrigin": "Reserva directa",
+    "hostOrigin": "Bloqueado por la propietaria",
+    "externalOrigin": "Origen externo (iCal)",
+    "range": "Desde {start} hasta {end} (salida; no ocupada)",
+    "readOnly": "Solo lectura: no se puede modificar aquí",
+    "unlock": "Desbloquear",
+    "unlocking": "Desbloqueando…",
+    "unlockConfirm": "¿Eliminar el bloqueo completo desde {start} hasta {end} (salida; no ocupada)? Se liberarán todas sus fechas.",
+    "unlocked": "Bloqueo eliminado; fechas liberadas",
+    "unlockError": "No se pudo eliminar el bloqueo. Revisa tus permisos y vuelve a intentar.",
+    "closeDetails": "Cerrar detalles",
+    "dismissNotice": "Cerrar aviso",
     "title": "Calendario de ocupación",
     "sync": "Sincronizar Airbnb (iCal)",
     "syncing": "Sincronizando…",

@@ -2,6 +2,16 @@
 
 ## HECHO Y FUNCIONANDO
 
+### Calendario del panel: origen y desbloqueo host (09 Oct 2026)
+
+CalendarBoard muestra detalles localizados por día con hover, foco o toque: fechas (fin excluido), reserva directa (`Booking.source='manual'`, nombre si existe), bloqueo de propietaria (`host-block`) y origen externo (Airbnb/Google/iCal). Colores y leyenda distinguen los orígenes; detalles debajo de la grilla, con cierre/Escape y sin ancho fijo. Si coinciden varios eventos se muestran todos. Reservas directas, externos y BlockDate son solo lectura aquí.
+
+Antes del ajuste, la grilla ignoraba días ocupados y solo ofrecía title nativo; el desbloqueo existía únicamente en AvailabilityEditor. Ahora occupation-calendar incluye Booking.id y la grilla reutiliza DELETE `/api/properties/[id]/blocks/[resourceId]`: solo host-block, dueño/admin, ajena 404. Confirmación informa que elimina TODO el rango, no un día aislado. Tras éxito se oculta el bloqueo localmente, aparece aviso flotante cerrable y router.refresh actualiza datos sin recarga completa. No se modificaron endpoints, property-access, reservas, sincronización iCal, tarifas ni calendario/formulario públicos.
+
+**Diferencia del modelo:** la acción Guardar bloqueo de esta grilla sigue creando BlockDate; el editor individual de disponibilidad crea Booking host-block. BlockDate no tiene DELETE existente, por lo que permanece de solo lectura en esta mejora. Para probar crear/desbloquear host-block, crear primero en el editor individual y después abrir el calendario consolidado. Sin Deshacer: la API elimina la fila y no ofrece restauración del mismo recurso; recrearlo puede solaparse con nuevas reservas. Sin migraciones ni conexiones a Neon.
+
+Pruebas offline: `scripts/test-calendar-interaction.cjs` (mouse/foco/toque, idiomas, confirmación, actualización local y conservación del bloqueo si DELETE falla) y `scripts/test-occupation-calendar.cjs` (DELETE real: host propio 200, host ajeno 404, directo/iCal 404 incluso con ID conocido, CLIENT 403, ADMIN puede eliminar host ajeno). Validación: 28 scripts pasan, TypeScript web limpio, ESLint 0 errores/8 warnings preexistentes. QA real/visual pendiente de Emma: `pnpm dev`, login COLLABORATOR → `/es/panel/calendario`; repetir `/en` y `/fr`, 375px y ambos temas. Hover/Tab/toque sobre host → rango/origen → cancelar y confirmar Desbloquear; directo/iCal → solo detalles y ningún DELETE. ADMIN puede desbloquear host ajeno y conserva sincronización. Confirmar que eventos restantes no cambian y que el día final del rango queda libre según la convención existente.
+
 ### Compresión de fotos en navegador (09 Oct 2026)
 
 Solo uploader de ResourceEditor y lib/photo-upload.ts: JPEG/PNG/WebP mayores a 1.000.000 bytes se decodifican con createImageBitmap({imageOrientation:'from-image'}), dibujan en canvas sin ampliar y exportan JPEG calidad .82/lado mayor 1920px. Constantes photoCompression; nombre derivado del original, saneado y extensión .jpg. La orientación se aplica a píxeles; no se copian tags EXIF al nuevo archivo. Fallback si bitmap falta/falla: HTMLImageElement con orientación from-image, dependiente del soporte nativo del navegador; verificar verticales reales en móviles antiguos. JPEG aplana transparencia sobre blanco. Se cierran bitmaps, revocan object URLs y liberan canvas.

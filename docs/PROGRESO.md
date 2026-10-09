@@ -246,6 +246,13 @@
 1. **Bugs conocidos:** iCal sync no deduplica eventos (reservas
    duplicadas al repetir sync); `bookings/create` no valida
    solapamientos de fechas.
-2. Calendario para colaboradores (diseño pendiente).
+2. QA manual de calendario para colaboradores: tooltips de origen y desbloqueo host implementados; BlockDate de la grilla permanece solo lectura (sin endpoint DELETE existente).
 3. Navbar post-login: fix aplicado, falta confirmación final.
 4. QA de compresión cliente implementada: cámara >5MB, orientación/legibilidad y peso final en Respaldo.
+
+### Calendario del panel — origen y desbloqueo host (09 Oct 2026)
+
+- Implementado: detalles por mouse/foco/toque con rango y origen es/en/fr; colores diferenciados, aviso de solo lectura, confirmación de eliminación completa de host-block, aviso flotante y actualización sin recarga completa.
+- Reutilizado DELETE de bloques existente: propiedad propia/ADMIN; reserva directa/iCal no eliminables; property-access y endpoints sin cambios. Sin SQL/Neon.
+- Tests offline: interacción cliente y permisos/DELETE real con SQLite en memoria; los 28 scripts pasan, TypeScript web limpio y ESLint 0 errores/8 warnings preexistentes. Validación visual y contra Respaldo pendiente de Emma (375px, es/en/fr, ambos temas).
+- Decisiones: el bloqueo creado desde la grilla sigue siendo BlockDate; crear host-block desde el editor individual para este flujo. Sin desbloqueo parcial ni Deshacer (no hay restauración existente).

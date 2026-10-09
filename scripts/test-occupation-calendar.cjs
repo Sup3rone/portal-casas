@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const { load, memory, req, setSession, setLocale } = require('./test-property-access.cjs');
 const { occupationCalendar } = load('apps/web/src/lib/occupation-calendar.ts');
 const route = load('apps/web/src/app/api/properties/[id]/calendar-blocks/route.ts');
+const blocks = load('apps/web/src/app/api/properties/[id]/[resource]/[resourceId]/route.ts');
 const Page = load('apps/web/src/app/[locale]/panel/calendario/page.tsx').default;
 const AdminPage = load('apps/web/src/app/[locale]/admin/calendario/page.tsx').default;
 const React = req('react'), { renderToStaticMarkup } = req('react-dom/server'), { NextIntlClientProvider } = req('next-intl');
@@ -20,6 +21,19 @@ async function main() {
   assert.deepEqual(data.propiedades.map(p=>p.id).sort(),['hidden','pa']);
   assert.ok(data.bookings.every(b=>b.propertyId!=='pb'));
   assert.ok(data.bookings.some(b=>b.guestName==='client'&&!b.manualBlock));
+  assert.ok(data.bookings.some(b=>b.id==='calendar-own'));
+  for(const [id,propertyId,source] of [['own-host','pa','host-block'],['foreign-host','pb','host-block'],['own-airbnb','pa','airbnb'],['own-google','pa','google']]) {
+    memory.prepare('INSERT INTO Booking (id,propertyId,startDate,endDate,source) VALUES (?,?,?,?,?)').run(id,propertyId,'2032-01-01','2032-01-03',source);
+  }
+  const remove=(id,resourceId)=>blocks.DELETE(new Request('http://localhost/test',{method:'DELETE'}),{params:Promise.resolve({id,resource:'blocks',resourceId})});
+  assert.equal((await remove('pb','foreign-host')).status,404);
+  for(const id of ['calendar-own','own-airbnb','own-google'])assert.equal((await remove('pa',id)).status,404);
+  assert.equal((await remove('pa','own-host')).status,200);
+  assert.equal(memory.prepare('SELECT count(*) n FROM Booking WHERE id=?').get('own-host').n,0);
+  for(const id of ['calendar-own','own-airbnb','own-google','foreign-host'])assert.equal(memory.prepare('SELECT count(*) n FROM Booking WHERE id=?').get(id).n,1);
+  setSession({user:{id:'client'}});assert.equal((await remove('pb','foreign-host')).status,403);
+  setSession({user:{id:'admin'}});assert.equal((await remove('pb','foreign-host')).status,200);
+  setSession({user:{id:'a'}});
   assert.equal((await route.POST(request(body),context('pb'))).status,404);
   assert.equal(memory.prepare('SELECT count(*) n FROM BlockDate').get().n,0);
   assert.equal((await route.POST(request({...body,endDate:body.startDate}),context('pa'))).status,400);
@@ -39,7 +53,7 @@ async function main() {
     setSession({user:{id:'a'}});
     const html=render(await Page({params:Promise.resolve({locale})}));
     assert.ok(!html.includes(messages.occupationCalendar.sync));
-    assert.ok(!html.includes('>pb<')); assert.ok(html.includes(messages.occupationCalendar.manual));
+    assert.ok(!html.includes('>pb<')); assert.ok(html.includes(messages.occupationCalendar.directOrigin));
     await assert.rejects(()=>AdminPage({params:Promise.resolve({locale})}),e=>e.status===403);
     setSession({user:{id:'admin'}});
     const admin=render(await AdminPage({params:Promise.resolve({locale})}));

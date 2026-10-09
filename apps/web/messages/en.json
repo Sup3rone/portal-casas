@@ -353,6 +353,18 @@
     "clearPhotos": "Use category photos"
   },
   "occupationCalendar": {
+    "directOrigin": "Direct booking",
+    "hostOrigin": "Blocked by the owner",
+    "externalOrigin": "External source (iCal)",
+    "range": "From {start} to {end} (check-out; not occupied)",
+    "readOnly": "Read-only: cannot be changed here",
+    "unlock": "Unblock",
+    "unlocking": "Unblocking…",
+    "unlockConfirm": "Delete the entire block from {start} to {end} (check-out; not occupied)? All dates in this block will be released.",
+    "unlocked": "Block deleted; dates released",
+    "unlockError": "Could not delete the block. Check your permissions and try again.",
+    "closeDetails": "Close details",
+    "dismissNotice": "Dismiss notification",
     "title": "Occupancy calendar",
     "sync": "Sync Airbnb (iCal)",
     "syncing": "Syncing…",

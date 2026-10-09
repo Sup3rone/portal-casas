@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { PanelResources } from '@/lib/panel-resources';
 import { panelRequest, inputClass, buttonClass } from './request';
-import { photoMetadata, PhotoUploadError } from '@/lib/photo-upload';
+import { photoMetadata, PhotoUploadError, photoTypes, photoCompression, optimizePhoto, type PhotoType } from '@/lib/photo-upload';
 import CoverEditor from './CoverEditor';
 
 type Item = PanelResources['rates'][number] | PanelResources['media'][number];
@@ -15,21 +15,28 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
   const formRef = useRef<HTMLFormElement>(null), fileRef = useRef<HTMLInputElement>(null), uploadLock = useRef(false);
   const [uploading, setUploading] = useState(false), [uploadMessage, setUploadMessage] = useState('');
   const [uploadedUrl, setUploadedUrl] = useState('');
+  const [optimizing, setOptimizing] = useState(false), [optimizedSizes, setOptimizedSizes] = useState<{ original: number; final: number } | null>(null);
   const uploadRequest = useRef<AbortController | null>(null);
   useEffect(() => () => { uploadRequest.current?.abort(); }, [propertyId, resource]);
   async function uploadPhoto(files: FileList | null) {
     if (!files?.length || uploadLock.current || busy || editing) return;
     if (files.length !== 1) { setUploadMessage('oneFile'); return; }
     const file = files[0];
-    try { photoMetadata(file.type, file.size); }
-    catch (error) { setUploadMessage(error instanceof PhotoUploadError && error.code === 'INVALID_FILE_SIZE' ? 'sizeError' : 'typeError'); return; }
+    setOptimizedSizes(null);
+    if (!photoTypes.includes(file.type as PhotoType)) { setUploadMessage('typeError'); return; }
     const form = new FormData(formRef.current!);
     const category = String(form.get('category') || 'principal'), order = Number(form.get('order'));
     if (!Number.isSafeInteger(order) || order < 0 || order > 2147483647) { setUploadMessage('orderError'); return; }
     uploadLock.current = true; setUploading(true); setUploadMessage(''); setUploadedUrl('');
     const controller = new AbortController(); uploadRequest.current = controller;
     try {
-      const data = new FormData(); data.set('file', file);
+      setOptimizing(file.size > photoCompression.thresholdBytes);
+      const optimized = await optimizePhoto(file);
+      if (controller.signal.aborted) return;
+      setOptimizing(false);
+      if (optimized.optimized) setOptimizedSizes({ original: Math.round(file.size / 100_000) / 10, final: Math.round(optimized.file.size / 1000) });
+      photoMetadata(optimized.file.type, optimized.file.size);
+      const data = new FormData(); data.set('file', optimized.file);
       const response = await fetch(`/api/properties/${encodeURIComponent(propertyId)}/upload`, { method: 'POST', body: data, signal: controller.signal });
       const blob = await response.json().catch(() => ({}));
       if (controller.signal.aborted) return;
@@ -40,8 +47,8 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}/media`, 'POST', { url: blob.url, category, order });
       if (urlField instanceof HTMLInputElement) urlField.value = '';
       setUploadMessage('success'); router.refresh();
-    } catch (error) { if (!controller.signal.aborted) setUploadMessage(error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError'); }
-    finally { uploadRequest.current = null; uploadLock.current = false; setUploading(false); if (fileRef.current) fileRef.current.value = ''; }
+    } catch (error) { if (!controller.signal.aborted) setUploadMessage(error instanceof PhotoUploadError ? error.code === 'INVALID_FILE_SIZE' ? 'sizeError' : 'typeError' : error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError'); }
+    finally { uploadRequest.current = null; uploadLock.current = false; setUploading(false); setOptimizing(false); if (fileRef.current) fileRef.current.value = ''; }
   }
   const fields = resource === 'rates' ? ['name', 'startDate', 'endDate', 'weekdayPrice', 'weekendPrice', 'priority'] : ['url', 'category', 'order'];
   function initial(field: string) {
@@ -89,8 +96,9 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       <p className="font-medium">{uploader('drop')}</p><p className="text-sm text-gray-600 dark:text-gray-300">{uploader('hint')}</p>
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" tabIndex={-1} disabled={busy || uploading}
         onChange={event => { void uploadPhoto(event.currentTarget.files); }} aria-label={uploader('choose')} />
-      <button type="button" disabled={busy || uploading} onClick={() => fileRef.current?.click()} className={buttonClass}>{uploader(uploading ? 'uploading' : 'choose')}</button>
-      {uploading && <div role="status"><label htmlFor={`upload-${propertyId}`}>{uploader('uploading')}</label><progress id={`upload-${propertyId}`} className="w-full accent-green-700" /></div>}
+      <button type="button" disabled={busy || uploading} onClick={() => fileRef.current?.click()} className={buttonClass}>{uploader(optimizing ? 'optimizing' : uploading ? 'uploading' : 'choose')}</button>
+      {uploading && <div role="status"><label htmlFor={`upload-${propertyId}`}>{uploader(optimizing ? 'optimizing' : 'uploading')}</label><progress id={`upload-${propertyId}`} className="w-full accent-green-700" /></div>}
+      {optimizedSizes && <p role="status" className="text-sm text-gray-600 dark:text-gray-300">{uploader('optimizedSize', optimizedSizes)}</p>}
       {uploadMessage && <p role={uploadMessage === 'success' ? 'status' : 'alert'}>{uploader(uploadMessage)}</p>}
       {uploadedUrl && <p className="break-all text-sm">{uploader('uploadedUrl')} <a href={uploadedUrl} target="_blank" rel="noreferrer" className="underline">{uploadedUrl}</a></p>}
     </div>}

@@ -388,7 +388,9 @@
     "orderError": "El orden debe ser un número entero válido mayor o igual a cero.",
     "accessError": "No tienes acceso a esta propiedad.",
     "uploadError": "No se pudo completar la subida o guardar la foto. Si aparece una URL, puedes guardarla mediante el formulario manual.",
-    "uploadedUrl": "URL de la foto subida:"
+    "uploadedUrl": "URL de la foto subida:",
+    "optimizing": "Optimizando…",
+    "optimizedSize": "Foto optimizada: {original, number} MB → {final, number} KB."
   },
   "listingSearch": {
     "empty": "No encontramos casas para esta búsqueda.",

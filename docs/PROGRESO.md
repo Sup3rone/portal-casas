@@ -184,6 +184,11 @@
 
 ## Actualización — 9 de octubre 2026
 
+### Compresión automática de fotos (cliente)
+
+- Implementada sin librerías en photo-upload.ts/ResourceEditor: umbral >1MB, JPEG .82, lado mayor 1920px sin upscale, orientación from-image, fallback al original y nombre .jpg saneado. Peso final validado con límite C1 vigente 4MB; servidor/Blob intactos.
+- Nuevos mensajes de optimización/pesos es/en/fr; test-image-compression cubre canvas/decode/umbrales/fallback. Subida y cambio de propiedad mantienen permisos, categorías/orden y abort. QA real de cámara/verticales y calidad en Respaldo pendiente, sin operaciones Neon/Blob aquí.
+
 ### Home: búsqueda y Sobre nosotros/redes
 
 - Corregido listado: consume guests/start/end, capacidad >= huéspedes y disponibilidad Booking/BlockDate en servidor; vacío/aviso y limpiar filtros es/en/fr. El buscador existente no ofrece destino.
@@ -243,4 +248,4 @@
    solapamientos de fechas.
 2. Calendario para colaboradores (diseño pendiente).
 3. Navbar post-login: fix aplicado, falta confirmación final.
-4. Compresión de imágenes en subida (fotos de cámara > 5MB).
+4. QA de compresión cliente implementada: cámara >5MB, orientación/legibilidad y peso final en Respaldo.

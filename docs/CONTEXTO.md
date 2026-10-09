@@ -2,6 +2,16 @@
 
 ## HECHO Y FUNCIONANDO
 
+### Compresión de fotos en navegador (09 Oct 2026)
+
+Solo uploader de ResourceEditor y lib/photo-upload.ts: JPEG/PNG/WebP mayores a 1.000.000 bytes se decodifican con createImageBitmap({imageOrientation:'from-image'}), dibujan en canvas sin ampliar y exportan JPEG calidad .82/lado mayor 1920px. Constantes photoCompression; nombre derivado del original, saneado y extensión .jpg. La orientación se aplica a píxeles; no se copian tags EXIF al nuevo archivo. Fallback si bitmap falta/falla: HTMLImageElement con orientación from-image, dependiente del soporte nativo del navegador; verificar verticales reales en móviles antiguos. JPEG aplana transparencia sobre blanco. Se cierran bitmaps, revocan object URLs y liberan canvas.
+
+Fotos <=1MB conservan el File original. Si decode/canvas/export falla, formato no es JPEG o resultado crece, se conserva original; después se aplica photoMetadata. Límite REAL vigente: 4.000.000 bytes final, no 5MB (multipart C1 y límite Vercel); route/Blob/permisos NO cambiados. Original grande que no puede comprimirse recibe sizeError existente sin subir; un original corrupto dentro del límite puede seguir enviándose según validaciones MIME/tamaño existentes. No se garantiza 300–500KB con calidad fija: depende del contenido; tampoco se garantiza ausencia absoluta de pérdida por JPEG.
+
+ResourceEditor muestra Optimizando con progreso existente y luego pesos original MB → final KB mediante claves photoUpload.optimizing/optimizedSize en es/en/fr; controles bloqueados durante todo el proceso, limpieza y abort de propiedad conservados, comprobación de abort tras optimizar evita subida tardía. Sin librerías, migraciones ni cambios a URL manual/categoría/orden/videos. Tests test-image-compression (canvas/bitmap/Blob mock) + test-photo-upload/property-switch cubren umbral, escala/orientación solicitada, nombre/extensión, fallback/cleanup y límite final. QA real en Respaldo: foto vertical JPEG de cámara >5MB, foto <1MB, corrupta y videos por URL manual; verificar es/en/fr, peso, aspecto y orientación.
+
+Referencia de API nativa: https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap y https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob.
+
 ### Video continuo de hero y Sobre nosotros (09 Oct 2026)
 
 Home extiende un contenedor relative/isolate detrás del hero y Sobre nosotros/redes con el MISMO video absoluto cover, sin duplicarlo ni usar fixed/scroll listeners. Hero conserva altura, buscador y autoplay/loop/muted/playsInline; Sobre nosotros conserva contenido, glass, contraste gray-900/gray-100, Reveal y feedback social. globals.css añade degradado oscuro progresivo solo en la zona About y cierre transparente→var(--background), que enlaza con el fondo normal de ambos temas. El recorte cover se adapta a la altura total y puede variar con narrativas largas; no se altera la proporción del video.

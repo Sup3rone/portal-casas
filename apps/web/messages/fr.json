@@ -389,7 +389,9 @@
     "orderError": "L’ordre doit être un entier valide supérieur ou égal à zéro.",
     "accessError": "Vous n’avez pas accès à cette propriété.",
     "uploadError": "Impossible de terminer l’envoi ou d’enregistrer la photo. Si une URL apparaît, vous pouvez l’enregistrer avec le formulaire manuel.",
-    "uploadedUrl": "URL de la photo envoyée :"
+    "uploadedUrl": "URL de la photo envoyée :",
+    "optimizing": "Optimisation…",
+    "optimizedSize": "Photo optimisée : {original, number} Mo → {final, number} Ko."
   },
   "listingSearch": {
     "empty": "Aucune maison ne correspond à votre recherche.",

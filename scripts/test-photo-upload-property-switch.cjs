@@ -27,6 +27,7 @@ const media = load('apps/web/src/app/api/properties/[id]/[resource]/route.ts');
 const Page = load('apps/web/src/app/[locale]/panel/propiedades/[id]/page.tsx').default;
 const Editor = load('apps/web/src/components/panel/ResourceEditor.tsx').default;
 const NativeFormData = global.FormData, nativeFetch = global.fetch, nativeInput = global.HTMLInputElement;
+const nativeBitmap = global.createImageBitmap, nativeDocument = global.document;
 class Input { value = ''; }
 global.HTMLInputElement = Input;
 global.FormData = class extends NativeFormData {
@@ -84,8 +85,16 @@ async function main() {
   render('pb',pageB.key)(selected()); await settle(); unmount(pageB.key);
   assert.deepEqual(calls, ['/api/properties/pa/upload','/api/properties/pb/upload','/api/properties/pb/media']);
   assert.equal(paths.length,1); assert.match(paths[0],/^properties\/pb\//);
+  // Foto de cámara: el handler cliente envía el JPEG final, no los 8 MB originales.
+  calls.length=0;paths.length=0;
+  global.createImageBitmap=async()=>({width:4000,height:6000,close(){}});
+  global.document={createElement:()=>({width:0,height:0,getContext:()=>({fillRect(){},drawImage(){}}),toBlob:callback=>callback(new Blob([new Uint8Array(450000)],{type:'image/jpeg'}))})};
+  render('pb',pageB.key)({currentTarget:{files:[new File([new Uint8Array(8000000)],'camera.png',{type:'image/png'})]}});await settle();
+  assert.deepEqual(calls,['/api/properties/pb/upload','/api/properties/pb/media']);assert.match(paths[0],/\.jpg$/);
+  assert.ok(mounted.get(pageB.key).hooks.some(value=>value?.original===8&&value?.final===450));unmount(pageB.key);
   console.log('OK A→B: routes/pathnames/Media correctos, key por propiedad y cancelación de upload A pendiente. Sin red/Blob/Neon.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => {
   global.FormData = NativeFormData; global.fetch = nativeFetch; global.HTMLInputElement = nativeInput; memory.close();
+  global.createImageBitmap=nativeBitmap;global.document=nativeDocument;
 });

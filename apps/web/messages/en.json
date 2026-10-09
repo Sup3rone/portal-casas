@@ -388,7 +388,9 @@
     "orderError": "Order must be a valid integer greater than or equal to zero.",
     "accessError": "You do not have access to this property.",
     "uploadError": "Unable to complete the upload or save the photo. If a URL appears, you can save it using the manual form.",
-    "uploadedUrl": "Uploaded photo URL:"
+    "uploadedUrl": "Uploaded photo URL:",
+    "optimizing": "Optimizing…",
+    "optimizedSize": "Photo optimized: {original, number} MB → {final, number} KB."
   },
   "listingSearch": {
     "empty": "No homes match your search.",

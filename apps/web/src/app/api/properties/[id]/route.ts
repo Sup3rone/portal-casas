@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, properties } from '@portal/db';
-import { and, eq, sql } from 'drizzle-orm';
+import { db, properties, media } from '@portal/db';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { AccessError, managedProperties, requirePropertyManager } from '@/lib/property-access';
 import { managedProperty } from '@/lib/panel-server';
@@ -13,6 +13,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { id } = await params;
     await managedProperty(id, manager);
     const changes = propertyInput(await req.json().catch(() => null));
+    const urls = [...new Set([changes.sectionBgInicio, changes.sectionBgMapa, changes.sectionBgReserva].filter((value): value is string => typeof value === 'string'))];
+    if (urls.length) {
+      const photos = await db.select({ url: media.url }).from(media)
+        .where(and(eq(media.propertyId, id), eq(media.type, 'PHOTO'), inArray(media.url, urls)));
+      if (urls.some(url => !photos.some(photo => photo.url === url))) {
+        return NextResponse.json({ error: 'validation', code: 'INVALID_BACKGROUND_PHOTO' }, { status: 400 });
+      }
+    }
     if (changes.published === true && manager.role !== 'ADMIN') throw new AccessError(403);
     // Revalidar aprobación del admin dentro del UPDATE, no solo en el formulario.
     const publication = changes.published === true

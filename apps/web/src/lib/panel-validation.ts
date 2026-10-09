@@ -27,11 +27,24 @@ export function dateRange(body: Record<string, unknown>) {
 const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address', 'city'] as const;
 const integers = ['maxGuests', 'bedrooms'] as const;
 const prices = ['baseWeekdayPrice', 'baseWeekendPrice'] as const;
-const allowed = new Set<string>([...texts, ...integers, ...prices, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'whatsapp']);
+const backgroundFields = ['sectionBgInicio', 'sectionBgMapa', 'sectionBgReserva'] as const;
+const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'whatsapp']);
 export function propertyInput(value: unknown, creating = false) {
   const body = objectBody(value);
   if (!Object.keys(body).length || Object.keys(body).some(key => !allowed.has(key))) throw new PanelValidationError('validation');
   const changes: Partial<typeof properties.$inferInsert> = {};
+  for (const key of backgroundFields) {
+    if (!(key in body)) continue;
+    if (body[key] === null) { changes[key] = null; continue; }
+    const url = text(body[key]);
+    if (creating || url.length > 2048) throw new PanelValidationError('validation');
+    const local = url.startsWith('/') && !url.startsWith('//') && !url.includes('\\');
+    if (!local) {
+      try { if (new URL(url).protocol !== 'https:') throw new Error(); }
+      catch { throw new PanelValidationError('validation'); }
+    }
+    changes[key] = url;
+  }
   if ('rentalType' in body || creating) {
     const rentalType = body.rentalType === undefined ? 'nocturna' : body.rentalType;
     if (rentalType !== 'nocturna' && rentalType !== 'anual') throw new PanelValidationError('validation');

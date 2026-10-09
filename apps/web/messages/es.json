@@ -1,4 +1,16 @@
 {
+  "sectionBackgrounds": {
+    "title": "Fondos de las secciones",
+    "hint": "Elige una foto de la biblioteca para cada fondo. Guarda cada sección por separado; sin selección se conserva el fondo del tema.",
+    "sectionBgInicio": "Inicio",
+    "sectionBgMapa": "Mapa y advertencias",
+    "sectionBgReserva": "Reserva",
+    "none": "Ninguna (blanco)",
+    "select": "Usar como fondo",
+    "photo": "Foto {number}",
+    "empty": "Sube fotos a la biblioteca para elegir un fondo.",
+    "snapshot": "El fondo guardado ya no está en la biblioteca. Elige otra foto o ninguna."
+  },
   "theme": {
     "light": "Activar modo claro",
     "dark": "Activar modo oscuro"

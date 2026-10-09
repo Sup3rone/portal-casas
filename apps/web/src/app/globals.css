@@ -7,6 +7,18 @@
   }
 }
 
+/* La imagen queda libre; la lectura se resuelve dentro de las tarjetas. */
+.section-background-photo .glass-panel,
+.section-background-photo .bg-white\/85 { background-color: var(--color-white); }
+html.dark .section-background-photo .glass-panel,
+html.dark .section-background-photo .bg-white\/85 { background-color: var(--color-gray-900); }
+.section-background-photo .detail-image-heading,
+.section-background-photo .detail-image-heading h1,
+.section-background-photo .detail-image-heading p {
+  color: var(--color-white);
+  text-shadow: 0 2px 6px rgb(0 0 0 / 75%);
+}
+
 html { scroll-behavior: smooth; }
 
 .reveal {
@@ -19,6 +31,8 @@ html { scroll-behavior: smooth; }
 
 /* El scroll y la navbar inteligente solo pertenecen al detalle público. */
 html:has(.property-detail) { scroll-snap-type: y mandatory; }
+html:has(.property-detail .detail-footer-flow[data-visible="true"]) { scroll-snap-type: none; }
+.detail-footer-flow { display: flow-root; scroll-snap-align: none; }
 body:has(.property-detail) > nav {
   position: fixed;
   inset: 0 0 auto;
@@ -39,11 +53,8 @@ html:has(.property-detail dialog[open]) { overflow: hidden; }
   padding: calc(var(--detail-nav-height, 88px) + 1.5rem) 1rem calc(5.5rem + env(safe-area-inset-bottom));
   scroll-snap-align: start;
 }
-.detail-final-snap { scroll-snap-align: start; }
-.detail-final-snap > .detail-screen { scroll-snap-align: none; }
 .detail-editorial { position: relative; }
-.detail-editorial-stop { position: absolute; width: 1px; height: 100dvh; scroll-snap-align: start; pointer-events: none; }
-.detail-editorial [data-editorial-stage] { height: 100dvh; }
+.detail-editorial .detail-screen { height: 100dvh; min-height: 0; scroll-snap-align: none; }
 .property-detail .detail-description { max-height: 40svh; overflow-y: auto; overflow-wrap: anywhere; }
 .detail-back-top {
   position: fixed;

@@ -5,6 +5,7 @@ import { propertyResources } from '@/lib/panel-resources';
 import PropertyForm from '@/components/panel/PropertyForm';
 import PublicationButton from '@/components/panel/PublicationButton';
 import ResourceEditor from '@/components/panel/ResourceEditor';
+import SectionBackgroundEditor from '@/components/panel/SectionBackgroundEditor';
 import AvailabilityEditor from '@/components/panel/AvailabilityEditor';
 import SectionSlider from '@/components/SectionSlider';
 import PropertySectionsEditor from '@/components/panel/PropertySectionsEditor';
@@ -24,6 +25,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
     <AvailabilityEditor propertyId={id} bookings={resources.bookings} />
     {resources.media.length > 0 && <SectionSlider slides={resources.media} />}
     <ResourceEditor propertyId={id} resource="media" items={resources.media.filter(item => item.type === 'PHOTO')} />
+    <SectionBackgroundEditor property={property} media={resources.media} />
     <PropertySectionsEditor propertyId={id} sections={sections} media={resources.media} />
   </section>;
 }

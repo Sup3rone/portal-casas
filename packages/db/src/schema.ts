@@ -16,6 +16,9 @@ export const users = pgTable("User", {
 });
 
 export const properties = pgTable('Property', {
+  sectionBgInicio: text('sectionBgInicio'),
+  sectionBgMapa: text('sectionBgMapa'),
+  sectionBgReserva: text('sectionBgReserva'),
   id: text('id').primaryKey(),
   slug: text('slug').notNull().unique(),
   titleEs: text('titleEs').notNull(),

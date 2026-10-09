@@ -1,6 +1,11 @@
 .presentation { position: relative; }
-.stage { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--background); }
+.stage { position: sticky; top: 0; height: 100dvh; background: var(--background); }
+.stop { position: absolute; width: 1px; scroll-snap-align: start; pointer-events: none; }
+.body { height: 100%; overflow-y: auto; overflow-x: clip; }
+.content { position: relative; min-height: 100dvh; }
 .panel, .screen, .backdrop { position: absolute; inset: 0; }
+.panel { height: 100dvh; }
+.panel[aria-hidden="true"]:not([data-reveal-entered]) :global(.reveal) { opacity: 0; transform: translateY(var(--reveal-distance, 48px)); }
 .screen { background: var(--color-gray-900); }
 .backdrop::after { content: ''; position: absolute; inset: 0; background: rgb(0 0 0 / 15%); }
 .floating { position: absolute; inset: 5svh max(1rem, calc((100vw - 72rem) / 2)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: center; overflow-y: auto; }
@@ -14,3 +19,12 @@
 @media (max-width: 1023px) { .floating { inset: 1rem; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-content: center; } .frames { height: clamp(110px, 22svh, 220px); } .description { max-height: 27svh; } }
 @media (max-height: 650px) { .floating { align-content: start; } }
 @media (prefers-reduced-motion: reduce) { .photo { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .presentation { height: auto !important; }
+  .stage { position: static; height: auto; }
+  .panel { position: relative; opacity: 1 !important; visibility: visible !important; height: 100dvh; scroll-snap-align: start; }
+  .body { height: 100%; overflow-y: auto; }
+  .stop { display: none; }
+  .frames { height: auto; }
+  .photo { position: relative; inset: auto; aspect-ratio: 4 / 3; opacity: 1 !important; }
+}

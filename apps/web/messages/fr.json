@@ -1,4 +1,16 @@
 {
+  "sectionBackgrounds": {
+    "title": "Arrière-plans des sections",
+    "hint": "Choisissez une photo de la bibliothèque pour chaque arrière-plan. Enregistrez chaque section séparément ; sans sélection, le fond du thème est conservé.",
+    "sectionBgInicio": "Introduction",
+    "sectionBgMapa": "Carte et avertissements",
+    "sectionBgReserva": "Réservation",
+    "none": "Aucune (blanc)",
+    "select": "Utiliser comme arrière-plan",
+    "photo": "Photo {number}",
+    "empty": "Ajoutez des photos à la bibliothèque pour choisir un arrière-plan.",
+    "snapshot": "L’arrière-plan enregistré n’est plus dans la bibliothèque. Choisissez une autre photo ou aucune."
+  },
   "theme": {
     "light": "Activer le mode clair",
     "dark": "Activer le mode sombre"

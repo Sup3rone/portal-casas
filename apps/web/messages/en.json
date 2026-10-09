@@ -1,4 +1,16 @@
 {
+  "sectionBackgrounds": {
+    "title": "Section backgrounds",
+    "hint": "Choose a library photo for each background. Save each section separately; no selection keeps the theme background.",
+    "sectionBgInicio": "Introduction",
+    "sectionBgMapa": "Map and notices",
+    "sectionBgReserva": "Booking",
+    "none": "None (white)",
+    "select": "Use as background",
+    "photo": "Photo {number}",
+    "empty": "Upload photos to the library to choose a background.",
+    "snapshot": "The saved background is no longer in the library. Choose another photo or none."
+  },
   "theme": {
     "light": "Switch to light mode",
     "dark": "Switch to dark mode"

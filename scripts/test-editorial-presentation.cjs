@@ -3,7 +3,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { load, memory, req, setLocale } = require('./test-property-access.cjs');
-const { editorialPresentation: build, editorialProgress, editorialSwipe } = load('apps/web/src/lib/editorial-presentation.ts');
+const { editorialPresentation: build, editorialProgress, editorialSwipe, sceneGeometry, sceneProgress } = load('apps/web/src/lib/editorial-presentation.ts');
+const geometry=sceneGeometry([1800,1000,600],1000);
+assert.deepEqual(geometry.map(scene=>scene.start),[0,1800,2800]);
+assert.equal(sceneProgress(800,1000,geometry,false).fade,0);
+assert.equal(sceneProgress(1675,1000,geometry,false).fade,0.5);
+assert.equal(sceneProgress(1800,1000,geometry,false).active,1);
+assert.equal(sceneProgress(1675,1000,geometry,true).fade,0);
 const media = [
   { id: 'hero', propertyId: 'pa', type: 'PHOTO', category: 'lugar', order: 8, url: '/hero.jpg' },
   { id: 'first', propertyId: 'pa', type: 'PHOTO', category: 'principal', order: 1, url: '/first.jpg' },
@@ -47,7 +53,7 @@ async function main() {
     assert.ok(!empty.includes('data-detail-section="fallback"'));
     assert.ok(empty.includes(messages.details.ofrece)); // Fallback integrado en P1.
     assert.equal((empty.match(/<iframe/g)||[]).length,1); // Mapa movido, sin duplicar.
-    assert.ok(!empty.includes('data-editorial-panel')); assert.ok(!empty.includes('href="#reservar"'));
+    assert.equal((empty.match(/data-editorial-panel=/g)||[]).length,3); assert.ok(!empty.includes('href="#reservar"'));
     memory.prepare('INSERT INTO "PropertySection" (propertyId,section) VALUES (?,?)').run('pa','destino');
     assert.equal(await render(await Page({params})),empty);
     memory.prepare('DELETE FROM "PropertySection"').run();
@@ -66,9 +72,9 @@ async function main() {
     for (const section of ['destino','amenidades','habitaciones','lugar']) memory.prepare('INSERT INTO "PropertySection" (propertyId,section,descriptionEs,descriptionEn,descriptionFr,heroMediaId) VALUES (?,?,?,?,?,?)')
       .run('pa',section,section+' ES',section+' EN',section+' FR','hero');
     const html=await render(await Page({params}));
-    assert.equal((html.match(/data-detail-section=/g)||[]).length,4);
-    assert.equal((html.match(/data-editorial-panel=/g)||[]).length,4);
-    assert.ok(html.indexOf('data-detail-section="editorial"') < html.indexOf('data-detail-section="location"'));
+    assert.equal((html.match(/data-detail-section=/g)||[]).length,3);
+    assert.equal((html.match(/data-editorial-panel=/g)||[]).length,7);
+    assert.ok(html.indexOf('data-editorial-panel="destino"') < html.indexOf('data-detail-section="location"'));
     assert.ok(html.includes('id="reservar"')); assert.ok(html.includes('maps.google.com')); assert.ok(html.includes('aria-modal="true"'));
     assert.ok(html.includes('General '+locale.toUpperCase()));
     assert.ok(html.includes('<video')); // Tratamiento de vídeo principal conservado.

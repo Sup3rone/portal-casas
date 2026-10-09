@@ -7,6 +7,7 @@ import MessageForm from '@/components/MessageForm';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import ReservationDatesProvider from '@/components/ReservationDatesProvider';
 import PropertyGallery from '@/components/PropertyGallery';
+import SectionBackground from '@/components/SectionBackground';
 import CategorySection from '@/components/CategorySection';
 import LocationMap from '@/components/LocationMap';
 import PropertyShareButton from '@/components/PropertyShareButton';
@@ -17,6 +18,7 @@ import { propertyBlocks } from '@/lib/occupation-calendar';
 import Reveal from '@/components/Reveal';
 import PropertyDetailScroll from '@/components/PropertyDetailScroll';
 import Footer from '@/components/Footer';
+import DetailFooterFlow from '@/components/DetailFooterFlow';
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -120,9 +122,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
   return (
     <PropertyDetailScroll key={property.id}>
-      {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
-      <section data-detail-section="gallery" className="detail-screen mx-auto max-w-7xl px-3 py-8 md:px-6">
-        <Reveal className="relative mb-6 rounded-2xl bg-black/30 dark:bg-black/50 p-6 pr-16 text-center">
+      <div className="detail-editorial" data-shared-presentation>
+        <EditorialPresentation slides={editorial} scenes={[{ id: 'gallery', label: title, content: (<>
+{/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
+      <SectionBackground url={property.sectionBgInicio} name="gallery" className="detail-screen mx-auto max-w-7xl px-3 py-8 md:px-6">
+        <Reveal className={`relative mb-6 rounded-2xl ${property.sectionBgInicio ? 'detail-image-heading' : 'bg-black/30 dark:bg-black/50'} p-6 pr-16 text-center`}>
           <PropertyShareButton title={title} />
           <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
             {title.toUpperCase()}
@@ -220,17 +224,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       )}
 
 
-      </section>
-
-      {editorial.length > 0 && <>
-        <div className="detail-editorial" data-detail-section="editorial">
-          {editorial.map((slide, index) => <div key={slide.section} className="detail-editorial-stop" aria-hidden="true" style={{ top: `${index * 100}dvh` }} />)}
-          <EditorialPresentation slides={editorial} />
-        </div>
-        <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{t('details.reservar')}</a>
-      </>}
-
-      {(hasMap || hasWarnings) && <section data-detail-section="location" className="detail-screen px-4 py-16 md:px-6" aria-label={t('details.mapWarnings')}>
+      </SectionBackground>
+        </>) }]} afterScenes={[
+          ...(hasMap || hasWarnings ? [{ id: 'location', label: t('details.mapWarnings'), content: (
+<SectionBackground url={property.sectionBgMapa} name="location" className="detail-screen px-4 py-16 md:px-6" label={t('details.mapWarnings')}>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {hasMap && <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} />}
           {hasWarnings && <Reveal className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
@@ -239,13 +236,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             {warningDescription && <p className="whitespace-pre-wrap break-words leading-relaxed">{warningDescription}</p>}
           </Reveal>}
         </div>
-      </section>}
-
-      {/* ===== RESERVAR: calendario izquierda, formulario derecha ===== */}
-      <div className="detail-final-snap">
-      <section id="reservar" data-detail-section="reservation" className="detail-screen px-6 py-24">
+      </SectionBackground>
+          ) }] : []),
+          { id: 'reservation', label: t('details.reservar'), content: (
+<SectionBackground url={property.sectionBgReserva} id="reservar" name="reservation" className="detail-screen px-6 py-24">
         <div className="mx-auto max-w-6xl">
-          <Reveal as="h2" className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl">
+          <Reveal as="h2" className={`mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl${property.sectionBgReserva ? ' detail-image-heading' : ''}`}>
             {t('details.reservar')}
           </Reveal>
           <ReservationDatesProvider key={property.id}>
@@ -268,9 +264,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           </div>
           </ReservationDatesProvider>
         </div>
-      </section>
-      <Footer inDetail />
+      </SectionBackground>
+          ) },
+        ]} />
       </div>
+      {editorial.length > 0 && <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{t('details.reservar')}</a>}
+      <DetailFooterFlow><Footer inDetail /></DetailFooterFlow>
     </PropertyDetailScroll>
   );
 }

@@ -4,6 +4,24 @@ type Media = { id: string; propertyId: string; url: string; type: 'PHOTO' | 'VID
 type Section = { propertyId: string; section: string; descriptionEs: string | null; descriptionEn: string | null; descriptionFr: string | null; heroMediaId: string | null; photoMediaIds?: string[] | null };
 export type EditorialSlide = { section: typeof editorialOrder[number]; description: string; hero?: { id: string; url: string }; photos: { id: string; url: string }[] };
 
+export function sceneGeometry(heights: number[], viewport: number) {
+  let start = 0;
+  return heights.map(height => {
+    const length = Math.max(1, viewport, height);
+    const scene = { start, length, overflow: Math.max(0, height - viewport) };
+    start += length;
+    return scene;
+  });
+}
+
+export function sceneProgress(distance: number, viewport: number, geometry: ReturnType<typeof sceneGeometry>, reduced: boolean) {
+  const index = Math.max(0, geometry.findLastIndex(scene => distance >= scene.start));
+  const scene = geometry[index];
+  const phase = scene ? Math.max(0, Math.min(1, (distance - scene.start - scene.overflow) / Math.max(1, viewport))) : 0;
+  const fade = reduced ? 0 : Math.max(0, Math.min(1, (phase - 0.75) / 0.25));
+  return { index, fade, active: fade >= 0.5 ? Math.min(geometry.length - 1, index + 1) : index };
+}
+
 export function editorialPresentation(propertyId: string, locale: string, sections: Section[], media: Media[]): EditorialSlide[] {
   const field = locale === 'en' ? 'descriptionEn' : locale === 'fr' ? 'descriptionFr' : 'descriptionEs';
   const photos = media.filter(item => item.propertyId === propertyId && item.type === 'PHOTO')

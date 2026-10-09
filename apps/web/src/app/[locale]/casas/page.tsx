@@ -1,19 +1,24 @@
 // src/app/[locale]/casas/page.tsx
 import { getTranslations } from 'next-intl/server';
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, gte, sql } from 'drizzle-orm';
 import { db, properties, media } from '@portal/db';
 import PropertyCard from '@/components/PropertyCard';
 import Reveal from '@/components/Reveal';
+import { Link } from '@/i18n/navigation';
+import { propertySearch, type PropertySearchParams } from '@/lib/property-search';
 
 export default async function PropertiesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<PropertySearchParams>;
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  const filters = propertySearch(await searchParams ?? {});
 
-  const rows = await db
+  const rows = filters.invalid ? [] : await db
     .select({ property: properties, m: media })
     .from(properties)
     // Portada explícita (máximo cinco); sin selección, una PHOTO por orden.
@@ -30,7 +35,15 @@ export default async function PropertiesPage({
       order by case when candidate."isCover" then candidate."coverOrder" else candidate."order" end asc, candidate.id asc
       limit 5
     )`))
-    .where(eq(properties.published, true))
+    .where(and(eq(properties.published, true),
+      filters.guests !== undefined ? gte(properties.maxGuests, filters.guests) : undefined,
+      filters.start && filters.end ? sql`not exists (
+        select 1 from "Booking" occupied where occupied."propertyId" = ${properties.id}
+          and occupied."startDate" <= ${filters.end}::date and occupied."endDate" > ${filters.start}::date
+      ) and not exists (
+        select 1 from "BlockDate" occupied where occupied."propertyId" = ${properties.id}
+          and occupied."startDate" <= ${filters.end}::date and occupied."endDate" > ${filters.start}::date
+      )` : undefined))
     .orderBy(asc(properties.createdAt), asc(properties.id), asc(media.coverOrder), asc(media.id));
 
   const grouped = new Map<string, typeof rows[number]['property'] & { media: NonNullable<typeof rows[number]['m']>[] }>();
@@ -61,6 +74,11 @@ export default async function PropertiesPage({
           </span>
         </div>
 
+        {filters.active && <Link href="/casas" className="mb-6 rounded-lg bg-white/90 px-4 py-3 text-sm font-medium text-green-800 dark:bg-gray-900 dark:text-green-300">{t('listingSearch.clear')}</Link>}
+        {!propertyList.length && <div role="status" className="rounded-2xl bg-white/90 p-6 text-center text-gray-900 dark:bg-gray-900/90 dark:text-gray-100">
+          <p>{t(filters.invalid ? 'listingSearch.invalid' : 'listingSearch.empty')}</p>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{t('listingSearch.adjust')}</p>
+        </div>}
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
           {propertyList.map((p, index) => (
             <Reveal key={p.id} delay={Math.min(index * 120, 600)} className="min-w-0">

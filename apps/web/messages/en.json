@@ -389,5 +389,24 @@
     "accessError": "You do not have access to this property.",
     "uploadError": "Unable to complete the upload or save the photo. If a URL appears, you can save it using the manual form.",
     "uploadedUrl": "Uploaded photo URL:"
+  },
+  "listingSearch": {
+    "empty": "No homes match your search.",
+    "adjust": "Try different dates or a different number of guests.",
+    "clear": "Clear filters",
+    "invalid": "Check the number of guests and select valid arrival and departure dates."
+  },
+  "siteContent": {
+    "title": "Site content",
+    "aboutTitle": "About us",
+    "about_es": "About us — Spanish",
+    "about_en": "About us — English",
+    "about_fr": "About us — French",
+    "social_instagram": "Instagram URL",
+    "social_facebook": "Facebook URL",
+    "hint": "Up to 2000 characters per language. Leave a field empty to hide its content on the home page.",
+    "socialHint": "HTTPS URLs only. Leave the field empty to hide the social link.",
+    "instagramLink": "Instagram (opens in a new tab)",
+    "facebookLink": "Facebook (opens in a new tab)"
   }
 }

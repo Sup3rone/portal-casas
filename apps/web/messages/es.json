@@ -389,5 +389,24 @@
     "accessError": "No tienes acceso a esta propiedad.",
     "uploadError": "No se pudo completar la subida o guardar la foto. Si aparece una URL, puedes guardarla mediante el formulario manual.",
     "uploadedUrl": "URL de la foto subida:"
+  },
+  "listingSearch": {
+    "empty": "No encontramos casas para esta búsqueda.",
+    "adjust": "Prueba otras fechas o una cantidad de huéspedes diferente.",
+    "clear": "Limpiar filtros",
+    "invalid": "Revisa la cantidad de huéspedes y selecciona llegada y salida válidas."
+  },
+  "siteContent": {
+    "title": "Contenido del sitio",
+    "aboutTitle": "Sobre nosotros",
+    "about_es": "Sobre nosotros — español",
+    "about_en": "Sobre nosotros — inglés",
+    "about_fr": "Sobre nosotros — francés",
+    "social_instagram": "URL de Instagram",
+    "social_facebook": "URL de Facebook",
+    "hint": "Hasta 2000 caracteres por idioma. Deja un campo vacío para ocultar su contenido en la home.",
+    "socialHint": "URLs HTTPS únicamente. Deja el campo vacío para ocultar la red social.",
+    "instagramLink": "Instagram (abre en una pestaña nueva)",
+    "facebookLink": "Facebook (abre en una pestaña nueva)"
   }
 }

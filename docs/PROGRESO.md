@@ -184,6 +184,13 @@
 
 ## Actualización — 9 de octubre 2026
 
+### Home: búsqueda y Sobre nosotros/redes
+
+- Corregido listado: consume guests/start/end, capacidad >= huéspedes y disponibilidad Booking/BlockDate en servidor; vacío/aviso y limpiar filtros es/en/fr. El buscador existente no ofrece destino.
+- Implementado SiteContent key/value y editor exclusivo ADMIN /panel/contenido (GET/PUT /api/panel/site-content), narrativas es/en/fr de 2000 caracteres y redes HTTPS. Home muestra contenido guardado bajo el hero con Reveal y SVG locales; valores vacíos lo ocultan.
+- SQL scripts/sql/site-content.sql PROPUESTO, NO EJECUTADO. Pendiente aplicación manual por Emma: Respaldo → validación → restore point/main antes del deploy autorizado. Tabla requerida por home; no desplegar sin ella.
+- Tests offline nuevos: test-property-search.cjs y test-site-content.cjs; validación visual/BD real pendiente. Detalle, reservas y panel de propiedades intactos.
+
 ### Correcciones menores/medianas de auditoría
 
 - Implementados los nueve puntos autorizados: config Drizzle sin safe, label email traducido, error de contraseña corta visible con token válido, lang inválido 400 INVALID_LANG, modal con salida estrictamente posterior, Date inválido 400 INVALID_DATES, reduced-motion sin reset de scroll, login por locale y .env.example sin secretos.

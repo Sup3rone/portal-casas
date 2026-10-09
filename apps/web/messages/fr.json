@@ -390,5 +390,24 @@
     "accessError": "Vous n’avez pas accès à cette propriété.",
     "uploadError": "Impossible de terminer l’envoi ou d’enregistrer la photo. Si une URL apparaît, vous pouvez l’enregistrer avec le formulaire manuel.",
     "uploadedUrl": "URL de la photo envoyée :"
+  },
+  "listingSearch": {
+    "empty": "Aucune maison ne correspond à votre recherche.",
+    "adjust": "Essayez d’autres dates ou un nombre de voyageurs différent.",
+    "clear": "Effacer les filtres",
+    "invalid": "Vérifiez le nombre de voyageurs et sélectionnez des dates d’arrivée et de départ valides."
+  },
+  "siteContent": {
+    "title": "Contenu du site",
+    "aboutTitle": "À propos de nous",
+    "about_es": "À propos — espagnol",
+    "about_en": "À propos — anglais",
+    "about_fr": "À propos — français",
+    "social_instagram": "URL Instagram",
+    "social_facebook": "URL Facebook",
+    "hint": "2000 caractères maximum par langue. Laissez un champ vide pour masquer son contenu sur la page d’accueil.",
+    "socialHint": "URL HTTPS uniquement. Laissez le champ vide pour masquer le lien social.",
+    "instagramLink": "Instagram (s’ouvre dans un nouvel onglet)",
+    "facebookLink": "Facebook (s’ouvre dans un nouvel onglet)"
   }
 }

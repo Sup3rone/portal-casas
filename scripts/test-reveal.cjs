@@ -10,7 +10,7 @@ assert.ok(html.startsWith('<section'));
 assert.ok(html.includes('Contenido SSR'));
 assert.ok(html.includes('class="reveal test"'));
 assert.ok(html.includes('--reveal-distance:32px') && html.includes('--reveal-delay:80ms'));
-assert.ok(renderToStaticMarkup(React.createElement(Reveal, null, 'SSR')).includes('--reveal-distance:24px'));
+assert.ok(renderToStaticMarkup(React.createElement(Reveal, null, 'SSR')).includes('--reveal-distance:48px'));
 
 let pathname = '/casas';
 mockModule('@/i18n/navigation', { usePathname: () => pathname, Link: ({ children, ...props }) => React.createElement('a', props, children) });

@@ -15,6 +15,8 @@ import EditorialPresentation from '@/components/EditorialPresentation';
 import { editorialPresentation } from '@/lib/editorial-presentation';
 import { propertyBlocks } from '@/lib/occupation-calendar';
 import Reveal from '@/components/Reveal';
+import PropertyDetailScroll from '@/components/PropertyDetailScroll';
+import Footer from '@/components/Footer';
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -117,17 +119,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   };
 
   return (
-    <main
-      className="min-h-screen dark:bg-gray-700 dark:bg-blend-multiply"
-      style={{
-        backgroundImage: "url('/images 2/detalle-bg.jpg')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }}
-    >
+    <PropertyDetailScroll key={property.id}>
       {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
-      <section className="mx-auto max-w-7xl px-3 py-8 md:px-6">
+      <section data-detail-section="gallery" className="detail-screen mx-auto max-w-7xl px-3 py-8 md:px-6">
         <Reveal className="relative mb-6 rounded-2xl bg-black/30 dark:bg-black/50 p-6 pr-16 text-center">
           <PropertyShareButton title={title} />
           <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
@@ -139,10 +133,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           </p>
         </Reveal>
         <PropertyGallery slides={principal} />
-      </section>
-
       {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
-      <Reveal as="section" className="mx-auto max-w-2xl px-6 py-16 text-center">
+      <Reveal as="div" className=" mx-auto max-w-2xl px-6 py-16 text-center">
         <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
           <p className="whitespace-pre-wrap leading-relaxed text-gray-700 dark:text-gray-200 font-light">
             {description}
@@ -152,7 +144,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
       {/* ===== EL DESTINO + LO QUE OFRECE — widgets flotantes ===== */}
       {(editorial.length === 0 || !hasEditorial('lugar')) && (
-      <section className="px-6 py-16">
+      <div className="px-6 py-16">
         <div className="mx-auto max-w-7xl">
 
           {/* Fila de widgets: destino+mapa | lo que ofrece */}
@@ -196,17 +188,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             )}
           </div>
         </div>
-      </section>
+      </div>
       )}
 
-      {editorial.length > 0 && <>
-        <EditorialPresentation slides={editorial} />
-        <a href="#reservar" className="fixed bottom-6 right-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{t('details.reservar')}</a>
-      </>}
-
       {/* ===== AMENIDADES: info + imagen ===== */}
-      {(!hasEditorial('amenidades') || porCategoria('amenidades').some(item => item.type === 'VIDEO')) && (
-      <CategorySection
+      {porCategoria('amenidades').length > 0 && (!hasEditorial('amenidades') || porCategoria('amenidades').some(item => item.type === 'VIDEO')) && (
+      <div className="mt-8"><CategorySection
         label={t('details.amenidades')}
         slides={porCategoria('amenidades')}
         items={[
@@ -216,12 +203,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           { icon: '🏊', label: t('details.amenities.piscina') },
           { icon: '🅿️', label: t('details.amenities.estacionamiento') },
         ]}
-      />
+      /></div>
       )}
 
       {/* ===== HABITACIONES: imagen + info (invertido) ===== */}
-      {(!hasEditorial('habitaciones') || porCategoria('habitaciones').some(item => item.type === 'VIDEO')) && (
-      <CategorySection
+      {porCategoria('habitaciones').length > 0 && (!hasEditorial('habitaciones') || porCategoria('habitaciones').some(item => item.type === 'VIDEO')) && (
+      <div className="mt-8"><CategorySection
         label={t('details.habitaciones')}
         slides={porCategoria('habitaciones')}
         reverse
@@ -229,10 +216,21 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           { icon: '🛏️', label: t('details.amenities.ropaCama') },
           { icon: '🛁', label: t('details.amenities.banos') },
         ]}
-      />
+      /></div>
       )}
 
-      {(hasMap || hasWarnings) && <section className="px-4 py-16 md:px-6" aria-label={t('details.mapWarnings')}>
+
+      </section>
+
+      {editorial.length > 0 && <>
+        <div className="detail-editorial" data-detail-section="editorial">
+          {editorial.map((slide, index) => <div key={slide.section} className="detail-editorial-stop" aria-hidden="true" style={{ top: `${index * 100}dvh` }} />)}
+          <EditorialPresentation slides={editorial} />
+        </div>
+        <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{t('details.reservar')}</a>
+      </>}
+
+      {(hasMap || hasWarnings) && <section data-detail-section="location" className="detail-screen px-4 py-16 md:px-6" aria-label={t('details.mapWarnings')}>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {hasMap && <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} />}
           {hasWarnings && <Reveal className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
@@ -244,32 +242,35 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       </section>}
 
       {/* ===== RESERVAR: calendario izquierda, formulario derecha ===== */}
-      <section id="reservar" className="px-6 py-24">
+      <div className="detail-final-snap">
+      <section id="reservar" data-detail-section="reservation" className="detail-screen px-6 py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl">
+          <Reveal as="h2" className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl">
             {t('details.reservar')}
-          </h2>
+          </Reveal>
           <ReservationDatesProvider key={property.id}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Columna izquierda: Calendario */}
-            <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
+            <Reveal className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
               <h3 className="mb-3 text-[0.65rem] tracking-[0.25em] text-gray-400 dark:text-gray-300 uppercase">
                 {t('details.disponibilidad').toUpperCase()}
               </h3>
               <AvailabilityCalendar bookings={bookingRows} />
-            </div>
+            </Reveal>
 
             {/* Columna derecha: Formulario */}
-            <div className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
+            <Reveal className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
               <MessageForm propertyId={property.id} locale={locale} pricing={pricing} maxGuests={property.maxGuests} compact />
               {property.whatsapp && <a href={`https://wa.me/${property.whatsapp}?text=${encodeURIComponent(t('details.whatsappMessage', { propertyName: title }))}`} target="_blank" rel="noopener noreferrer"
                 className="mt-3 block w-full rounded-lg border border-green-700 px-4 py-3 text-center text-sm font-medium text-green-800 transition hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-950">{t('details.whatsappButton')}</a>}
-            </div>
+            </Reveal>
           </div>
           </ReservationDatesProvider>
         </div>
       </section>
-    </main>
+      <Footer inDetail />
+      </div>
+    </PropertyDetailScroll>
   );
 }

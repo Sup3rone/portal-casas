@@ -104,6 +104,8 @@
     "panelCollaborator": "Collaborator panel"
   },
   "details": {
+    "backToTop": "Back to top",
+    "locationSection": "Location",
     "contactTitle": "Contact",
     "whatsappButton": "Contact for custom rentals",
     "whatsappMessage": "Hello, I'm interested in {propertyName}.",

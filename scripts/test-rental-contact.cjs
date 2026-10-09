@@ -45,7 +45,8 @@ async function main() {
     const title = locale === 'en' ? property.titleEn : locale === 'fr' ? property.titleFr : property.titleEs;
     const text = messages.details.whatsappMessage.replace('{propertyName}', title);
     assert.ok(html.replace(/&#x27;/g, "'").includes(`https://wa.me/5215512345678?text=${encodeURIComponent(text)}`));
-    assert.ok(html.includes('Emma'));
+    assert.ok(!html.includes('Emma'));
+    assert.ok(html.indexOf('https://wa.me/') > html.indexOf('type="submit"'));
     assert.ok(html.includes(messages.details.whatsappButton));
     console.log(`${locale}: formulario, badge anual y enlace WhatsApp localizado OK`);
   }

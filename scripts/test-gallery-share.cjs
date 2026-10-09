@@ -69,6 +69,12 @@ async function main() {
   find(render(), node => node.type === 'dialog').props.onKeyDown({ key: 'ArrowRight', preventDefault() {} });
   assert.equal(active, 0);
   assert.ok(!find(render(), node => node.props?.src === '/test/8.jpg'));
+  active = 7;
+  const renderFull = () => InteractiveGallery({ slides: photos, fullCollection: true });
+  find(renderFull(), node => node.props?.['aria-label'] === 'siguiente').props.onClick();
+  assert.equal(active, 8);
+  assert.ok(find(renderFull(), node => node.props?.src === '/test/8.jpg'));
+  assert.equal(find(renderFull(), node => node.props?.role === 'status').props.children.join(''), '9/28');
   memory.close();
   console.log('OK: galería y compartir sin red, escrituras ni librerías nuevas.');
 }

@@ -16,8 +16,55 @@ html { scroll-behavior: smooth; }
   transition-delay: var(--reveal-delay, 0ms);
 }
 .reveal.reveal-visible { opacity: 1; transform: none; }
+
+/* El scroll y la navbar inteligente solo pertenecen al detalle público. */
+html:has(.property-detail) { scroll-snap-type: y mandatory; }
+body:has(.property-detail) > nav {
+  position: fixed;
+  inset: 0 0 auto;
+  background: color-mix(in srgb, var(--background) 93%, transparent);
+  backdrop-filter: blur(12px);
+  transition: transform .3s ease;
+}
+body:has(.property-detail) > nav.detail-nav-top { background: color-mix(in srgb, var(--background) 75%, transparent); }
+body:has(.property-detail) > nav.detail-nav-hidden { transform: translateY(-105%); }
+.property-detail {
+  min-height: 100dvh;
+  background: var(--background);
+}
+html:has(.property-detail dialog[open]) { overflow: hidden; }
+.detail-screen {
+  position: relative;
+  min-height: 100dvh;
+  padding: calc(var(--detail-nav-height, 88px) + 1.5rem) 1rem calc(5.5rem + env(safe-area-inset-bottom));
+  scroll-snap-align: start;
+}
+.detail-final-snap { scroll-snap-align: start; }
+.detail-final-snap > .detail-screen { scroll-snap-align: none; }
+.detail-editorial { position: relative; }
+.detail-editorial-stop { position: absolute; width: 1px; height: 100dvh; scroll-snap-align: start; pointer-events: none; }
+.detail-editorial [data-editorial-stage] { height: 100dvh; }
+.property-detail .detail-description { max-height: 40svh; overflow-y: auto; overflow-wrap: anywhere; }
+.detail-back-top {
+  position: fixed;
+  z-index: 40;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: calc(1rem + env(safe-area-inset-bottom) + var(--detail-keyboard-offset, 0px));
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background: var(--color-green-700);
+  color: var(--color-white);
+  font-size: 1.5rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+}
+.detail-back-top:focus-visible { outline: 3px solid var(--color-green-400); outline-offset: 3px; }
+@media (width >= 48rem) { .detail-screen { padding-inline: 1.5rem; } }
+@media (width < 48rem) { .property-detail { --detail-nav-height: 160px; } }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
+  html:has(.property-detail) { scroll-behavior: auto; }
+  body:has(.property-detail) > nav { transition: none; transform: none; }
 }
 
 :root {

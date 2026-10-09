@@ -2,6 +2,123 @@
 
 ## HECHO Y FUNCIONANDO
 
+### Detalle continuo scroll-driven (08 Oct 2026, vigente)
+
+Blueprint vigente: P1 mosaico/título/datos/compartir → P2 destino → P3 amenidades → P4 habitaciones → P5 lugar → P6 mapa/advertencias → P7 reserva/calendario/WhatsApp → footer sin snap propio. `apps/web/src/app/[locale]/casas/[slug]/page.tsx` integra descripción general, widgets y CategorySection fallback dentro de P1 para no crear pantallas adicionales ni perder contenido. P1 puede exceder el viewport si ese contenido lo requiere. Las secciones editoriales vacías y mapa/advertencias sin datos se siguen omitiendo; no se inventan cuatro pantallas en casas sin editoriales. PropertyGallery mantiene colección/límite/lightbox originales; no se altera el panel ni los datos.
+
+Excepción expresamente autorizada a la protección de `components/EditorialPresentation.tsx`: **avance por scroll, sin autoplay ni timers**. El fundido entre bloques conserva editorialProgress; las dos fotos del cuadro también responden al progreso local del bloque (primer cuarto: primera foto; zona central: fundido a segunda), sin cambios de texto, fondos, estructura glass, tipografía ni CSS module. Con una foto no hay alternancia. Teclas izquierda/derecha en el cuadro desplazan el documento, sin cambiar un índice por fuera del scroll; swipe vertical usa el scroll nativo. Reduced-motion hace el cambio de fotos discreto y conserva el comportamiento reducido de fondos. Cualquier otro cambio interno sigue requiriendo autorización expresa.
+
+`globals.css` mantiene snap y navbar exclusivos del detalle, altura mínima 100dvh y stage/puntos editoriales de 100dvh; contenido largo y scroll interno original siguen accesibles. `PropertyDetailScroll.tsx`, Navbar.tsx, calendario/formulario/WhatsApp/Footer intactos en este ajuste. Reveal no envuelve la presentación sticky. No se agregan claves i18n; se reutilizan las existentes en es/en/fr. Sin migraciones, conexiones BD ni despliegues.
+
+Validación: 22 scripts offline pasaron, TypeScript --noEmit --incremental false limpio, ESLint 0 errores/8 warnings heredados. `scripts/test-detail-scroll.cjs` verifica orden, ausencia de timers, efecto real del avance/fotos por scroll, retroceso/reduced-motion, fondos/narrativas y CSS interno protegidos, footer, idiomas y ausencia de fotos/editoriales. `scripts/test-editorial-presentation.cjs` comprueba fallbacks integrados en P1. QA visual manual pendiente para Emma: checklist pantalla por pantalla en `docs/DETALLE-SCROLL-SNAP.md`. No se inició el navegador automatizado.
+
+### SLIDER DEL DETALLE (histórico)
+
+Nota posterior: el ajuste scroll-snap editorial descrito más abajo reintegra EditorialPresentation y CategorySection en el detalle. El inventario de esta sección registra el estado del intento descartado al momento de la investigación; sus indicaciones de “sin uso en detalle” no describen ya el render vigente.
+
+Investigación de solo lectura del 08 Oct 2026. Se revisaron componentes, referencias actuales, `git log --all`, versiones con `git show` y archivos eliminados del historial. **El cambio reciente a PropertyDetailScroll/scroll-snap está en el árbol de trabajo, todavía sin commit.** La última versión confirmada anterior al cambio es **`a7e53aa57a24919592d28e8cffb4957a83510e9e`** (`apartado para reservas`). No hay un commit de scroll-snap que pueda usarse como frontera histórica en este checkout.
+
+#### Inventario y estado
+
+Todas las rutas de componentes siguientes pertenecen a `apps/web/src/components/`. Ninguno de estos archivos fue eliminado por el cambio reciente: se sustituyeron sus usos en la página pública. No se encontraron otros archivos con nombres Slider/Carousel/Showcase/Hero relacionados al detalle en el historial de esa carpeta.
+
+| Archivo | Comportamiento y contenido | Historia comprobada | Estado actual |
+| --- | --- | --- | --- |
+| `EditorialPresentation.tsx` | Presentación de cuatro secciones con stage sticky de 100svh, fondo hero a pantalla completa y fundido entre secciones al hacer scroll. Cada sección contiene fotos a la izquierda y narrativa localizada a la derecha en cuadros glass, apilados en móvil. Hasta dos PHOTO por cuadro, una visible cada vez; autoplay cada 5000 ms cuando hay dos, pausa por hover/focus/toque, teclado y swipe. Reduced-motion desactiva autoplay y fundido. | Creado en `f183eb6e` (`Tablas y agregados`), ya con selección de fotos y autoplay. `8b1e56c3` (`recuadro limpio`) quitó flechas, dots y contador del cuadro; esa versión sigue en `a7e53aa5`. | Archivo vivo, pero sin importación/uso desde el detalle actual. Es el **slider automático** buscado. |
+| `EditorialPresentation.module.css` | Estilos de fondo, stage sticky, cuadros flotantes, responsive y crossfade de fotos de 400 ms. No recibe props. | Creado en `f183eb6e`; `8b1e56c3` eliminó estilos de controles junto con su markup. | Vivo, importado por EditorialPresentation; no activo en el detalle actual. |
+| `SectionSlider.tsx` | Slider **manual**, sin intervalos de autoplay: flechas y dots cambian el índice circular. PHOTO o VIDEO con controles nativos; modo normal 16:9 o `fullscreen` con posición absoluta para fondo hero. Entrada fade de 0.4 s. | Existe desde `483c4c76` (`Cambio de paginas de renta`); en `eda6e43a` el detalle lo usa como hero `fullscreen` y en CategorySection. En `9dbc43a3` la galería superior pública se reemplaza por PropertyGallery. Última modificación propia: `116dad6f`. | Vivo y usado en `app/[locale]/panel/propiedades/[id]/page.tsx`; también referenciado por CategorySection y CategoryGrid. No importado por el detalle actual. |
+| `PropertyGallery.tsx` | Mosaico de miniaturas y lightbox **manual**, con flechas/teclado, Escape, cierre exterior, focus trap y contador en el diálogo; no autoplay. Soporta PHOTO/VIDEO. | Creado en `9dbc43a3` (`mejoras requeridas imagenes`). Cambios de mosaico en `8cef1fc7`; `9e49ed34` limita colección y lightbox a ocho. En `a7e53aa5` conserva ese límite. | Vivo y activo en el detalle actual. El cambio no confirmado añade `fullCollection`: ocho miniaturas con lightbox de toda la colección cuando es true. No confundirlo con el slider automático editorial. |
+| `CategorySection.tsx` | Bloque de dos columnas: título/lista con iconos y SectionSlider manual. `reverse` invierte columnas; sin slides no se renderiza. | Creado en `d1b0d042`; usado en el detalle de `eda6e43a` y todavía en `a7e53aa5` como fallback de amenidades/habitaciones sin contenido editorial o con videos. Última modificación: `9e49ed34`. | Vivo, sin consumidores externos actuales; conserva su importación de SectionSlider. |
+| `CategoryGrid.tsx` | Cuatro tarjetas EL DESTINO, AMENIDADES, HABITACIONES, EN EL LUGAR. Abren popups: mapa, lista de amenidades, slider manual de habitaciones y lista de servicios, respectivamente. No es la presentación editorial sticky. | Creado y usado por el detalle en `479dd32a` (`pagina de scroll`). El detalle de `eda6e43a` ya utiliza CategorySection en su lugar. Última modificación propia: `116dad6f`. | Vivo, sin consumidores actuales. Su referencia interna a SectionSlider permanece. |
+| `Gallery.tsx` | Galería anterior sin carrusel/lightbox: muestra cinco PHOTO, botón ver más/menos y VIDEO al final. | Creado y usado por el detalle en `67ec9515` (`Mueve galería a componente Gallery y deja solo <Gallery media={mediaList} /> en page.tsx`). Único commit propio encontrado. | Vivo, sin consumidores actuales; no es el slider buscado. |
+
+`PropertyDetailScroll.tsx` es el nuevo controlador no confirmado del detalle, no el slider histórico: maneja el scroll local, navbar y botón volver arriba. No se restauró ni modificó ningún componente durante esta investigación.
+
+#### Captura textual de props
+
+Firmas de EditorialPresentation y datos auxiliares, presentes en el snapshot previo `a7e53aa5` y conservadas en el archivo actual:
+
+```tsx
+export default function EditorialPresentation({ slides }: { slides: EditorialSlide[] })
+function EditorialScreen({ slide }: { slide: EditorialSlide })
+export type EditorialSlide = {
+  section: typeof editorialOrder[number];
+  description: string;
+  hero?: { id: string; url: string };
+  photos: { id: string; url: string }[];
+};
+export const editorialOrder = ['destino', 'amenidades', 'habitaciones', 'lugar'] as const;
+```
+
+Las dos últimas declaraciones viven en `apps/web/src/lib/editorial-presentation.ts`, creado en `f183eb6e`. Su función `editorialPresentation(propertyId, locale, sections, media)` prepara los slides en servidor: descripción del idioma activo sin fallback de idioma, hero PHOTO de la misma propiedad, fotos seleccionadas por `photoMediaIds` o primeras dos de categoría por order/id. Descarta secciones sin descripción activa ni hero.
+
+Firmas de los otros componentes (tipos y valores por defecto conservados):
+
+```tsx
+type Slide = { url: string; type: 'PHOTO' | 'VIDEO' };
+export default function SectionSlider({ slides, fullscreen = false }: {
+  slides: Slide[];
+  fullscreen?: boolean;
+})
+
+// PropertyGallery en a7e53aa5, ANTES del scroll-snap:
+export default function PropertyGallery({ slides: allSlides }: { slides: Slide[] })
+// PropertyGallery en el árbol de trabajo actual:
+export default function PropertyGallery({ slides: allSlides, fullCollection = false }: {
+  slides: Slide[];
+  fullCollection?: boolean;
+})
+
+type Item = { icon: string; label: string };
+export default function CategorySection({ label, items, slides, reverse = false }: {
+  label: string;
+  items: Item[];
+  slides: Slide[];
+  reverse?: boolean;
+})
+
+export type CategoryData = {
+  mapEmbedUrl: string | null;
+  amenities: Item[];
+  roomSlides: Slide[];
+  placeOffers: Item[];
+};
+export default function CategoryGrid({ data }: { data: CategoryData })
+
+type MediaItem = { id: string; url: string; type: string };
+export default function Gallery({ media }: { media: MediaItem[] })
+```
+
+#### Los cuatro bloques editoriales sustituidos
+
+No eran cuatro archivos distintos: eran cuatro instancias internas de `EditorialScreen` dentro de `EditorialPresentation`, alimentadas por PropertySection. Orden fijo: **destino → amenidades → habitaciones → lugar**. Títulos i18n `details.destino`, `details.amenidades`, `details.habitaciones`, `details.enLugar`; categorías de fotos fallback `principal`, `amenidades`, `habitaciones`, `lugar`. Cada una tenía fondo hero, cuadro de fotos y descripción en es/en/fr. `advertencias` se renderizaba aparte junto al mapa, no como quinta diapositiva.
+
+En el detalle confirmado `a7e53aa5`, `<EditorialPresentation slides={editorial} />` se insertaba después de la galería superior/descripción/widgets fallback y antes de CategorySection/mapa/reserva. Solo se mostraba cuando había contenido editorial. Las casas sin contenido usaban widgets de destino/ofertas y CategorySection de amenidades/habitaciones. El actual árbol de trabajo sustituye esos bloques por Hero, Ubicación y Reserva; el modelo, helper, editor y componentes históricos siguen presentes.
+
+#### Recuperación (comandos documentados, NO ejecutados)
+
+**Sí, la versión anterior completa del detalle es recuperable desde `a7e53aa57a24919592d28e8cffb4957a83510e9e`.** Lectura sin alterar archivos:
+
+```powershell
+git show 'a7e53aa57a24919592d28e8cffb4957a83510e9e:apps/web/src/app/[locale]/casas/[slug]/page.tsx'
+git show 'a7e53aa57a24919592d28e8cffb4957a83510e9e:apps/web/src/components/EditorialPresentation.tsx'
+git show 'a7e53aa57a24919592d28e8cffb4957a83510e9e:apps/web/src/components/EditorialPresentation.module.css'
+```
+
+Si se autoriza restauración posterior, `git checkout <hash> -- <ruta>` recupera cada archivo. **Sobrescribe los cambios locales de esa ruta:** conservar primero el diff del scroll-snap. Recuperar solo page.tsx no garantiza restaurar el comportamiento completo: Footer, PropertyGallery y globals.css también tienen cambios locales del scroll-snap y deben compararse con ese mismo snapshot. Para recuperar únicamente el slider editorial, sus archivos y helper ya siguen intactos; hace falta reintegrar su uso, tarea no realizada aquí. Para consultar la variante con flechas/dots/contador usar `f183eb6e`; para la variante anterior de hero manual fullscreen usar `eda6e43a`.
+
+Supuestos: “versión buena” significa la última versión confirmada anterior al scroll-snap, no una certificación de QA visual. No se ejecutó la app ni se validaron datos/BD. No se eliminaron componentes sin uso ni se corrigieron textos heredados durante esta auditoría.
+
+### Detalle público full-screen con scroll-snap editorial (08 Oct 2026, etapa anterior)
+
+`apps/web/src/app/[locale]/casas/[slug]/page.tsx` conserva el orden del snapshot a7e53aa5: título/datos y PropertyGallery, descripción general, widgets fallback de destino/ofertas, EditorialPresentation (destino/amenidades/habitaciones/lugar), CategorySection fallback cuando corresponde, mapa/advertencias y reserva/WhatsApp. Se envuelven en secciones de altura mínima de viewport, sin retirar galerías, videos ni fallbacks. La galería usa su colección principal original y límite original de ocho; no se activa fullCollection. Footer local después de reserva y footer global omitido solo en detalle.
+
+**EditorialPresentation.tsx y su lógica interna son intocables en futuros rediseños**, salvo autorización expresa. También se mantiene intacto su CSS module en este ajuste. Usa scroll de window, stage sticky, fundido, cuadros glass y autoplay de 5000 ms; por ello el scroll-snap se aplica al documento (`html:has(.property-detail)`), sin contenedor con scroll independiente ni eventos sintéticos. Puntos snap absolutos externos cada 100svh acompañan las cuatro diapositivas sin modificar el componente. No se aplica Reveal a su contenedor. Fila inexistente o vacía sigue sin generar diapositiva; mapa/advertencias se omiten si faltan ambos.
+
+`components/PropertyDetailScroll.tsx` es solo controlador de navbar por dirección y botón ↑, ahora escucha window.scrollY y usa window.scrollTo. Navbar.tsx intacto; reduced-motion mantiene navbar visible y navegación sin smooth. CSS scoped, safe-area y VisualViewport conservados; secciones largas pueden recorrerse normalmente y cuadros editoriales mantienen su scroll interno original. Área snap final incluye reserva y footer, sin parada propia del footer. Messages details.backToTop ya disponible en es/en/fr, sin nuevas claves requeridas. Sin cambios a listado, panel, schema/APIs ni SQL.
+
+Validación offline: los 22 scripts test-*.cjs pasaron; TypeScript --noEmit --incremental false limpio y ESLint 0 errores/8 warnings heredados (incluidas labels/categoryData del detalle anterior restaurado). test-detail-scroll compara EditorialPresentation y su CSS contra a7e53aa5, comprueba cuatro bloques/orden, footer único, scroll window/navbar/teclado/reduced-motion; test-editorial-presentation comprueba fallbacks y render es/en/fr. QA visual MANUAL pendiente por decisión del usuario: checklist en docs/DETALLE-SCROLL-SNAP.md; pruebas DOM no certifican el comportamiento visual nativo del snap. El intento previo de tres secciones que sustituía la presentación editorial fue descartado.
+
 ### Tipos de renta y contacto WhatsApp (08 Oct 2026)
 
 Implementado en código; SQL PENDIENTE de ejecución manual por Emma. `packages/db/src/schema.ts`: Property añade rentalType text NOT NULL DEFAULT nocturna (CHECK nocturna/anual), contactName text nullable y whatsapp text nullable (CHECK 8–15 dígitos). `scripts/sql/property-rental-contact.sql`: propuesta transaccional no idempotente; propiedades existentes quedan nocturna y contactos NULL. Aplicar en Respaldo primero; luego restore point y main ANTES de desplegar código autorizado. Sin migración aplicada, las consultas del schema nuevo fallarán por columnas ausentes. No se ejecutaron conexiones/SQL/deploy aquí.

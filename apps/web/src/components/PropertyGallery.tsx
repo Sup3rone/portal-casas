@@ -8,8 +8,8 @@ import Reveal from './Reveal';
 type Slide = { url: string; type: 'PHOTO' | 'VIDEO' };
 const DETAIL_GALLERY_LIMIT = 8;
 
-export default function PropertyGallery({ slides: allSlides }: { slides: Slide[] }) {
-  const slides = allSlides.slice(0, DETAIL_GALLERY_LIMIT);
+export default function PropertyGallery({ slides: allSlides, fullCollection = false }: { slides: Slide[]; fullCollection?: boolean }) {
+  const slides = fullCollection ? allSlides : allSlides.slice(0, DETAIL_GALLERY_LIMIT);
   const t = useTranslations('details.gallery');
   const [index, setIndex] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -46,7 +46,7 @@ export default function PropertyGallery({ slides: allSlides }: { slides: Slide[]
   return (
     <>
       <Reveal className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
-        {slides.map((slide, i) => {
+        {slides.slice(0, DETAIL_GALLERY_LIMIT).map((slide, i) => {
           return (
             <button key={`${slide.url}-${i}`} type="button" aria-haspopup="dialog"
               aria-label={t(slide.type === 'VIDEO' ? 'abrirVideo' : 'abrirFoto', { number: i + 1 })}

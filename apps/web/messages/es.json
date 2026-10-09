@@ -104,6 +104,8 @@
     "panelCollaborator": "Panel del colaborador"
   },
   "details": {
+    "backToTop": "Volver arriba",
+    "locationSection": "Ubicación",
     "contactTitle": "Contacto",
     "whatsappButton": "Contacto para rentas personalizadas",
     "whatsappMessage": "Hola, me interesa {propertyName}.",

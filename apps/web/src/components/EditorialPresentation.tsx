@@ -1,55 +1,28 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { editorialProgress, editorialSwipe, type EditorialSlide } from '@/lib/editorial-presentation';
+import { editorialProgress, type EditorialSlide } from '@/lib/editorial-presentation';
 import styles from './EditorialPresentation.module.css';
 
 const titles = { destino: 'destino', amenidades: 'amenidades', habitaciones: 'habitaciones', lugar: 'enLugar' } as const;
 
 function EditorialScreen({ slide }: { slide: EditorialSlide }) {
   const t = useTranslations('details'), gallery = useTranslations('details.gallery');
-  const [index, setIndex] = useState(0);
-  const touch = useRef<{ x: number; y: number } | null>(null);
   const count = slide.photos.length;
-  const [paused, setPaused] = useState(false), [reduced, setReduced] = useState(true);
-  const resume = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const interacting = useRef({ hover: false, focus: false, touch: false });
-  function pause() { if (resume.current) clearTimeout(resume.current); setPaused(true); }
-  function release() {
-    if (resume.current) clearTimeout(resume.current);
-    resume.current = setTimeout(() => {
-      if (!Object.values(interacting.current).some(Boolean)) setPaused(false);
-    }, 5000);
-  }
-  useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setReduced(query.matches); update(); query.addEventListener('change', update);
-    return () => { query.removeEventListener('change', update); if (resume.current) clearTimeout(resume.current); };
-  }, []);
-  useEffect(() => {
-    if (count !== 2 || paused || reduced) return;
-    const timer = setInterval(() => setIndex(value => (value + 1) % 2), 5000);
-    return () => clearInterval(timer);
-  }, [count, paused, reduced]);
-  function move(step: number) { pause(); if (count > 1) setIndex(value => (value + step + count) % count); release(); }
   return <section className={styles.screen} aria-label={t(titles[slide.section])}>
     {slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
     <div className={styles.floating}>
     <div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: t(titles[slide.section]) })}
       tabIndex={count > 1 ? 0 : undefined}
-      onMouseEnter={() => { interacting.current.hover = true; pause(); }}
-      onMouseLeave={() => { interacting.current.hover = false; release(); }}
-      onFocus={() => { interacting.current.focus = true; pause(); }}
-      onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) { interacting.current.focus = false; release(); } }}
-      onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); move(event.key === 'ArrowLeft' ? -1 : 1); } }}
-      onTouchStart={event => { interacting.current.touch = true; pause(); const point = event.touches[0]; touch.current = { x: point.clientX, y: point.clientY }; }}
-      onTouchCancel={() => { interacting.current.touch = false; touch.current = null; release(); }}
-      onTouchEnd={event => { const point = event.changedTouches[0], start = touch.current; touch.current = null;
-        interacting.current.touch = false; if (start) move(editorialSwipe(start, { x: point.clientX, y: point.clientY })); release(); }}>
+      onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault(); window.scrollBy({ top: (event.key === 'ArrowLeft' ? -1 : 1) * window.innerHeight,
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      } }}>
       <div className={styles.frames}>
         {slide.photos.map((photo, number) => {
-          return <div key={photo.id} className={styles.photo} style={{ opacity: number === index ? 1 : 0 }} aria-hidden={number !== index}>
+          return <div key={photo.id} data-editorial-photo={number} className={styles.photo}
+            style={{ opacity: count === 1 ? 1 : number === 0 ? 'calc(1 - var(--editorial-photo-progress, 0))' : 'var(--editorial-photo-progress, 0)' }} aria-hidden={number !== 0}>
             <Image src={photo.url} alt={gallery('foto', { number: number + 1 })} fill unoptimized sizes="(max-width: 1023px) 45vw, 25vw" className="object-cover" />
           </div>;
         })}
@@ -75,8 +48,16 @@ export default function EditorialPresentation({ slides }: { slides: EditorialSli
     let frame = 0;
     function update() {
       frame = 0;
-      const { index, fade, active } = editorialProgress(-element.getBoundingClientRect().top, element.querySelector<HTMLElement>('[data-editorial-stage]')!.offsetHeight, panels.length, reduced.matches);
+      const distance = -element.getBoundingClientRect().top;
+      const height = element.querySelector<HTMLElement>('[data-editorial-stage]')!.offsetHeight;
+      const { index, fade, active } = editorialProgress(distance, height, panels.length, reduced.matches);
       panels.forEach((panel, number) => {
+        const progress = Math.max(0, Math.min(1, (distance / Math.max(1, height) - number - 0.25) / 0.5));
+        panel.style.setProperty('--editorial-photo-progress', String(reduced.matches ? Number(progress >= 0.5) : progress));
+        const photos = panel.querySelectorAll<HTMLElement>('[data-editorial-photo]');
+        photos.forEach((photo, photoIndex) => {
+          photo.setAttribute('aria-hidden', String(photoIndex !== (progress >= 0.5 ? 1 : 0) && photos.length > 1));
+        });
         panel.style.opacity = String(number === index ? 1 : number === index + 1 ? fade : 0);
         panel.style.pointerEvents = number === active ? 'auto' : 'none';
         panel.inert = number !== active;
@@ -90,7 +71,7 @@ export default function EditorialPresentation({ slides }: { slides: EditorialSli
     return () => { cancelAnimationFrame(frame); resize.disconnect(); window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule); reduced.removeEventListener('change', schedule); };
   }, [slides.length]);
   if (!slides.length) return null;
-  return <div ref={root} className={styles.presentation} style={{ height: `${slides.length * 100}svh` }}>
+  return <div ref={root} className={styles.presentation} style={{ height: `${slides.length * 100}dvh` }}>
     <div className={styles.stage} data-editorial-stage>
       {slides.map((slide, number) => <div key={slide.section} data-editorial-panel className={styles.panel} style={{ opacity: number === 0 ? 1 : 0 }}
         inert={number !== 0} aria-hidden={number !== 0}><EditorialScreen slide={slide} /></div>)}

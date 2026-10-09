@@ -1,6 +1,5 @@
 // Datos y SSR reales sin Neon; interacción/scroll se comprueban aparte en navegador.
 const assert = require('node:assert/strict');
-const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const { load, memory, req, setLocale } = require('./test-property-access.cjs');
@@ -31,8 +30,6 @@ assert.equal(editorialSwipe({x:100,y:100},{x:20,y:105}),1);
 assert.equal(editorialSwipe({x:100,y:100},{x:180,y:105}),-1);
 assert.equal(editorialSwipe({x:100,y:100},{x:120,y:200}),0);
 const Page = load('apps/web/src/app/[locale]/casas/[slug]/page.tsx').default;
-const baseline = execFileSync('git', ['show', 'HEAD:apps/web/src/app/[locale]/casas/[slug]/page.tsx'], { encoding: 'utf8' });
-const Previous = load('scripts/fixtures/baseline-detail.tsx', baseline).default;
 memory.prepare('UPDATE "Property" SET titleEs=?,titleEn=?,titleFr=?,descEs=?,descEn=?,descFr=?,city=?,address=?,bedrooms=?,bathrooms=?,lat=?,lng=? WHERE id=?')
   .run('Casa','House','Maison','General ES','General EN','General FR','City','Address',2,1,20,-100,'pa');
 for (const m of media.filter(m => m.propertyId === 'pa')) memory.prepare('INSERT INTO "Media" (id,propertyId,type,category,"order",url) VALUES (?,?,?,?,?,?)')
@@ -44,8 +41,11 @@ async function main() {
     const messages = JSON.parse(fs.readFileSync(path.join(__dirname,'../apps/web/messages/'+locale+'.json'),'utf8'));
     const render = async tree => { const stream = await renderToReadableStream(React.createElement(NextIntlClientProvider, {locale,messages,timeZone:'America/Mexico_City',onError(e){throw e;}},tree)); await stream.allReady; return new Response(stream).text(); };
     const params = Promise.resolve({locale,slug:'pa'});
-    const before = await render(await Previous({params})), empty = await render(await Page({params}));
-    assert.ok(before.includes('id="reservar"')); assert.ok(empty.includes('id="reservar"'));
+    const empty = await render(await Page({params}));
+    assert.ok(empty.includes('id="reservar"'));
+    assert.ok(empty.includes('data-detail-section="gallery"'));
+    assert.ok(!empty.includes('data-detail-section="fallback"'));
+    assert.ok(empty.includes(messages.details.ofrece)); // Fallback integrado en P1.
     assert.equal((empty.match(/<iframe/g)||[]).length,1); // Mapa movido, sin duplicar.
     assert.ok(!empty.includes('data-editorial-panel')); assert.ok(!empty.includes('href="#reservar"'));
     memory.prepare('INSERT INTO "PropertySection" (propertyId,section) VALUES (?,?)').run('pa','destino');
@@ -55,7 +55,7 @@ async function main() {
       .run('pa','advertencias','Aviso ES','Notice EN','Avis FR');
     const warnings = await render(await Page({params}));
     assert.ok(warnings.includes(messages.details.advertencias));
-    assert.ok(warnings.indexOf(messages.details.mapWarnings) < warnings.indexOf('id="reservar"'));
+    assert.ok(warnings.indexOf(messages.details.advertencias) < warnings.indexOf('id="reservar"'));
     assert.equal((warnings.match(/<iframe/g)||[]).length,1);
     memory.prepare('UPDATE "Property" SET lat=NULL,lng=NULL WHERE id=?').run('pa');
     assert.equal(((await render(await Page({params}))).match(/<iframe/g)||[]).length,0);
@@ -66,13 +66,14 @@ async function main() {
     for (const section of ['destino','amenidades','habitaciones','lugar']) memory.prepare('INSERT INTO "PropertySection" (propertyId,section,descriptionEs,descriptionEn,descriptionFr,heroMediaId) VALUES (?,?,?,?,?,?)')
       .run('pa',section,section+' ES',section+' EN',section+' FR','hero');
     const html=await render(await Page({params}));
-    assert.equal((html.match(/data-editorial-panel/g)||[]).length,4);
-    assert.ok(html.includes('href="#reservar"')); assert.ok(html.includes('hidden')); assert.ok(html.includes('lg:flex'));
+    assert.equal((html.match(/data-detail-section=/g)||[]).length,4);
+    assert.equal((html.match(/data-editorial-panel=/g)||[]).length,4);
+    assert.ok(html.indexOf('data-detail-section="editorial"') < html.indexOf('data-detail-section="location"'));
     assert.ok(html.includes('id="reservar"')); assert.ok(html.includes('maps.google.com')); assert.ok(html.includes('aria-modal="true"'));
-    assert.ok(html.includes('destino '+locale.toUpperCase()));
+    assert.ok(html.includes('General '+locale.toUpperCase()));
     assert.ok(html.includes('<video')); // Tratamiento de vídeo principal conservado.
     memory.prepare('DELETE FROM "PropertySection"').run();
   }
-  memory.close(); console.log('OK: PHOTO/hero, vacíos, 4 secciones glass, mapa único/advertencias/omisión, reserva/lightbox/vídeos y reduced-motion. Sin red/Neon.');
+  memory.close(); console.log('OK: presentación pública y 4 bloques editoriales conservados, fallbacks, mapa/advertencias, reserva/lightbox/vídeos. Sin red/Neon.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});

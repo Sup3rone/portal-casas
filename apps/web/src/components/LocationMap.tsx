@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import PropertyShareButton from './PropertyShareButton';
+import Reveal from './Reveal';
 
 type Props = {
   lat: number;
@@ -12,7 +13,7 @@ export default async function LocationMap({ lat, lng, address, propertyTitle }: 
   const locale = await getLocale();
   const t = await getTranslations('details');
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+    <Reveal className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
       <PropertyShareButton title={propertyTitle} />
       <iframe
         title={t('mapTitle', { address })}
@@ -26,6 +27,6 @@ export default async function LocationMap({ lat, lng, address, propertyTitle }: 
       <div className="bg-white dark:bg-gray-900 px-4 py-3">
         <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">📍 {address}</p>
       </div>
-    </div>
+    </Reveal>
   );
 }

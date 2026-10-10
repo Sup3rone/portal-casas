@@ -27,7 +27,7 @@ async function main() {
     assert.ok(html.includes('<video'));
     assert.equal(renderToStaticMarkup(wrap(React.createElement(Gallery, { slides: [] }))), '');
     const map = renderToStaticMarkup(wrap(await Map({ lat: 20, lng: -105, address: 'Address', propertyTitle: 'Property' })));
-    assert.ok(map.includes(messages.details.share.action));
+    assert.ok(map.includes(messages.details.share.locationAction));
     assert.ok(map.includes('hl=' + locale));
 
     const data = { title: 'Property ' + locale, url: 'https://example.com/' + locale + '/casas/property' };
@@ -41,6 +41,25 @@ async function main() {
     assert.equal(copied, undefined, 'Cancelar no debe copiar');
     assert.equal(await Share.shareProperty(data, { share: async () => { throw new DOMException('Unavailable', 'NotAllowedError'); }, clipboard }), 'copied');
     await assert.rejects(() => Share.shareProperty(data, { clipboard: { writeText: async () => { throw new Error('Denied'); } } }), /Denied/);
+    for (const [location, query] of [
+      [{ lat:20, lng:-105, address:'Ignored', city:'Nuevo Vallarta' }, '20,-105'],
+      [{ lat:null, lng:null, address:'Av. México 1 & 2', city:'Nuevo Vallarta' }, 'Av. México 1 & 2, Nuevo Vallarta'],
+      [{ address:'', city:'' }, null],
+    ]) {
+      const props={title:'Property '+locale,...location};
+      const shared=Share.propertyShareData(props,data.url);
+      assert.equal(shared.url,query ? 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query) : data.url);
+      assert.equal(shared.text,props.title+(props.city ? ' — '+props.city : ''));
+      native=undefined;copied=undefined;
+      assert.equal(await Share.shareProperty(shared,{share:async value=>{native=value;},clipboard}),'shared');
+      assert.deepEqual(native,shared);assert.equal(copied,undefined);
+      assert.equal(await Share.shareProperty(shared,{clipboard}),'copied');assert.equal(copied,shared.url);
+    }
+    assert.equal(Share.propertyLocationUrl({lat:0,lng:0}),'https://www.google.com/maps/search/?api=1&query=0%2C0');
+    assert.equal(Share.propertyLocationUrl({lat:NaN,lng:0,city:'City'}),'https://www.google.com/maps/search/?api=1&query=City');
+    assert.equal(Share.propertyLocationUrl({lat:91,lng:181,address:'Address'}),'https://www.google.com/maps/search/?api=1&query=Address');
+    assert.equal(Share.propertyLocationUrl({lat:20,lng:null}),null);
+    assert.equal(Share.propertyLocationUrl({address:'   ',city:' '}),null);
     console.log(locale + ': mosaico, límite, video, mapa y share/copia/cancelación OK');
   }
   // Handlers reales: lightbox limitada y navegación circular/teclado entre 0 y 7.
@@ -75,6 +94,26 @@ async function main() {
   assert.equal(active, 8);
   assert.ok(find(renderFull(), node => node.props?.src === '/test/8.jpg'));
   assert.equal(find(renderFull(), node => node.props?.role === 'status').props.children.join(''), '9/28');
+  // Handler del botón: contenido calculado y feedback de ubicación/página correctos.
+  let hooks,index;
+  mockModule('react',{...React,useEffect(){},useState(initial){const slot=index++;if(!(slot in hooks))hooks[slot]=initial;return [hooks[slot],value=>{hooks[slot]=value;}];}});
+  const InteractiveShare=load('apps/web/src/components/PropertyShareButton-interactive.tsx',fs.readFileSync(path.join(__dirname,'../apps/web/src/components/PropertyShareButton.tsx'),'utf8')).default;
+  const oldNavigator=Object.getOwnPropertyDescriptor(global,'navigator'),oldWindow=global.window;
+  const pageUrl='https://example.com/fr/casas/property';
+  let copiedLink;
+  global.window={location:{href:pageUrl}};
+  Object.defineProperty(global,'navigator',{configurable:true,value:{clipboard:{writeText:async url=>{copiedLink=url;}}}});
+  try{
+    for(const props of [{title:'Maison',lat:20,lng:-105,city:'Vallarta'},{title:'Maison',address:'Calle 1',city:'Vallarta'},{title:'Maison'}]){
+      hooks=[];const renderShare=()=>{index=0;return InteractiveShare(props);};
+      const url=Share.propertyLocationUrl(props);
+      assert.equal(find(renderShare(),node=>node.type==='button').props['aria-label'],url?'locationAction':'action');
+      await find(renderShare(),node=>node.type==='button').props.onClick();
+      assert.equal(copiedLink,url||pageUrl);
+      assert.equal(find(renderShare(),node=>node.props?.role==='status').props.children,url?'locationCopied':'copied');
+      assert.equal(find(renderShare(),node=>node.type==='button').props.disabled,false);
+    }
+  }finally{if(oldNavigator)Object.defineProperty(global,'navigator',oldNavigator);else delete global.navigator;global.window=oldWindow;}
   memory.close();
   console.log('OK: galería y compartir sin red, escrituras ni librerías nuevas.');
 }

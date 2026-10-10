@@ -197,6 +197,9 @@
       "posicion": "Photo ou vidéo {number} sur {count}"
     },
     "share": {
+      "locationAction": "Partager l’emplacement",
+      "locationCopied": "Lien de localisation copié",
+      "locationShared": "Emplacement partagé",
       "action": "Partager ce logement",
       "copied": "Lien copié",
       "shared": "Lien partagé",

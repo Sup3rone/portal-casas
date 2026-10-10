@@ -2,6 +2,14 @@
 
 ## HECHO Y FUNCIONANDO
 
+### Compartir ubicación de propiedad (09 Oct 2026)
+
+PropertyShareButton ahora recibe lat/lng/address/city opcionales. propertyLocationUrl elige coordenadas finitas y en rango (incluye 0,0); si falta una o son inválidas, busca dirección y ciudad no vacías; sin ubicación devuelve null y propertyShareData conserva window.location.href como fallback. Formato oficial elegido para ambos casos: https://www.google.com/maps/search/?api=1&query= + encodeURIComponent(query), donde query es lat,lng o address, city. Referencia: https://developers.google.com/maps/documentation/urls/get-started (Search admite coordenadas o dirección y requiere api=1). No geocodifica ni consume APIs/keys de Google.
+
+Texto nativo/title: título localizado — ciudad (sin separador si no hay ciudad); al copiar se copia SOLO la URL calculada. Se conserva Web Share API, fallback clipboard, cancelación AbortError sin copia, manejo de error, feedback de 3s, focus y teclado. Claves details.share.locationAction/locationCopied/locationShared en es/en/fr distinguen ubicación; claves genéricas siguen usadas en el fallback a página. LocationMap pasa los datos disponibles al botón y mantiene iframe/estilos tal cual. Excepción de alcance autorizada: page.tsx solo pasa props de ubicación al botón del encabezado y city a LocationMap; así el encabezado cubre casos sin coordenadas cuando el mapa no se renderiza. Ambos botones comparten la misma ubicación, sin cambios a WhatsApp, contenido, scroll-snap, home/panel/footer ni BD.
+
+Tests test-gallery-share.cjs cubren tres contenidos en es/en/fr, URLs codificadas (acentos/&/comas), coordenadas 0 y fuera de rango, lat/lng incompletas, texto nativo, copia, feedback del handler real y mecanismos de cancelación/error existentes. Validación offline: 30 scripts pasan, TypeScript web limpio y ESLint 0 errores/8 warnings preexistentes. QA manual pendiente: localhost → detalle con lat/lng → compartir/copiar → abrir pin; sin coordenadas pero con dirección/ciudad → búsqueda desde encabezado; sin ubicación → URL de la página con locale. Móvil Web Share nativo/desktop clipboard, tres idiomas; confirmar ambos botones, notificación localizada y WhatsApp intacto. Sin conexiones a BD ni migraciones.
+
 ### Footer: redes y WhatsApp global (09 Oct 2026)
 
 La columna CONTACTO de Footer conserva email y añade SVG inline enlazados solo si están configurados. Instagram/Facebook reutilizan exactamente social_instagram/social_facebook de SiteContent, sin duplicar campos ni modificar la home. WhatsApp usa contact_whatsapp y muestra número legible junto al icono; todos los enlaces abren pestaña nueva con noopener noreferrer y aria-label localizado. Se reutilizan iconos IG/FB de la home, tamaño h-6/w-6 y clase about-social-link (hover/touch y reduced-motion); footer conserva sus superficies claro/oscuro y los enlaces usan verde del tema. Fila flex-wrap para 375px, sin elementos ni margen añadido cuando todo está vacío.

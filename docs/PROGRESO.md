@@ -251,6 +251,13 @@
 4. QA de compresión cliente implementada: cámara >5MB, orientación/legibilidad y peso final en Respaldo.
 5. Aplicación manual por Emma de `scripts/sql/site-content-featured.sql` (Respaldo → main) y QA de Propiedad destacada en home.
 6. Aplicación manual de `scripts/sql/site-content-contact.sql` después del ALTER de destacada y QA del footer global (redes + WhatsApp, 375px y es/en/fr).
+7. QA manual de Compartir ubicación: Google Maps con coordenadas/búsqueda, fallback a página, móvil/desktop y es/en/fr.
+
+### Compartir ubicación — detalle (09 Oct 2026)
+
+- Implementado: PropertyShareButton comparte URL oficial Maps search api=1 (coordenadas primero; dirección/ciudad como fallback; página si todo falta), título localizado + ciudad y feedback de ubicación.
+- Mantiene mecanismos Web Share/clipboard/cancelación/temporizador y accesibilidad. LocationMap sin cambios de iframe; page.tsx solo amplía props de ambas instancias según autorización del usuario. WhatsApp y resto del detalle intactos.
+- Tests offline ampliados en test-gallery-share.cjs; 30 scripts pasan, TypeScript web limpio y ESLint 0 errores/8 warnings preexistentes. Verificación real del pin/share nativo pendiente de Emma. Sin SQL, endpoints, dependencias ni operaciones contra BD.
 
 ### Footer — redes y WhatsApp global (09 Oct 2026)
 

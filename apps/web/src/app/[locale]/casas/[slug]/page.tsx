@@ -127,7 +127,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <SectionBackground url={property.sectionBgInicio} name="gallery" className="detail-screen mx-auto max-w-7xl px-3 py-8 md:px-6">
         <Reveal className={`relative mb-6 rounded-2xl ${property.sectionBgInicio ? 'detail-image-heading' : 'bg-black/30 dark:bg-black/50'} p-6 pr-16 text-center`}>
-          <PropertyShareButton title={title} />
+          <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={property.city} />
           <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
             {title.toUpperCase()}
           </h1>
@@ -229,7 +229,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           ...(hasMap || hasWarnings ? [{ id: 'location', label: t('details.mapWarnings'), content: (
 <SectionBackground url={property.sectionBgMapa} name="location" className="detail-screen px-4 py-16 md:px-6" label={t('details.mapWarnings')}>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
-          {hasMap && <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} />}
+          {hasMap && <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={property.city} />}
           {hasWarnings && <Reveal className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
             <h2 className="mb-4 text-2xl font-light tracking-wide">{t('details.advertencias')}</h2>
             {warningHero && <Image src={warningHero.url} alt={t('details.advertencias')} width={600} height={400} unoptimized className="mb-4 h-auto w-full rounded-lg object-cover" />}

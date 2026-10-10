@@ -7,14 +7,15 @@ type Props = {
   lng: number;
   address: string;
   propertyTitle: string;
+  city?: string;
 };
 
-export default async function LocationMap({ lat, lng, address, propertyTitle }: Props) {
+export default async function LocationMap({ lat, lng, address, propertyTitle, city }: Props) {
   const locale = await getLocale();
   const t = await getTranslations('details');
   return (
     <Reveal className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
-      <PropertyShareButton title={propertyTitle} />
+      <PropertyShareButton title={propertyTitle} lat={lat} lng={lng} address={address} city={city} />
       <iframe
         title={t('mapTitle', { address })}
         src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&hl=${locale}&output=embed`}

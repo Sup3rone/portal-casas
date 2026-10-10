@@ -249,6 +249,14 @@
 2. QA manual de calendario para colaboradores: tooltips de origen y desbloqueo host implementados; BlockDate de la grilla permanece solo lectura (sin endpoint DELETE existente).
 3. Navbar post-login: fix aplicado, falta confirmación final.
 4. QA de compresión cliente implementada: cámara >5MB, orientación/legibilidad y peso final en Respaldo.
+5. Aplicación manual por Emma de `scripts/sql/site-content-featured.sql` (Respaldo → main) y QA de Propiedad destacada en home.
+
+### Propiedad destacada en home (09 Oct 2026)
+
+- Implementado: selector ADMIN en Contenido del sitio, clave featured_property_id por GET/PUT existentes, validación de publicada y tarjeta tras Sobre nosotros/cierre del video.
+- Primera portada por coverOrder, fallback PHOTO por order/id; sin foto, eliminada o despublicada oculta. Descripción breve localizada, CTA localizado, animación existente de Sobre nosotros y hover respetando reduced-motion.
+- Excepción mínima aprobada: ALTER del CHECK SiteContent en `scripts/sql/site-content-featured.sql`, PENDIENTE de ejecución manual. No hay nuevas columnas/tablas ni conexiones a Neon.
+- Pruebas: `test-featured-property.cjs` y regresión `test-site-content.cjs`; suite de 29 scripts pasa, TypeScript web limpio y ESLint 0 errores/8 warnings preexistentes. QA visual 375px/es/en/fr/temas y BD Respaldo pendiente de Emma.
 
 ### Calendario del panel — origen y desbloqueo host (09 Oct 2026)
 

@@ -5,7 +5,7 @@ import { useRouter } from '@/i18n/navigation';
 import type { SiteContentValues } from '@/lib/site-content';
 import { panelRequest, inputClass, buttonClass } from './request';
 
-export default function SiteContentEditor({ content }: { content: SiteContentValues }) {
+export default function SiteContentEditor({ content, properties }: { content: SiteContentValues; properties: { id: string; label: string; city: string }[] }) {
   const t = useTranslations('siteContent'), panel = useTranslations('panel'), router = useRouter();
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   async function save(event: React.FormEvent<HTMLFormElement>) {
@@ -27,6 +27,14 @@ export default function SiteContentEditor({ content }: { content: SiteContentVal
         <input name={key} type="url" pattern="https://.+" title={t('socialHint')} maxLength={2048} defaultValue={content[key]} className={inputClass} />
       </label>)}
       <p className="text-sm text-gray-600 dark:text-gray-300">{t('socialHint')}</p>
+      <label className="block text-sm">{t('featuredLabel')}
+        <select name="featured_property_id" defaultValue={content.featured_property_id} className={inputClass}>
+          <option value="">{t('featuredNone')}</option>
+          {content.featured_property_id && !properties.some(property=>property.id===content.featured_property_id) && <option value={content.featured_property_id} disabled>{t('featuredUnavailable')}</option>}
+          {properties.map(property=><option key={property.id} value={property.id}>{property.label} · {property.city}</option>)}
+        </select>
+      </label>
+      <p className="text-sm text-gray-600 dark:text-gray-300">{t('featuredHint')}</p>
     </fieldset>
     {message && <p role={message === 'saved' ? 'status' : 'alert'}>{panel(message)}</p>}
     <button disabled={busy} className={buttonClass}>{panel(busy ? 'saving' : 'save')}</button>

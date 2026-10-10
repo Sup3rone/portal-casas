@@ -411,6 +411,12 @@
     "invalid": "Check the number of guests and select valid arrival and departure dates."
   },
   "siteContent": {
+    "featuredLabel": "Featured property",
+    "featuredNone": "None",
+    "featuredUnavailable": "Property unavailable; choose another or None",
+    "featuredHint": "Published properties only. Without photos or if unpublished, the section is hidden on the home page.",
+    "featuredTitle": "Featured property",
+    "featuredView": "View property",
     "title": "Site content",
     "aboutTitle": "About us",
     "about_es": "About us — Spanish",

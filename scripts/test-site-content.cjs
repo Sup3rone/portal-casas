@@ -6,7 +6,7 @@ const api=load('apps/web/src/app/api/panel/site-content/route.ts');
 const Home=load('apps/web/src/app/[locale]/page.tsx').default;
 const ContentPage=load('apps/web/src/app/[locale]/panel/contenido/page.tsx').default;
 const Layout=load('apps/web/src/app/[locale]/panel/layout.tsx').default;
-const content={about_es:'Nosotros ES',about_en:'About EN',about_fr:'À propos FR',social_instagram:'https://www.instagram.com/example/',social_facebook:'https://www.facebook.com/example/'};
+const content={about_es:'Nosotros ES',about_en:'About EN',about_fr:'À propos FR',social_instagram:'https://www.instagram.com/example/',social_facebook:'https://www.facebook.com/example/',featured_property_id:''};
 const put=value=>api.PUT(new Request('http://localhost/api/panel/site-content',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(value)}));
 async function renderHome(locale){setLocale(locale);const messages=require('../apps/web/messages/'+locale+'.json');return renderToStaticMarkup(React.createElement(NextIntlClientProvider,{locale,messages,timeZone:'America/Mexico_City'},await Home({params:Promise.resolve({locale})})));}
 async function main(){

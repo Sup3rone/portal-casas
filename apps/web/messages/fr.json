@@ -412,6 +412,12 @@
     "invalid": "Vérifiez le nombre de voyageurs et sélectionnez des dates d’arrivée et de départ valides."
   },
   "siteContent": {
+    "featuredLabel": "Propriété à la une",
+    "featuredNone": "Aucune",
+    "featuredUnavailable": "Propriété indisponible ; choisissez une autre ou Aucune",
+    "featuredHint": "Propriétés publiées uniquement. Sans photos ou si elle n’est plus publiée, la section est masquée sur l’accueil.",
+    "featuredTitle": "Propriété à la une",
+    "featuredView": "Voir la propriété",
     "title": "Contenu du site",
     "aboutTitle": "À propos de nous",
     "about_es": "À propos — espagnol",

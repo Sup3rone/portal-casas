@@ -45,6 +45,15 @@ html { scroll-behavior: smooth; }
   transition-delay: .2s;
 }
 .reveal.about-reveal.reveal-visible { opacity: 1; transform: scale(1); }
+
+.home-featured-photo { transition: transform .3s ease-out; }
+@media (hover: hover) and (pointer: fine) {
+  .home-featured-image:hover .home-featured-photo { transform: scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-featured-image:hover .home-featured-photo { transform: none; }
+  .home-featured-photo { transition: none; }
+}
 .about-social-link {
   cursor: pointer;
   --about-social-glow: color-mix(in srgb, var(--color-green-700) 35%, transparent);

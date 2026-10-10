@@ -411,6 +411,12 @@
     "invalid": "Revisa la cantidad de huéspedes y selecciona llegada y salida válidas."
   },
   "siteContent": {
+    "featuredLabel": "Propiedad destacada",
+    "featuredNone": "Ninguna",
+    "featuredUnavailable": "Propiedad no disponible; selecciona otra o Ninguna",
+    "featuredHint": "Solo propiedades publicadas. Sin fotos o si deja de estar publicada, la sección se oculta en la home.",
+    "featuredTitle": "Propiedad destacada",
+    "featuredView": "Ver propiedad",
     "title": "Contenido del sitio",
     "aboutTitle": "Sobre nosotros",
     "about_es": "Sobre nosotros — español",

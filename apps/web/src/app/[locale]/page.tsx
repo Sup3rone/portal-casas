@@ -1,8 +1,10 @@
 // src/app/[locale]/page.tsx
 import { getTranslations } from 'next-intl/server';
 import Reveal from '@/components/Reveal';
-import { readSiteContent } from '@/lib/site-content';
+import { readSiteContent, readFeaturedProperty, briefDescription } from '@/lib/site-content';
 import HomeVideoMotion from '@/components/HomeVideoMotion';
+import Image from 'next/image';
+import { Link } from '@/i18n/navigation';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -10,6 +12,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const content = await readSiteContent();
   const about = content[locale === 'en' ? 'about_en' : locale === 'fr' ? 'about_fr' : 'about_es'];
   const social = await getTranslations({ locale, namespace: 'siteContent' });
+  const featured = await readFeaturedProperty(content.featured_property_id);
+  const labels = await getTranslations({ locale, namespace: 'properties' });
+  const featuredTitle = featured && ((locale === 'en' ? featured.property.titleEn : locale === 'fr' ? featured.property.titleFr : featured.property.titleEs).trim() || featured.property.titleEs);
+  const featuredDescription = featured && briefDescription((locale === 'en' ? featured.property.descEn : locale === 'fr' ? featured.property.descFr : featured.property.descEs).trim() || featured.property.descEs);
   return (
     <main>
       {/* Una sola capa de video acompaña hero y Sobre nosotros. */}
@@ -115,6 +121,21 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </Reveal></div>}
       <div className="home-video-closing pointer-events-none absolute inset-x-0 bottom-0 h-24" aria-hidden="true" />
       </div>
+      {featured && <Reveal as="section" delay={200} className="about-reveal mx-auto max-w-6xl px-4 py-16">
+        <div className="grid min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 md:grid-cols-2">
+          <div className="home-featured-image min-w-0 overflow-hidden">
+            <Image src={featured.photo.url} alt={featuredTitle || featured.property.titleEs} width={1200} height={900} unoptimized className="home-featured-photo aspect-[4/3] h-full w-full object-cover" />
+          </div>
+          <div className="min-w-0 space-y-4 p-6 text-gray-900 dark:text-gray-100 md:p-10">
+            <p className="text-sm font-medium tracking-widest text-green-800 dark:text-green-300">{social('featuredTitle')}</p>
+            <h2 className="break-words text-2xl font-light">{featuredTitle}</h2>
+            <p className="break-words text-gray-600 dark:text-gray-300">{featured.property.city}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{featured.property.maxGuests} {labels('guests')} · {featured.property.bedrooms} {labels('bedrooms')} · {featured.property.bathrooms} {labels('bathrooms')}</p>
+            {featuredDescription && <p className="break-words leading-relaxed">{featuredDescription}</p>}
+            <Link href={`/casas/${featured.property.slug}`} className="inline-flex min-h-11 items-center rounded-lg bg-green-700 px-4 py-2 font-medium text-white hover:bg-green-800 dark:hover:bg-green-600">{social('featuredView')}</Link>
+          </div>
+        </div>
+      </Reveal>}
     </main>
   );
 }

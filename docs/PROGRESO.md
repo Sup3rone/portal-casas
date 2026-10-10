@@ -250,6 +250,14 @@
 3. Navbar post-login: fix aplicado, falta confirmación final.
 4. QA de compresión cliente implementada: cámara >5MB, orientación/legibilidad y peso final en Respaldo.
 5. Aplicación manual por Emma de `scripts/sql/site-content-featured.sql` (Respaldo → main) y QA de Propiedad destacada en home.
+6. Aplicación manual de `scripts/sql/site-content-contact.sql` después del ALTER de destacada y QA del footer global (redes + WhatsApp, 375px y es/en/fr).
+
+### Footer — redes y WhatsApp global (09 Oct 2026)
+
+- Implementado: mismas URLs Instagram/Facebook de SiteContent, WhatsApp opcional con número visible/formato genérico, SVG inline, accesibilidad y estilos compartidos de redes; email intacto.
+- Selector/campo ADMIN en Contenido del sitio, regex 8–15 dígitos y 400 INVALID_CONTACT_WHATSAPP; contexto del layout alimenta ambos footers, incluido detalle, sin modificar home/nav/detalle.
+- Excepción aprobada: ALTER del CHECK para séptima clave contact_whatsapp; SQL preparado y PENDIENTE de ejecución manual por Emma. Cero tablas/columnas nuevas y ninguna conexión a BD.
+- Pruebas offline: 30 scripts pasan, TypeScript web limpio y ESLint 0 errores/8 warnings preexistentes. QA real en Respaldo pendiente (vaciar individualmente, enlaces, 375px, tres idiomas y temas).
 
 ### Propiedad destacada en home (09 Oct 2026)
 

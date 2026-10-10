@@ -411,6 +411,9 @@
     "invalid": "Check the number of guests and select valid arrival and departure dates."
   },
   "siteContent": {
+    "contactWhatsappLabel": "Global contact WhatsApp",
+    "contactWhatsappHint": "Country code and number: 8–15 digits only, without + or spaces. Leave empty to hide.",
+    "contactWhatsappLink": "Contact via WhatsApp: {number}",
     "featuredLabel": "Featured property",
     "featuredNone": "None",
     "featuredUnavailable": "Property unavailable; choose another or None",

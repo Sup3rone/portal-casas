@@ -27,6 +27,10 @@ export default function SiteContentEditor({ content, properties }: { content: Si
         <input name={key} type="url" pattern="https://.+" title={t('socialHint')} maxLength={2048} defaultValue={content[key]} className={inputClass} />
       </label>)}
       <p className="text-sm text-gray-600 dark:text-gray-300">{t('socialHint')}</p>
+      <label className="block text-sm">{t('contactWhatsappLabel')}
+        <input name="contact_whatsapp" type="tel" inputMode="numeric" pattern="[0-9]{8,15}" minLength={8} maxLength={15} title={t('contactWhatsappHint')} defaultValue={content.contact_whatsapp} className={inputClass} />
+      </label>
+      <p className="text-sm text-gray-600 dark:text-gray-300">{t('contactWhatsappHint')}</p>
       <label className="block text-sm">{t('featuredLabel')}
         <select name="featured_property_id" defaultValue={content.featured_property_id} className={inputClass}>
           <option value="">{t('featuredNone')}</option>

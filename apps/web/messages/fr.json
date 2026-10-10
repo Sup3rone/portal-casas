@@ -412,6 +412,9 @@
     "invalid": "Vérifiez le nombre de voyageurs et sélectionnez des dates d’arrivée et de départ valides."
   },
   "siteContent": {
+    "contactWhatsappLabel": "WhatsApp de contact global",
+    "contactWhatsappHint": "Indicatif pays et numéro : 8 à 15 chiffres uniquement, sans + ni espaces. Laissez vide pour masquer.",
+    "contactWhatsappLink": "Contacter par WhatsApp : {number}",
     "featuredLabel": "Propriété à la une",
     "featuredNone": "Aucune",
     "featuredUnavailable": "Propriété indisponible ; choisissez une autre ou Aucune",

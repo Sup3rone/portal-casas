@@ -4,7 +4,7 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 import { requireAdmin, AccessError } from './property-access';
 import { objectBody, PanelValidationError } from './panel-validation';
 
-export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id'] as const;
+export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp'] as const;
 export type SiteContentValues = Record<typeof siteContentKeys[number], string>;
 export class SiteContentError extends PanelValidationError {
   constructor(public code: string) { super('validation'); }
@@ -22,6 +22,8 @@ export function siteContentInput(input: unknown): SiteContentValues {
     const value = raw.trim();
     if (key.startsWith('about_')) {
       if (value.length > 2000) throw new SiteContentError('ABOUT_TOO_LONG');
+    } else if (key === 'contact_whatsapp') {
+      if (value && !/^[0-9]{8,15}$/.test(value)) throw new SiteContentError('INVALID_CONTACT_WHATSAPP');
     } else if (key === 'featured_property_id') {
       if (value.length > 200) throw new SiteContentError('INVALID_FEATURED_PROPERTY');
     } else if (value) {

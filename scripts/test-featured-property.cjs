@@ -7,7 +7,7 @@ const {briefDescription,readFeaturedProperty}=load('apps/web/src/lib/site-conten
 const Home=load('apps/web/src/app/[locale]/page.tsx').default;
 const Page=load('apps/web/src/app/[locale]/panel/contenido/page.tsx').default;
 const api=load('apps/web/src/app/api/panel/site-content/route.ts');
-const content={about_es:'Nosotros',about_en:'About',about_fr:'À propos',social_instagram:'',social_facebook:'',featured_property_id:'pa'};
+const content={about_es:'Nosotros',about_en:'About',about_fr:'À propos',social_instagram:'',social_facebook:'',featured_property_id:'pa',contact_whatsapp:''};
 const put=value=>api.PUT(new Request('http://localhost/test',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(value)}));
 const render=async(locale,component)=>{
   setLocale(locale);const messages=require('../apps/web/messages/'+locale+'.json');

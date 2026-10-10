@@ -411,6 +411,9 @@
     "invalid": "Revisa la cantidad de huéspedes y selecciona llegada y salida válidas."
   },
   "siteContent": {
+    "contactWhatsappLabel": "WhatsApp de contacto global",
+    "contactWhatsappHint": "Código de país y número: solo 8–15 dígitos, sin + ni espacios. Vacío para ocultarlo.",
+    "contactWhatsappLink": "Contactar por WhatsApp: {number}",
     "featuredLabel": "Propiedad destacada",
     "featuredNone": "Ninguna",
     "featuredUnavailable": "Propiedad no disponible; selecciona otra o Ninguna",

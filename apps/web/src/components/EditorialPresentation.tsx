@@ -7,16 +7,16 @@ import styles from './EditorialPresentation.module.css';
 
 const titles = { destino: 'destino', amenidades: 'amenidades', habitaciones: 'habitaciones', lugar: 'enLugar' } as const;
 
-function EditorialScreen({ slide }: { slide: EditorialSlide }) {
+function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide; flow?: boolean }) {
   const t = useTranslations('details'), gallery = useTranslations('details.gallery');
   const count = slide.photos.length;
-  return <section className={styles.screen} aria-label={t(titles[slide.section])}>
-    {slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
+  return <section className={styles.screen} data-editorial-slide={flow ? slide.section : undefined} aria-label={t(titles[slide.section])}>
+    {!flow && slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
     <div className={styles.floating}>
     <div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: t(titles[slide.section]) })}
       tabIndex={count > 1 ? 0 : undefined}
       onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        event.preventDefault(); window.scrollBy({ top: (event.key === 'ArrowLeft' ? -1 : 1) * window.innerHeight,
+        event.preventDefault(); (event.currentTarget.closest<HTMLElement>('.detail-snap-container') || window).scrollBy({ top: (event.key === 'ArrowLeft' ? -1 : 1) * (flow ? event.currentTarget.closest('section')?.offsetHeight || window.innerHeight : window.innerHeight),
           behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       } }}>
       <div className={styles.frames}>
@@ -39,6 +39,59 @@ function EditorialScreen({ slide }: { slide: EditorialSlide }) {
 }
 
 export type EditorialScene = { id: string; label: string; content: ReactNode };
+
+function EditorialFlow({ slides }: { slides: EditorialSlide[] }) {
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = root.current;
+    if (!element) return;
+    const screens = Array.from(element.querySelectorAll<HTMLElement>('[data-editorial-slide]'));
+    const backgrounds = Array.from(element.querySelectorAll<HTMLElement>('[data-flow-background]'));
+    const scrollTarget = element.closest?.('.detail-snap-container') || window;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+    function update() {
+      frame = 0;
+      const rect = element!.getBoundingClientRect();
+      // Identifica el tramo visible sin imponer puntos de snap.
+      element!.setAttribute('data-scroll-free', String(rect.top < window.innerHeight && rect.bottom > 0));
+      const distance = -rect.top + window.innerHeight * 0.35;
+      const positions = screens.map(screen => ({ start: screen.getBoundingClientRect().top - rect.top, height: screen.offsetHeight }));
+      const index = Math.max(0, positions.findLastIndex(position => distance >= position.start));
+      const phase = Math.max(0, Math.min(1, (distance - positions[index].start) / Math.max(1, positions[index].height)));
+      const fade = reduced.matches ? 0 : Math.max(0, Math.min(1, (phase - 0.75) / 0.25));
+      backgrounds.forEach((background, number) => { background.style.opacity = String(number === index ? 1 : number === index + 1 ? fade : 0); });
+      screens.forEach((screen, number) => {
+        const local = Math.max(0, Math.min(1, (distance - positions[number].start) / Math.max(1, positions[number].height)));
+        const photoPhase = reduced.matches ? 0 : Math.max(0, Math.min(1, (local - 0.25) / 0.5));
+        screen.style.setProperty('--editorial-photo-progress', String(photoPhase));
+        const photos = screen.querySelectorAll<HTMLElement>('[data-editorial-photo]');
+        photos.forEach((photo, photoIndex) => photo.setAttribute('aria-hidden', String(!reduced.matches && photos.length > 1 && photoIndex !== (photoPhase >= 0.5 ? 1 : 0))));
+      });
+    }
+    function schedule() { if (!frame) frame = requestAnimationFrame(update); }
+    const resize = new ResizeObserver(schedule);
+    screens.forEach(screen => resize.observe(screen));
+    scrollTarget.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    reduced.addEventListener('change', schedule);
+    update();
+    return () => {
+      cancelAnimationFrame(frame); resize.disconnect();
+      scrollTarget.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule);
+      reduced.removeEventListener('change', schedule); element.removeAttribute('data-scroll-free');
+    };
+  }, [slides]);
+  if (!slides.length) return null;
+  return <div ref={root} className={styles.flow} data-editorial-flow>
+    <div className={styles.flowBackdrop} aria-hidden="true"><div className={styles.flowBackgroundStage}>
+      {slides.map((slide,index)=><div key={slide.section} data-flow-background={slide.section} className={styles.backdrop} style={{ opacity: index === 0 ? 1 : 0 }}>
+        {slide.hero && <Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" />}
+      </div>)}
+    </div></div>
+    {slides.map(slide=><EditorialScreen key={slide.section} slide={slide} flow />)}
+  </div>;
+}
 
 // Motor compartido; los componentes de las escenas permanecen montados.
 export function EditorialStage({ scenes }: { scenes: EditorialScene[] }) {
@@ -160,6 +213,41 @@ export function EditorialStage({ scenes }: { scenes: EditorialScene[] }) {
 }
 
 export default function EditorialPresentation({ slides, scenes = [], afterScenes = [] }: { slides: EditorialSlide[]; scenes?: EditorialScene[]; afterScenes?: EditorialScene[] }) {
-  const t = useTranslations('details');
-  return <EditorialStage scenes={[...scenes, ...slides.map(slide => ({ id: slide.section, label: t(titles[slide.section]), content: <EditorialScreen slide={slide} /> })), ...afterScenes]} />;
+  const anchor = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const journey = anchor.current?.closest<HTMLElement>('.detail-journey');
+    if (!journey) return;
+    const sections = Array.from(journey.querySelectorAll<HTMLElement>('[data-detail-section], [data-editorial-slide]'));
+    const layers = Array.from(journey.querySelectorAll<HTMLElement>('[data-journey-background]'));
+    if (!sections.length || !layers.length) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+    function update() {
+      frame = 0;
+      if (reduced.matches) { journey!.removeAttribute('data-background-ready'); return; }
+      // La misma línea de lectura y último cuarto usados por EditorialFlow.
+      const line = window.innerHeight * 0.35;
+      const positions = sections.map(section => ({ top: section.getBoundingClientRect().top, height: section.offsetHeight }));
+      const index = Math.max(0, positions.findLastIndex(position => position.top <= line));
+      const phase = Math.max(0, Math.min(1, (line - positions[index].top) / Math.max(1, positions[index].height)));
+      const fade = Math.max(0, Math.min(1, (phase - 0.75) / 0.25));
+      const current = sections[index].dataset.detailSection || sections[index].dataset.editorialSlide;
+      const next = sections[index + 1]?.dataset.detailSection || sections[index + 1]?.dataset.editorialSlide;
+      layers.forEach(layer => { layer.style.opacity = String(layer.dataset.journeyBackground === current ? 1 : layer.dataset.journeyBackground === next ? fade : 0); });
+      journey!.setAttribute('data-background-ready', 'true');
+    }
+    function schedule() { if (!frame) frame = requestAnimationFrame(update); }
+    const resize = new ResizeObserver(schedule);
+    sections.forEach(section => resize.observe(section));
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    reduced.addEventListener('change', schedule);
+    update();
+    return () => {
+      cancelAnimationFrame(frame); resize.disconnect();
+      window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule);
+      reduced.removeEventListener('change', schedule); journey.removeAttribute('data-background-ready');
+    };
+  }, [slides]);
+  return <><EditorialStage scenes={scenes} /><EditorialFlow slides={slides} /><EditorialStage scenes={afterScenes} /><span ref={anchor} hidden aria-hidden="true" /></>;
 }

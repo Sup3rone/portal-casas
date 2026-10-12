@@ -77,31 +77,87 @@ html.dark .about-social-link { --about-social-glow: color-mix(in srgb, var(--col
 }
 
 /* El scroll y la navbar inteligente solo pertenecen al detalle público. */
-html:has(.property-detail) { scroll-snap-type: y mandatory; }
-html:has(.property-detail .detail-footer-flow[data-visible="true"]) { scroll-snap-type: none; }
-.detail-footer-flow { display: flow-root; scroll-snap-align: none; }
+.detail-snap-container {
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+}
+.detail-footer-flow { display: flow-root; }
 body:has(.property-detail) > nav {
   position: fixed;
   inset: 0 0 auto;
-  background: color-mix(in srgb, var(--background) 93%, transparent);
+  background: color-mix(in srgb, var(--background) 75%, transparent);
   backdrop-filter: blur(12px);
   transition: transform .3s ease;
 }
 body:has(.property-detail) > nav.detail-nav-top { background: color-mix(in srgb, var(--background) 75%, transparent); }
 body:has(.property-detail) > nav.detail-nav-hidden { transform: translateY(-105%); }
 .property-detail {
-  min-height: 100dvh;
+  min-height: 0;
   background: var(--background);
 }
 html:has(.property-detail dialog[open]) { overflow: hidden; }
+.detail-snap-container:has(dialog[open]) { overflow-y: hidden; }
 .detail-screen {
   position: relative;
-  min-height: 100dvh;
-  padding: calc(var(--detail-nav-height, 88px) + 1.5rem) 1rem calc(5.5rem + env(safe-area-inset-bottom));
-  scroll-snap-align: start;
+  min-height: 0;
+  padding: 1.5rem 1rem;
 }
 .detail-editorial { position: relative; }
-.detail-editorial .detail-screen { height: 100dvh; min-height: 0; scroll-snap-align: none; }
+/* Secciones independientes: cada fondo queda dentro de su propio contenedor. */
+.detail-independent > .detail-screen,
+.detail-independent [data-editorial-slide] {
+  position: relative;
+  height: auto;
+  min-height: 100vh !important;
+  width: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-block: 0;
+  background-color: var(--background);
+}
+.detail-independent > .detail-screen:first-child { padding-top: calc(var(--detail-nav-height, 88px) + 1.5rem); }
+.detail-independent [data-editorial-flow] > [data-editorial-slide] {
+  display: flex;
+  align-items: center;
+  background: transparent;
+}
+.detail-independent [data-editorial-flow] { background: var(--color-gray-900); }
+.detail-independent > .detail-screen > :not([data-section-background]) { width: 100%; }
+/* Fondo editorial local: absoluto y cover, sin escenario sticky. */
+.detail-independent [data-editorial-flow] > [aria-hidden="true"] > div {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+/* Remates del detalle: mosaico original, superficies oscuras y fondos estáticos. */
+.detail-independent [data-detail-section="gallery"] > .reveal.grid {
+  max-width: calc(80rem - 3rem);
+  margin-inline: auto;
+}
+.detail-snap-container :is(.glass-panel, .bg-white\/85) {
+  background-color: color-mix(in srgb, var(--color-gray-900) 82%, transparent) !important;
+  color: var(--color-gray-100);
+  backdrop-filter: blur(4px) !important;
+}
+.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600) { color: var(--color-gray-100); }
+.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-500, .text-gray-400) { color: var(--color-gray-300); }
+.detail-independent [data-flow-background] {
+  opacity: 1 !important;
+  transition: opacity .3s ease-out;
+}
+.detail-independent [data-editorial-flow][data-scroll-free="false"] [data-flow-background] { opacity: 0 !important; }
+@media (prefers-reduced-motion: reduce) {
+  .detail-independent [data-flow-background] { transition: none; }
+}
+/* Vista previa sin capturar rueda/touch; foco de teclado habilita el mapa embebido. */
+.property-detail .detail-location-map iframe { pointer-events: none; }
+.property-detail .detail-location-map iframe:focus { pointer-events: auto; }
 .property-detail .detail-description { max-height: 40svh; overflow-y: auto; overflow-wrap: anywhere; }
 .detail-back-top {
   position: fixed;
@@ -121,7 +177,7 @@ html:has(.property-detail dialog[open]) { overflow: hidden; }
 @media (width < 48rem) { .property-detail { --detail-nav-height: 160px; } }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
-  html:has(.property-detail) { scroll-behavior: auto; }
+  html:has(.property-detail), .detail-snap-container { scroll-behavior: auto; }
   body:has(.property-detail) > nav { transition: none; transform: none; }
 }
 

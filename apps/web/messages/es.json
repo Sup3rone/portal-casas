@@ -392,9 +392,13 @@
     "empty": "No hay propiedades"
   },
   "photoUpload": {
-    "drop": "Arrastra una foto aquí",
-    "hint": "JPEG, PNG o WebP · máximo 4 MB · una foto por subida. Usa la categoría y el orden del formulario; también puedes añadir una URL manual.",
-    "choose": "Elegir archivo",
+    "queueProgress": "Archivo {current} de {total}: {name}",
+    "queueSummary": "Subida finalizada: {success} fotos guardadas, {failed} fallidas.",
+    "fileFailure": "{name}: {error}",
+    "dismissSummary": "Cerrar resumen",
+    "drop": "Arrastra tus fotos aquí",
+    "hint": "JPEG, PNG o WebP · máximo 4 MB por foto después de optimizar. Puedes elegir varias fotos; se suben una a una con la categoría y desde el orden del formulario. También puedes añadir una URL manual.",
+    "choose": "Elegir fotos",
     "uploading": "Subiendo…",
     "success": "Foto subida y añadida",
     "typeError": "Elige una imagen JPEG, PNG o WebP.",

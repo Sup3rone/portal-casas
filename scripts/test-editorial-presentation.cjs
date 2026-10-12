@@ -53,7 +53,7 @@ async function main() {
     assert.ok(!empty.includes('data-detail-section="fallback"'));
     assert.ok(empty.includes(messages.details.ofrece)); // Fallback integrado en P1.
     assert.equal((empty.match(/<iframe/g)||[]).length,1); // Mapa movido, sin duplicar.
-    assert.equal((empty.match(/data-editorial-panel=/g)||[]).length,3); assert.ok(!empty.includes('href="#reservar"'));
+    assert.equal((empty.match(/data-editorial-panel=/g)||[]).length,0); assert.ok(!empty.includes('href="#reservar"'));
     memory.prepare('INSERT INTO "PropertySection" (propertyId,section) VALUES (?,?)').run('pa','destino');
     assert.equal(await render(await Page({params})),empty);
     memory.prepare('DELETE FROM "PropertySection"').run();
@@ -73,8 +73,9 @@ async function main() {
       .run('pa',section,section+' ES',section+' EN',section+' FR','hero');
     const html=await render(await Page({params}));
     assert.equal((html.match(/data-detail-section=/g)||[]).length,3);
-    assert.equal((html.match(/data-editorial-panel=/g)||[]).length,7);
-    assert.ok(html.indexOf('data-editorial-panel="destino"') < html.indexOf('data-detail-section="location"'));
+    assert.equal((html.match(/data-editorial-panel=/g)||[]).length,0);
+    assert.equal((html.match(/data-editorial-slide=/g)||[]).length,4);
+    assert.ok(html.indexOf('data-editorial-slide="destino"') < html.indexOf('data-detail-section="location"'));
     assert.ok(html.includes('id="reservar"')); assert.ok(html.includes('maps.google.com')); assert.ok(html.includes('aria-modal="true"'));
     assert.ok(html.includes('General '+locale.toUpperCase()));
     assert.ok(html.includes('<video')); // Tratamiento de vídeo principal conservado.

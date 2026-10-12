@@ -33,9 +33,10 @@ global.HTMLInputElement = Input;
 global.FormData = class extends NativeFormData {
   constructor(form) { super(); if (form) for (const [key, value] of Object.entries(form.values)) this.set(key, value); }
 };
-let defer = false;
+let defer = false, failNextUpload = false;
 global.fetch = async (url, options) => {
   calls.push(url);
+  if(failNextUpload&&url.endsWith('/upload')){failNextUpload=false;return new Response(JSON.stringify({code:'UPLOAD_FAILED'}),{status:500});}
   if (defer && url.endsWith('/upload')) {
     defer = false;
     return new Promise((resolve, reject) => options.signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true }));
@@ -55,6 +56,7 @@ function render(propertyId, key) {
   instance = mounted.get(key) || { hooks: [], cleanup: [] };
   mounted.set(key, instance); index = 0;
   const tree = Editor({ propertyId, resource: 'media', items: [] });
+  instance.tree=tree;
   const form = find(tree, node => node.type === 'form');
   form.props.ref.current = { values: { category: 'habitaciones', order: '7' }, elements: { namedItem: () => new Input() } };
   const input = find(tree, node => node.type === 'input' && node.props.type === 'file');
@@ -92,6 +94,35 @@ async function main() {
   render('pb',pageB.key)({currentTarget:{files:[new File([new Uint8Array(8000000)],'camera.png',{type:'image/png'})]}});await settle();
   assert.deepEqual(calls,['/api/properties/pb/upload','/api/properties/pb/media']);assert.match(paths[0],/\.jpg$/);
   assert.ok(mounted.get(pageB.key).hooks.some(value=>value?.original===8&&value?.final===450));unmount(pageB.key);
+  // Cola real: MIME inválido, tamaño final excesivo y fallo HTTP no frenan siguientes.
+  calls.length=0;paths.length=0;failNextUpload=true;
+  global.createImageBitmap=async file=>{if(file.name==='oversized.png')throw new Error('decode');return {width:4000,height:6000,close(){}};};
+  const batch=[new File(['ok'],'http-fails.png',{type:'image/png'}),new File(['text'],'invalid.txt',{type:'text/plain'}),
+    new File([new Uint8Array(5000000)],'oversized.png',{type:'image/png'}),
+    new File([new Uint8Array(8000000)],'camera-queue.png',{type:'image/png'}),
+    new File(['ok'],'last.png',{type:'image/png'})];
+  const before=memory.prepare('SELECT count(*) n FROM Media WHERE propertyId=?').get('pb').n;
+  const handler=render('pb',pageB.key);
+  assert.equal(find(mounted.get(pageB.key).tree,node=>node.type==='input'&&node.props.type==='file').props.multiple,true);
+  handler({currentTarget:{files:batch}});await settle();
+  assert.deepEqual(calls,['/api/properties/pb/upload','/api/properties/pb/upload','/api/properties/pb/media','/api/properties/pb/upload','/api/properties/pb/media']);
+  assert.equal(memory.prepare('SELECT count(*) n FROM Media WHERE propertyId=?').get('pb').n,before+2);
+  assert.ok(mounted.get(pageB.key).hooks.some(value=>value?.success===2&&value?.failed===3));
+  const failures=mounted.get(pageB.key).hooks.find(value=>Array.isArray(value)&&value[0]?.code);
+  assert.deepEqual(failures.map(value=>[value.name,value.code]),[['http-fails.png','uploadError'],['invalid.txt','typeError'],['oversized.png','sizeError']]);
+  for(const order of [10,11])assert.equal(memory.prepare('SELECT count(*) n FROM Media WHERE propertyId=? AND "order"=?').get('pb',order).n,1);
+  unmount(pageB.key);
+  // Abort de una cola A detiene todos los archivos pendientes y deja B independiente.
+  calls.length=0;paths.length=0;defer=true;
+  render('pa',pageA.key)({currentTarget:{files:[batch[0],batch[4]]}});await settle();unmount(pageA.key);
+  render('pb',pageB.key)(selected());await settle();unmount(pageB.key);
+  assert.deepEqual(calls,['/api/properties/pa/upload','/api/properties/pb/upload','/api/properties/pb/media']);
+  for(const locale of ['es','en','fr']){
+    const messages=require('../apps/web/messages/'+locale+'.json');const translate=req('next-intl').createTranslator({locale,messages,namespace:'photoUpload',onError:error=>{throw error;}});
+    assert.ok(translate('queueProgress',{current:3,total:5,name:'camera.png'}).includes('camera.png'));
+    assert.ok(translate('queueSummary',{success:2,failed:3}).includes('2'));
+    assert.ok(translate('fileFailure',{name:'invalid.txt',error:translate('typeError')}).includes('invalid.txt'));
+  }
   console.log('OK A→B: routes/pathnames/Media correctos, key por propiedad y cancelación de upload A pendiente. Sin red/Blob/Neon.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => {

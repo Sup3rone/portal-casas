@@ -393,9 +393,13 @@
     "empty": "Aucune propriété"
   },
   "photoUpload": {
-    "drop": "Déposez une photo ici",
-    "hint": "JPEG, PNG ou WebP · 4 Mo maximum · une photo par envoi. Utilise la catégorie et l’ordre du formulaire ; vous pouvez aussi ajouter une URL manuelle.",
-    "choose": "Choisir un fichier",
+    "queueProgress": "Fichier {current} sur {total} : {name}",
+    "queueSummary": "Envoi terminé : {success} photos enregistrées, {failed} en échec.",
+    "fileFailure": "{name} : {error}",
+    "dismissSummary": "Fermer le résumé",
+    "drop": "Déposez vos photos ici",
+    "hint": "JPEG, PNG ou WebP · 4 Mo maximum par photo après optimisation. Choisissez plusieurs photos ; elles sont envoyées une à une avec la catégorie et l’ordre initial du formulaire. Vous pouvez aussi ajouter une URL manuelle.",
+    "choose": "Choisir des photos",
     "uploading": "Envoi…",
     "success": "Photo envoyée et ajoutée",
     "typeError": "Choisissez une image JPEG, PNG ou WebP.",

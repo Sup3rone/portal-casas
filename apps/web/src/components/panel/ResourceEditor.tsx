@@ -17,19 +17,28 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
   const [uploadedUrl, setUploadedUrl] = useState('');
   const [optimizing, setOptimizing] = useState(false), [optimizedSizes, setOptimizedSizes] = useState<{ original: number; final: number } | null>(null);
   const uploadRequest = useRef<AbortController | null>(null);
+  const [queue, setQueue] = useState<{ current: number; total: number; name: string } | null>(null);
+  const [failures, setFailures] = useState<{ name: string; code: string; url?: string }[]>([]);
+  const [summary, setSummary] = useState<{ success: number; failed: number } | null>(null);
   useEffect(() => () => { uploadRequest.current?.abort(); }, [propertyId, resource]);
   async function uploadPhoto(files: FileList | null) {
     if (!files?.length || uploadLock.current || busy || editing) return;
-    if (files.length !== 1) { setUploadMessage('oneFile'); return; }
-    const file = files[0];
+    const batch = Array.from(files);
     setOptimizedSizes(null);
-    if (!photoTypes.includes(file.type as PhotoType)) { setUploadMessage('typeError'); return; }
     const form = new FormData(formRef.current!);
     const category = String(form.get('category') || 'principal'), order = Number(form.get('order'));
-    if (!Number.isSafeInteger(order) || order < 0 || order > 2147483647) { setUploadMessage('orderError'); return; }
+    if (!Number.isSafeInteger(order) || order < 0 || order + batch.length - 1 > 2147483647) { setUploadMessage('orderError'); return; }
     uploadLock.current = true; setUploading(true); setUploadMessage(''); setUploadedUrl('');
+    setFailures([]); setSummary(null);
     const controller = new AbortController(); uploadRequest.current = controller;
+    let success = 0, failed = 0;
     try {
+      for (const [index, file] of batch.entries()) {
+      if (controller.signal.aborted) return;
+      let blobUrl = '';
+      setQueue({ current: index + 1, total: batch.length, name: file.name }); setOptimizedSizes(null);
+      try {
+      if (!photoTypes.includes(file.type as PhotoType)) throw new PhotoUploadError('INVALID_FILE_TYPE');
       setOptimizing(file.size > photoCompression.thresholdBytes);
       const optimized = await optimizePhoto(file);
       if (controller.signal.aborted) return;
@@ -42,13 +51,22 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       if (controller.signal.aborted) return;
       if (!response.ok || typeof blob.url !== 'string') throw new Error(response.status === 401 || response.status === 403 || response.status === 404 ? 'forbidden' : 'error');
       setUploadedUrl(blob.url);
+      blobUrl = blob.url;
       const urlField = formRef.current?.elements.namedItem('url');
       if (urlField instanceof HTMLInputElement) urlField.value = blob.url;
-      await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}/media`, 'POST', { url: blob.url, category, order });
+      await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}/media`, 'POST', { url: blob.url, category, order: order + index });
+      if (controller.signal.aborted) return;
       if (urlField instanceof HTMLInputElement) urlField.value = '';
-      setUploadMessage('success'); router.refresh();
-    } catch (error) { if (!controller.signal.aborted) setUploadMessage(error instanceof PhotoUploadError ? error.code === 'INVALID_FILE_SIZE' ? 'sizeError' : 'typeError' : error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError'); }
-    finally { uploadRequest.current = null; uploadLock.current = false; setUploading(false); setOptimizing(false); if (fileRef.current) fileRef.current.value = ''; }
+      success++;
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        failed++;
+        const code = error instanceof PhotoUploadError ? error.code === 'INVALID_FILE_SIZE' ? 'sizeError' : 'typeError' : error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError';
+        setFailures(current => [...current, { name: file.name, code, url: blobUrl || undefined }]);
+      } finally { setOptimizing(false); }
+      }
+      setSummary({ success, failed }); if (success) router.refresh();
+    } finally { uploadRequest.current = null; uploadLock.current = false; setUploading(false); setOptimizing(false); setQueue(null); if (fileRef.current) fileRef.current.value = ''; }
   }
   const fields = resource === 'rates' ? ['name', 'startDate', 'endDate', 'weekdayPrice', 'weekendPrice', 'priority'] : ['url', 'category', 'order'];
   function initial(field: string) {
@@ -94,12 +112,14 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
     {resource === 'media' && !editing && <div className="space-y-3 rounded-xl border-2 border-dashed border-gray-300 p-4 dark:border-gray-600"
       onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void uploadPhoto(event.dataTransfer.files); }} aria-busy={uploading}>
       <p className="font-medium">{uploader('drop')}</p><p className="text-sm text-gray-600 dark:text-gray-300">{uploader('hint')}</p>
-      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" tabIndex={-1} disabled={busy || uploading}
+      <input ref={fileRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="sr-only" tabIndex={-1} disabled={busy || uploading}
         onChange={event => { void uploadPhoto(event.currentTarget.files); }} aria-label={uploader('choose')} />
       <button type="button" disabled={busy || uploading} onClick={() => fileRef.current?.click()} className={buttonClass}>{uploader(optimizing ? 'optimizing' : uploading ? 'uploading' : 'choose')}</button>
-      {uploading && <div role="status"><label htmlFor={`upload-${propertyId}`}>{uploader(optimizing ? 'optimizing' : 'uploading')}</label><progress id={`upload-${propertyId}`} className="w-full accent-green-700" /></div>}
+      {uploading && queue && <div role="status" className="min-w-0 break-words"><label htmlFor={`upload-${propertyId}`}>{uploader(optimizing ? 'optimizing' : 'uploading')} · {uploader('queueProgress', queue)}</label><progress id={`upload-${propertyId}`} className="w-full accent-green-700" /></div>}
       {optimizedSizes && <p role="status" className="text-sm text-gray-600 dark:text-gray-300">{uploader('optimizedSize', optimizedSizes)}</p>}
       {uploadMessage && <p role={uploadMessage === 'success' ? 'status' : 'alert'}>{uploader(uploadMessage)}</p>}
+      {failures.length > 0 && <ul role="alert" className="space-y-2 break-words text-sm">{failures.map((failure,index)=><li key={index}>{uploader('fileFailure',{name:failure.name,error:uploader(failure.code)})}{failure.url&&<a href={failure.url} target="_blank" rel="noreferrer" className="ml-2 break-all underline">{uploader('uploadedUrl')} {failure.url}</a>}</li>)}</ul>}
+      {summary && <div role="status" className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-lg rounded-xl border border-gray-300 bg-white p-4 text-gray-900 shadow-lg dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">{uploader('queueSummary',summary)}<button type="button" onClick={()=>setSummary(null)} className="ml-3 min-h-11 underline">{uploader('dismissSummary')}</button></div>}
       {uploadedUrl && <p className="break-all text-sm">{uploader('uploadedUrl')} <a href={uploadedUrl} target="_blank" rel="noreferrer" className="underline">{uploadedUrl}</a></p>}
     </div>}
     {message && <p role="status">{t(message)}</p>}

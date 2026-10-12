@@ -392,9 +392,13 @@
     "empty": "No properties"
   },
   "photoUpload": {
-    "drop": "Drag a photo here",
-    "hint": "JPEG, PNG or WebP · maximum 4 MB · one photo per upload. Uses the form category and order; you can also add a manual URL.",
-    "choose": "Choose file",
+    "queueProgress": "File {current} of {total}: {name}",
+    "queueSummary": "Upload finished: {success} photos saved, {failed} failed.",
+    "fileFailure": "{name}: {error}",
+    "dismissSummary": "Dismiss summary",
+    "drop": "Drag your photos here",
+    "hint": "JPEG, PNG or WebP · maximum 4 MB per photo after optimization. Select multiple photos; they upload one at a time using the category and starting order from the form. You can also add a manual URL.",
+    "choose": "Choose photos",
     "uploading": "Uploading…",
     "success": "Photo uploaded and added",
     "typeError": "Choose a JPEG, PNG or WebP image.",

@@ -122,10 +122,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
   return (
     <PropertyDetailScroll key={property.id}>
-      <div className="detail-editorial" data-shared-presentation>
-        <EditorialPresentation slides={editorial} scenes={[{ id: 'gallery', label: title, content: (<>
+      {[...new Set([property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url, ...editorial.map(slide => slide.hero?.url), property.sectionBgMapa, property.sectionBgReserva].filter((url): url is string => Boolean(url)))].map(url => <link key={url} rel="preload" as="image" href={url} />)}
+      <div className="detail-editorial detail-independent detail-snap-container" data-detail-flow>
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
-      <SectionBackground url={property.sectionBgInicio} name="gallery" className="detail-screen mx-auto max-w-7xl px-3 py-8 md:px-6">
+      <SectionBackground url={property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url} name="gallery" className="detail-screen px-3 py-8 md:px-6">
         <Reveal className={`relative mb-6 rounded-2xl ${property.sectionBgInicio ? 'detail-image-heading' : 'bg-black/30 dark:bg-black/50'} p-6 pr-16 text-center`}>
           <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={property.city} />
           <h1 className="break-words text-3xl font-light tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
@@ -225,11 +225,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
 
       </SectionBackground>
-        </>) }]} afterScenes={[
-          ...(hasMap || hasWarnings ? [{ id: 'location', label: t('details.mapWarnings'), content: (
+      {editorial.map(slide => <EditorialPresentation key={slide.section} slides={[slide]} />)}
+      {(hasMap || hasWarnings) && (
 <SectionBackground url={property.sectionBgMapa} name="location" className="detail-screen px-4 py-16 md:px-6" label={t('details.mapWarnings')}>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
-          {hasMap && <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={property.city} />}
+          {hasMap && <div className="detail-location-map min-w-0">
+            <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={property.city} />
+            <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${property.lat},${property.lng}`)}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-white/90 px-3 text-sm text-green-800 underline dark:bg-gray-900/90 dark:text-green-300">{t('details.mapTitle',{address:property.address})} ↗</a>
+          </div>}
           {hasWarnings && <Reveal className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
             <h2 className="mb-4 text-2xl font-light tracking-wide">{t('details.advertencias')}</h2>
             {warningHero && <Image src={warningHero.url} alt={t('details.advertencias')} width={600} height={400} unoptimized className="mb-4 h-auto w-full rounded-lg object-cover" />}
@@ -237,8 +240,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           </Reveal>}
         </div>
       </SectionBackground>
-          ) }] : []),
-          { id: 'reservation', label: t('details.reservar'), content: (
+      )}
 <SectionBackground url={property.sectionBgReserva} id="reservar" name="reservation" className="detail-screen px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal as="h2" className={`mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl${property.sectionBgReserva ? ' detail-image-heading' : ''}`}>
@@ -265,8 +267,6 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           </ReservationDatesProvider>
         </div>
       </SectionBackground>
-          ) },
-        ]} />
       </div>
       {editorial.length > 0 && <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{t('details.reservar')}</a>}
       <DetailFooterFlow><Footer inDetail /></DetailFooterFlow>

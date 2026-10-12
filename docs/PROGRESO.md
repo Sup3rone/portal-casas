@@ -243,6 +243,17 @@
 
 ### 📋 PENDIENTES (prioridad)
 
+Detalle sin snap (12 Oct): eliminado snap obligatorio y align:start de globals.css y módulo editorial. Componentes/motor/alturas protegidos intactos; editoriales mantienen altura natural, stages interactivos conservan100dvh por geometría JS. QA visual de recorrido continuo pendiente de Emma.
+
+QA UX 12 Oct: subida múltiple, navbar translúcida y editoriales en flujo libre implementados; verificar visualmente en375px/desktop y es/en/fr con Emma.
+
+### UX — cola de fotos y detalle (12 Oct 2026)
+
+- Uploader secuencial con optimización por archivo, fallos individuales, orden inicial + índice y resumen; abort detiene pendientes. APIs y compresión intactas.
+- Navbar detalle: fondo93% →75%, mantiene blur y lógica direccional.
+- Editoriales en altura natural y scroll libre; fondos/fotos con fundido por scroll, tarjetas glass oscuro65%/blur12. Snap del documento suspendido solo mientras se ven editoriales, necesario para no saltarlas; stage mosaico/mapa/reserva intacto.
+- Tests de cola y detalle ampliados: 30 scripts pasan, TypeScript web limpio y ESLint 0 errores / 8 warnings preexistentes. QA real/visual pendiente; sin BD/Blob, dependencias, SQL ni deploy.
+
 1. **Bugs conocidos:** iCal sync no deduplica eventos (reservas
    duplicadas al repetir sync); `bookings/create` no valida
    solapamientos de fechas.
@@ -279,3 +290,49 @@
 - Reutilizado DELETE de bloques existente: propiedad propia/ADMIN; reserva directa/iCal no eliminables; property-access y endpoints sin cambios. Sin SQL/Neon.
 - Tests offline: interacción cliente y permisos/DELETE real con SQLite en memoria; los 28 scripts pasan, TypeScript web limpio y ESLint 0 errores/8 warnings preexistentes. Validación visual y contra Respaldo pendiente de Emma (375px, es/en/fr, ambos temas).
 - Decisiones: el bloqueo creado desde la grilla sigue siendo BlockDate; crear host-block desde el editor individual para este flujo. Sin desbloqueo parcial ni Deshacer (no hay restauración existente).
+
+
+### Detalle: scroll único continuo — 12 Oct 2026
+- Mosaico, mapa y reserva salen de scenes/afterScenes y quedan en flujo documental junto a las editoriales; footer normal conservado.
+- Eliminadas alturas forzadas/scroll interior del stage en la página; padding de las secciones24px (antes101px arriba/88px abajo), degradado decorativo entre fondos. Motor editorial intacto.
+- Mapa no captura rueda por defecto: interacción con foco de teclado o enlace localizado a Google Maps.
+- Validación: 30 tests offline pasan; TypeScript web limpio; lint0errores/8warnings preexistentes. DOM/browser1280px/375px sin huecos/overflow; lightbox y persistencia de fechas/campos con ↑ verificadas sin enviar datos. Checklist completo en CONTEXTO.md.
+
+
+### Detalle: viaje visual de fondos compartidos — 12 Oct 2026
+- Layout y CSS incorporan una capa decorativa sticky común desde mosaico hasta reserva; fundidos de opacidad ligados a timelines CSS de cada sección, sin snap ni alturas forzadas del contenido.
+- EditorialPresentation y componentes interactivos intactos. Footer fuera del recorrido; fallback local con reduced-motion/navegadores sin soporte.
+- Los 30 scripts offline pasan; TypeScript limpio, lint 0 errores / 8 warnings previos. QA local de fundido editorial→mapa, 375px sin overflow, lightbox y composición es/en/fr; reserva en francés/oscuro legible. Checklist completo en CONTEXTO.md.
+
+
+### Detalle: fondo fijo Apple-style sin snap — 12 Oct 2026
+- Fondo decorativo sticky compartido, contenido en altura natural y footer fuera del stage; fundido400ms con progreso de scroll equivalente al motor editorial existente.
+- EditorialPresentation conserva API y contenido; el efecto compartido reemplaza timelines CSS y funciona también sin editoriales. Reduced-motion conserva fondos locales y funcionalidad completa.
+- test-detail-scroll ampliado: cambio/intermedio/retorno de fondo, reduced-motion/cleanup, ausencia de snap y flujo natural. 30 scripts pasan, TypeScript limpio, lint0errores/8warnings previos.
+- QA local:375px sin overflow; lightbox, navbar direccional, ↑ y conservación de fechas/campos. Matriz visual completa y teclado móvil real: checklist en CONTEXTO.md. Sin migraciones ni BD/deploy.
+
+
+### Detalle: secciones independientes full-screen — 12 Oct 2026
+- Eliminado stage global; mosaico/mapa/reserva conservan fondo propio y cada editorial se compone con una instancia slides:[slide], sin cambiar el componente.
+- CSS externo: min-height100dvh/heightauto para no cortar contenido largo, sin snap ni solapamiento; fundido decorativo de entrada y fallback reduced-motion. Footer natural.
+- 30 scripts pasan, TypeScript limpio, lint0errores/8warnings previos. Capturas/DOM: siete contenedores y fondos independientes, editoriales720px en viewport720px /812px en móvil375×812; sin overflow. Lightbox y calendario/formulario verificados sin enviar datos.
+- QA completo y supuestos en CONTEXTO.md; teclado móvil real/reduced-motion visual pendientes de Emma. Sin BD/migraciones/deploy.
+
+
+### Detalle: scroll-snap diapositivas — 12 Oct 2026
+- Solo globals.css en la app: snap raíz y mandatory/overflow-scroll/height100vh; siete secciones min100vh/flex/start, con fondos propios y centrado.
+- Footer conserva altura natural, cierre end en su envoltura para hacerlo alcanzable. Componentes React/navbar/↑/lightbox/calendario/formulario sin cambios.
+- Los30scripts offline pasan; TypeScript limpio, lint0errores/8warnings previos; test-detail-scroll actualizado. QA local desktop/375px: snap, lightbox y footer accesibles; checklist en CONTEXTO.md.
+
+
+### Detalle: snap simple local — 12 Oct 2026
+- Contenedor en page.tsx con height100vh/overflow-scroll/snap mandatory; cada sección width100%/min100vh/flex/start y fondo independiente. Footer exterior natural.
+- Sin stage global, fondos sticky ni timelines complejas. Navbar/↑ y fotografías adaptan su referencia al scroller local; lightbox bloquea ambos scrolls.
+- 30 scripts pasan, TypeScript limpio, lint0errores/8warnings previos; pruebas y captura del scroller local. QA manual en CONTEXTO.md.
+
+
+### Detalle: remates finales — 12 Oct 2026
+- Proximity en vez de mandatory; fondos estáticos precargados y entrada300ms, un hero exclusivo por editorial. Estructura intacta.
+- Navbar sigue deltas exterior/interior separados y conserva clases tras cambios de React; foco de teclado accesible.
+- Mosaico compacto según HEAD disponible (falta commit de título solicitado); paneles gris90082%/blur4px/texto claro, CSS exclusivo del detalle.
+- 30 scripts pasan, TypeScript limpio, lint0errores/8warnings previos. Pruebas de preload/proximity/navbar y QA local; checklist/supuestos en CONTEXTO.md.

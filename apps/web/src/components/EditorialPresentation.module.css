@@ -1,6 +1,6 @@
 .presentation { position: relative; }
 .stage { position: sticky; top: 0; height: 100dvh; background: var(--background); }
-.stop { position: absolute; width: 1px; scroll-snap-align: start; pointer-events: none; }
+.stop { position: absolute; width: 1px; pointer-events: none; }
 .body { height: 100%; overflow-y: auto; overflow-x: clip; }
 .content { position: relative; min-height: 100dvh; }
 .panel, .screen, .backdrop { position: absolute; inset: 0; }
@@ -15,14 +15,28 @@
 .frames { position: relative; height: clamp(140px, 30svh, 320px); }
 .photo { position: absolute; inset: 0; border-radius: .75rem; overflow: hidden; transition: opacity 400ms ease; }
 .description { max-height: 48svh; overflow-y: auto; margin-top: 1rem; overflow-wrap: anywhere; }
+/* Editoriales en flujo natural: sin altura de viewport ni scroll interior. */
+.flow { position: relative; isolation: isolate; }
+.flowBackdrop { position: absolute; inset: 0; pointer-events: none; z-index: -1; }
+.flowBackgroundStage { position: sticky; top: 0; height: 100dvh; background: var(--color-gray-900); overflow: hidden; }
+.flowBackgroundStage .backdrop { background: var(--color-gray-900); transition: opacity 400ms ease; }
+.flow .screen { position: relative; inset: auto; height: auto; min-height: 0; padding: 5svh 1rem; background: transparent; }
+.flow .floating { position: relative; inset: auto; width: 100%; max-width: 72rem; margin-inline: auto; overflow: visible; }
+.flow .description { max-height: none; overflow: visible; }
+.flow .floating .images, .flow .floating .narrative {
+  background-color: color-mix(in srgb, var(--color-gray-900) 65%, transparent);
+  color: var(--color-gray-100); backdrop-filter: blur(12px);
+}
 :global(.dark) .images:focus-visible { outline-color: var(--color-green-400); }
 @media (max-width: 1023px) { .floating { inset: 1rem; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-content: center; } .frames { height: clamp(110px, 22svh, 220px); } .description { max-height: 27svh; } }
 @media (max-height: 650px) { .floating { align-content: start; } }
+@media (max-width: 1023px) { .flow .floating { align-content: start; } .flow .description { max-height: none; } }
+@media (prefers-reduced-motion: reduce) { .flowBackgroundStage .backdrop { transition: none; } }
 @media (prefers-reduced-motion: reduce) { .photo { transition: none; } }
 @media (prefers-reduced-motion: reduce) {
   .presentation { height: auto !important; }
   .stage { position: static; height: auto; }
-  .panel { position: relative; opacity: 1 !important; visibility: visible !important; height: 100dvh; scroll-snap-align: start; }
+  .panel { position: relative; opacity: 1 !important; visibility: visible !important; height: 100dvh; }
   .body { height: 100%; overflow-y: auto; }
   .stop { display: none; }
   .frames { height: auto; }

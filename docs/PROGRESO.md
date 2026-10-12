@@ -362,3 +362,17 @@ QA UX 12 Oct: subida múltiple, navbar translúcida y editoriales en flujo libre
 - Fade de sección/fondo200ms, enlace «Ubicación ↗» bajo mapa retirado; mapa/comportamientos existentes sin cambios.
 - Advertencias/calendario/formulario blanco25%/blur10px/texto negro, formulario sin segunda capa opaca. Estados calendario legibles y lógica intacta.
 - 30scripts pasan, TypeScript limpio, lint0errores/8warnings previos;375px/es/en/fr/temas, rango13→15Oct y paneles verificados. Docs/checklist/supuestos en CONTEXTO.md.
+
+
+### Experimento detalle fullpage — 12 Oct 2026
+**Rama:** experimento/detalle-fullpage. **Estado:** Implementado/validado, PENDIENTE aprobación visual; sin merge ni deploy.
+- Una escena por gesto de rueda/swipe para contenido que cabe; inercia agrupada, entrada fade300ms (opciónA), fondos propios/vidrio25%, autoplay4s intacto.
+- Opción2 confirmada: reserva móvil y otras escenas largas con scroll natural, sin recortar contenido; footer normal. Mapa/input/lightbox protegidos.
+- 31scripts pasan (nuevo test-detail-fullpage), TypeScript limpio, lint0errores/8warnings previos. QA desktop720px y móvil812px: avances exactos de una escena; reserva/formulario/submit y lightbox verificados sin enviar datos.
+- Tres capturas en docs/qa para aprobación; checklist/supuestos en CONTEXTO.md. Merge manual solo tras aprobación de la clienta.
+
+
+### Doble scroll del detalle — implementado (12 Oct 2026)
+- Documento único en desktop/móvil; snap del html limitado al detalle, contenedor natural y reserva móvil con excepción aprobada.
+- Navbar/↑ escuchan window: visible al subir/al final, oculta al bajar. EditorialPresentation ajustado con autorización: navegación/observer/EditorialFlow usan documento; carrusel/fade/contenidos intactos.
+- Validación: 31 scripts offline pasan, TypeScript web limpio, lint0errores/8warnings previos; diff sin errores. Tests del detalle/fullpage actualizados para prohibir scroll interior y cubrir dirección/final/↑. QA visual de esta corrección pendiente de Emma; sin merge/deploy/BD. Checklist en CONTEXTO.md.

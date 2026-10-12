@@ -7,8 +7,97 @@ import styles from './EditorialPresentation.module.css';
 
 const titles = { destino: 'destino', amenidades: 'amenidades', habitaciones: 'habitaciones', lugar: 'enLugar' } as const;
 
+// Una rueda/swipe completo, una escena. No interfiere con zoom ni controles.
+export function attachFullpageNavigation(container: HTMLElement, motion: MediaQueryList) {
+  const sections = Array.from(container.querySelectorAll<HTMLElement>('[data-detail-section], [data-editorial-flow]'));
+  let moving = false, lastWheel = 0, wheelHandled = false, accumulated = 0;
+  function viewportTop() { return 0; }
+  function indexAtTop() { return Math.max(0, sections.findLastIndex(section => section.getBoundingClientRect().top <= viewportTop() + 2)); }
+  function naturalScroll(direction: number) {
+    const section = sections[indexAtTop()];
+    if (!section) return false;
+    const rect = section.getBoundingClientRect(), height = window.innerHeight;
+    return rect.height > height + 1 && (direction > 0 ? rect.bottom > viewportTop() + height + 1 : rect.top < viewportTop() - 1);
+  }
+
+  let settle: ReturnType<typeof setTimeout> | undefined;
+  let touch: { x: number; y: number; native: boolean } | undefined;
+  function protectedTarget(target: EventTarget | null) {
+    return !(target instanceof Element) || Boolean(target.closest('input, textarea, select, iframe, dialog[open]')) || Boolean(container.querySelector('dialog[open]'));
+  }
+  function move(direction: number) {
+    if (moving || !sections.length) return;
+    const top = viewportTop();
+    const index = indexAtTop();
+    const next = index + direction;
+    if (next < 0) return;
+    if (next >= sections.length) {
+      container.parentElement?.querySelector<HTMLElement>('.detail-footer-flow')?.scrollIntoView({ behavior: motion.matches ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
+    moving = true;
+    window.scrollTo({ top: window.scrollY + sections[next].getBoundingClientRect().top - top, behavior: motion.matches ? 'auto' : 'smooth' });
+    clearTimeout(settle); settle = setTimeout(() => { moving = false; }, 900);
+  }
+  function scroll() {
+    if (!moving) return;
+    clearTimeout(settle); settle = setTimeout(() => { moving = false; }, 120);
+  }
+  function wheel(event: WheelEvent) {
+    if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY) || protectedTarget(event.target)) return;
+    const direction = Math.sign(event.deltaY);
+    if (!direction) return;
+    const now = Date.now();
+    if (now - lastWheel > 180) { accumulated = 0; wheelHandled = false; }
+    lastWheel = now;
+    if (naturalScroll(direction)) { wheelHandled = true; return; }
+    event.preventDefault();
+    if (moving || wheelHandled) return;
+    accumulated += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
+    if (Math.abs(accumulated) >= 40) { wheelHandled = true; move(Math.sign(accumulated)); }
+  }
+  function start(event: TouchEvent) {
+    touch = undefined;
+    if (event.touches.length !== 1 || protectedTarget(event.target)) return;
+    touch = { x: event.touches[0].clientX, y: event.touches[0].clientY, native: false };
+  }
+  function drag(event: TouchEvent) {
+    if (!touch || event.touches.length !== 1) { touch = undefined; return; }
+    const dx = event.touches[0].clientX - touch.x, dy = touch.y - event.touches[0].clientY;
+    if (Math.abs(dy) <= Math.abs(dx) || Math.abs(dy) < 8) return;
+    if (touch.native || naturalScroll(Math.sign(dy))) { touch.native = true; return; }
+    event.preventDefault();
+  }
+  function end(event: TouchEvent) {
+    if (touch && !touch.native && event.changedTouches.length) {
+      const dx = event.changedTouches[0].clientX - touch.x, dy = touch.y - event.changedTouches[0].clientY;
+      if (Math.abs(dy) >= 40 && Math.abs(dy) > Math.abs(dx)) move(Math.sign(dy));
+    }
+    touch = undefined;
+  }
+  function cancel() { touch = undefined; }
+  container.addEventListener('wheel', wheel, { passive: false });
+  container.addEventListener('touchstart', start, { passive: true });
+  container.addEventListener('touchmove', drag, { passive: false });
+  container.addEventListener('touchend', end);
+  container.addEventListener('touchcancel', cancel);
+  window.addEventListener('scroll', scroll, { passive: true });
+  return () => {
+    clearTimeout(settle);
+    container.removeEventListener('wheel', wheel); container.removeEventListener('touchstart', start);
+    container.removeEventListener('touchmove', drag); container.removeEventListener('touchend', end);
+    container.removeEventListener('touchcancel', cancel);
+    window.removeEventListener('scroll', scroll);
+  };
+}
+
 export function DetailSectionTransitions({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
   const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const container = root.current;
+    if (!container?.matches?.('.detail-fullpage')) return;
+    return attachFullpageNavigation(container, window.matchMedia('(prefers-reduced-motion: reduce)'));
+  }, []);
   useEffect(() => {
     const container = root.current;
     if (!container) return;
@@ -27,13 +116,15 @@ export function DetailSectionTransitions({ children, ...props }: HTMLAttributes<
         const active = sections.reduce((best, section) => (visible.get(section) || 0) > (visible.get(best) || 0) ? section : best, sections[0]);
         sections.forEach(section => section.setAttribute('data-section-active', String(section === active)));
         container!.setAttribute('data-transitions-ready', 'true');
-      }, { root: container, threshold: Array.from({ length: 21 }, (_, index) => index / 20) });
+      }, { root: null, threshold: Array.from({ length: 21 }, (_, index) => index / 20) });
       sections.forEach(section => observer!.observe(section));
     }
     configure();
     motion.addEventListener('change', configure);
+    window.addEventListener('resize', configure);
     return () => {
       observer?.disconnect(); motion.removeEventListener('change', configure);
+      window.removeEventListener('resize', configure);
       container.removeAttribute('data-transitions-ready');
       sections.forEach(section => section.removeAttribute('data-section-active'));
     };
@@ -109,7 +200,7 @@ function EditorialFlow({ slides }: { slides: EditorialSlide[] }) {
     if (!element) return;
     const screens = Array.from(element.querySelectorAll<HTMLElement>('[data-editorial-slide]'));
     const backgrounds = Array.from(element.querySelectorAll<HTMLElement>('[data-flow-background]'));
-    const scrollTarget = element.closest?.('.detail-snap-container') || window;
+    const scrollTarget = window;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     function update() {

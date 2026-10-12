@@ -78,10 +78,8 @@ html.dark .about-social-link { --about-social-glow: color-mix(in srgb, var(--col
 
 /* El scroll y la navbar inteligente solo pertenecen al detalle público. */
 .detail-snap-container {
-  height: 100vh;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  scroll-snap-type: y proximity;
+  height: auto;
+  overflow: visible;
   scroll-behavior: smooth;
 }
 .detail-footer-flow { display: flow-root; }
@@ -99,7 +97,6 @@ body:has(.property-detail) > nav.detail-nav-hidden { transform: translateY(-105%
   background: var(--background);
 }
 html:has(.property-detail dialog[open]) { overflow: hidden; }
-.detail-snap-container:has(dialog[open]) { overflow-y: hidden; }
 .detail-screen {
   position: relative;
   min-height: 0;
@@ -172,18 +169,18 @@ html:has(.property-detail dialog[open]) { overflow: hidden; }
   .detail-independent [data-flow-background] { opacity: 1 !important; transition: none; }
 }
 /* Fade de cada bloque completo; conserva su fondo y su posición en el flujo. */
-.detail-snap-container[data-transitions-ready] { background: var(--color-gray-900); }
-.detail-snap-container[data-transitions-ready] [data-section-active] {
+.detail-snap-container:not(.detail-fullpage)[data-transitions-ready] { background: var(--color-gray-900); }
+.detail-snap-container:not(.detail-fullpage)[data-transitions-ready] [data-section-active] {
   transition: opacity .2s ease, filter .2s ease;
 }
-.detail-snap-container[data-transitions-ready] [data-section-active="false"] { opacity: .3; filter: blur(2px); }
-.detail-snap-container[data-transitions-ready] [data-section-active="true"],
+.detail-snap-container:not(.detail-fullpage)[data-transitions-ready] [data-section-active="false"] { opacity: .3; filter: blur(2px); }
+.detail-snap-container:not(.detail-fullpage)[data-transitions-ready] [data-section-active="true"],
 .detail-snap-container [data-section-active]:focus-within,
 .detail-snap-container [data-section-active]:has(dialog[open]) { opacity: 1 !important; filter: none !important; }
 .detail-snap-container [data-editorial-controls] { display: none; }
 .detail-snap-container [data-section-active]:has(dialog[open]) { transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .detail-snap-container[data-transitions-ready] [data-section-active] { opacity: 1; filter: none; transition: none; }
+  .detail-snap-container:not(.detail-fullpage)[data-transitions-ready] [data-section-active] { opacity: 1; filter: none; transition: none; }
 }
 /* Vista previa sin capturar rueda/touch; foco de teclado habilita el mapa embebido. */
 .property-detail .detail-location-map iframe { pointer-events: none; }
@@ -345,4 +342,23 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   .property-lightbox[open] {
     animation: none;
   }
+}
+
+/* Experimento fullpage: misma estructura, una escena por gesto cuando cabe. */
+html:has(.detail-fullpage) { scroll-snap-type: y mandatory; }
+.detail-fullpage { height: auto; overflow: visible; scroll-behavior: smooth; }
+.detail-fullpage [data-section-active="true"] { animation: detail-fullpage-enter 300ms ease-out; }
+.detail-fullpage [data-flow-background] { opacity: 1 !important; transition: none; }
+.detail-fullpage [data-section-active]:focus-within,
+.detail-fullpage [data-section-active]:has(dialog[open]) { animation: none; }
+.detail-fullpage.detail-snap-container [data-editorial-flow] :is([data-editorial-narrative], [data-editorial-carousel]).glass-panel { background: rgb(255 255 255 / 25%) !important; }
+.detail-fullpage .detail-location-map iframe { pointer-events: auto; }
+@keyframes detail-fullpage-enter { from { opacity: 0; } to { opacity: 1; } }
+@media (width < 48rem) {
+  .detail-fullpage { height: auto; overflow: visible; }
+  .detail-fullpage #reservar { min-height: 0 !important; scroll-snap-align: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .detail-fullpage { scroll-behavior: auto; }
+  .detail-fullpage [data-section-active="true"] { animation: none; }
 }

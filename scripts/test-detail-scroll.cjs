@@ -121,7 +121,7 @@ async function main() {
   const Controller=load('apps/web/src/components/PropertyDetailScroll-interactive.tsx',fs.readFileSync(path.join(__dirname,'../apps/web/src/components/PropertyDetailScroll.tsx'),'utf8')).default;
   try {
     global.window={...eventTarget(),scrollY:0,scrollTo(options){this.lastScroll=options;},innerHeight:800,visualViewport:viewport,location:{hash:''},history:{replaceState(){}},matchMedia:()=>motion};
-    global.document={...eventTarget(),querySelector:()=>navbar,activeElement:null};
+    global.document={...eventTarget(),querySelector:()=>navbar,activeElement:null,documentElement:{scrollHeight:3000}};
     global.ResizeObserver=class {observe(){} disconnect(){this.closed=true;}};
     global.requestAnimationFrame=fn=>{callback=fn;return 1;}; global.cancelAnimationFrame=()=>{};
     const observedClasses=[];
@@ -140,18 +140,15 @@ async function main() {
     assert.equal(style.get('--detail-viewport-height'),'400px');assert.equal(buttonStyle.get('--detail-keyboard-offset'),'400px');
     cleanup();assert.equal(container.listeners.size,0);assert.ok(!classes.has('detail-nav-top'));assert.ok(!classes.has('detail-nav-hidden'));
     // Motor real con geometría medida, foco, diálogo y reduced-motion.
-    // Navbar/↑ sobre el nuevo scroller local, sin depender de window.scrollY.
-    const localScroller={...eventTarget(),scrollTop:0,scrollTo(options){this.lastScroll=options;}};
-    container.querySelector=()=>localScroller;global.window.scrollY=0;refIndex=0;effects=[];
-    const localUI=Controller({children:'SSR'}),disposeLocal=effects[0]();
-    localScroller.scrollTop=200;localScroller.listeners.get('scroll')();callback();assert.ok(classes.has('detail-nav-hidden'));
-    localScroller.scrollTop=100;localScroller.listeners.get('scroll')();callback();assert.ok(!classes.has('detail-nav-hidden'));
-    find(localUI,node=>node.type==='button').props.onClick();assert.equal(localScroller.lastScroll.top,0);
-    global.window.scrollY=100;global.window.listeners.get('scroll')();callback();
-    global.window.scrollY=50;localScroller.scrollTop=150;global.window.listeners.get('scroll')();callback();
-    assert.ok(!classes.has('detail-nav-hidden'),'Scroll externo hacia arriba no se cancela con scroll interno');
-    localScroller.scrollTop=250;localScroller.listeners.get('scroll')();callback();assert.ok(classes.has('detail-nav-hidden'));
-    disposeLocal();assert.equal(localScroller.listeners.size,0);delete container.querySelector;
+    // Solo window controla dirección, final y vuelta al inicio.
+    global.window.scrollY=0;refIndex=0;effects=[];
+    const documentUI=Controller({children:'SSR'}),disposeDocument=effects[0]();
+    scroll(200);assert.ok(classes.has('detail-nav-hidden'));
+    scroll(2200);assert.ok(!classes.has('detail-nav-hidden'),'Navbar visible al final');
+    scroll(2100);assert.ok(!classes.has('detail-nav-hidden'),'Subir muestra navbar');
+    scroll(2150);assert.ok(classes.has('detail-nav-hidden'),'Volver a bajar oculta navbar');
+    find(documentUI,node=>node.type==='button').props.onClick();assert.equal(global.window.lastScroll.top,0);
+    disposeDocument();assert.equal(container.listeners.size,0);
     let distance=0,dialog=false;
     const panels=Array.from({length:4},(_,number)=>{
       const values=new Map(),attributes=new Map();
@@ -227,7 +224,8 @@ async function main() {
     flowDistance=heights.reduce((a,b)=>a+b,0);global.window.listeners.get('scroll')();callback();assert.equal(flowAttributes.get('data-scroll-free'),'false');
     disposeFlow();assert.equal(flowAttributes.size,0);assert.equal(global.window.listeners.size,0);global.window.innerHeight=800;
     const detailCss=fs.readFileSync(path.join(__dirname,'../apps/web/src/app/globals.css'),'utf8');
-    assert.match(detailCss,/\.detail-snap-container \{[^}]*height: 100vh;[^}]*overflow-y: scroll;[^}]*scroll-snap-type: y proximity;/);
+    assert.match(detailCss,/\.detail-snap-container \{[^}]*height: auto;[^}]*overflow: visible;/);
+    assert.match(detailCss,/html:has\(\.detail-fullpage\) \{ scroll-snap-type: y mandatory;/);
     assert.match(detailCss,/min-height: 100vh !important;[^}]*scroll-snap-align: start;[^}]*display: flex;/);
     assert.match(detailCss,/\.detail-independent > \.detail-screen,[\s\S]*?height: auto;[\s\S]*?min-height: 100vh !important;/);
     assert.match(detailCss,/\.detail-screen \{[^}]*min-height: 0;[^}]*padding: 1\.5rem 1rem;/);
@@ -239,7 +237,7 @@ async function main() {
     assert.ok(!detailCss.includes('.detail-journey'),'Sin fondo global compartido');
     assert.ok(!detailCss.includes('animation-timeline:'),'Sin animaciones complejas de fondo');
     assert.match(detailCss,/\.detail-independent \[data-editorial-flow\] > \[aria-hidden="true"\] > div \{[^}]*position: absolute;/);
-    assert.match(detailCss,/\.detail-snap-container:has\(dialog\[open\]\) \{ overflow-y: hidden;/);
+    assert.match(detailCss,/html:has\(\.property-detail dialog\[open\]\) \{ overflow: hidden;/);
     // Carrusel editorial real: autoplay, pausa, manual/swipe y reduced-motion.
     let photoIndex=0,tick,clearTimer=false,carouselVisible,closedObserver=false,refCursor=0;
     const carouselRefs=[],carouselNode={};
@@ -276,15 +274,15 @@ async function main() {
     effects=[];motion.matches=false;
     mockModule('react',{...React,useRef:()=>({current:transitionRoot}),useEffect:effect=>effects.push(effect)});
     const Transitions=load('apps/web/src/components/EditorialPresentation-transitions-test.tsx',editorialSource).DetailSectionTransitions;
-    const transitionUI=Transitions({className:'detail-snap-container',children:'Mounted'}),disposeTransitions=effects[0]();
-    assert.equal(transitionUI.props.children,'Mounted');assert.equal(observerOptions.root,transitionRoot);
+    const transitionUI=Transitions({className:'detail-snap-container',children:'Mounted'}),disposeTransitions=effects[1]();
+    assert.equal(transitionUI.props.children,'Mounted');assert.equal(observerOptions.root,null);
     function visibleSections(heights){sectionObserver(transitionSections.map((target,index)=>({target,isIntersecting:heights[index]>0,intersectionRect:{height:heights[index]}})));}
     visibleSections([600,100,0]);assert.equal(transitionSections[0].attributes.get('data-section-active'),'true');
     visibleSections([150,550,0]);assert.equal(transitionSections[0].attributes.get('data-section-active'),'false');assert.equal(transitionSections[1].attributes.get('data-section-active'),'true');
     motion.matches=true;motion.listeners.get('change')();assert.equal(transitionAttributes.size,0);assert.ok(transitionSections.every(section=>section.attributes.size===0));
     motion.matches=false;motion.listeners.get('change')();visibleSections([0,0,650]);assert.equal(transitionSections[2].attributes.get('data-section-active'),'true');
     disposeTransitions();assert.ok(observerClosed);assert.equal(transitionAttributes.size,0);
-    global.IntersectionObserver=undefined;effects=[];Transitions({children:'SSR fallback'});const disposeFallback=effects[0]();assert.equal(transitionAttributes.size,0);disposeFallback();
+    global.IntersectionObserver=undefined;effects=[];Transitions({children:'SSR fallback'});const disposeFallback=effects[1]();assert.equal(transitionAttributes.size,0);disposeFallback();
     assert.match(detailCss,/transition: opacity \.2s ease, filter \.2s ease;/);
     assert.match(detailCss,/\[data-section-active="false"\] \{ opacity: \.3; filter: blur\(2px\);/);
     assert.match(detailCss,/\[data-editorial-controls\] \{ display: none;/);

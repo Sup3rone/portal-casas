@@ -10,23 +10,21 @@ export default function PropertyDetailScroll({ children }: { children: ReactNode
     const container = root.current;
     const navbar = document.querySelector<HTMLElement>('body > nav');
     if (!container || !navbar) return;
-    const scroller = container.querySelector?.<HTMLElement>('.detail-snap-container');
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let previousOuter = window.scrollY, previousInner = scroller?.scrollTop || 0, frame = 0;
+    let previous = window.scrollY, frame = 0;
     let hidden = false, atTop = true;
     function show() { hidden = false; navbar!.classList.remove('detail-nav-hidden'); }
     function update() {
       frame = 0;
-      const outer = Math.max(0, window.scrollY), inner = Math.max(0, scroller?.scrollTop || 0);
-      const outerDelta = outer - previousOuter, innerDelta = inner - previousInner;
-      const delta = Math.abs(outerDelta) >= 6 ? outerDelta : innerDelta;
-      atTop = outer <= 4 && inner <= 4;
+      const position = Math.max(0, window.scrollY);
+      const delta = position - previous;
+      atTop = position <= 4;
+      const atEnd = position + window.innerHeight >= document.documentElement.scrollHeight - 4;
       navbar!.classList.toggle('detail-nav-top', atTop);
-      if (motion.matches || atTop || (navbar!.contains(document.activeElement) && document.activeElement?.matches(':focus-visible'))) show();
+      if (motion.matches || atTop || atEnd || (navbar!.contains(document.activeElement) && document.activeElement?.matches(':focus-visible'))) show();
       else if (Math.abs(delta) >= 6) hidden = delta > 0;
       navbar!.classList.toggle('detail-nav-hidden', hidden);
-      if (Math.abs(outerDelta) >= 6 || atTop) previousOuter = outer;
-      if (Math.abs(innerDelta) >= 6 || atTop) previousInner = inner;
+      if (Math.abs(delta) >= 6 || atTop || atEnd) previous = position;
     }
     function scroll() { if (!frame) frame = requestAnimationFrame(update); }
     function measure() { container!.style.setProperty('--detail-nav-height', `${navbar!.getBoundingClientRect().height}px`); }
@@ -45,7 +43,6 @@ export default function PropertyDetailScroll({ children }: { children: ReactNode
     const resize = new ResizeObserver(measure);
     resize.observe(navbar); measure(); viewport(); update();
     window.addEventListener('scroll', scroll, { passive: true });
-    scroller?.addEventListener('scroll', scroll, { passive: true });
     navbar.addEventListener('focusin', show);
     motion.addEventListener('change', update);
     window.visualViewport?.addEventListener('resize', viewport);
@@ -53,7 +50,6 @@ export default function PropertyDetailScroll({ children }: { children: ReactNode
     window.addEventListener('resize', viewport);
     return () => {
       cancelAnimationFrame(frame); resize.disconnect(); classes?.disconnect();
-      scroller?.removeEventListener('scroll', scroll);
       window.removeEventListener('scroll', scroll); navbar.removeEventListener('focusin', show);
       motion.removeEventListener('change', update);
       window.visualViewport?.removeEventListener('resize', viewport);
@@ -64,7 +60,6 @@ export default function PropertyDetailScroll({ children }: { children: ReactNode
   }, []);
 
   function backToTop() {
-    root.current?.querySelector?.<HTMLElement>('.detail-snap-container')?.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
   return <>

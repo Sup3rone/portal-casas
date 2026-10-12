@@ -123,7 +123,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   return (
     <PropertyDetailScroll key={property.id}>
       {[...new Set([property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url, ...editorial.map(slide => slide.hero?.url), property.sectionBgMapa, property.sectionBgReserva].filter((url): url is string => Boolean(url)))].map(url => <link key={url} rel="preload" as="image" href={url} />)}
-      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container" data-detail-flow>
+      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container detail-fullpage" tabIndex={0} data-detail-flow>
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <SectionBackground url={property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url} name="gallery" className="detail-screen px-3 py-8 md:px-6">
         <Reveal className={`relative mb-6 rounded-2xl ${property.sectionBgInicio ? 'detail-image-heading' : 'bg-black/30 dark:bg-black/50'} p-6 pr-16 text-center`}>

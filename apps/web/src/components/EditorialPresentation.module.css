@@ -42,3 +42,26 @@
   .frames { height: auto; }
   .photo { position: relative; inset: auto; aspect-ratio: 4 / 3; opacity: 1 !important; }
 }
+
+/* Controles del carrusel editorial; las fotos mantienen sus capas y tamaño. */
+.controls { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .5rem; }
+.controls button { min-width: 44px; min-height: 44px; border-radius: 9999px; cursor: pointer; }
+.controls button:focus-visible { outline: 2px solid var(--color-green-400); outline-offset: 2px; }
+.dots { display: flex; flex-wrap: wrap; justify-content: center; }
+.dots button { display: grid; place-items: center; }
+.dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--color-gray-400); }
+.dots button[aria-pressed="true"] span { background: var(--color-white); }
+/* Marco de fotos editorial: vidrio blanco, sin cambiar padding ni carrusel. */
+:global(.detail-snap-container) .floating .images:global(.glass-panel) {
+  background: rgb(255 255 255 / 35%) !important;
+  backdrop-filter: blur(10px) !important;
+  color: var(--color-black) !important;
+  --tw-ring-color: rgb(255 255 255 / 40%);
+}
+.images .dots span { background: var(--color-gray-600); }
+.images .dots button[aria-pressed="true"] span { background: var(--color-black); }
+@media (prefers-reduced-motion: reduce) {
+  .frames:has([data-carousel-photo]) { height: clamp(140px, 30svh, 320px); }
+  .frames [data-carousel-photo] { position: absolute; inset: 0; aspect-ratio: auto; opacity: 0 !important; }
+  .frames [data-carousel-photo][aria-hidden="false"] { opacity: 1 !important; }
+}

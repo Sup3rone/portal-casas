@@ -135,25 +135,55 @@ html:has(.property-detail dialog[open]) { overflow: hidden; }
   inset: 0;
   height: 100%;
 }
-/* Remates del detalle: mosaico original, superficies oscuras y fondos estáticos. */
+/* Remates del detalle: mosaico original, vidrio blanco y fondos estáticos. */
 .detail-independent [data-detail-section="gallery"] > .reveal.grid {
   max-width: calc(80rem - 3rem);
   margin-inline: auto;
 }
 .detail-snap-container :is(.glass-panel, .bg-white\/85) {
-  background-color: color-mix(in srgb, var(--color-gray-900) 82%, transparent) !important;
-  color: var(--color-gray-100);
-  backdrop-filter: blur(4px) !important;
+  background-color: rgb(255 255 255 / 25%) !important;
+  color: var(--color-black) !important;
+  backdrop-filter: blur(10px) !important;
 }
-.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600) { color: var(--color-gray-100); }
-.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-500, .text-gray-400) { color: var(--color-gray-300); }
+.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600) { color: var(--color-black); }
+.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-500, .text-gray-400) { color: var(--color-gray-700); }
+/* Contraste del formulario y estados del calendario sobre vidrio claro. */
+#reservar .glass-panel > form { background-color: transparent; backdrop-filter: none; }
+.detail-snap-container .glass-panel :is(input, textarea, select) { color: var(--color-black); }
+.detail-snap-container .glass-panel .text-red-600 { color: var(--color-red-800); }
+#reservar .glass-panel .bg-green-50 { background-color: var(--color-green-50); }
+#reservar .glass-panel .text-green-700 { color: var(--color-green-800); }
+#reservar .glass-panel .bg-red-100 { background-color: var(--color-red-100); }
+#reservar .glass-panel button[aria-pressed]:disabled { color: var(--color-gray-600); }
+#reservar .glass-panel button[aria-pressed]:disabled:not(.line-through) { background-color: rgb(255 255 255 / 30%); }
+#reservar .glass-panel button[aria-pressed].line-through { color: var(--color-red-800); }
+#reservar .glass-panel button[aria-pressed="true"] { background-color: var(--color-green-700); color: var(--color-white); }
+.detail-snap-container [data-editorial-narrative].glass-panel {
+  background: rgb(255 255 255 / 20%) !important;
+  color: var(--color-black) !important;
+  backdrop-filter: blur(10px) !important;
+}
 .detail-independent [data-flow-background] {
-  opacity: 1 !important;
-  transition: opacity .3s ease-out;
+  opacity: 0 !important;
+  transition: opacity .2s ease-out;
 }
-.detail-independent [data-editorial-flow][data-scroll-free="false"] [data-flow-background] { opacity: 0 !important; }
+.detail-independent [data-editorial-flow][data-scroll-free="true"] [data-flow-background] { opacity: 1 !important; }
 @media (prefers-reduced-motion: reduce) {
-  .detail-independent [data-flow-background] { transition: none; }
+  .detail-independent [data-flow-background] { opacity: 1 !important; transition: none; }
+}
+/* Fade de cada bloque completo; conserva su fondo y su posición en el flujo. */
+.detail-snap-container[data-transitions-ready] { background: var(--color-gray-900); }
+.detail-snap-container[data-transitions-ready] [data-section-active] {
+  transition: opacity .2s ease, filter .2s ease;
+}
+.detail-snap-container[data-transitions-ready] [data-section-active="false"] { opacity: .3; filter: blur(2px); }
+.detail-snap-container[data-transitions-ready] [data-section-active="true"],
+.detail-snap-container [data-section-active]:focus-within,
+.detail-snap-container [data-section-active]:has(dialog[open]) { opacity: 1 !important; filter: none !important; }
+.detail-snap-container [data-editorial-controls] { display: none; }
+.detail-snap-container [data-section-active]:has(dialog[open]) { transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .detail-snap-container[data-transitions-ready] [data-section-active] { opacity: 1; filter: none; transition: none; }
 }
 /* Vista previa sin capturar rueda/touch; foco de teclado habilita el mapa embebido. */
 .property-detail .detail-location-map iframe { pointer-events: none; }

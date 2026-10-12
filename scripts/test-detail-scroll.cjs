@@ -14,10 +14,10 @@ for (const file of ['apps/web/src/components/EditorialPresentation.module.css'])
   assert.match(current,/\.flow \.floating \.images, \.flow \.floating \.narrative \{\s*background-color: color-mix[^;]*65%, transparent/);
 }
 const editorialSource = fs.readFileSync(path.join(__dirname,'../apps/web/src/components/EditorialPresentation.tsx'),'utf8');
-assert.ok(!/setInterval|setTimeout/.test(editorialSource),'No debe haber avance editorial por tiempo');
+assert.ok(!/setInterval|setTimeout/.test(editorialSource.slice(editorialSource.indexOf('function EditorialFlow'))),'El avance de secciones sigue por scroll');
 const originalEditorial = execFileSync('git',['show','a7e53aa57a24919592d28e8cffb4957a83510e9e:apps/web/src/components/EditorialPresentation.tsx'],{encoding:'utf8'});
 for (const [start,end] of [['    {slide.hero','    <div className={styles.floating}>'],['    <div className={`${styles.narrative}','  </section>;']]) {
-  const fragment = text => { const normal=text.replace(/\r\n/g,'\n').replace('!flow && slide.hero','slide.hero');return normal.slice(normal.indexOf(start),normal.indexOf(end,normal.indexOf(start))); };
+  const fragment = text => { const normal=text.replace(/\r\n/g,'\n').replace('!flow && slide.hero','slide.hero').replace('data-editorial-narrative ','');return normal.slice(normal.indexOf(start),normal.indexOf(end,normal.indexOf(start))); };
   assert.equal(fragment(editorialSource),fragment(originalEditorial),'Fondos y narrativa originales conservados');
 }
 const { load, memory, req, setLocale, mockModule } = require('./test-property-access.cjs');
@@ -80,7 +80,7 @@ async function main() {
     assert.ok(find(tree,node=>node.type===FooterFlow));
     assert.ok(!html.includes('data-editorial-stage'));
     assert.ok(!html.includes('data-scene-body'));
-    assert.ok(html.includes('https://www.google.com/maps/search/?api=1'));
+    assert.ok(!html.includes('href="https://www.google.com/maps/search/?api=1'),'Sin enlace de ubicación debajo del mapa');
     assert.equal(gallery.props.slides.length,6);
     assert.deepEqual(gallery.props.slides.map(item=>item.order),[0,2,4,6,8,10]);
     assert.deepEqual(children.filter(node=>node.type===Presentation).map(node=>node.props.slides.map(slide=>slide.section)),[['destino'],['amenidades'],['habitaciones'],['lugar']]);
@@ -240,6 +240,54 @@ async function main() {
     assert.ok(!detailCss.includes('animation-timeline:'),'Sin animaciones complejas de fondo');
     assert.match(detailCss,/\.detail-independent \[data-editorial-flow\] > \[aria-hidden="true"\] > div \{[^}]*position: absolute;/);
     assert.match(detailCss,/\.detail-snap-container:has\(dialog\[open\]\) \{ overflow-y: hidden;/);
+    // Carrusel editorial real: autoplay, pausa, manual/swipe y reduced-motion.
+    let photoIndex=0,tick,clearTimer=false,carouselVisible,closedObserver=false,refCursor=0;
+    const carouselRefs=[],carouselNode={};
+    global.window.setInterval=fn=>{tick=fn;return 1;};global.window.clearInterval=()=>{clearTimer=true;};
+    global.IntersectionObserver=class {constructor(fn){carouselVisible=fn;}observe(){carouselVisible([{isIntersecting:true}]);}disconnect(){closedObserver=true;}};
+    effects=[];motion.matches=false;
+    mockModule('react',{...React,useState:()=>[photoIndex,value=>{photoIndex=typeof value==='function'?value(photoIndex):value;}],
+      useRef:value=>carouselRefs[refCursor++] ||= {current:value===null?carouselNode:value},useEffect:effect=>effects.push(effect)});
+    const Screen=load('apps/web/src/components/EditorialPresentation-carousel-test.tsx',editorialSource).EditorialScreen;
+    const carouselSlide={section:'habitaciones',description:'Text',photos:[{id:'a',url:'/a.jpg'},{id:'b',url:'/b.jpg'}]};
+    function renderCarousel(slide=carouselSlide){refCursor=0;return Screen({slide,flow:true});}
+    function carouselUI(){return find(renderCarousel(),node=>node.props?.['data-editorial-carousel']!==undefined);}
+    renderCarousel();const disposeCarousel=effects[0]();tick();assert.equal(photoIndex,1);
+    carouselUI().props.onMouseEnter();tick();assert.equal(photoIndex,1);
+    carouselUI().props.onMouseLeave();tick();assert.equal(photoIndex,0);
+    motion.matches=true;tick();assert.equal(photoIndex,0);motion.matches=false;
+    carouselUI().props.onKeyDown({key:'ArrowRight',preventDefault(){}});assert.equal(photoIndex,1);
+    carouselUI().props.onTouchStart({touches:[{clientX:100,clientY:100}]});
+    carouselUI().props.onTouchEnd({changedTouches:[{clientX:20,clientY:102}]});assert.equal(photoIndex,0);
+    const manualDot=find(renderCarousel(),node=>node.type==='button'&&node.props['aria-pressed']===false);
+    manualDot.props.onClick();assert.equal(photoIndex,1);
+    carouselVisible([{isIntersecting:false}]);tick();assert.equal(photoIndex,1);
+    disposeCarousel();assert.ok(clearTimer&&closedObserver);
+    const one=renderCarousel({...carouselSlide,photos:[carouselSlide.photos[0]]});
+    assert.ok(!find(one,node=>node.type==='button'),'Una foto no tiene controles');
+    assert.match(detailCss,/background: rgb\(255 255 255 \/ 20%\) !important;/);
+    assert.match(detailCss,/transition: opacity \.2s ease-out;/);
+    // Observer de secciones completas: selección, reduced-motion y fallback.
+    const transitionAttributes=new Map();
+    const transitionSections=Array.from({length:3},()=>({attributes:new Map(),setAttribute(name,value){this.attributes.set(name,value);},removeAttribute(name){this.attributes.delete(name);}}));
+    const transitionRoot={querySelectorAll:()=>transitionSections,setAttribute:(name,value)=>transitionAttributes.set(name,value),removeAttribute:name=>transitionAttributes.delete(name)};
+    let sectionObserver,observerOptions,observerClosed=false;
+    global.IntersectionObserver=class {constructor(fn,options){sectionObserver=fn;observerOptions=options;}observe(){}disconnect(){observerClosed=true;}};
+    effects=[];motion.matches=false;
+    mockModule('react',{...React,useRef:()=>({current:transitionRoot}),useEffect:effect=>effects.push(effect)});
+    const Transitions=load('apps/web/src/components/EditorialPresentation-transitions-test.tsx',editorialSource).DetailSectionTransitions;
+    const transitionUI=Transitions({className:'detail-snap-container',children:'Mounted'}),disposeTransitions=effects[0]();
+    assert.equal(transitionUI.props.children,'Mounted');assert.equal(observerOptions.root,transitionRoot);
+    function visibleSections(heights){sectionObserver(transitionSections.map((target,index)=>({target,isIntersecting:heights[index]>0,intersectionRect:{height:heights[index]}})));}
+    visibleSections([600,100,0]);assert.equal(transitionSections[0].attributes.get('data-section-active'),'true');
+    visibleSections([150,550,0]);assert.equal(transitionSections[0].attributes.get('data-section-active'),'false');assert.equal(transitionSections[1].attributes.get('data-section-active'),'true');
+    motion.matches=true;motion.listeners.get('change')();assert.equal(transitionAttributes.size,0);assert.ok(transitionSections.every(section=>section.attributes.size===0));
+    motion.matches=false;motion.listeners.get('change')();visibleSections([0,0,650]);assert.equal(transitionSections[2].attributes.get('data-section-active'),'true');
+    disposeTransitions();assert.ok(observerClosed);assert.equal(transitionAttributes.size,0);
+    global.IntersectionObserver=undefined;effects=[];Transitions({children:'SSR fallback'});const disposeFallback=effects[0]();assert.equal(transitionAttributes.size,0);disposeFallback();
+    assert.match(detailCss,/transition: opacity \.2s ease, filter \.2s ease;/);
+    assert.match(detailCss,/\[data-section-active="false"\] \{ opacity: \.3; filter: blur\(2px\);/);
+    assert.match(detailCss,/\[data-editorial-controls\] \{ display: none;/);
     // Fondo compartido real: sirve también a casas sin filas editoriales.
     let journeyScroll=0;
     const journeyHeights=[1200,800,1000],journeyNames=['gallery','location','reservation'];

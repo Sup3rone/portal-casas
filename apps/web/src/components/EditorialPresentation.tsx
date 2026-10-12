@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type HTMLAttributes } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { sceneGeometry, sceneProgress, type EditorialSlide } from '@/lib/editorial-presentation';
@@ -7,28 +7,90 @@ import styles from './EditorialPresentation.module.css';
 
 const titles = { destino: 'destino', amenidades: 'amenidades', habitaciones: 'habitaciones', lugar: 'enLugar' } as const;
 
-function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide; flow?: boolean }) {
+export function DetailSectionTransitions({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const container = root.current;
+    if (!container) return;
+    const sections = Array.from(container.querySelectorAll<HTMLElement>('[data-detail-section], [data-editorial-flow]'));
+    if (!sections.length) return;
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let observer: IntersectionObserver | undefined;
+    function configure() {
+      observer?.disconnect();
+      container!.removeAttribute('data-transitions-ready');
+      sections.forEach(section => section.removeAttribute('data-section-active'));
+      if (motion.matches || typeof IntersectionObserver === 'undefined') return;
+      const visible = new Map<Element, number>();
+      observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => visible.set(entry.target, entry.isIntersecting ? entry.intersectionRect.height : 0));
+        const active = sections.reduce((best, section) => (visible.get(section) || 0) > (visible.get(best) || 0) ? section : best, sections[0]);
+        sections.forEach(section => section.setAttribute('data-section-active', String(section === active)));
+        container!.setAttribute('data-transitions-ready', 'true');
+      }, { root: container, threshold: Array.from({ length: 21 }, (_, index) => index / 20) });
+      sections.forEach(section => observer!.observe(section));
+    }
+    configure();
+    motion.addEventListener('change', configure);
+    return () => {
+      observer?.disconnect(); motion.removeEventListener('change', configure);
+      container.removeAttribute('data-transitions-ready');
+      sections.forEach(section => section.removeAttribute('data-section-active'));
+    };
+  }, []);
+  return <div {...props} ref={root}>{children}</div>;
+}
+
+export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide; flow?: boolean }) {
   const t = useTranslations('details'), gallery = useTranslations('details.gallery');
   const count = slide.photos.length;
+  const [index, setIndex] = useState(0);
+  const active = index % Math.max(1, count);
+  const carousel = useRef<HTMLDivElement>(null);
+  const interaction = useRef({ hover: false, focus: false, touch: false });
+  const touch = useRef({ x: 0, y: 0 });
+  useEffect(() => {
+    if (count < 2 || typeof IntersectionObserver === 'undefined') return;
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let visible = false;
+    const observer = new IntersectionObserver(entries => { visible = entries.some(entry => entry.isIntersecting); }, { threshold: 0.15 });
+    if (carousel.current) observer.observe(carousel.current);
+    const timer = window.setInterval(() => {
+      if (visible && !motion.matches && !Object.values(interaction.current).some(Boolean)) setIndex(value => (value + 1) % count);
+    }, 4000);
+    return () => { window.clearInterval(timer); observer.disconnect(); };
+  }, [count]);
+  function move(delta: number) { setIndex(value => (value + delta + count) % count); }
+
   return <section className={styles.screen} data-editorial-slide={flow ? slide.section : undefined} aria-label={t(titles[slide.section])}>
     {!flow && slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
     <div className={styles.floating}>
     <div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: t(titles[slide.section]) })}
-      tabIndex={count > 1 ? 0 : undefined}
-      onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        event.preventDefault(); (event.currentTarget.closest<HTMLElement>('.detail-snap-container') || window).scrollBy({ top: (event.key === 'ArrowLeft' ? -1 : 1) * (flow ? event.currentTarget.closest('section')?.offsetHeight || window.innerHeight : window.innerHeight),
-          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-      } }}>
+      ref={carousel} tabIndex={count > 1 ? 0 : undefined} data-editorial-carousel
+      onMouseEnter={() => { interaction.current.hover = true; }} onMouseLeave={() => { interaction.current.hover = false; }}
+      onFocus={() => { interaction.current.focus = true; }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) interaction.current.focus = false; }}
+      onTouchStart={event => { const point = event.touches[0]; touch.current = { x: point.clientX, y: point.clientY }; interaction.current.touch = true; }}
+      onTouchEnd={event => {
+        const point = event.changedTouches[0], dx = point.clientX - touch.current.x, dy = point.clientY - touch.current.y;
+        if (count > 1 && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) move(dx < 0 ? 1 : -1);
+        interaction.current.touch = false;
+      }} onTouchCancel={() => { interaction.current.touch = false; }}
+      onKeyDown={event => { if (count > 1 && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) { event.preventDefault(); move(event.key === 'ArrowLeft' ? -1 : 1); } }}>
       <div className={styles.frames}>
         {slide.photos.map((photo, number) => {
-          return <div key={photo.id} data-editorial-photo={number} className={styles.photo}
-            style={{ opacity: count === 1 ? 1 : number === 0 ? 'calc(1 - var(--editorial-photo-progress, 0))' : 'var(--editorial-photo-progress, 0)' }} aria-hidden={number !== 0}>
+          return <div key={photo.id} data-carousel-photo={number} className={styles.photo}
+            style={{ opacity: number === active ? 1 : 0 }} aria-hidden={number !== active}>
             <Image src={photo.url} alt={gallery('foto', { number: number + 1 })} fill unoptimized sizes="(max-width: 1023px) 45vw, 25vw" className="object-cover" />
           </div>;
         })}
       </div>
+      {count > 1 && <div className={styles.controls} data-editorial-controls>
+        <button type="button" onClick={() => move(-1)} aria-label={gallery('anterior')}>‹</button>
+        <div className={styles.dots}>{slide.photos.map((photo, number) => <button key={photo.id} type="button" onClick={() => setIndex(number)} aria-label={gallery('irFoto', { number: number + 1 })} aria-pressed={number === active}><span /></button>)}</div>
+        <button type="button" onClick={() => move(1)} aria-label={gallery('siguiente')}>›</button>
+      </div>}
     </div>
-    <div className={`${styles.narrative} glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`}>
+    <div data-editorial-narrative className={`${styles.narrative} glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`}>
       <h2 className="break-words text-2xl font-light tracking-widest md:text-4xl">{t(titles[slide.section])}</h2>
       {slide.description && <div className={styles.description} tabIndex={0} aria-label={t('presentation.description', { section: t(titles[slide.section]) })}>
         <p className="whitespace-pre-wrap break-words leading-relaxed">{slide.description}</p></div>}
@@ -53,8 +115,8 @@ function EditorialFlow({ slides }: { slides: EditorialSlide[] }) {
     function update() {
       frame = 0;
       const rect = element!.getBoundingClientRect();
-      // Identifica el tramo visible sin imponer puntos de snap.
-      element!.setAttribute('data-scroll-free', String(rect.top < window.innerHeight && rect.bottom > 0));
+      // El margen del 10% permite ver el fade antes de salir por completo.
+      element!.setAttribute('data-scroll-free', String(rect.top < window.innerHeight * 0.9 && rect.bottom > window.innerHeight * 0.1));
       const distance = -rect.top + window.innerHeight * 0.35;
       const positions = screens.map(screen => ({ start: screen.getBoundingClientRect().top - rect.top, height: screen.offsetHeight }));
       const index = Math.max(0, positions.findLastIndex(position => distance >= position.start));

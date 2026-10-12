@@ -12,7 +12,7 @@ import CategorySection from '@/components/CategorySection';
 import LocationMap from '@/components/LocationMap';
 import PropertyShareButton from '@/components/PropertyShareButton';
 import Image from 'next/image';
-import EditorialPresentation from '@/components/EditorialPresentation';
+import EditorialPresentation, { DetailSectionTransitions } from '@/components/EditorialPresentation';
 import { editorialPresentation } from '@/lib/editorial-presentation';
 import { propertyBlocks } from '@/lib/occupation-calendar';
 import Reveal from '@/components/Reveal';
@@ -123,7 +123,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   return (
     <PropertyDetailScroll key={property.id}>
       {[...new Set([property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url, ...editorial.map(slide => slide.hero?.url), property.sectionBgMapa, property.sectionBgReserva].filter((url): url is string => Boolean(url)))].map(url => <link key={url} rel="preload" as="image" href={url} />)}
-      <div className="detail-editorial detail-independent detail-snap-container" data-detail-flow>
+      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container" data-detail-flow>
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <SectionBackground url={property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url} name="gallery" className="detail-screen px-3 py-8 md:px-6">
         <Reveal className={`relative mb-6 rounded-2xl ${property.sectionBgInicio ? 'detail-image-heading' : 'bg-black/30 dark:bg-black/50'} p-6 pr-16 text-center`}>
@@ -231,7 +231,6 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {hasMap && <div className="detail-location-map min-w-0">
             <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={property.city} />
-            <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${property.lat},${property.lng}`)}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-white/90 px-3 text-sm text-green-800 underline dark:bg-gray-900/90 dark:text-green-300">{t('details.mapTitle',{address:property.address})} ↗</a>
           </div>}
           {hasWarnings && <Reveal className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
             <h2 className="mb-4 text-2xl font-light tracking-wide">{t('details.advertencias')}</h2>
@@ -267,7 +266,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           </ReservationDatesProvider>
         </div>
       </SectionBackground>
-      </div>
+      </DetailSectionTransitions>
       {editorial.length > 0 && <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{t('details.reservar')}</a>}
       <DetailFooterFlow><Footer inDetail /></DetailFooterFlow>
     </PropertyDetailScroll>

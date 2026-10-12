@@ -2,6 +2,50 @@
 
 ## HECHO Y FUNCIONANDO
 
+### Detalle: fade ágil, mapa limpio y vidrio blanco en reserva (12 Oct 2026)
+
+Solo page.tsx y globals.css en la app. Fade de sección completa (opacity/filter) pasa de400ms a200ms; fondo editorial de350ms a200ms. Proximity, observer, autoplay y estructura intactos. Se elimina únicamente el enlace externo bajo LocationMap que mostraba «Ubicación — dirección ↗»; componente del mapa, iframe, borde/redondez, compartir y controles no se modifican.
+
+CSS exclusivo de detail-snap-container sustituye superficies oscuras de glass-panel/bg-white85 por blanco25%/blur10px/texto negro. Advertencias, calendario y formulario comparten ese tratamiento en ambos temas; narrativa/marco editorial blancos existentes conservados. La capa interna bg-white90/darkbg-gray90090 del formulario compacto se vuelve transparente mediante CSS sobre #reservar .glass-panel > form; así solo hay una superficie de vidrio, sin tocar MessageForm. Texto de inputs negro, etiquetas/grises legibles y errores rojo800.
+
+Calendario: disponible verde claro/texto verde800; seleccionado verde700/blanco; ocupado rojo claro/rojo800 y tachado existente; pasado gris y superficie blanca30%. CSS local conserva disabled/aria-pressed/rangos/leyenda y ninguna regla de selección/validación cambia. Navbar/↑/lightbox/mapa funcional/WhatsApp/panel/home/listado/footer intactos.
+
+Validación: 30scripts offline pasan, TypeScript limpio y lint0errores/8warnings previos. test-detail-scroll actualizado para200ms y ausencia del enlace bajo mapa. Browser local: paneles rgba255/25%, blur10px, texto negro, formulario interior transparente, sin enlace de ubicación;375px/es/en/fr/temas sin overflow. Rango13→15Oct sincroniza inputs; selección verde con texto blanco; fechas pasadas diferenciadas. Captura móvil francés/oscuro revisada, sin enviar consulta ni tocar BD.
+
+Cómo probar con pnpm dev: recorrer secciones en ambos sentidos (fade200ms), revisar mapa sin enlace inferior con flecha; advertencias/calendario/formulario blancos translúcidos, texto/input/error legibles; seleccionar rango y comprobar verde/blanco, pasado deshabilitado y ocupado rojo/tachado con propiedad que tenga reservas. Repetir375px/es/en/fr/claro/oscuro y reduced-motion. Supuestos: eliminar el enlace de Ubicación identifica el recuadro con flecha indicado; la tarjeta integrada de LocationMap y sus datos permanecen intactos; blanco25% para los paneles anteriormente oscuros, fondos de sección sin cambios.
+
+### Detalle: fade de sección completa — pendiente de aprobación visual (12 Oct 2026)
+
+Implementado para revisión; aprobación visual del cliente PENDIENTE según el pedido. Tres archivos de app: page.tsx, EditorialPresentation.tsx y globals.css. DetailSectionTransitions, exportado del archivo editorial existente, conserva exactamente el mismo div del contenedor y sus hijos SSR. IntersectionObserver con root detail-snap-container observa mosaico, cada envoltura editorial (incluye fondo + contenido), mapa y reserva; activa el bloque con mayor altura visible. No se eliminan/mueven secciones ni se modifica ningún componente funcional. Proximity y fondos propios se conservan.
+
+CSS: bloque activo opacity1/filter:none; inactivo opacity.3/blur2px; transición opacity400ms ease y filter400ms ease. Color de base gris900 para que la salida desvanecida oscurezca en vez de lavar hacia blanco. Contenido sigue montado en flujo, sin inert ni hidden; foco y lightbox mantienen el bloque nítido, modal sin transición para evitar interferir. Reduced-motion desactiva observer/atributos y muestra todo sin fade/blur; sin IntersectionObserver se mantiene el mismo fallback SSR visible.
+
+Carrusel actual conserva autoplay4s/fade de fotos/swipe/teclado y pausa durante interacción/fuera de viewport. CSS oculta la fila marcada data-editorial-controls: sin flechas ni puntos visibles/focusables. No se alteran imágenes seleccionadas ni fondo de sección. Sin observer, autoplay queda desactivado pero primera foto/manual permanecen. Narrativa: vidrio blanco20% y blur10px, texto negro en ambos temas; marco de fotos conserva su vidrio blanco anterior.
+
+Validación: 30scripts offline pasan, TypeScript limpio, lint0errores/8warnings previos. test-detail-scroll añade selección de sección por observer, cambio de activa, reduced-motion, fallback y cleanup; expectativas de vidrio20%/controles ocultos actualizadas. Browser/capturas: activa opacity1, otras.3/blur2, ningún control visible; siete bloques,375px sin overflow; es/en/fr/claro/oscuro; vidrio20% y negro. Capturas desktop/móvil presentadas al cliente para aprobación; NO marcar cerrada hasta recibirla.
+
+Cómo probar con pnpm dev: scroll entre mosaico/editoriales/mapa/reserva en ambos sentidos; observar fade400ms sin fusiones ni solapamiento; dejar visible un carrusel4s y confirmar rotación sin controles; swipe/teclado, cuadros blancos con negro; lightbox/Escape, foco/formulario y mapa siguen operables;375px/es/en/fr/ambos temas; reduced-motion todo visible sin fade/autoplay. Supuestos: activo = mayor altura visible, blur2px sutil, pause/reduced-motion del carrusel conservadas; tres archivos de implementación más tests y docs exigidos. Aprobación visual PENDIENTE.
+
+### Marco editorial de vidrio blanco (12 Oct 2026)
+
+EditorialPresentation.module.css cambia solo la superficie del marco de fotos (.images dentro de detail-snap-container): blanco35%, blur10px y texto/controles negros en ambos temas; ring blanco40% y puntos activos negros. El padding y la redondez existentes no cambian. El panel narrativo ya conserva texto negro y vidrio blanco del ajuste previo. No se modifican fondos grandes, estructura, tamaños/recortes de fotos ni lógica/autoplay del carrusel.
+
+Verificación: test-detail-scroll y test-editorial-presentation pasan. Navegador local/captura: cuatro marcos rgba(255,255,255,.35), blur10px y texto negro;375px/francés/oscuro sin overflow, mismo vidrio en claro. QA manual: pnpm dev, recorrer Destino/Amenidades/Habitaciones/Lugar y confirmar ausencia de marco oscuro; controles/puntos legibles y fotos intactas; repetir375px/es/en/fr/claro/oscuro.
+
+### Editoriales: fade, carrusel automático y vidrio blanco (12 Oct 2026)
+
+Ajuste exclusivo de presentación editorial: estructura/secciones, mapa/calendario/formulario/lightbox/navbar y demás páginas no cambian. Proximity se conserva. Fondos independientes entran opacity0→1 y salen1→0 mediante transition350ms ease-out; data-scroll-free se activa con margen10% del viewport para que el fade sea visible antes de salir por completo. Reduced-motion deja fondos visibles sin transición. No stage compartido ni cambios de imágenes asignadas.
+
+EditorialScreen de EditorialPresentation.tsx convierte las fotos seleccionadas en carrusel: capas absolutas con opacity binaria según índice, crossfade400ms, autoplay cada4000ms cuando visible. Pausa fuera del viewport y durante hover/foco/touch; no autoplay con prefers-reduced-motion. Flechas, puntos con aria-pressed/labels localizados, teclado←/→ y swipe horizontal (40px, mayor que movimiento vertical). Una foto no tiene timer ni controles. Se limpia intervalo/IntersectionObserver al desmontar. Las fotos ya no dependen del progreso de scroll para fusionarse; se reutilizan las PHOTOS de slide.photos sin ampliar la selección editorial existente (hasta2 fotos según modelo). No backend ni diccionarios nuevos: se reutilizan details.gallery.anterior/siguiente/irFoto y labels presentation enes/en/fr.
+
+El cuadro de narrativa tiene marcador data-editorial-narrative y CSS exclusivo: blanco22%, blur10px y texto negro en ambos temas, bordes/redondez existentes. Solo el texto pasa a vidrio blanco; cuadro de fotos conserva su superficie anterior. CSS reduced-motion muestra la foto activa del carrusel sin animación; navegación manual sigue disponible.
+
+Archivos: EditorialPresentation.tsx, EditorialPresentation.module.css, globals.css; tests en test-detail-scroll.cjs. Validación: 30scripts offline pasan; TypeScript limpio; lint0errores/8warnings previos. Tests reales con mocks de intervalo/observer cubren4s, pausa, invisible, reduced-motion, teclado, swipe, puntos, una foto y limpieza. Browser local/capturas: controles cambian foto y punto activo; vidrio rgba255/22%, blur10px, texto rgb0/0/0;375px sin overflow, es/en/fr y oscuro/claro.
+
+Cómo probar: pnpm dev → detalle; scroll entre editoriales en ambas direcciones, ver fade350ms con proximity. Sección con2fotos: observar4s sin hover/foco, comprobar rotación y dots; pausar hover/foco/touch, usar flechas/teclado/swipe; una foto sin controles. Comprobar narrativa blanca translúcida con texto negro,375px/es/en/fr/ambos temas. Reduced-motion: sin autoplay/fade, controles manuales funcionales; prueba táctil real pendiente de Emma.
+
+Supuestos: intervalo4s (dentro de3–5s), reutilizar la selección editorial actual (no todas las fotos de biblioteca), pausa automática durante interacción y autoplay solo visible. El título/narrativa mantienen sus traducciones/datos actuales.
+
 ### Detalle: cinco remates visuales/UX (12 Oct 2026)
 
 Sin cambio de estructura: se mantiene detail-snap-container y las siete secciones/fondos independientes. Se evalúa y conserva scroll-snap-type:y proximity: permite scroll libre entre paradas cercanas, frente a la atracción obligatoria de mandatory; no se puede garantizar una ausencia universal de jank sin perfilado en dispositivos reales. Los fondos se precargan desde page.tsx con link rel=preload as=image y URLs únicas, incluyendo hero de cada editorial; las imágenes permanecen montadas, sin cambiar src ni capas durante el scroll. Cada instancia editorial conserva un único hero y fondo con opacity1; cuando data-scroll-free=false se oculta, y al entrar aparece con transition opacity300ms ease-out (sin transición con reduced-motion). Ningún stage compartido nuevo.

@@ -336,3 +336,29 @@ QA UX 12 Oct: subida múltiple, navbar translúcida y editoriales en flujo libre
 - Navbar sigue deltas exterior/interior separados y conserva clases tras cambios de React; foco de teclado accesible.
 - Mosaico compacto según HEAD disponible (falta commit de título solicitado); paneles gris90082%/blur4px/texto claro, CSS exclusivo del detalle.
 - 30 scripts pasan, TypeScript limpio, lint0errores/8warnings previos. Pruebas de preload/proximity/navbar y QA local; checklist/supuestos en CONTEXTO.md.
+
+
+### Editoriales: fade + autoplay + vidrio blanco — 12 Oct 2026
+- Fondo propio por sección con fade350ms de entrada/salida y proximity intacto.
+- Carrusel fotos4s, puntos/flechas/teclado/swipe, pausa interacción/invisible; reduced-motion sin autoplay. Una foto sin controles.
+- Narrativas vidrio blanco22%/blur10px/texto negro; otros módulos intactos.
+- 30scripts offline pasan; TypeScript limpio; lint0errores/8warnings previos. Browser375px,es/en/fr,temas y navegación manual verificados; prueba táctil/reduced-motion visual pendientes.
+
+
+### Marco de fotos editorial: vidrio blanco — 12 Oct 2026
+- Solo CSS del marco: blanco35%/blur10px, texto y controles negros; radio/padding/carrusel/fondos intactos.
+- Dos tests de detalle/editoriales pasan; captura y DOM375px/francés/oscuro comprueban estilo y ausencia de overflow. Checklist en CONTEXTO.md.
+
+
+### Detalle: slide/fade de sección completa — 12 Oct 2026
+**Estado:** Implementado y validado; PENDIENTE de aprobación visual del cliente.
+- Observer local: activa opacity1, inactivas.3/blur2px, transición400ms; flujo/fondos propios/proximity intactos.
+- Carrusel4s sin flechas/puntos visibles; narrativa blanco20%/blur10px/texto negro. Foco/modal y reduced-motion/fallback protegidos.
+- Tres archivos de app + test-detail-scroll/docs. 30scripts pasan, TypeScript limpio, lint0errores/8warnings previos; capturas desktop/móvil375px/es/en/fr/temas presentadas.
+- No considerar cerrada hasta aprobación de las capturas; checklist/supuestos en CONTEXTO.md.
+
+
+### Detalle: transición200ms + vidrio blanco general — 12 Oct 2026
+- Fade de sección/fondo200ms, enlace «Ubicación ↗» bajo mapa retirado; mapa/comportamientos existentes sin cambios.
+- Advertencias/calendario/formulario blanco25%/blur10px/texto negro, formulario sin segunda capa opaca. Estados calendario legibles y lógica intacta.
+- 30scripts pasan, TypeScript limpio, lint0errores/8warnings previos;375px/es/en/fr/temas, rango13→15Oct y paneles verificados. Docs/checklist/supuestos en CONTEXTO.md.

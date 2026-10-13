@@ -346,17 +346,29 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 /* Experimento fullpage: misma estructura, una escena por gesto cuando cabe. */
 html:has(.detail-fullpage) { scroll-snap-type: y mandatory; }
+html:has(.detail-fullpage).detail-free-scroll { scroll-snap-type: none; }
 .detail-fullpage { height: auto; overflow: visible; scroll-behavior: smooth; }
-.detail-fullpage [data-section-active="true"] { animation: detail-fullpage-enter 300ms ease-out; }
+.detail-fullpage #reservar { height: auto !important; min-height: 0 !important; max-height: none; scroll-snap-align: start; scroll-margin-top: 0; padding-top: max(24px, calc(var(--detail-nav-height, 88px) + 12px)); }
+html.detail-free-scroll .detail-fullpage #reservar { scroll-snap-align: none; }
+/* Cierre propio de reserva: respiro dentro de su fondo, antes del footer normal. */
+.detail-fullpage #reservar { background-color: var(--background); padding-bottom: clamp(4rem, 8vh, 6rem); }
+.detail-fullpage #reservar [data-section-background="reservation"] img { object-fit: cover; object-position: center; }
+.detail-fullpage #reservar::after { content: ''; position: absolute; inset: auto 0 0; height: clamp(3rem, 6vh, 5rem); background: linear-gradient(to bottom, transparent, var(--background)); pointer-events: none; }
+
+.detail-fullpage [data-section-active] { animation: none; }
 .detail-fullpage [data-flow-background] { opacity: 1 !important; transition: none; }
 .detail-fullpage [data-section-active]:focus-within,
 .detail-fullpage [data-section-active]:has(dialog[open]) { animation: none; }
 .detail-fullpage.detail-snap-container [data-editorial-flow] :is([data-editorial-narrative], [data-editorial-carousel]).glass-panel { background: rgb(255 255 255 / 25%) !important; }
-.detail-fullpage .detail-location-map iframe { pointer-events: auto; }
-@keyframes detail-fullpage-enter { from { opacity: 0; } to { opacity: 1; } }
+.detail-fullpage .detail-location-map iframe { pointer-events: none; }
+.detail-fullpage .detail-location-map iframe:focus { pointer-events: auto; }
+/* Fondos locales originales siempre visibles; solo se desvanece la copia saliente. */
+.detail-fullpage [data-detail-section="location"] { min-height: 100vh !important; scroll-snap-align: start; }
+.detail-background-outgoing { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1; pointer-events: none; transition: opacity .3s ease-out; }
+.detail-fullpage [data-flow-background]::after { z-index: 1; }
+
 @media (width < 48rem) {
   .detail-fullpage { height: auto; overflow: visible; }
-  .detail-fullpage #reservar { min-height: 0 !important; scroll-snap-align: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .detail-fullpage { scroll-behavior: auto; }

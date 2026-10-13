@@ -96,13 +96,18 @@ export default function MessageForm({
   const { dates: { startDate, endDate }, setDates } = useReservationDates();
   const [guests, setGuests] = useState<number>(1);
   const [fields, setFields] = useState({ name: '', email: '', phone: '', body: '' });
+  const [touched, setTouched] = useState<Partial<Record<InquiryField, boolean>>>({});
+  const [submitted, setSubmitted] = useState(false);
   const [serverValidation, setServerValidation] = useState<{ signature: string; errors: InquiryErrors; maxGuests?: number } | null>(null);
   const hoy = inquiryToday();
   const input = { ...fields, guests, startDate, endDate };
   const signature = JSON.stringify(input);
   const localErrors = validateInquiry(input, { today: hoy, maxGuests, bookings: pricing.booked.map(booking => ({ startDate: booking.start, endDate: booking.end })) });
   const serverErrors = serverValidation?.signature === signature ? serverValidation : null;
-  const errors: InquiryErrors = { ...localErrors, ...serverErrors?.errors };
+  const validationErrors: InquiryErrors = { ...localErrors, ...serverErrors?.errors };
+  const errors: InquiryErrors = Object.fromEntries(inquiryFields
+    .filter(field => (submitted || touched[field]) && validationErrors[field])
+    .map(field => [field, validationErrors[field]]));
   function fieldError(field: InquiryField) {
     return errors[field] ? <p id={`${field}-error`} className="text-red-600 dark:text-red-400 text-xs tracking-wide" aria-live="polite">
       {t(`validation.${errors[field]}`, { maxGuests: serverErrors?.maxGuests ?? maxGuests })}
@@ -120,6 +125,7 @@ export default function MessageForm({
     : '';
 
   async function handleSubmit(formData: FormData) {
+    setSubmitted(true);
     const submitted = inquiryFromFormData(formData);
     const checked = validateInquiry(submitted, { today: inquiryToday(), maxGuests, bookings: pricing.booked.map(booking => ({ startDate: booking.start, endDate: booking.end })) });
     if (Object.keys(checked).length) return;
@@ -135,6 +141,7 @@ export default function MessageForm({
       }
       if (!res.ok) throw new Error(t('error'));
       setFields({ name: '', email: '', phone: '', body: '' });
+      setTouched({}); setSubmitted(false);
       setServerValidation(null);
       setStatus('success');
       setTimeout(() => setStatus('idle'), 3000);
@@ -157,6 +164,10 @@ export default function MessageForm({
           noValidate
           lang={formatoLocale}
           action={handleSubmit}
+          onBlur={event => {
+            const field = event.target.getAttribute('name') as InquiryField;
+            if (inquiryFields.includes(field)) setTouched(current => ({ ...current, [field]: true }));
+          }}
           className={compact ? formClasses + ' space-y-3' : 'space-y-6'}
         >
       <input type="hidden" name="propertyId" value={propertyId} />
@@ -318,7 +329,7 @@ export default function MessageForm({
         <p className="text-red-600 dark:text-red-400 text-xs tracking-wide">{t('error')}</p>
       )}
 
-      <SubmitButton disabled={Object.keys(errors).length > 0} />
+      <SubmitButton disabled={Object.keys(validationErrors).length > 0} />
     </form>
   );
 }

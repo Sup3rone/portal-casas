@@ -438,5 +438,30 @@
     "socialHint": "HTTPS URLs only. Leave the field empty to hide the social link.",
     "instagramLink": "Instagram (opens in a new tab)",
     "facebookLink": "Facebook (opens in a new tab)"
+  },
+  "panelLocation": {
+    "label": "Google Maps link",
+    "hint": "Paste a full URL with coordinates. Advanced editing lets you correct them. Clearing the link removes the location.",
+    "mapsInvalid": "Paste a valid HTTPS Google Maps link containing coordinates.",
+    "mapsShort": "This is a short link. Open it in Maps and copy the full URL from your browser address bar.",
+    "mapsRange": "Coordinates must be between −90 and 90 (latitude) and −180 and 180 (longitude).",
+    "detected": "✓ Location detected: {lat}, {lng}",
+    "view": "View in Maps",
+    "advanced": "Advanced coordinate editing",
+    "lat": "Latitude",
+    "lng": "Longitude"
+  },
+  "panelTranslation": {
+    "button": "Translate",
+    "translating": "Translating…",
+    "hint": "Uses MyMemory to translate empty fields only. Review the results and click Save to keep them.",
+    "prepared": "Languages filled: {filled}. Skipped because they already have content: {skipped}.",
+    "emptySource": "There is no source text to translate.",
+    "error": "Translation could not be completed. Your fields have not changed; try later or fill them manually.",
+    "quota": "Today’s available translation limit has been reached. Try later or fill manually; your text is preserved.",
+    "rateLimit": "Too many translation requests. Wait one minute and try again.",
+    "sourceChanged": "The source text changed during translation. No fields were filled; try again.",
+    "tooLong": "The text or translation exceeds the allowed limit. Shorten it or fill manually.",
+    "busy": "A translation is already running in this form. Wait for it to finish."
   }
 }

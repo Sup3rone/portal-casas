@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { PanelProperty } from '@/lib/panel-resources';
 import { panelRequest, inputClass, buttonClass } from './request';
+import MapsLocationInput from './MapsLocationInput';
+import TranslationDraftButton from './TranslationDraftButton';
 
 export default function PropertyForm({ property }: { property?: PanelProperty }) {
   const t = useTranslations('panel'), router = useRouter();
@@ -47,12 +49,13 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
         {texts.map(key => <label key={key} className="block text-sm">{t(`fields.${key}`)}
           {key.startsWith('desc') ? <textarea name={key} required rows={4} defaultValue={property?.[key]} className={inputClass} />
             : <input name={key} required defaultValue={property?.[key]} className={inputClass} />}
+          {(key.startsWith('desc') || key.startsWith('title')) && <TranslationDraftButton source={key.slice(-2).toLowerCase() as 'es' | 'en' | 'fr'} prefix={key.startsWith('desc') ? 'desc' : 'title'} disabled={busy} />}
         </label>)}
-        {numbers.map(key => <label key={key} className="block text-sm">{t(`fields.${key}`)}
+        <MapsLocationInput key={property?.id || 'new'} lat={property?.lat} lng={property?.lng} />
+        {numbers.filter(key => key !== 'lat' && key !== 'lng').map(key => <label key={key} className="block text-sm">{t(`fields.${key}`)}
           <input key={`${key}:${property?.[key] ?? ''}`} name={key} type="number" required={['maxGuests', 'bedrooms', 'bathrooms'].includes(key)}
-            min={key === 'maxGuests' ? 1 : key === 'lat' ? -90 : key === 'lng' ? -180 : 0}
-            max={key === 'lat' ? 90 : key === 'lng' ? 180 : undefined}
-            step={['bathrooms', 'lat', 'lng'].includes(key) ? 'any' : 1}
+            min={key === 'maxGuests' ? 1 : 0}
+            step={key === 'bathrooms' ? 'any' : 1}
             defaultValue={property?.[key] ?? (key === 'maxGuests' ? 1 : ['bedrooms', 'bathrooms'].includes(key) ? 0 : '')} className={inputClass} />
         </label>)}
       </div>

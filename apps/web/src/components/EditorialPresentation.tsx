@@ -14,6 +14,9 @@ export function attachFullpageNavigation(container: HTMLElement, motion: MediaQu
   function viewportTop() { return 0; }
   function indexAtTop() { return Math.max(0, sections.findLastIndex(section => section.getBoundingClientRect().top <= viewportTop() + 2)); }
   function naturalScroll(direction: number) {
+    if (document.documentElement.classList.contains('detail-free-scroll')) return true;
+    const reservation = sections.find(section => section.id === 'reservar');
+    if (reservation && reservation.getBoundingClientRect().top <= window.innerHeight / 2) return true;
     const section = sections[indexAtTop()];
     if (!section) return false;
     const rect = section.getBoundingClientRect(), height = window.innerHeight;
@@ -91,6 +94,49 @@ export function attachFullpageNavigation(container: HTMLElement, motion: MediaQu
   };
 }
 
+// Fundido local: nunca ocultar ni reemplazar la imagen original.
+export function attachLocalBackgroundFade(sections: HTMLElement[]) {
+  const sources = new Map<HTMLElement, { original: HTMLImageElement; image: HTMLImageElement; ready: Promise<boolean> }>();
+  sections.forEach(section => {
+    const original = section.querySelector<HTMLImageElement>('[data-section-background] img, [data-flow-background] img');
+    if (!original) return;
+    original.loading = 'eager';
+    const image = new window.Image(); image.alt = ''; image.src = original.currentSrc || original.src;
+    const ready = Promise.all([image.decode(), original.decode()]).then(() => true, () => false);
+    sources.set(section, { original, image, ready });
+  });
+  let current: HTMLElement | undefined, disposed = false, version = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined, finish: ReturnType<typeof setTimeout> | undefined;
+  let outgoing: HTMLImageElement | undefined, running = false, pending: HTMLElement | undefined;
+  async function change(section: HTMLElement) {
+    if (disposed || section === current) return;
+    if (running) { pending = section; return; }
+    const request = ++version, old = current && sources.get(current), next = sources.get(section);
+    if (!next || !old) { current = section; return; }
+    if (!(await next.ready) || !(await old.ready) || disposed || request !== version) return;
+    // Imagen decodificada anterior sobre la imagen nueva opaca, dentro de SU fondo.
+    outgoing = old.image;
+    outgoing.className = 'detail-background-outgoing'; outgoing.setAttribute('aria-hidden', 'true');
+    outgoing.style.opacity = '1'; outgoing.style.transition = 'none';
+    next.original.parentElement!.append(outgoing);
+    void outgoing.offsetWidth;
+    outgoing.style.transition = ''; outgoing.style.opacity = '0';
+    current = section; running = true;
+    finish = setTimeout(() => {
+      outgoing?.remove(); outgoing = undefined; running = false;
+      const queued = pending; pending = undefined; if (queued) void change(queued);
+    }, 300);
+  }
+  return {
+    update(section: HTMLElement) {
+      if (section === current && !running) return;
+      ++version; pending = undefined; clearTimeout(timer);
+      timer = setTimeout(() => { void change(section); }, 80);
+    },
+    dispose() { disposed = true; ++version; clearTimeout(timer); clearTimeout(finish); outgoing?.remove(); },
+  };
+}
+
 export function DetailSectionTransitions({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -105,15 +151,20 @@ export function DetailSectionTransitions({ children, ...props }: HTMLAttributes<
     if (!sections.length) return;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let observer: IntersectionObserver | undefined;
+    let fade: ReturnType<typeof attachLocalBackgroundFade> | undefined;
     function configure() {
-      observer?.disconnect();
+      observer?.disconnect(); fade?.dispose(); fade = undefined;
       container!.removeAttribute('data-transitions-ready');
       sections.forEach(section => section.removeAttribute('data-section-active'));
       if (motion.matches || typeof IntersectionObserver === 'undefined') return;
+      if (container!.matches?.('.detail-fullpage')) fade = attachLocalBackgroundFade(sections);
+      let previous: HTMLElement | undefined;
       const visible = new Map<Element, number>();
       observer = new IntersectionObserver(entries => {
         entries.forEach(entry => visible.set(entry.target, entry.isIntersecting ? entry.intersectionRect.height : 0));
         const active = sections.reduce((best, section) => (visible.get(section) || 0) > (visible.get(best) || 0) ? section : best, sections[0]);
+        if (active === previous || !(visible.get(active) || 0)) return;
+        previous = active; fade?.update(active);
         sections.forEach(section => section.setAttribute('data-section-active', String(section === active)));
         container!.setAttribute('data-transitions-ready', 'true');
       }, { root: null, threshold: Array.from({ length: 21 }, (_, index) => index / 20) });
@@ -123,7 +174,7 @@ export function DetailSectionTransitions({ children, ...props }: HTMLAttributes<
     motion.addEventListener('change', configure);
     window.addEventListener('resize', configure);
     return () => {
-      observer?.disconnect(); motion.removeEventListener('change', configure);
+      observer?.disconnect(); fade?.dispose(); motion.removeEventListener('change', configure);
       window.removeEventListener('resize', configure);
       container.removeAttribute('data-transitions-ready');
       sections.forEach(section => section.removeAttribute('data-section-active'));
@@ -155,8 +206,8 @@ export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide
 
   return <section className={styles.screen} data-editorial-slide={flow ? slide.section : undefined} aria-label={t(titles[slide.section])}>
     {!flow && slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
-    <div className={styles.floating}>
-    <div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: t(titles[slide.section]) })}
+    <div className={styles.floating} style={!count || !slide.description.trim() ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}>
+    {count > 0 && <div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: t(titles[slide.section]) })}
       ref={carousel} tabIndex={count > 1 ? 0 : undefined} data-editorial-carousel
       onMouseEnter={() => { interaction.current.hover = true; }} onMouseLeave={() => { interaction.current.hover = false; }}
       onFocus={() => { interaction.current.focus = true; }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) interaction.current.focus = false; }}
@@ -180,13 +231,13 @@ export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide
         <div className={styles.dots}>{slide.photos.map((photo, number) => <button key={photo.id} type="button" onClick={() => setIndex(number)} aria-label={gallery('irFoto', { number: number + 1 })} aria-pressed={number === active}><span /></button>)}</div>
         <button type="button" onClick={() => move(1)} aria-label={gallery('siguiente')}>›</button>
       </div>}
-    </div>
-    <div data-editorial-narrative className={`${styles.narrative} glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`}>
+    </div>}
+    {slide.description.trim() && <div data-editorial-narrative className={`${styles.narrative} glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`}>
       <h2 className="break-words text-2xl font-light tracking-widest md:text-4xl">{t(titles[slide.section])}</h2>
       {slide.description && <div className={styles.description} tabIndex={0} aria-label={t('presentation.description', { section: t(titles[slide.section]) })}>
         <p className="whitespace-pre-wrap break-words leading-relaxed">{slide.description}</p></div>}
 
-    </div>
+    </div>}
     </div>
   </section>;
 }

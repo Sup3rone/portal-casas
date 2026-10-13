@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { EditorialSection, SectionName } from '@/lib/property-sections';
 import { panelRequest, buttonClass, inputClass } from './request';
+import TranslationDraftButton from './TranslationDraftButton';
 
 type Photo = { id: string; url: string; order: number; type: string };
 const names = ['destino', 'amenidades', 'habitaciones', 'lugar', 'advertencias'] as const;
@@ -30,7 +31,7 @@ function SectionForm({ propertyId, name, value, photos }: { propertyId: string; 
   return <form onSubmit={submit} className="space-y-4 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
     <h3 className="text-xl font-semibold">{details(titles[name])}</h3>
     <div className="grid gap-4 md:grid-cols-3">{(['descriptionEs', 'descriptionEn', 'descriptionFr'] as const).map(field =>
-      <label key={field} className="block text-sm">{t(field)}<textarea name={field} maxLength={10000} rows={5} defaultValue={value?.[field] || ''} disabled={busy} className={inputClass} /></label>)}</div>
+      <label key={field} className="block text-sm">{t(field)}<textarea name={field} maxLength={10000} rows={5} defaultValue={value?.[field] || ''} disabled={busy} className={inputClass} /><TranslationDraftButton source={field.slice(-2).toLowerCase() as 'es' | 'en' | 'fr'} prefix="description" disabled={busy} /></label>)}</div>
     <label className="block text-sm">{t('hero')}<select value={hero} onChange={event => setHero(event.target.value)} disabled={busy} className={inputClass}>
       <option value="">{t('noImage')}</option>
       {hero && !selected && <option value={hero}>{t('unavailable')}</option>}

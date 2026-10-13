@@ -45,8 +45,8 @@ export default function CategorySection({
   if (!columnaImagen) return null;
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2">
-      {reverse ? <>{columnaImagen}{columnaInfo}</> : <>{columnaInfo}{columnaImagen}</>}
+    <section className={`grid grid-cols-1${items.length ? ' md:grid-cols-2' : ''}`}>
+      {items.length ? (reverse ? <>{columnaImagen}{columnaInfo}</> : <>{columnaInfo}{columnaImagen}</>) : columnaImagen}
     </section>
   );
 }

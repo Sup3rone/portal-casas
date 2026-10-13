@@ -1,5 +1,18 @@
 # Progreso del Proyecto - Portal-Casas
 
+### Anticipación bidireccional de fondos — 13 Oct 2026
+- Diagnóstico: DeferredDetailImage no revierte ready ni desmonta la imagen al salir del viewport; el Map del fundido ya retiene referencias fuertes a todos los fondos preparados durante la vida del detalle. No había descarte explícito de fondos visitados; el margen de una pantalla limitaba la preparación anticipada.
+- DeferredDetailImage amplía rootMargin a dos alturas de viewport en ambos sentidos y threshold a 0.35. EditorialPresentation conserva la preparación inicial de dos fondos y prepara las próximas dos secciones al activar la actual. Los visitados permanecen montados/referenciados hasta desmontar el detalle; no cambia el fundido, eager inicial, SEO ni componentes interactivos.
+- Test del fundido verifica anticipación de dos secciones y regreso sin nuevas decodificaciones; prueba de galería/SSR diferido pasa. QA manual pendiente: pnpm dev, Network con throttling y caché habilitada para medir regreso real; bajar hasta reserva y subir rápidamente hasta mosaico, luego bajar rápido. Repetir a375px. Comparar solicitudes iniciales con las que se agregan al avanzar; no deben precargarse todos los fondos lejanos. Disable cache sirve para observar la primera carga, no para evaluar reutilización de caché HTTP.
+- Supuestos: se eligen dos pantallas/dos secciones para limitar memoria/red. La app retiene referencias pero no puede garantizar que el navegador conserve bitmaps decodificados bajo presión de memoria. Sin IntersectionObserver se conserva el fallback de compatibilidad. Mejoría perceptible pendiente de QA visual/red real.
+
+
+### Carga progresiva de imágenes — 13 Oct 2026
+- Validación: TypeScript web limpio, pnpm lint 0 errores/6 warnings heredados; los 37 scripts offline pasan (36 en el recorrido completo y galería reejecutada tras ajustar la expectativa que incluye VIDEO). Pruebas ampliadas para carga SSR diferida, prioridad del mosaico y preparación de fondos actual/siguiente.
+- Cards lazy salvo primera card; dimensiones explícitas. Mosaico primera imagen eager/high y resto lazy. Fondos y fotos editoriales diferidos a una pantalla de anticipación; controlador prepara solo primeros dos y actual/siguiente, esperando decode para fundir sin ocultar originales.
+- Sin cambios de diseño, carrusel, SEO, subida, BD ni dependencias. unoptimized conservado hasta verificar optimizer en producción. QA Network/Performance/375px/temas pendiente de Emma; procedimiento en CONTEXTO.md.
+
+
 ### Mapa interactivo desde el primer toque — 13 Oct 2026
 - LocationMap.tsx aplica pointerEvents:auto al iframe, anulando las2reglas globales none del detalle/fullpage sin modificar globals.css ni el motor. Añade tabIndex0 y outline de foco interior visible (claro/oscuro). URL, dimensiones, compartir y coordenadas intactos.
 - Revisado el contenedor: no overlay invisible cubriendo el mapa; botón compartir ocupa su esquina. Navegador local FR: pointer-events computado auto sin foco; elementFromPoint en centro devuelve IFRAME. Scroll fuera del mapa avanzó3989→4610 y navbar se ocultó; ↑ respondió. Galería/share y detail-scroll pasan; comprobación offline del iframe confirma eventos/foco; TypeScript limpio, lint0errores/6warnings heredados.

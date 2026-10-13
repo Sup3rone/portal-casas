@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState, type ReactNode, type HTMLAttributes } from 'react';
 import Image from 'next/image';
+import DeferredDetailImage from './DeferredDetailImage';
 import { useTranslations } from 'next-intl';
 import { sceneGeometry, sceneProgress, type EditorialSlide } from '@/lib/editorial-presentation';
 import styles from './EditorialPresentation.module.css';
@@ -96,22 +97,37 @@ export function attachFullpageNavigation(container: HTMLElement, motion: MediaQu
 
 // Fundido local: nunca ocultar ni reemplazar la imagen original.
 export function attachLocalBackgroundFade(sections: HTMLElement[]) {
-  const sources = new Map<HTMLElement, { original: HTMLImageElement; image: HTMLImageElement; ready: Promise<boolean> }>();
-  sections.forEach(section => {
+  // Referencias fuertes a los fondos visitados hasta desmontar el detalle.
+  const sources = new Map<HTMLElement, { original: HTMLImageElement; image: HTMLImageElement; ready: Promise<boolean>; cleanup: () => void }>();
+  function prepare(section: HTMLElement) {
+    const existing = sources.get(section);
+    if (existing) return existing;
     const original = section.querySelector<HTMLImageElement>('[data-section-background] img, [data-flow-background] img');
     if (!original) return;
+    original.dispatchEvent?.(new Event('detail-image-load'));
     original.loading = 'eager';
-    const image = new window.Image(); image.alt = ''; image.src = original.currentSrc || original.src;
-    const ready = Promise.all([image.decode(), original.decode()]).then(() => true, () => false);
-    sources.set(section, { original, image, ready });
-  });
+    const url = original.dataset?.deferredSrc || original.currentSrc || original.src;
+    const image = new window.Image(); image.alt = ''; image.src = url;
+    const matchesSource = () => original.src === url || original.getAttribute?.('src') === url;
+    let cleanup = () => {};
+    const originalReady = original.dataset?.deferredSrc && !matchesSource()
+      ? new Promise<void>((resolve, reject) => {
+          const loaded = () => { if (!matchesSource()) return; cleanup(); original.decode().then(resolve, reject); };
+          const failed = () => { cleanup(); reject(new Error('background load')); };
+          cleanup = () => { original.removeEventListener('load', loaded); original.removeEventListener('error', failed); };
+          original.addEventListener('load', loaded); original.addEventListener('error', failed);
+        }) : original.decode();
+    const ready = Promise.all([image.decode(), originalReady]).then(() => true, () => false);
+    const source = { original, image, ready, cleanup }; sources.set(section, source); return source;
+  }
+  sections.slice(0, 2).forEach(prepare);
   let current: HTMLElement | undefined, disposed = false, version = 0;
   let timer: ReturnType<typeof setTimeout> | undefined, finish: ReturnType<typeof setTimeout> | undefined;
   let outgoing: HTMLImageElement | undefined, running = false, pending: HTMLElement | undefined;
   async function change(section: HTMLElement) {
     if (disposed || section === current) return;
     if (running) { pending = section; return; }
-    const request = ++version, old = current && sources.get(current), next = sources.get(section);
+    const request = ++version, old = current && prepare(current), next = prepare(section);
     if (!next || !old) { current = section; return; }
     if (!(await next.ready) || !(await old.ready) || disposed || request !== version) return;
     // Imagen decodificada anterior sobre la imagen nueva opaca, dentro de SU fondo.
@@ -129,11 +145,14 @@ export function attachLocalBackgroundFade(sections: HTMLElement[]) {
   }
   return {
     update(section: HTMLElement) {
+      prepare(section);
+      const index = sections.indexOf(section);
+      sections.slice(index + 1, index + 3).forEach(prepare);
       if (section === current && !running) return;
       ++version; pending = undefined; clearTimeout(timer);
       timer = setTimeout(() => { void change(section); }, 80);
     },
-    dispose() { disposed = true; ++version; clearTimeout(timer); clearTimeout(finish); outgoing?.remove(); },
+    dispose() { disposed = true; ++version; clearTimeout(timer); clearTimeout(finish); outgoing?.remove(); sources.forEach(source => source.cleanup()); },
   };
 }
 
@@ -222,7 +241,7 @@ export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide
         {slide.photos.map((photo, number) => {
           return <div key={photo.id} data-carousel-photo={number} className={styles.photo}
             style={{ opacity: number === active ? 1 : 0 }} aria-hidden={number !== active}>
-            <Image src={photo.url} alt={gallery('foto', { number: number + 1 })} fill unoptimized sizes="(max-width: 1023px) 45vw, 25vw" className="object-cover" />
+            <DeferredDetailImage key={photo.url} src={photo.url} alt={gallery('foto', { number: number + 1 })} fill unoptimized sizes="(max-width: 1023px) 45vw, 25vw" className="object-cover" />
           </div>;
         })}
       </div>
@@ -290,7 +309,7 @@ function EditorialFlow({ slides }: { slides: EditorialSlide[] }) {
   return <div ref={root} className={styles.flow} data-editorial-flow>
     <div className={styles.flowBackdrop} aria-hidden="true"><div className={styles.flowBackgroundStage}>
       {slides.map((slide,index)=><div key={slide.section} data-flow-background={slide.section} className={styles.backdrop} style={{ opacity: index === 0 ? 1 : 0 }}>
-        {slide.hero && <Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" />}
+        {slide.hero && <DeferredDetailImage key={slide.hero.url} src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" />}
       </div>)}
     </div></div>
     {slides.map(slide=><EditorialScreen key={slide.section} slide={slide} flow />)}

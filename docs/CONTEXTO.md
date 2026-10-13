@@ -1,5 +1,16 @@
 # Contexto — Portal Casas
 
+## Carga progresiva de imágenes — 13 Oct 2026
+
+Listado: PropertyCard declara width=400/height=300 (proporción de presentación; el recorte CSS existente se conserva), decoding async y lazy por defecto. /casas pasa eager únicamente a la primera card; las demás fotos visibles quedan sujetas al lazy nativo. PropertyGallery: primera miniatura eager/high; otras siete lazy, sin cambios de lightbox ni selección.
+
+DeferredDetailImage conserva next/image unoptimized y las clases/dimensiones existentes. El fondo inicial del mosaico carga desde SSR; otros fondos y fotos editoriales usan un pixel local hasta acercarse a una pantalla de distancia (IntersectionObserver con rootMargin en píxeles de window.innerHeight). Al habilitarse cargan eager para completar la anticipación. Sin IntersectionObserver se cargan normalmente por compatibilidad. No se alteran SEO/og:image, compresión, diseños ni tiempos del carrusel.
+
+EditorialPresentation prepara únicamente los primeros dos fondos al iniciar el controlador de fundido y el actual/siguiente al cambiar de sección. El fundido espera decode de ambas imágenes; conserva el original visible, agrupación de triggers y duración existente. Se aceptan URLs locales y absolutas. No se quita unoptimized porque no se dispone de verificación del optimizer Blob/AVIF/WebP en producción; no hay deploy ni cambios de next.config.
+
+QA manual pendiente: pnpm dev; Network con Disable cache y Slow 3G, identificar las URLs de fondos (no confundirlas con miniaturas). Abrir detalle: fondos lejanos no deben solicitarse de entrada; avanzar: siguiente fondo se solicita antes de entrar, sin flash. Revisar Performance/CLS, 375px, ambos temas, reduced-motion, recorrido rápido/lento ida/vuelta y lightbox. En /casas comprobar fotos iniciales visibles y carga progresiva al bajar. La anticipación no garantiza descargas completas ante red caída o salto instantáneo a una sección distante.
+
+
 ## Imagen social por defecto — 13 Oct 2026
 
 `public/og-default.jpg` reutiliza la foto real que ya estaba en el workspace (sala frente al mar). Con autorización del usuario se recortó centrada y redimensionó convencionalmente, sin IA:1200×630 JPEG calidad85,60658bytes (<300KB), sin cambiar componentes visuales. No está pendiente de Emma; sí pendiente de incluir en el commit/deploy que ella autorice.

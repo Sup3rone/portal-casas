@@ -56,7 +56,7 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
                 <><video src={slide.url} preload="metadata" muted playsInline aria-hidden="true" className="h-full w-full object-cover" />
                   <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-black/30 dark:bg-black/50 text-3xl text-white dark:text-gray-100">▶</span></>
               ) : (
-                <Image src={slide.url} alt={t('foto', { number: i + 1 })} fill unoptimized sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover" />
+                <Image src={slide.url} alt={t('foto', { number: i + 1 })} fill unoptimized loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : 'auto'} sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover" />
               )}
             </button>
           );

@@ -89,7 +89,7 @@ export default async function PropertiesPage({
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
           {propertyList.map((p, index) => (
             <Reveal key={p.id} delay={Math.min(index * 120, 600)} className="min-w-0">
-              <PropertyCard property={p} />
+              <PropertyCard property={p} eager={index === 0} />
             </Reveal>
           ))}
         </div>

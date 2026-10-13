@@ -7,17 +7,24 @@ const React = req('react');
 const { renderToStaticMarkup } = req('react-dom/server');
 const { NextIntlClientProvider } = req('next-intl');
 const Gallery = load('apps/web/src/components/PropertyGallery.tsx').default;
+const DeferredImage = load('apps/web/src/components/DeferredDetailImage.tsx').default;
 const Share = load('apps/web/src/components/PropertyShareButton.tsx');
 const Map = load('apps/web/src/components/LocationMap.tsx').default;
 const slides = Array.from({ length: 55 }, (_, i) => ({ url: '/images/photo-' + i + '.jpg', type: i === 7 ? 'VIDEO' : 'PHOTO' }));
 
 async function main() {
+  const deferred = renderToStaticMarkup(React.createElement(DeferredImage, { src: '/far-background.jpg', alt: '', fill: true, unoptimized: true }));
+  assert.ok(!deferred.includes(' src="/far-background.jpg"'), 'El fondo lejano no se descarga desde el HTML inicial');
+  const eager = renderToStaticMarkup(React.createElement(DeferredImage, { src: '/first-background.jpg', alt: '', fill: true, eager: true, unoptimized: true }));
+  assert.ok(eager.includes('src="/first-background.jpg"'), 'El primer fondo está disponible desde SSR');
   for (const locale of ['es', 'en', 'fr']) {
     setLocale(locale);
     const messages = JSON.parse(fs.readFileSync(path.join(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
     const wrap = child => React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } }, child);
     const html = renderToStaticMarkup(wrap(React.createElement(Gallery, { slides })));
     assert.equal((html.match(/aria-haspopup="dialog"/g) ?? []).length, 8);
+    assert.equal((html.match(/loading="eager"/g) ?? []).length, 1, 'Solo la primera miniatura carga eager');
+    assert.equal((html.match(/loading="lazy"/g) ?? []).length, 6, 'Las otras seis imágenes cargan lazy; el video conserva su flujo');
     assert.ok(!html.includes('+47'));
     assert.ok(!html.includes('/images/photo-8.jpg'));
     const short = renderToStaticMarkup(wrap(React.createElement(Gallery, { slides: slides.slice(0, 3) })));

@@ -18,7 +18,7 @@ type DbProperty = {
   media: { url: string; type: string }[];
 };
 
-export default function PropertyCard({ property }: { property: DbProperty }) {
+export default function PropertyCard({ property, eager = false }: { property: DbProperty; eager?: boolean }) {
   const locale = useLocale() as 'es' | 'en' | 'fr';
   const t = useTranslations('properties');
   const photos = property.media.filter(item => item.type === 'PHOTO').slice(0, 5);
@@ -39,6 +39,7 @@ export default function PropertyCard({ property }: { property: DbProperty }) {
               {photos.map((photo, index) => <img key={photo.url + index}
                 src={photo.url}
                 alt={title}
+                width={400} height={300} loading={eager ? 'eager' : 'lazy'} decoding="async"
                 className={`min-h-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 ${index === 0 && (photos.length === 3 || photos.length === 5) ? 'col-span-2' : ''}`}
               />)}
             </div>

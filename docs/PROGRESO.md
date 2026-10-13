@@ -362,3 +362,76 @@ QA UX 12 Oct: subida múltiple, navbar translúcida y editoriales en flujo libre
 - Fade de sección/fondo200ms, enlace «Ubicación ↗» bajo mapa retirado; mapa/comportamientos existentes sin cambios.
 - Advertencias/calendario/formulario blanco25%/blur10px/texto negro, formulario sin segunda capa opaca. Estados calendario legibles y lógica intacta.
 - 30scripts pasan, TypeScript limpio, lint0errores/8warnings previos;375px/es/en/fr/temas, rango13→15Oct y paneles verificados. Docs/checklist/supuestos en CONTEXTO.md.
+
+
+### Experimento detalle fullpage — 12 Oct 2026
+**Rama:** experimento/detalle-fullpage. **Estado:** Implementado/validado, PENDIENTE aprobación visual; sin merge ni deploy.
+- Una escena por gesto de rueda/swipe para contenido que cabe; inercia agrupada, entrada fade300ms (opciónA), fondos propios/vidrio25%, autoplay4s intacto.
+- Opción2 confirmada: reserva móvil y otras escenas largas con scroll natural, sin recortar contenido; footer normal. Mapa/input/lightbox protegidos.
+- 31scripts pasan (nuevo test-detail-fullpage), TypeScript limpio, lint0errores/8warnings previos. QA desktop720px y móvil812px: avances exactos de una escena; reserva/formulario/submit y lightbox verificados sin enviar datos.
+- Tres capturas en docs/qa para aprobación; checklist/supuestos en CONTEXTO.md. Merge manual solo tras aprobación de la clienta.
+
+
+### Doble scroll del detalle — implementado (12 Oct 2026)
+- Documento único en desktop/móvil; snap del html limitado al detalle, contenedor natural y reserva móvil con excepción aprobada.
+- Navbar/↑ escuchan window: visible al subir/al final, oculta al bajar. EditorialPresentation ajustado con autorización: navegación/observer/EditorialFlow usan documento; carrusel/fade/contenidos intactos.
+- Validación: 31 scripts offline pasan, TypeScript web limpio, lint0errores/8warnings previos; diff sin errores. Tests del detalle/fullpage actualizados para prohibir scroll interior y cubrir dirección/final/↑. QA visual de esta corrección pendiente de Emma; sin merge/deploy/BD. Checklist en CONTEXTO.md.
+
+
+### Final fullpage: reserva libre y footer — 12 Oct 2026
+- Reserva con altura natural y sin snap en todos los anchos; fondo, vidrio, componentes y provider intactos.
+- Snap del documento desactivado mientras reserva/footer están en el tramo libre; restaurado al volver a diapositivas. Rueda/swipe no interceptados en ese tramo.
+- Tests cubren CSS, desactivación/restauración/cleanup del snap, reserva libre incluso corta, swipe y navbar al final/↑. QA visual pendiente de Emma según checklist de CONTEXTO.md. Sin merge/deploy/BD.
+- Validación offline: 31 scripts pasan; TypeScript web limpio, ESLint0errores/8warnings previos y diff limpio.
+
+
+### Crossfade revertido — 12 Oct 2026
+- Revertido el último ajuste a petición del usuario: desaparecieron las imágenes de fondo. Restaurados fondos locales/fade/observer anteriores y retirado el test específico del intento descartado.
+- Scroll único, navbar/↑ y reserva/footer libres conservados. El parpadeo sigue pendiente; sin merge/deploy/BD.
+
+
+### Detalle: ocultar cuadros de plantilla/vacíos — 12 Oct 2026
+- Eliminadas listas fijas de servicios; galerías con Media real conservadas sin columna informativa vacía.
+- Descripción/destino requieren texto/ubicación no vacíos; editoriales sin datos válidos omitidas; fotos solas/texto solo no muestran cuadros vacíos. Advertencias con hero real o narrativa.
+- Tests render es/en/fr y estados parciales actualizados. Sin BD/backend/panel; fullpage/fondos/reserva/footer conservados. QA manual pendiente según CONTEXTO.md; criterio de completitud documentado como supuesto.
+
+
+### Mapa slide + fundido de fondos locales — 12 Oct 2026
+- Mapa explícito min100vh/align:start; umbral libre de reserva pasa de borde inferior a media pantalla para no liberar mapa completo.
+- Eliminado fade desde0 de sección completa. Copia saliente local decodificada encima de original entrante siempre opaca; no fondos globales/ocultamiento de imágenes. Fade300ms, agrupación80ms/serialización, fallback y reduced-motion.
+- Tests de mapa→reserva/footer/navbar actualizados y nuevo test-detail-background-fade para decode, originales visibles, disparos repetidos y cleanup. QA visual pendiente de Emma con checklist en CONTEXTO.md; sin merge/deploy/BD.
+- Validación: 32 scripts offline pasan, TypeScript limpio, ESLint0errores/6warnings previos y diff limpio.
+
+
+### Acceso a reserva corregido — 12 Oct 2026
+- Diagnóstico medido: gap mapa→reserva0px; fallo del ancla por falta de punto de snap (quedaba reserva705px abajo con mandatory activo).
+- Aterrizaje inicial de reserva con margin navbar+12px; tramo interior continúa libre. Enlaces#reservar/hash inicial liberan snap antes de desplazarse; fullpage no intercepta el tramo libre.
+- QA real desktop/375px/es/en/fr/claro/oscuro: CTA/PgDn/rueda/hash inicial llegan a calendario; footer e ↑ operables. Capturas en docs/qa/reserva-accesible-*.jpg. Swipe/teclado físico/barra manual pendientes de Emma.
+- 32 tests pasan, TypeScript limpio, lint0errores/6warnings previos y diff limpio. Sin BD/merge/deploy; calendario/formulario/WhatsApp/fundido intactos.
+
+
+### Captura de reserva: eliminar franja del mapa — 12 Oct 2026
+- Ancla a borde superior exacto, protección del navbar trasladada a padding interno de reserva; fondos intactos.
+- Ajuste de desplazamiento inicial cancelable ante interacción. Capturas desktop/móvil actualizadas y bordes verificados en navegador.
+- TypeScript/test-detail-scroll pasan, sin BD/merge/deploy.
+
+
+### Identidad de reserva + feedback inicial — 12 Oct 2026
+- Reutiliza sectionBgReserva propio; fallback color del tema, cover centrado, respiro inferior64–96px y gradiente al tema dentro de reserva. Footer/tramo libre/ancla intactos.
+- MessageForm sin errores iniciales: aparecen por blur/submit, aria-invalid acompaña mensajes; reglas/servidor/botón inválido deshabilitado conservados.
+- QA desktop y375px/fr: fondos distintos, errores0 iniciales/nombre inválido tras blur, cierre/footer alcanzables sin overflow. Capturas reserva-identidad-*.jpg y reserva-cierre-footer.jpg; sin envíos/BD/merge/deploy.
+- Tests de render es/en/fr actualizados, nuevo test-inquiry-feedback y checks CSS en detail-scroll. Checklist/supuestos en CONTEXTO.md.
+- Validación: 33 scripts offline pasan, TypeScript limpio, lint0errores/6warnings previos, diff limpio; QA inglés/oscuro confirma fondo y gradiente del tema.
+
+
+### Panel: ubicación Maps + borradores multiidioma — 12 Oct 2026 (traducción sustituida el13 Oct)
+- Link Maps reemplaza UX principal de coordenadas; parser estricto/feedback, manual avanzado, Ver en Maps; persiste lat/lng existentes, sin migración.
+- Opción B explícita: copiar sin traducir a idiomas vacíos + abrir traductor, sin sobrescribir ni guardar automáticamente. Disponible en títulos/descripciones de propiedad y narrativas de5secciones; labels es/en/fr.
+-34tests offline pasan, TypeScript limpio, lint0errores/6warnings previos y diff limpio. Nuevo test-panel-location-translation para formatos/rechazos/manual/borradores.
+- Persistencia/QA visual del panel requieren sesión real y prueba de Emma; no BD/red de traducción/merge/deploy. Criterios, evaluación API, checklist y supuestos en CONTEXTO.md.
+
+### Panel: traducción automática en la misma pantalla — 13 Oct 2026
+- Reemplaza apertura externa/copia de borradores: Traducir rellena destinos vacíos desde cualquier origen es/en/fr, avisa omisiones, conserva ediciones concurrentes y solo Guardar persiste. Carga y bloqueo de doble clic, sin cambiar parser Maps ni vistas públicas.
+- Nueva API /api/traducir con requirePropertyManager, validación400, MyMemory gratuito sin key, segmentos450bytes/timeout20s, cuota429 y fallos502. Rate limit básico en memoria:4peticiones de destino/usuario/minuto; presupuesto5000caracteres/día/instancia. Límites oficiales verificados; dos destinos consumen dos veces el texto.
+-35scripts offline pasan, TypeScript web limpio y lint0errores/6warnings preexistentes. Nuevo test-panel-translation cubre relleno, errores, ediciones previas/concurrentes, API/permisos, cuotas y doble clic. Prueba pública del protocolo HTTP200; sin textos de usuarios/propiedades enviados, sin BD/merge/deploy.
+- Pendiente de Emma: QA autenticado, calidad/revisión de traducciones y Guardar/reabrir en los tres idiomas. Procedimiento, límites y supuestos en CONTEXTO.md.

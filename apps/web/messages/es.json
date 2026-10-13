@@ -438,5 +438,30 @@
     "socialHint": "URLs HTTPS únicamente. Deja el campo vacío para ocultar la red social.",
     "instagramLink": "Instagram (abre en una pestaña nueva)",
     "facebookLink": "Facebook (abre en una pestaña nueva)"
+  },
+  "panelLocation": {
+    "label": "Link de Google Maps",
+    "hint": "Pega una URL completa con coordenadas. Puedes corregirlas en edición avanzada. Vaciar el enlace quita la ubicación.",
+    "mapsInvalid": "Pega un enlace HTTPS válido de Google Maps que contenga coordenadas.",
+    "mapsShort": "El enlace es corto. Ábrelo en Maps y copia la URL completa de la barra del navegador.",
+    "mapsRange": "Las coordenadas deben estar entre −90 y 90 (latitud) y −180 y 180 (longitud).",
+    "detected": "✓ Ubicación detectada: {lat}, {lng}",
+    "view": "Ver en Maps",
+    "advanced": "Edición avanzada de coordenadas",
+    "lat": "Latitud",
+    "lng": "Longitud"
+  },
+  "panelTranslation": {
+    "button": "Traducir",
+    "translating": "Traduciendo…",
+    "hint": "Traduce con MyMemory solo los campos vacíos. Revisa los resultados y pulsa Guardar para conservarlos.",
+    "prepared": "Idiomas rellenados: {filled}. Omitidos porque ya tienen contenido: {skipped}.",
+    "emptySource": "No hay texto de origen para traducir.",
+    "error": "No se pudo completar la traducción. Tus campos no se han modificado; intenta más tarde o rellena a mano.",
+    "quota": "Se alcanzó el límite de traducción disponible hoy. Intenta más tarde o rellena a mano; tus textos se conservan.",
+    "rateLimit": "Demasiadas solicitudes de traducción. Espera un minuto y vuelve a intentar.",
+    "sourceChanged": "El texto de origen cambió durante la traducción. No se rellenaron los campos; vuelve a intentar.",
+    "tooLong": "El texto o su traducción supera el límite permitido. Acórtalo o rellena a mano.",
+    "busy": "Ya hay una traducción en curso en este formulario. Espera a que termine."
   }
 }

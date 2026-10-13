@@ -70,8 +70,8 @@ async function main() {
     const messages = JSON.parse(fs.readFileSync(path.join(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
     const html = renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } },
       React.createElement(Provider, null, React.createElement(Form, { propertyId: 'pa', locale, maxGuests: 4, pricing: { base: { weekday: 100, weekend: 200 }, seasons: [], booked: [] } }))));
-    for (const key of ['nameLength', 'emailFormat', 'startRequired', 'endRequired', 'messageRequired']) assert.ok(html.includes(messages.details.form.validation[key]));
-    for (const field of ['name', 'email', 'startDate', 'endDate', 'body']) assert.ok(html.includes(`id="${field}-error"`));
+    for (const key of ['nameLength', 'emailFormat', 'startRequired', 'endRequired', 'messageRequired']) assert.ok(!html.includes(messages.details.form.validation[key]));
+    for (const field of ['name', 'email', 'startDate', 'endDate', 'body']) assert.ok(!html.includes(`id="${field}-error"`));
     assert.ok(/type="submit"[^>]*disabled/.test(html)); assert.ok(html.includes('max="4"'));
     assert.ok(html.includes(`name="lang" value="${locale}"`));
     const wrap = child => React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } }, child);
@@ -81,7 +81,7 @@ async function main() {
     for (const item of items) assert.ok(category.includes(item.label));
     assert.equal((category.match(/<li\b/g) ?? []).length, items.length);
     assert.equal(renderToStaticMarkup(wrap(React.createElement(CategorySection, { label: 'Empty', items, slides: [] }))), '');
-    console.log(locale + ': errores inline, accesibilidad, capacidad y botón deshabilitado OK');
+    console.log(locale + ': sin errores iniciales, accesibilidad, capacidad y botón deshabilitado OK');
   }
   memory.close();
   console.log('OK: reglas, API 400/201, idioma persistido es/en/fr, footer localizado y listado de categorías. Sin red.');

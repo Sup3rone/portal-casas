@@ -47,11 +47,20 @@ async function main() {
     const messages = JSON.parse(fs.readFileSync(path.join(__dirname,'../apps/web/messages/'+locale+'.json'),'utf8'));
     const render = async tree => { const stream = await renderToReadableStream(React.createElement(NextIntlClientProvider, {locale,messages,timeZone:'America/Mexico_City',onError(e){throw e;}},tree)); await stream.allReady; return new Response(stream).text(); };
     const params = Promise.resolve({locale,slug:'pa'});
+    memory.prepare('UPDATE "Property" SET descEs=?,descEn=?,descFr=?,address=?,city=?,lat=NULL,lng=NULL WHERE id=?')
+      .run('  ','','  ','  ','','pa');
+    const sparse = await render(await Page({params}));
+    assert.ok(!sparse.includes(messages.details.ofrece),'Sin lista genérica');
+    assert.ok(!sparse.includes(messages.details.destino),'Sin ubicación vacía');
+    assert.ok(!sparse.includes('max-w-2xl'),'Sin contenedor de descripción vacía');
+    assert.ok(sparse.includes('id="reservar"'),'Reserva permanece disponible');
+    memory.prepare('UPDATE "Property" SET descEs=?,descEn=?,descFr=?,address=?,city=?,lat=20,lng=-100 WHERE id=?')
+      .run('General ES','General EN','General FR','Address','City','pa');
     const empty = await render(await Page({params}));
     assert.ok(empty.includes('id="reservar"'));
     assert.ok(empty.includes('data-detail-section="gallery"'));
     assert.ok(!empty.includes('data-detail-section="fallback"'));
-    assert.ok(empty.includes(messages.details.ofrece)); // Fallback integrado en P1.
+    assert.ok(!empty.includes(messages.details.ofrece)); // No inventar servicios de la propiedad.
     assert.equal((empty.match(/<iframe/g)||[]).length,1); // Mapa movido, sin duplicar.
     assert.equal((empty.match(/data-editorial-panel=/g)||[]).length,0); assert.ok(!empty.includes('href="#reservar"'));
     memory.prepare('INSERT INTO "PropertySection" (propertyId,section) VALUES (?,?)').run('pa','destino');

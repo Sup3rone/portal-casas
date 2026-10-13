@@ -16,10 +16,8 @@ for (const file of ['apps/web/src/components/EditorialPresentation.module.css'])
 const editorialSource = fs.readFileSync(path.join(__dirname,'../apps/web/src/components/EditorialPresentation.tsx'),'utf8');
 assert.ok(!/setInterval|setTimeout/.test(editorialSource.slice(editorialSource.indexOf('function EditorialFlow'))),'El avance de secciones sigue por scroll');
 const originalEditorial = execFileSync('git',['show','a7e53aa57a24919592d28e8cffb4957a83510e9e:apps/web/src/components/EditorialPresentation.tsx'],{encoding:'utf8'});
-for (const [start,end] of [['    {slide.hero','    <div className={styles.floating}>'],['    <div className={`${styles.narrative}','  </section>;']]) {
-  const fragment = text => { const normal=text.replace(/\r\n/g,'\n').replace('!flow && slide.hero','slide.hero').replace('data-editorial-narrative ','');return normal.slice(normal.indexOf(start),normal.indexOf(end,normal.indexOf(start))); };
-  assert.equal(fragment(editorialSource),fragment(originalEditorial),'Fondos y narrativa originales conservados');
-}
+const backdrop = text => text.replace(/\r\n/g,'\n').replace('!flow && slide.hero','slide.hero').split('\n').find(line=>line.includes('{slide.hero && <div className={styles.backdrop}'));
+assert.equal(backdrop(editorialSource),backdrop(originalEditorial),'Fondo editorial conservado');
 const { load, memory, req, setLocale, mockModule } = require('./test-property-access.cjs');
 const React = req('react'), { renderToStaticMarkup, renderToReadableStream } = req('react-dom/server');
 const { NextIntlClientProvider } = req('next-intl');
@@ -109,19 +107,21 @@ async function main() {
     const listeners = new Map();
     return { listeners, addEventListener: (name, listener) => listeners.set(name,listener), removeEventListener: name => listeners.delete(name) };
   }
+  const documentClasses = new Set();
+  let reservationTop = 4000;
   const classes = new Set(), style = new Map(), buttonStyle = new Map();
-  const container = {...eventTarget(),scrollTop:0,style:{setProperty:(name,value)=>style.set(name,value)},scrollTo(options){this.lastScroll=options;}};
+  const container = {...eventTarget(),querySelector:()=>({getBoundingClientRect:()=>({top:reservationTop-global.window.scrollY})}),scrollTop:0,style:{setProperty:(name,value)=>style.set(name,value)},scrollTo(options){this.lastScroll=options;}};
   const navbar = {...eventTarget(),contains:()=>false,getBoundingClientRect:()=>({height:132}),classList:{contains:name=>classes.has(name),remove:(...names)=>names.forEach(name=>classes.delete(name)),toggle:(name,enabled)=>enabled?classes.add(name):classes.delete(name)}};
   const motion={...eventTarget(),matches:false};
   const viewport={...eventTarget(),height:800,offsetTop:0};
-  const native={window:global.window,document:global.document,ResizeObserver:global.ResizeObserver,MutationObserver:global.MutationObserver,IntersectionObserver:global.IntersectionObserver,requestAnimationFrame:global.requestAnimationFrame,cancelAnimationFrame:global.cancelAnimationFrame};
+  const native={window:global.window,document:global.document,Element:global.Element,ResizeObserver:global.ResizeObserver,MutationObserver:global.MutationObserver,IntersectionObserver:global.IntersectionObserver,requestAnimationFrame:global.requestAnimationFrame,cancelAnimationFrame:global.cancelAnimationFrame};
   let effects=[],refIndex=0,callback;
   mockModule('react',{...React,useRef:()=>({current:refIndex++===0?container:{style:{setProperty:(name,value)=>buttonStyle.set(name,value)}}}),useEffect:effect=>effects.push(effect)});
   mockModule('next-intl',{useTranslations:()=>key=>key});
   const Controller=load('apps/web/src/components/PropertyDetailScroll-interactive.tsx',fs.readFileSync(path.join(__dirname,'../apps/web/src/components/PropertyDetailScroll.tsx'),'utf8')).default;
   try {
     global.window={...eventTarget(),scrollY:0,scrollTo(options){this.lastScroll=options;},innerHeight:800,visualViewport:viewport,location:{hash:''},history:{replaceState(){}},matchMedia:()=>motion};
-    global.document={...eventTarget(),querySelector:()=>navbar,activeElement:null};
+    global.document={...eventTarget(),querySelector:()=>navbar,activeElement:null,documentElement:{scrollHeight:3000,classList:{add:name=>documentClasses.add(name),toggle:(name,on)=>on?documentClasses.add(name):documentClasses.delete(name),remove:name=>documentClasses.delete(name)}}};
     global.ResizeObserver=class {observe(){} disconnect(){this.closed=true;}};
     global.requestAnimationFrame=fn=>{callback=fn;return 1;}; global.cancelAnimationFrame=()=>{};
     const observedClasses=[];
@@ -140,18 +140,28 @@ async function main() {
     assert.equal(style.get('--detail-viewport-height'),'400px');assert.equal(buttonStyle.get('--detail-keyboard-offset'),'400px');
     cleanup();assert.equal(container.listeners.size,0);assert.ok(!classes.has('detail-nav-top'));assert.ok(!classes.has('detail-nav-hidden'));
     // Motor real con geometría medida, foco, diálogo y reduced-motion.
-    // Navbar/↑ sobre el nuevo scroller local, sin depender de window.scrollY.
-    const localScroller={...eventTarget(),scrollTop:0,scrollTo(options){this.lastScroll=options;}};
-    container.querySelector=()=>localScroller;global.window.scrollY=0;refIndex=0;effects=[];
-    const localUI=Controller({children:'SSR'}),disposeLocal=effects[0]();
-    localScroller.scrollTop=200;localScroller.listeners.get('scroll')();callback();assert.ok(classes.has('detail-nav-hidden'));
-    localScroller.scrollTop=100;localScroller.listeners.get('scroll')();callback();assert.ok(!classes.has('detail-nav-hidden'));
-    find(localUI,node=>node.type==='button').props.onClick();assert.equal(localScroller.lastScroll.top,0);
-    global.window.scrollY=100;global.window.listeners.get('scroll')();callback();
-    global.window.scrollY=50;localScroller.scrollTop=150;global.window.listeners.get('scroll')();callback();
-    assert.ok(!classes.has('detail-nav-hidden'),'Scroll externo hacia arriba no se cancela con scroll interno');
-    localScroller.scrollTop=250;localScroller.listeners.get('scroll')();callback();assert.ok(classes.has('detail-nav-hidden'));
-    disposeLocal();assert.equal(localScroller.listeners.size,0);delete container.querySelector;
+    // Solo window controla dirección, final y vuelta al inicio.
+    global.window.scrollY=0;refIndex=0;effects=[];
+    const documentUI=Controller({children:'SSR'}),disposeDocument=effects[0]();
+    scroll(200);assert.ok(classes.has('detail-nav-hidden'));
+    assert.ok(!documentClasses.has('detail-free-scroll'));
+    reservationTop=2500;
+    scroll(1700);assert.ok(!documentClasses.has('detail-free-scroll'),'Reserva al borde inferior no libera el mapa completo');
+    scroll(2200);assert.ok(!classes.has('detail-nav-hidden'),'Navbar visible al final');
+    assert.ok(documentClasses.has('detail-free-scroll'),'Reserva/footer desactivan snap obligatorio');
+    scroll(2100);assert.ok(!classes.has('detail-nav-hidden'),'Subir muestra navbar');
+    scroll(2150);assert.ok(classes.has('detail-nav-hidden'),'Volver a bajar oculta navbar');
+    find(documentUI,node=>node.type==='button').props.onClick();assert.equal(global.window.lastScroll.top,0);
+    class Anchor { closest(){return this;} }
+    global.Element=Anchor;
+    let anchorPrevented=false;
+    global.window.scrollY=0;
+    container.listeners.get('click')({button:0,target:new Anchor(),preventDefault(){anchorPrevented=true;}});
+    assert.ok(anchorPrevented);assert.ok(documentClasses.has('detail-free-scroll'),'Ancla libera snap antes del smooth');
+    assert.equal(global.window.lastScroll.top,2500,'Ancla aterriza al inicio exacto de la sección');
+    scroll(2500);assert.ok(documentClasses.has('detail-free-scroll'));
+    scroll(0);assert.ok(!documentClasses.has('detail-free-scroll'),'Volver arriba restaura snap');
+    disposeDocument();assert.equal(container.listeners.size,0);assert.equal(documentClasses.size,0);
     let distance=0,dialog=false;
     const panels=Array.from({length:4},(_,number)=>{
       const values=new Map(),attributes=new Map();
@@ -227,7 +237,13 @@ async function main() {
     flowDistance=heights.reduce((a,b)=>a+b,0);global.window.listeners.get('scroll')();callback();assert.equal(flowAttributes.get('data-scroll-free'),'false');
     disposeFlow();assert.equal(flowAttributes.size,0);assert.equal(global.window.listeners.size,0);global.window.innerHeight=800;
     const detailCss=fs.readFileSync(path.join(__dirname,'../apps/web/src/app/globals.css'),'utf8');
-    assert.match(detailCss,/\.detail-snap-container \{[^}]*height: 100vh;[^}]*overflow-y: scroll;[^}]*scroll-snap-type: y proximity;/);
+    assert.match(detailCss,/\.detail-snap-container \{[^}]*height: auto;[^}]*overflow: visible;/);
+    assert.match(detailCss,/\.detail-fullpage #reservar \{[^}]*height: auto !important;[^}]*min-height: 0 !important;[^}]*scroll-snap-align: start;/);
+    assert.match(detailCss,/scroll-margin-top: 0; padding-top: max\(24px, calc\(var\(--detail-nav-height, 88px\) \+ 12px\)\);/);
+    assert.match(detailCss,/background-color: var\(--background\); padding-bottom: clamp\(4rem, 8vh, 6rem\);/);
+    assert.match(detailCss,/background: linear-gradient\(to bottom, transparent, var\(--background\)\); pointer-events: none;/);
+    assert.match(detailCss,/detail-free-scroll \{ scroll-snap-type: none;/);
+    assert.match(detailCss,/html:has\(\.detail-fullpage\) \{ scroll-snap-type: y mandatory;/);
     assert.match(detailCss,/min-height: 100vh !important;[^}]*scroll-snap-align: start;[^}]*display: flex;/);
     assert.match(detailCss,/\.detail-independent > \.detail-screen,[\s\S]*?height: auto;[\s\S]*?min-height: 100vh !important;/);
     assert.match(detailCss,/\.detail-screen \{[^}]*min-height: 0;[^}]*padding: 1\.5rem 1rem;/);
@@ -239,7 +255,7 @@ async function main() {
     assert.ok(!detailCss.includes('.detail-journey'),'Sin fondo global compartido');
     assert.ok(!detailCss.includes('animation-timeline:'),'Sin animaciones complejas de fondo');
     assert.match(detailCss,/\.detail-independent \[data-editorial-flow\] > \[aria-hidden="true"\] > div \{[^}]*position: absolute;/);
-    assert.match(detailCss,/\.detail-snap-container:has\(dialog\[open\]\) \{ overflow-y: hidden;/);
+    assert.match(detailCss,/html:has\(\.property-detail dialog\[open\]\) \{ overflow: hidden;/);
     // Carrusel editorial real: autoplay, pausa, manual/swipe y reduced-motion.
     let photoIndex=0,tick,clearTimer=false,carouselVisible,closedObserver=false,refCursor=0;
     const carouselRefs=[],carouselNode={};
@@ -265,6 +281,11 @@ async function main() {
     disposeCarousel();assert.ok(clearTimer&&closedObserver);
     const one=renderCarousel({...carouselSlide,photos:[carouselSlide.photos[0]]});
     assert.ok(!find(one,node=>node.type==='button'),'Una foto no tiene controles');
+    const photoOnly=renderCarousel({...carouselSlide,description:'  '});
+    assert.ok(!find(photoOnly,node=>node.props?.['data-editorial-narrative']!==undefined),'Solo fotos: sin cuadro de narrativa vacío');
+    const textOnly=renderCarousel({...carouselSlide,photos:[]});
+    assert.ok(!find(textOnly,node=>node.props?.['data-editorial-carousel']!==undefined),'Solo texto: sin cuadro de fotos vacío');
+    assert.ok(find(textOnly,node=>node.props?.['data-editorial-narrative']!==undefined));
     assert.match(detailCss,/background: rgb\(255 255 255 \/ 20%\) !important;/);
     assert.match(detailCss,/transition: opacity \.2s ease-out;/);
     // Observer de secciones completas: selección, reduced-motion y fallback.
@@ -276,15 +297,15 @@ async function main() {
     effects=[];motion.matches=false;
     mockModule('react',{...React,useRef:()=>({current:transitionRoot}),useEffect:effect=>effects.push(effect)});
     const Transitions=load('apps/web/src/components/EditorialPresentation-transitions-test.tsx',editorialSource).DetailSectionTransitions;
-    const transitionUI=Transitions({className:'detail-snap-container',children:'Mounted'}),disposeTransitions=effects[0]();
-    assert.equal(transitionUI.props.children,'Mounted');assert.equal(observerOptions.root,transitionRoot);
+    const transitionUI=Transitions({className:'detail-snap-container',children:'Mounted'}),disposeTransitions=effects[1]();
+    assert.equal(transitionUI.props.children,'Mounted');assert.equal(observerOptions.root,null);
     function visibleSections(heights){sectionObserver(transitionSections.map((target,index)=>({target,isIntersecting:heights[index]>0,intersectionRect:{height:heights[index]}})));}
     visibleSections([600,100,0]);assert.equal(transitionSections[0].attributes.get('data-section-active'),'true');
     visibleSections([150,550,0]);assert.equal(transitionSections[0].attributes.get('data-section-active'),'false');assert.equal(transitionSections[1].attributes.get('data-section-active'),'true');
     motion.matches=true;motion.listeners.get('change')();assert.equal(transitionAttributes.size,0);assert.ok(transitionSections.every(section=>section.attributes.size===0));
     motion.matches=false;motion.listeners.get('change')();visibleSections([0,0,650]);assert.equal(transitionSections[2].attributes.get('data-section-active'),'true');
     disposeTransitions();assert.ok(observerClosed);assert.equal(transitionAttributes.size,0);
-    global.IntersectionObserver=undefined;effects=[];Transitions({children:'SSR fallback'});const disposeFallback=effects[0]();assert.equal(transitionAttributes.size,0);disposeFallback();
+    global.IntersectionObserver=undefined;effects=[];Transitions({children:'SSR fallback'});const disposeFallback=effects[1]();assert.equal(transitionAttributes.size,0);disposeFallback();
     assert.match(detailCss,/transition: opacity \.2s ease, filter \.2s ease;/);
     assert.match(detailCss,/\[data-section-active="false"\] \{ opacity: \.3; filter: blur\(2px\);/);
     assert.match(detailCss,/\[data-editorial-controls\] \{ display: none;/);

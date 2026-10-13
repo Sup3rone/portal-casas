@@ -1,7 +1,7 @@
 // Metadata y rutas SEO reales con Drizzle/SQLite en memoria; sin red ni Neon.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const { load, memory, setLocale } = require('./test-property-access.cjs');
+const { load, memory, setLocale, mockModule } = require('./test-property-access.cjs');
 process.env.PUBLIC_SITE_URL = 'https://portal.test';
 const seo = load('apps/web/src/lib/seo.ts');
 const detail = load('apps/web/src/app/[locale]/casas/[slug]/page.tsx');
@@ -30,12 +30,28 @@ async function main() {
     for(const [page,path] of [[home,''],[listing,'/casas']]) {
       const value = await page.generateMetadata({params:Promise.resolve({locale})});
       assert.ok(value.title); assert.ok(value.description); assert.equal(value.alternates.canonical,`https://portal.test/${locale}${path}`);
+      assert.deepEqual(value.openGraph.images,[{url:'https://portal.test/og-default.jpg',width:1200,height:630,alt:'Portal Casas'}]);
+      assert.deepEqual(value.twitter.images,['https://portal.test/og-default.jpg']);
     }
   }
   memory.prepare('UPDATE "Media" SET isCover=0 WHERE propertyId=?').run('pa');
   assert.equal((await detail.generateMetadata({params:Promise.resolve({locale:'es',slug:'pa'})})).openGraph.images[0].url,'https://portal.test/fotos/primera.jpg');
   const noPhoto = await detail.generateMetadata({params:Promise.resolve({locale:'es',slug:'pb'})});
-  assert.deepEqual(noPhoto.openGraph.images,[]); assert.deepEqual(noPhoto.twitter.images,[]);
+  assert.deepEqual(noPhoto.openGraph.images,[seo.defaultSocialImage()]); assert.deepEqual(noPhoto.twitter.images,['https://portal.test/og-default.jpg']);
+  mockModule('../globals.css', {});
+  const layoutMetadata = load('apps/web/src/app/[locale]/layout.tsx').metadata;
+  assert.deepEqual(layoutMetadata.openGraph.images,[seo.defaultSocialImage()]);
+  assert.deepEqual(layoutMetadata.twitter.images,['https://portal.test/og-default.jpg']);
+  const jpeg=fs.readFileSync('apps/web/public/og-default.jpg');
+  assert.ok(jpeg.length < 300000); assert.equal(jpeg.readUInt16BE(0),0xffd8);
+  let dimensions;
+  for(let offset=2;offset<jpeg.length;) {
+    while(jpeg[offset]===0xff) offset++;
+    const marker=jpeg[offset++], length=jpeg.readUInt16BE(offset);
+    if([0xc0,0xc1,0xc2].includes(marker)) { dimensions=[jpeg.readUInt16BE(offset+5),jpeg.readUInt16BE(offset+3)]; break; }
+    offset+=length;
+  }
+  assert.deepEqual(dimensions,[1200,630],'Imagen social real con las dimensiones requeridas');
   await assert.rejects(detail.generateMetadata({params:Promise.resolve({locale:'es',slug:'hidden'})}), /notFound/);
   await assert.rejects(detail.generateMetadata({params:Promise.resolve({locale:'es',slug:'missing'})}), /notFound/);
   const text = 'Una descripción completa que no debe terminar con una palabra cortada. '.repeat(6);

@@ -1,5 +1,13 @@
 # Contexto — Portal Casas
 
+## Imagen social por defecto — 13 Oct 2026
+
+`public/og-default.jpg` reutiliza la foto real que ya estaba en el workspace (sala frente al mar). Con autorización del usuario se recortó centrada y redimensionó convencionalmente, sin IA:1200×630 JPEG calidad85,60658bytes (<300KB), sin cambiar componentes visuales. No está pendiente de Emma; sí pendiente de incluir en el commit/deploy que ella autorice.
+
+`lib/seo.ts` exporta defaultSocialImage: URL absoluta desde PUBLIC_SITE_URL + /og-default.jpg, dimensiones y alt Portal Casas. Metadata base del layout añade OG/Twitter con esta imagen. pageMetadata también usa el fallback para home/listado y detalles sin PHOTO (sustituye la regla anterior de omitir imagen; necesaria porque OG de hijos sustituye el objeto del layout). Propiedades con foto siguen usando portada/orden existente; URLs absolutas Blob se conservan y solo rutas locales se resuelven contra PUBLIC_SITE_URL. No se cambia selección de fotos ni diseño.
+
+Pruebas: test-seo verifica home/listado/no-foto/layout, portada propia conservada, URL absoluta, JPEG real1200×630 y tamaño menor300000bytes. Emma configura PUBLIC_SITE_URL real en Vercel, luego comprueba código fuente de home/listado/detalle sin fotos, acceso público200 a /og-default.jpg y preview con link nuevo/depurador. Validación de previews externos pendiente; no hay deploy ni envíos a redes en esta tarea. Marcadores de conflicto preexistentes más abajo en este documento quedan señalados, sin resolverlos dentro de esta tarea.
+
 <<<<<<< HEAD
 ## SEO técnico — implementado 13 Oct 2026
 

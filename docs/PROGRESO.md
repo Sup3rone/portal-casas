@@ -1,5 +1,11 @@
 # Progreso del Proyecto - Portal-Casas
 
+### Imagen social por defecto — 13 Oct 2026
+- Foto existente reutilizada y ajustada sin IA con autorización: public/og-default.jpg1200×630,60658bytes. Lista, no pendiente de subir una imagen nueva.
+- Fallback OG/Twitter absoluto con PUBLIC_SITE_URL en layout y pageMetadata: home/listado/detalle sin fotos. Portada propia y URLs Blob se conservan.
+- test-seo cubre fallback/base/portada y dimensiones/peso reales. Sin cambios visuales/BD/deploy; previews y código fuente en producción pendientes de Emma. CONTEXTO mantiene señalados sus marcadores de conflicto preexistentes.
+- Validación:36scripts offline pasan, TypeScript limpio, ESLint0errores/6warnings heredados.
+
 Última actualización: 13 Oct 2026
 
 ### SEO técnico — 13 Oct 2026

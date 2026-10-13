@@ -7,11 +7,12 @@ import AuthProvider from '@/components/AuthProvider';
 import FooterContactsProvider from '@/components/FooterContactsProvider';
 import { readSiteContent } from '@/lib/site-content';
 import type { Metadata } from 'next';
-import { siteUrl } from '@/lib/seo';
+import { defaultSocialImage, siteUrl } from '@/lib/seo';
 
 export const metadata: Metadata = {
   metadataBase: siteUrl(), title: { default: 'Portal Casas', template: '%s | Portal Casas' },
-  openGraph: { siteName: 'Portal Casas', type: 'website' },
+  openGraph: { siteName: 'Portal Casas', type: 'website', images: [defaultSocialImage()] },
+  twitter: { card: 'summary_large_image', images: [defaultSocialImage().url] },
 };
 
 export function generateStaticParams() {

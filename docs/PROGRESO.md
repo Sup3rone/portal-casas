@@ -1,5 +1,15 @@
 # Progreso del Proyecto - Portal-Casas
 
+### Variante blanca de comparación — 13 Oct 2026
+- Únicamente valores del token del detalle: --glass-bg:rgba(255,255,255,0.35), --glass-text:#1a1a1a; --glass-blur sigue en10px. Sin cambios de reglas, bordes, tamaños, componentes ni otros tokens. Variante temporal para decisión visual de la clienta frente al oscuro anterior (negro60% y texto blanco); no se afirma contraste garantizado sobre todas las fotografías. Revisar con recarga del detalle, fotos claras/oscuras y ambos temas.
+
+### Vidrio oscuro centralizado del detalle — 13 Oct 2026
+- Solo colores CSS: globals.css define en .detail-snap-container --glass-bg:rgba(0,0,0,0.6), --glass-text:#fff, --glass-blur:10px; editoriales/fotos, advertencias, tarjetas del mosaico y reserva consumen esos tokens. EditorialPresentation.module.css elimina sus overrides blancos. Inputs oscuros, texto/placeholder claros, bordes/foco legibles y esquema nativo dark independiente del tema general; estados verde/rojo/selección del calendario conservados. Sin cambios de layout, fondos, componentes, animaciones ni negocio.
+- Contraste teórico conservador blanco sobre negro60% compuesto sobre blanco:5.74:1. QA manual pendiente sobre fotos claras/oscuras, es/en/fr,375px, ambos temas, reduced-motion; escribir en inputs, revisar fechas y estados del calendario. No se afirma certificación WCAG de toda la página por este cálculo.
+- Reversión centralizada: cambiar --glass-bg a rgba(255,255,255,0.25) recupera el fondo claro. Para recuperar también el texto negro y controles claros hay que cambiar --glass-text:#000, --glass-color-scheme:light y --glass-error:var(--color-red-800) en el MISMO bloque de tokens. Cambiar únicamente el fondo dejando texto blanco no garantiza legibilidad; no hace falta buscar reglas en varios archivos. La transparencia del vidrio blanco puede requerir revisión sobre fotos claras.
+- Se actualizan dos expectativas de test-detail-scroll que exigían los colores anteriores; se conservan pruebas de estructura/funcionalidad.
+
+
 ## Limitador básico de flujos públicos — 13 Oct 2026
 
 Validación offline: TypeScript web limpio; pnpm lint0errores/6warnings heredados; 38scripts test-*.cjs pasan. test-rate-limit cubre todos los umbrales, IP/flujo, expiración, idioma, Retry-After y endpoints públicos sin BD. QA con login/cookies/email reales y móvil pendiente de Emma.

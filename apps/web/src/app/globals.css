@@ -132,33 +132,49 @@ html:has(.property-detail dialog[open]) { overflow: hidden; }
   inset: 0;
   height: 100%;
 }
-/* Remates del detalle: mosaico original, vidrio blanco y fondos estáticos. */
+/* Tokens locales: no afectan el vidrio de home, listado ni panel. */
+.detail-snap-container {
+  --glass-bg: rgba(255, 255, 255, 0.35);
+  --glass-text: #1a1a1a;
+  --glass-blur: 10px;
+  --glass-error: var(--color-red-100);
+  --glass-color-scheme: dark;
+}
+/* Remates del detalle: mosaico original, vidrio y fondos estáticos. */
 .detail-independent [data-detail-section="gallery"] > .reveal.grid {
   max-width: calc(80rem - 3rem);
   margin-inline: auto;
 }
 .detail-snap-container :is(.glass-panel, .bg-white\/85) {
-  background-color: rgb(255 255 255 / 25%) !important;
-  color: var(--color-black) !important;
-  backdrop-filter: blur(10px) !important;
+  background-color: var(--glass-bg) !important;
+  color: var(--glass-text) !important;
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  --tw-ring-color: color-mix(in srgb, var(--glass-text) 40%, transparent);
 }
-.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600) { color: var(--color-black); }
-.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-500, .text-gray-400) { color: var(--color-gray-700); }
-/* Contraste del formulario y estados del calendario sobre vidrio claro. */
+.detail-snap-container :is(.glass-panel, .bg-white\/85) :is(.text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400) { color: var(--glass-text); }
+/* Contraste del formulario y estados del calendario sobre vidrio oscuro. */
 #reservar .glass-panel > form { background-color: transparent; backdrop-filter: none; }
-.detail-snap-container .glass-panel :is(input, textarea, select) { color: var(--color-black); }
-.detail-snap-container .glass-panel .text-red-600 { color: var(--color-red-800); }
+.detail-snap-container .glass-panel :is(input, textarea, select) {
+  color: var(--glass-text);
+  background-color: var(--glass-bg);
+  border-color: color-mix(in srgb, var(--glass-text) 65%, transparent);
+  color-scheme: var(--glass-color-scheme);
+}
+.detail-snap-container .glass-panel :is(input, textarea)::placeholder { color: var(--glass-text); opacity: .9; }
+.detail-snap-container .glass-panel button:not([aria-pressed]):hover { background-color: var(--glass-bg); }
+.detail-snap-container .glass-panel :is(input, textarea, select):focus { border-color: var(--glass-text); }
+.detail-snap-container .glass-panel .text-red-600 { color: var(--glass-error); }
 #reservar .glass-panel .bg-green-50 { background-color: var(--color-green-50); }
 #reservar .glass-panel .text-green-700 { color: var(--color-green-800); }
 #reservar .glass-panel .bg-red-100 { background-color: var(--color-red-100); }
 #reservar .glass-panel button[aria-pressed]:disabled { color: var(--color-gray-600); }
-#reservar .glass-panel button[aria-pressed]:disabled:not(.line-through) { background-color: rgb(255 255 255 / 30%); }
+#reservar .glass-panel button[aria-pressed]:disabled:not(.line-through) { background-color: var(--color-gray-200); }
 #reservar .glass-panel button[aria-pressed].line-through { color: var(--color-red-800); }
 #reservar .glass-panel button[aria-pressed="true"] { background-color: var(--color-green-700); color: var(--color-white); }
 .detail-snap-container [data-editorial-narrative].glass-panel {
-  background: rgb(255 255 255 / 20%) !important;
-  color: var(--color-black) !important;
-  backdrop-filter: blur(10px) !important;
+  background: var(--glass-bg) !important;
+  color: var(--glass-text) !important;
+  backdrop-filter: blur(var(--glass-blur)) !important;
 }
 .detail-independent [data-flow-background] {
   opacity: 0 !important;
@@ -359,7 +375,7 @@ html.detail-free-scroll .detail-fullpage #reservar { scroll-snap-align: none; }
 .detail-fullpage [data-flow-background] { opacity: 1 !important; transition: none; }
 .detail-fullpage [data-section-active]:focus-within,
 .detail-fullpage [data-section-active]:has(dialog[open]) { animation: none; }
-.detail-fullpage.detail-snap-container [data-editorial-flow] :is([data-editorial-narrative], [data-editorial-carousel]).glass-panel { background: rgb(255 255 255 / 25%) !important; }
+.detail-fullpage.detail-snap-container [data-editorial-flow] :is([data-editorial-narrative], [data-editorial-carousel]).glass-panel { background: var(--glass-bg) !important; }
 .detail-fullpage .detail-location-map iframe { pointer-events: none; }
 .detail-fullpage .detail-location-map iframe:focus { pointer-events: auto; }
 /* Fondos locales originales siempre visibles; solo se desvanece la copia saliente. */

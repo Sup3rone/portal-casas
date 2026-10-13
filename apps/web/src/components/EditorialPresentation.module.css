@@ -24,8 +24,8 @@
 .flow .floating { position: relative; inset: auto; width: 100%; max-width: 72rem; margin-inline: auto; overflow: visible; }
 .flow .description { max-height: none; overflow: visible; }
 .flow .floating .images, .flow .floating .narrative {
-  background-color: color-mix(in srgb, var(--color-gray-900) 65%, transparent);
-  color: var(--color-gray-100); backdrop-filter: blur(12px);
+  background-color: var(--glass-bg);
+  color: var(--glass-text); backdrop-filter: blur(var(--glass-blur));
 }
 :global(.dark) .images:focus-visible { outline-color: var(--color-green-400); }
 @media (max-width: 1023px) { .floating { inset: 1rem; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-content: center; } .frames { height: clamp(110px, 22svh, 220px); } .description { max-height: 27svh; } }
@@ -51,15 +51,15 @@
 .dots button { display: grid; place-items: center; }
 .dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--color-gray-400); }
 .dots button[aria-pressed="true"] span { background: var(--color-white); }
-/* Marco de fotos editorial: vidrio blanco, sin cambiar padding ni carrusel. */
+/* Marco editorial: mismos tokens que reserva, sin cambiar padding ni carrusel. */
 :global(.detail-snap-container) .floating .images:global(.glass-panel) {
-  background: rgb(255 255 255 / 35%) !important;
-  backdrop-filter: blur(10px) !important;
-  color: var(--color-black) !important;
-  --tw-ring-color: rgb(255 255 255 / 40%);
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  color: var(--glass-text) !important;
+  --tw-ring-color: color-mix(in srgb, var(--glass-text) 40%, transparent);
 }
 .images .dots span { background: var(--color-gray-600); }
-.images .dots button[aria-pressed="true"] span { background: var(--color-black); }
+.images .dots button[aria-pressed="true"] span { background: var(--glass-text); }
 @media (prefers-reduced-motion: reduce) {
   .frames:has([data-carousel-photo]) { height: clamp(140px, 30svh, 320px); }
   .frames [data-carousel-photo] { position: absolute; inset: 0; aspect-ratio: auto; opacity: 0 !important; }

@@ -11,7 +11,7 @@ for (const file of ['apps/web/src/components/EditorialPresentation.module.css'])
   }
   assert.match(current,/\.flow \.screen \{[^}]*height: auto;/);
   assert.match(current,/\.flow \.description \{ max-height: none; overflow: visible;/);
-  assert.match(current,/\.flow \.floating \.images, \.flow \.floating \.narrative \{\s*background-color: color-mix[^;]*65%, transparent/);
+  assert.match(current,/\.flow \.floating \.images, \.flow \.floating \.narrative \{\s*background-color: var\(--glass-bg\)/);
 }
 const editorialSource = fs.readFileSync(path.join(__dirname,'../apps/web/src/components/EditorialPresentation.tsx'),'utf8');
 assert.ok(!/setInterval|setTimeout/.test(editorialSource.slice(editorialSource.indexOf('function EditorialFlow'))),'El avance de secciones sigue por scroll');
@@ -286,7 +286,7 @@ async function main() {
     const textOnly=renderCarousel({...carouselSlide,photos:[]});
     assert.ok(!find(textOnly,node=>node.props?.['data-editorial-carousel']!==undefined),'Solo texto: sin cuadro de fotos vacío');
     assert.ok(find(textOnly,node=>node.props?.['data-editorial-narrative']!==undefined));
-    assert.match(detailCss,/background: rgb\(255 255 255 \/ 20%\) !important;/);
+    assert.match(detailCss,/background: var\(--glass-bg\) !important;/);
     assert.match(detailCss,/transition: opacity \.2s ease-out;/);
     // Observer de secciones completas: selección, reduced-motion y fallback.
     const transitionAttributes=new Map();

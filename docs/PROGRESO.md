@@ -1,5 +1,27 @@
 # Progreso del Proyecto - Portal-Casas
 
+## Cierre de auditoría 2026-10-13 — Todos los P1 completados
+
+- SEO: metadata localizada es/en/fr, canonical, hreflang, OG/Twitter; og-default.jpg (1200×630,60.7KB) con fallback absoluto vía PUBLIC_SITE_URL; sitemap.xml solo propiedades publicadas, además de home/listado; robots.txt excluye panel; páginas auth noindex.
+- Textos de prueba /fr: about_fr y narrativas de Del Canto ocultos. No se borraron de BD; al llenar contenido real desde el panel se muestra normalmente.
+- Mapa: pointer-events activo; habilitado para interacción desde el primer toque. QA manual de gestos/zoom pendiente según registro previo.
+- Performance imágenes: anticipación bidireccional de dos pantallas y próximas dos secciones (dentro del objetivo2–3), fondos visitados retenidos, primera imagen eager y dimensiones explícitas en cards. unoptimized se conserva hasta validar optimizer Vercel en producción.
+- Rate limiting: lib/rate-limit.ts por IP, memoria por instancia documentada; login10/15min, registro5/h, recuperación3/h, consultas5/15min. HTTP429 + Retry-After + mensajes localizados en transporte nuevo; formularios conservan campos. Traducción mantiene su limitador. Sin JS las Server Actions siguen limitadas, con la limitación HTTP documentada.
+- Diseño: vidrio centralizado en --glass-bg, --glass-text y --glass-blur. Decisión vigente al cierre: variante OSCURA; revertir a blanca mediante tokens. Nota de implementación: el CSS aún conserva la blanca35% de comparación solicitada antes; aplicar la oscura requiere una tarea posterior, no se cambia código aquí.
+- Detalle: cinco lecturas relacionadas en Promise.all tras obtener propiedad; metadata/render conservados.
+- Analytics: @vercel/analytics2.0.1 global; query_submitted y whatsapp_clicked instrumentados (Pro/Enterprise para reportarlos; Hobby solo tráfico básico). Pendiente Emma: activar Web Analytics en dashboard y deployment autorizado; si activa después, requiere siguiente deployment.
+- Cierre de implementación P1; no equivale a deploy ni a aprobación del QA de producción. Validación de esta jornada: TypeScript limpio, ESLint0errores/6warnings heredados y38scripts offline pasan; se reejecutan los tests en este cierre documental.
+
+## Deuda técnica abierta (P2)
+
+1. UX panel: mensajes de error específicos y controles táctiles ≥44px.
+2. Headers de seguridad y CSP compatible con Maps/Blob/video.
+3. Migrar pnpm.overrides a pnpm-workspace.yaml.
+4. Marcadores de conflicto en CONTEXTO.md: RESUELTOS en esta tarea; sale de deuda abierta, se conserva este punto para trazabilidad.
+5. Fullpage del detalle: PAUSADO; estado vigente y riesgos registrados en DETALLE-SCROLL-SNAP.md, sin desactivar código existente.
+6. Medir LCP/INP/CLS en producción cuando haya tráfico real.
+
+
 ## Web Analytics y conversiones — 13 Oct 2026
 
 Única dependencia añadida: @vercel/analytics2.0.1 en apps/web/package.json y pnpm-lock.yaml (sin actualizaciones ajenas). SiteAnalytics.tsx monta Analytics de @vercel/analytics/next desde layout locale para pageviews/navegación. beforeSend elimina query/hash de las URLs para no enviar tokens de recuperación ni parámetros personales. No se añaden cookies ni banner; referencia de privacidad: https://vercel.com/docs/analytics/privacy-policy. No se envían nombres, emails, teléfonos, mensajes ni fechas del formulario en eventos.

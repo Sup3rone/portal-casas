@@ -1,5 +1,12 @@
 # Detalle por escenas y footer en flujo normal
 
+## Estado vigente al cierre — 13 Oct 2026: FULLPAGE PAUSADO
+
+Pausado para nuevos rediseños; no se desactiva código en este cierre documental. Estado implementado: secciones independientes mosaico → editoriales con datos → mapa/notas si existen → reserva de altura natural → footer normal fuera del escenario. Scroll del documento, snap/avance fullpage solo donde cabe, liberación al entrar en reserva; #reservar y ↑, navbar, lightbox y estado de fechas/campos conservados. Las descripciones de stage compartido/scroll interno de capítulos antiguos son HISTÓRICAS y no sustituyen este estado vigente.
+
+Antes de reanudar: QA375px/teclado, reserva y footer alcanzables sin rebote, mapa que no atrape navegación, ausencia de flash, foco/estado al volver y reduced-motion; no sustituir ni eliminar componentes aprobados. Fondos diferidos/anticipados y lectura paralela ya implementados. Decisión de cierre: vidrio oscuro; CSS temporal en blanco35% de comparación, sin cambio de código en esta tarea. Métricas de rendimiento de producción pendientes.
+
+
 ## Fondos personalizados de inicio/mapa/reserva (09 Oct 2026)
 
 Los tres fondos se configuran desde el editor privado con SectionBackgroundEditor, debajo de la biblioteca. Selección exclusiva de PHOTO propia, miniaturas y Ninguna (blanco). Guardado independiente por sección mediante PATCH /api/properties/[id]; mismo gate dueño/admin, 404 propiedad ajena, 400 INVALID_BACKGROUND_PHOTO para VIDEO/URL ajena o fuera de biblioteca. La creación permanece NULL hasta tener biblioteca. No se ejecutó SQL/BD/Blob ni deploy.

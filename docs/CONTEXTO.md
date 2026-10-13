@@ -1,5 +1,10 @@
 # Contexto — Portal Casas
 
+## Estado vigente al cierre13-Oct-2026
+
+Todos los P1 de implementación cerrados; resumen y deuda P2 en PROGRESO.md. Fullpage PAUSADO para nuevos ajustes: el comportamiento existente permanece, documentado en DETALLE-SCROLL-SNAP.md. Decisión de diseño vigente: vidrio oscuro; el CSS sigue temporalmente en blanco35% de comparación, pendiente de aplicar la decisión en una tarea de código. Conflictos documentales resueltos conservando ambas secciones complementarias, con fallback SEO actualizado. No hay deploy, migraciones ni cambios de app en este cierre.
+
+
 ## Web Analytics y conversiones — 13 Oct 2026
 
 Única dependencia añadida: @vercel/analytics2.0.1 en apps/web/package.json y pnpm-lock.yaml (sin actualizaciones ajenas). SiteAnalytics.tsx monta Analytics de @vercel/analytics/next desde layout locale para pageviews/navegación. beforeSend elimina query/hash de las URLs para no enviar tokens de recuperación ni parámetros personales. No se añaden cookies ni banner; referencia de privacidad: https://vercel.com/docs/analytics/privacy-policy. No se envían nombres, emails, teléfonos, mensajes ni fechas del formulario en eventos.
@@ -54,16 +59,15 @@ QA manual pendiente: pnpm dev; Network con Disable cache y Slow 3G, identificar 
 
 `lib/seo.ts` exporta defaultSocialImage: URL absoluta desde PUBLIC_SITE_URL + /og-default.jpg, dimensiones y alt Portal Casas. Metadata base del layout añade OG/Twitter con esta imagen. pageMetadata también usa el fallback para home/listado y detalles sin PHOTO (sustituye la regla anterior de omitir imagen; necesaria porque OG de hijos sustituye el objeto del layout). Propiedades con foto siguen usando portada/orden existente; URLs absolutas Blob se conservan y solo rutas locales se resuelven contra PUBLIC_SITE_URL. No se cambia selección de fotos ni diseño.
 
-Pruebas: test-seo verifica home/listado/no-foto/layout, portada propia conservada, URL absoluta, JPEG real1200×630 y tamaño menor300000bytes. Emma configura PUBLIC_SITE_URL real en Vercel, luego comprueba código fuente de home/listado/detalle sin fotos, acceso público200 a /og-default.jpg y preview con link nuevo/depurador. Validación de previews externos pendiente; no hay deploy ni envíos a redes en esta tarea. Marcadores de conflicto preexistentes más abajo en este documento quedan señalados, sin resolverlos dentro de esta tarea.
+Pruebas: test-seo verifica home/listado/no-foto/layout, portada propia conservada, URL absoluta, JPEG real1200×630 y tamaño menor300000bytes. Emma configura PUBLIC_SITE_URL real en Vercel, luego comprueba código fuente de home/listado/detalle sin fotos, acceso público200 a /og-default.jpg y preview con link nuevo/depurador. Validación de previews externos pendiente; no hay deploy ni envíos a redes en esta tarea. Marcadores de conflicto resueltos manualmente en el cierre del13-Oct-2026, conservando SEO y auditoría.
 
-<<<<<<< HEAD
 ## SEO técnico — implementado 13 Oct 2026
 
 Implementado sobre main (9a0c7ee7), sin commit/merge/deploy ni operaciones en Neon. `PUBLIC_SITE_URL` es la única fuente del origen SEO: canonical, OG, metadataBase, sitemap y robots. `.env.example`: fallback http://localhost:3000; Emma debe configurar el origen HTTPS real en Vercel antes del deploy, sin ruta/query/credenciales. No se asume dominio. La variable histórica NEXT_PUBLIC_SITE_URL de recuperación de contraseña queda fuera de este cambio.
 
 `lib/seo.ts`: URLs absolutas, hreflang es/en/fr+x-default español y extracto hasta155 caracteres sin partir palabras. Layout locale: metadataBase, nombre Portal Casas y plantilla %s | Portal Casas. Home/listado: title/description del namespace seo en messages/es/en/fr.json; canonical sin filtros/query. `next.config.ts` desactiva streaming de metadata (htmlLimitedBots:/.*/) para entregar etiquetas en el head del HTML inicial incluso con User-Agent normal; puede aumentar TTFB al esperar lecturas de metadata, no medido.
 
-Detalle generateMetadata: títulos Property.titleEs/En/Fr (fallback español si vacío) y descripciones descEs/En/Fr del idioma actual. SiteContent Sobre nosotros no se usa para describir propiedades. `lib/seo-property.ts` comparte lectura de publicada con el render mediante React.cache por petición, sin caché persistente ni cambio de visibilidad. OG website/site_name/locale/url y Twitter summary_large_image: primera PHOTO de portada por coverOrder; fallback primera PHOTO por order/id; VIDEO excluido. Blob se conserva; rutas locales se convierten a absolutas. Sin foto se omite og:image/twitter:image, sin imagen social por defecto inventada.
+Detalle generateMetadata: títulos Property.titleEs/En/Fr (fallback español si vacío) y descripciones descEs/En/Fr del idioma actual. SiteContent Sobre nosotros no se usa para describir propiedades. `lib/seo-property.ts` comparte lectura de publicada con el render mediante React.cache por petición, sin caché persistente ni cambio de visibilidad. OG website/site_name/locale/url y Twitter summary_large_image: primera PHOTO de portada por coverOrder; fallback primera PHOTO por order/id; VIDEO excluido. Blob se conserva; rutas locales se convierten a absolutas. Sin foto se usa og-default.jpg con URL absoluta vía PUBLIC_SITE_URL.
 
 `app/sitemap.ts`: /sitemap.xml dinámico con home/listado + propiedades publicadas en3idiomas y alternates. **Property no tiene updatedAt**, solo createdAt: lastModified se omite para no publicar fecha falsa; no se cambia schema. `app/robots.ts`: Allow /; Disallow api/panel/admin/mi-cuenta/login/registro/recuperación, con y sin locale; sitemap absoluto. Metadata noindex/nofollow en panel/admin/mi-cuenta/autenticación, sin cambiar permisos/UI/actions. Canonical/hreflang se aplican a todas las páginas públicas indexables; no se anuncian equivalencias de recursos privados ni URLs con token. Robots no reemplaza autorización ni garantiza desindexar URLs previamente indexadas.
 
@@ -77,8 +81,7 @@ Prueba manual: configurar PUBLIC_SITE_URL en apps/web/.env.local, reiniciar `pnp
 
 ## Deuda técnica — auditoría 13 Oct 2026 (recomendaciones)
 
-Informe vigente: [AUDITORIA-2026-10-13.md](AUDITORIA-2026-10-13.md). Solo recomendaciones, sin implementación ni cambios en BD/deploy. Prioridades: contraste real del glass, entrega de imágenes, protección ante abuso público; luego metadata SEO, contenido de QA, fallback SSR de Reveal e interacción de mapa. Hay35tests offline pasando, TypeScript web limpio y lint0errores/6warnings heredados. LCP/INP/CLS, bundle/memoria y headers/analytics de producción no disponibles; no certificar rendimiento o WCAG sin medir. Fullpage actual usa snap del documento, gesto interceptado y reserva/footer libres: consolidación futura requiere preservar calendario/formulario/foco. No repetir tareas ya completas del historial. Cada mejora requiere aprobación posterior; alcance y reproducción en el informe.
->>>>>>> 1be76983c4852234964c5e06e0f4263e4a175b59
+Informe vigente: [AUDITORIA-2026-10-13.md](AUDITORIA-2026-10-13.md). Solo recomendaciones, sin implementación ni cambios en BD/deploy. Las prioridades P1 de implementación se cerraron el13-Oct-2026: SEO/imagen social, contenido FR, mapa, imágenes, limitador y Analytics; recepción Analytics/optimizer y métricas reales siguen pendientes. Hay38tests offline pasando, TypeScript web limpio y lint0errores/6warnings heredados. LCP/INP/CLS, bundle/memoria y headers/analytics de producción no disponibles; no certificar rendimiento o WCAG sin medir. Fullpage actual usa snap del documento, gesto interceptado y reserva/footer libres: consolidación futura requiere preservar calendario/formulario/foco. No repetir tareas ya completas del historial. Cada mejora requiere aprobación posterior; alcance y reproducción en el informe.
 
 ## HECHO Y FUNCIONANDO
 

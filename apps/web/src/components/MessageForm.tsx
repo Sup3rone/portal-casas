@@ -4,6 +4,7 @@
 import { useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useTranslations } from 'next-intl';
+import { track } from '@vercel/analytics';
 import { useReservationDates } from './ReservationDatesProvider';
 import { inquiryFields, inquiryFromFormData, inquiryToday, validateInquiry, type InquiryErrors, type InquiryField } from '@/lib/inquiry-validation';
 
@@ -79,12 +80,14 @@ function calcularCotizacion(startStr: string, endStr: string, pricing: PricingIn
 
 export default function MessageForm({
   propertyId,
+  propertySlug,
   locale,
   pricing,
   maxGuests,
   compact = false,
 }: {
   propertyId: string;
+  propertySlug?: string;
   locale: string;
   pricing: PricingInfo;
   maxGuests: number;
@@ -147,6 +150,10 @@ export default function MessageForm({
         return;
       }
       if (!res.ok) throw new Error(t('error'));
+      // Solo tras la confirmación del servidor; sin datos personales.
+      if (propertySlug) {
+        try { track('query_submitted', { property: propertySlug }); } catch { /* No alterar el envío confirmado. */ }
+      }
       setFields({ name: '', email: '', phone: '', body: '' });
       setTouched({}); setSubmitted(false);
       setServerValidation(null);

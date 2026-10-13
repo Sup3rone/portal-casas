@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
+import { PropertyWhatsAppLink } from '@/components/SiteAnalytics';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import ReservationDatesProvider from '@/components/ReservationDatesProvider';
 import PropertyGallery from '@/components/PropertyGallery';
@@ -195,9 +196,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
             {/* Columna derecha: Formulario */}
             <Reveal className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
-              <MessageForm propertyId={property.id} locale={locale} pricing={pricing} maxGuests={property.maxGuests} compact />
-              {property.whatsapp && <a href={`https://wa.me/${property.whatsapp}?text=${encodeURIComponent(t('details.whatsappMessage', { propertyName: title }))}`} target="_blank" rel="noopener noreferrer"
-                className="mt-3 block w-full rounded-lg border border-green-700 px-4 py-3 text-center text-sm font-medium text-green-800 transition hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-950">{t('details.whatsappButton')}</a>}
+              <MessageForm propertyId={property.id} propertySlug={property.slug} locale={locale} pricing={pricing} maxGuests={property.maxGuests} compact />
+              {property.whatsapp && <PropertyWhatsAppLink propertySlug={property.slug} href={`https://wa.me/${property.whatsapp}?text=${encodeURIComponent(t('details.whatsappMessage', { propertyName: title }))}`} target="_blank" rel="noopener noreferrer"
+                className="mt-3 block w-full rounded-lg border border-green-700 px-4 py-3 text-center text-sm font-medium text-green-800 transition hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-950">{t('details.whatsappButton')}</PropertyWhatsAppLink>}
             </Reveal>
           </div>
           </ReservationDatesProvider>

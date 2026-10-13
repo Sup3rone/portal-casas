@@ -4,6 +4,7 @@ import '../globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AuthProvider from '@/components/AuthProvider';
+import SiteAnalytics from '@/components/SiteAnalytics';
 import FooterContactsProvider from '@/components/FooterContactsProvider';
 import { readSiteContent } from '@/lib/site-content';
 import type { Metadata } from 'next';
@@ -36,6 +37,7 @@ export default async function LocaleLayout({
             <script src="/theme-init.js" async fetchPriority="high" />
           </head>
           <body>
+            <SiteAnalytics />
             <NextIntlClientProvider>
               <AuthProvider>
                 <FooterContactsProvider value={{ social_instagram, social_facebook, contact_whatsapp }}>

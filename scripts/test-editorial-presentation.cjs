@@ -2,7 +2,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { load, memory, req, setLocale } = require('./test-property-access.cjs');
+const { load, memory, req, setLocale, portal, mockModule } = require('./test-property-access.cjs');
 const { editorialPresentation: build, editorialProgress, editorialSwipe, sceneGeometry, sceneProgress } = load('apps/web/src/lib/editorial-presentation.ts');
 const geometry=sceneGeometry([1800,1000,600],1000);
 assert.deepEqual(geometry.map(scene=>scene.start),[0,1800,2800]);
@@ -35,6 +35,27 @@ assert.equal(editorialProgress(1000, 1000, 4, true).active, 1);
 assert.equal(editorialSwipe({x:100,y:100},{x:20,y:105}),1);
 assert.equal(editorialSwipe({x:100,y:100},{x:180,y:105}),-1);
 assert.equal(editorialSwipe({x:100,y:100},{x:120,y:200}),0);
+let activeReads = 0, maximumReads = 0;
+const dataTables = new Set(['Media','PropertySection','Booking','BlockDate','SeasonRate']);
+function delayedQuery(query, table) {
+  return new Proxy(query, { get(target, key) {
+    if (key === 'then') return (resolve, reject) => {
+      if (!dataTables.has(table)) return target.then(resolve, reject);
+      activeReads++; maximumReads = Math.max(maximumReads,activeReads);
+      return new Promise(done => setTimeout(done,40)).then(() => target).finally(() => activeReads--).then(resolve,reject);
+    };
+    const value = Reflect.get(target,key);
+    if (typeof value !== 'function') return value;
+    return (...args) => delayedQuery(value.apply(target,args), key === 'from' ? req('drizzle-orm/pg-core').getTableConfig(args[0]).name : table);
+  } });
+}
+mockModule('@portal/db', {...portal,db:new Proxy(portal.db,{get(target,key){
+  if(key==='select') return (...args)=>delayedQuery(target.select(...args));
+  return Reflect.get(target,key);
+}})});
+// El harness ya cargó este helper: añadir latencia también a su promesa real.
+const occupation = load('apps/web/src/lib/occupation-calendar.ts');
+mockModule('@/lib/occupation-calendar', {...occupation,propertyBlocks:(...args)=>delayedQuery(occupation.propertyBlocks(...args),'BlockDate')});
 const Page = load('apps/web/src/app/[locale]/casas/[slug]/page.tsx').default;
 memory.prepare('UPDATE "Property" SET titleEs=?,titleEn=?,titleFr=?,descEs=?,descEn=?,descFr=?,city=?,address=?,bedrooms=?,bathrooms=?,lat=?,lng=? WHERE id=?')
   .run('Casa','House','Maison','General ES','General EN','General FR','City','Address',2,1,20,-100,'pa');
@@ -49,7 +70,17 @@ async function main() {
     const params = Promise.resolve({locale,slug:'pa'});
     memory.prepare('UPDATE "Property" SET descEs=?,descEn=?,descFr=?,address=?,city=?,lat=NULL,lng=NULL WHERE id=?')
       .run('  ','','  ','  ','','pa');
-    const sparse = await render(await Page({params}));
+    maximumReads = 0;
+    const pageStart = performance.now();
+    const sparseTree = await Page({params});
+    const pageDuration = performance.now() - pageStart;
+    assert.equal(maximumReads,5,'Las cinco lecturas dependientes del ID se solapan');
+    if(locale === 'es') {
+      const baselineStart = performance.now();
+      for(const table of [portal.media,portal.propertySections,portal.bookings,portal.blockDates,portal.seasonRates]) await delayedQuery(portal.db.select().from(table),req('drizzle-orm/pg-core').getTableConfig(table).name);
+      console.log(`Medición offline con40ms artificiales por lectura: secuencial ${(performance.now()-baselineStart).toFixed(0)}ms; página paralela ${pageDuration.toFixed(0)}ms. No es TTFB real.`);
+    }
+    const sparse = await render(sparseTree);
     assert.ok(!sparse.includes(messages.details.ofrece),'Sin lista genérica');
     assert.ok(!sparse.includes(messages.details.destino),'Sin ubicación vacía');
     assert.ok(!sparse.includes('max-w-2xl'),'Sin contenedor de descripción vacía');

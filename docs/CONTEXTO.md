@@ -1,5 +1,16 @@
 # Contexto — Portal Casas
 
+## Lecturas paralelas del detalle — 13 Oct 2026
+
+Antes, PropertyPage esperaba params → traducciones → readPublishedProperty(slug) → Media (order asc) → PropertySection → Booking (startDate asc) → propertyBlocks/BlockDate → SeasonRate. Ahora espera params y propiedad publicada primero (notFound si no existe), luego Promise.all para Media, PropertySection, Booking, BlockDate, SeasonRate y traducciones. No hay escrituras ni dependencia entre esas cinco lecturas: todas filtran por el mismo property.id. Composición editorial/advertencias y pricing se calculan después; bloqueos se agregan a reservas en el mismo orden anterior. Si una lectura falla, Promise.all rechaza y la página sigue fallando, sin catch silencioso.
+
+Metadata intacta: readPublishedProperty sigue compartida mediante React.cache durante render; generateMetadata espera propiedad y después propertySeoPhoto (depende del id), sin cambios de consulta/selección OG. generateStaticParams intacta. Lecturas internas de componentes como Footer no se modifican. await params se conserva por la API de Next; no se añade ninguna espera para property.
+
+Test-editorial-presentation extiende la capa de datos existente con40ms de latencia artificial por lectura y verifica5lecturas solapadas, además de su render previo con datos escasos/completos en es/en/fr. Medición informal OFFLINE:262ms para5lecturas secuenciales frente a57ms para PropertyPage paralela; incluye overhead local y datos SQLite de prueba, no representa TTFB/Neon/producción. No se ha conectado ni medido BD real. No hay console.time/log nuevo en la app.
+
+QA real pendiente: pnpm dev; abrir una casa con pocos datos y otra completa; comprobar fotos/editoriales, mapa, fechas/formulario y view-source (title, canonical, OG idénticos). DevTools Network: registrar Waiting/TTFB del documento con caché desactivada y servidor caliente en varias visitas; comparar con el commit anterior usando el mismo entorno y propiedades, sin desplegar. No se promete una reducción concreta en producción: latencia y concurrencia de BD pueden variar.
+
+
 ## Limitador básico de flujos públicos — 13 Oct 2026
 
 lib/rate-limit.ts centraliza ventanas fijas por IP (primer valor x-forwarded-for): login10/15min, registro5/hora, recuperación3/hora, consultas5/15min. Sin servicios, dependencias ni migraciones. Map por instancia; limpieza de entradas expiradas cada minuto al recibir tráfico. Vercel puede distribuir peticiones entre funciones/instancias y reinicia memoria en despliegues: protección básica, NO cuota global garantizada. Si crece el sitio, evaluar almacenamiento compartido. Se confía en el header del proxy Vercel; fuera de él debe sanearlo el proxy y sin header se comparte el bucket unknown.

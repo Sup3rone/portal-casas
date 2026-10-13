@@ -39,17 +39,19 @@ export async function generateStaticParams() {
 
 export default async function PropertyPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
-  const t = await getTranslations({ locale });
-
   const property = await readPublishedProperty(slug);
   if (!property) notFound();
 
-  const mediaList = await db
-    .select()
-    .from(media)
-    .where(eq(media.propertyId, property.id))
-    .orderBy(media.order);
-  const sectionRows = await db.select().from(propertySections).where(eq(propertySections.propertyId, property.id));
+  const [mediaList, sectionRows, bookingRows, blockRows, rateRows, t] = await Promise.all([
+    db.select().from(media).where(eq(media.propertyId, property.id)).orderBy(media.order),
+    db.select().from(propertySections).where(eq(propertySections.propertyId, property.id)),
+    db.select({ startDate: bookings.startDate, endDate: bookings.endDate })
+      .from(bookings).where(eq(bookings.propertyId, property.id)).orderBy(bookings.startDate),
+    propertyBlocks(property.id),
+    db.select().from(seasonRates).where(eq(seasonRates.propertyId, property.id)),
+    getTranslations({ locale }),
+  ]);
+  bookingRows.push(...blockRows);
   const editorial = editorialPresentation(property.id, locale, sectionRows, mediaList)
     .map(slide => locale === 'fr' ? { ...slide, description: publicFrenchText(slide.description) } : slide)
     .filter(slide => Boolean(slide.description || slide.hero || slide.photos.length));
@@ -59,18 +61,6 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   const hasWarnings = Boolean(warningDescription || warningHero);
   const hasMap = property.lat != null && property.lng != null;
   const hasEditorial = (name: string) => editorial.some(slide => slide.section === name);
-
-  const bookingRows = await db
-    .select({ startDate: bookings.startDate, endDate: bookings.endDate })
-    .from(bookings)
-    .where(eq(bookings.propertyId, property.id))
-    .orderBy(bookings.startDate);
-  bookingRows.push(...await propertyBlocks(property.id));
-
-  const rateRows = await db
-    .select()
-    .from(seasonRates)
-    .where(eq(seasonRates.propertyId, property.id));
 
   const pricing = {
     base: { weekday: property.baseWeekdayPrice, weekend: property.baseWeekendPrice },

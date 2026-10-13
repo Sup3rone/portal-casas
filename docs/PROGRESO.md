@@ -1,5 +1,16 @@
 # Progreso del Proyecto - Portal-Casas
 
+## Lecturas paralelas del detalle — 13 Oct 2026
+
+Antes, PropertyPage esperaba params → traducciones → readPublishedProperty(slug) → Media (order asc) → PropertySection → Booking (startDate asc) → propertyBlocks/BlockDate → SeasonRate. Ahora espera params y propiedad publicada primero (notFound si no existe), luego Promise.all para Media, PropertySection, Booking, BlockDate, SeasonRate y traducciones. No hay escrituras ni dependencia entre esas cinco lecturas: todas filtran por el mismo property.id. Composición editorial/advertencias y pricing se calculan después; bloqueos se agregan a reservas en el mismo orden anterior. Si una lectura falla, Promise.all rechaza y la página sigue fallando, sin catch silencioso.
+
+Metadata intacta: readPublishedProperty sigue compartida mediante React.cache durante render; generateMetadata espera propiedad y después propertySeoPhoto (depende del id), sin cambios de consulta/selección OG. generateStaticParams intacta. Lecturas internas de componentes como Footer no se modifican. await params se conserva por la API de Next; no se añade ninguna espera para property.
+
+Test-editorial-presentation extiende la capa de datos existente con40ms de latencia artificial por lectura y verifica5lecturas solapadas, además de su render previo con datos escasos/completos en es/en/fr. Medición informal OFFLINE:262ms para5lecturas secuenciales frente a57ms para PropertyPage paralela; incluye overhead local y datos SQLite de prueba, no representa TTFB/Neon/producción. No se ha conectado ni medido BD real. No hay console.time/log nuevo en la app.
+
+QA real pendiente: pnpm dev; abrir una casa con pocos datos y otra completa; comprobar fotos/editoriales, mapa, fechas/formulario y view-source (title, canonical, OG idénticos). DevTools Network: registrar Waiting/TTFB del documento con caché desactivada y servidor caliente en varias visitas; comparar con el commit anterior usando el mismo entorno y propiedades, sin desplegar. No se promete una reducción concreta en producción: latencia y concurrencia de BD pueden variar.
+
+
 ### Variante blanca de comparación — 13 Oct 2026
 - Únicamente valores del token del detalle: --glass-bg:rgba(255,255,255,0.35), --glass-text:#1a1a1a; --glass-blur sigue en10px. Sin cambios de reglas, bordes, tamaños, componentes ni otros tokens. Variante temporal para decisión visual de la clienta frente al oscuro anterior (negro60% y texto blanco); no se afirma contraste garantizado sobre todas las fotografías. Revisar con recarga del detalle, fotos claras/oscuras y ambos temas.
 

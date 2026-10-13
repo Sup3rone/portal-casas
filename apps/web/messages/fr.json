@@ -445,5 +445,30 @@
     "socialHint": "URL HTTPS uniquement. Laissez le champ vide pour masquer le lien social.",
     "instagramLink": "Instagram (s’ouvre dans un nouvel onglet)",
     "facebookLink": "Facebook (s’ouvre dans un nouvel onglet)"
+  },
+  "panelLocation": {
+    "label": "Lien Google Maps",
+    "hint": "Collez une URL complète avec coordonnées. Vous pouvez les corriger dans les réglages avancés. Effacer le lien supprime la localisation.",
+    "mapsInvalid": "Collez un lien HTTPS Google Maps valide contenant des coordonnées.",
+    "mapsShort": "Ce lien est raccourci. Ouvrez-le dans Maps et copiez l’URL complète depuis la barre d’adresse du navigateur.",
+    "mapsRange": "Les coordonnées doivent être entre −90 et 90 (latitude) et −180 et 180 (longitude).",
+    "detected": "✓ Localisation détectée : {lat}, {lng}",
+    "view": "Voir dans Maps",
+    "advanced": "Modification avancée des coordonnées",
+    "lat": "Latitude",
+    "lng": "Longitude"
+  },
+  "panelTranslation": {
+    "button": "Traduire",
+    "translating": "Traduction…",
+    "hint": "Utilise MyMemory pour traduire uniquement les champs vides. Vérifiez les résultats puis cliquez sur Enregistrer.",
+    "prepared": "Langues remplies : {filled}. Ignorées car déjà remplies : {skipped}.",
+    "emptySource": "Il n’y a aucun texte source à traduire.",
+    "error": "La traduction n’a pas pu être terminée. Vos champs restent inchangés ; réessayez plus tard ou remplissez-les manuellement.",
+    "quota": "La limite de traduction disponible aujourd’hui est atteinte. Réessayez plus tard ou remplissez manuellement ; vos textes sont conservés.",
+    "rateLimit": "Trop de demandes de traduction. Attendez une minute puis réessayez.",
+    "sourceChanged": "Le texte source a changé pendant la traduction. Aucun champ n’a été rempli ; réessayez.",
+    "tooLong": "Le texte ou sa traduction dépasse la limite autorisée. Raccourcissez-le ou remplissez manuellement.",
+    "busy": "Une traduction est déjà en cours dans ce formulaire. Attendez sa fin."
   }
 }

@@ -1,6 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { panelManager } from '@/lib/panel-server';
+import { privateMetadata } from '@/lib/seo';
+
+export const metadata = privateMetadata;
 
 export const dynamic = 'force-dynamic';
 export default async function PanelLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {

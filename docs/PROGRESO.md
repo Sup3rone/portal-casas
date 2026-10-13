@@ -1,6 +1,13 @@
 # Progreso del Proyecto - Portal-Casas
 
-Última actualización: 05 Oct 2026
+Última actualización: 13 Oct 2026
+
+### SEO técnico — 13 Oct 2026
+- Metadata localizada home/listado/detalle, plantilla Portal Casas, canonical/hreflang es/en/fr+x-default, OG/Twitter con primera portada PHOTO y fallback; sin foto se omite imagen.
+- Sitemap dinámico solo publicadas×3 + home/listado×3; robots excluye API/privadas por locale; noindex en panel/admin/cuenta/autenticación. Sin cambios de permisos ni componentes visuales.
+- PUBLIC_SITE_URL en .env.example; Emma configura dominio HTTPS real en Vercel. Metadata bloqueante en HTML inicial mediante htmlLimitedBots; posible aumento TTFB documentado.
+-31scripts offline pasan, TypeScript web limpio, lint0errores/8warnings heredados. Nuevo test-seo; sin Neon/migraciones/commit/deploy.
+- Pendiente: QA de HTML crudo/sitemap/robots/previews por Emma. lastModified omitido porque Property no tiene updatedAt; JSON-LD bonus diferido hasta definir clasificación/tarifas anuales. Detalle en CONTEXTO.md.
 
 ---
 

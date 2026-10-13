@@ -6,6 +6,13 @@ import Footer from '@/components/Footer';
 import AuthProvider from '@/components/AuthProvider';
 import FooterContactsProvider from '@/components/FooterContactsProvider';
 import { readSiteContent } from '@/lib/site-content';
+import type { Metadata } from 'next';
+import { siteUrl } from '@/lib/seo';
+
+export const metadata: Metadata = {
+  metadataBase: siteUrl(), title: { default: 'Portal Casas', template: '%s | Portal Casas' },
+  openGraph: { siteName: 'Portal Casas', type: 'website' },
+};
 
 export function generateStaticParams() {
   return [{ locale: 'es' }, { locale: 'en' }, { locale: 'fr' }];

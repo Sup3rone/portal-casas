@@ -1,6 +1,6 @@
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
 import { db, properties, media, bookings, seasonRates, propertySections } from '@portal/db';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import MessageForm from '@/components/MessageForm';
@@ -19,6 +19,17 @@ import Reveal from '@/components/Reveal';
 import PropertyDetailScroll from '@/components/PropertyDetailScroll';
 import Footer from '@/components/Footer';
 import DetailFooterFlow from '@/components/DetailFooterFlow';
+import { descriptionExcerpt, pageMetadata } from '@/lib/seo';
+import { propertySeoPhoto, readPublishedProperty } from '@/lib/seo-property';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }) {
+  const { locale, slug } = await params;
+  const property = await readPublishedProperty(slug);
+  if (!property) notFound();
+  const title = (locale === 'en' ? property.titleEn : locale === 'fr' ? property.titleFr : property.titleEs).trim() || property.titleEs;
+  const description = locale === 'en' ? property.descEn : locale === 'fr' ? property.descFr : property.descEs;
+  return pageMetadata(locale, `/casas/${encodeURIComponent(slug)}`, title, descriptionExcerpt(description || ''), await propertySeoPhoto(property.id));
+}
 
 export async function generateStaticParams() {
   const props = await db.select({ slug: properties.slug }).from(properties).where(eq(properties.published, true));
@@ -29,14 +40,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   const { locale, slug } = await params;
   const t = await getTranslations({ locale });
 
-  const propertyList = await db
-    .select()
-    .from(properties)
-    .where(and(eq(properties.slug, slug), eq(properties.published, true)))
-    .limit(1);
-
-  if (propertyList.length === 0) notFound();
-  const property = propertyList[0];
+  const property = await readPublishedProperty(slug);
+  if (!property) notFound();
 
   const mediaList = await db
     .select()

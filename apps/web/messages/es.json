@@ -1,4 +1,10 @@
 {
+  "seo": {
+    "homeTitle": "Casas y departamentos para tu próxima estancia",
+    "homeDescription": "Encuentra casas y departamentos para tu estancia. Consulta fotos, ubicación y disponibilidad y contacta con Portal Casas para planear tu reserva.",
+    "listingTitle": "Casas y departamentos",
+    "listingDescription": "Explora las propiedades de Portal Casas. Consulta fotos, capacidad, ubicación y disponibilidad para encontrar tu próxima estancia."
+  },
   "sectionBackgrounds": {
     "title": "Fondos de las secciones",
     "hint": "Elige una foto de la biblioteca para cada fondo. Guarda cada sección por separado; sin selección se conserva el fondo del tema.",

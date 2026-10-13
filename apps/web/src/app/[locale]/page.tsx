@@ -5,6 +5,13 @@ import { readSiteContent, readFeaturedProperty, briefDescription } from '@/lib/s
 import HomeVideoMotion from '@/components/HomeVideoMotion';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
+import { pageMetadata } from '@/lib/seo';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'seo' });
+  return pageMetadata(locale, '', t('homeTitle'), t('homeDescription'));
+}
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

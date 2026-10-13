@@ -1,5 +1,21 @@
 # Contexto — Portal Casas
 
+## SEO técnico — 13 Oct 2026
+
+Implementado sobre main (9a0c7ee7), sin commit/merge/deploy ni operaciones en Neon. `PUBLIC_SITE_URL` es la única fuente del origen SEO: canonical, OG, metadataBase, sitemap y robots. `.env.example`: fallback http://localhost:3000; Emma debe configurar el origen HTTPS real en Vercel antes del deploy, sin ruta/query/credenciales. No se asume dominio. La variable histórica NEXT_PUBLIC_SITE_URL de recuperación de contraseña queda fuera de este cambio.
+
+`lib/seo.ts`: URLs absolutas, hreflang es/en/fr+x-default español y extracto hasta155 caracteres sin partir palabras. Layout locale: metadataBase, nombre Portal Casas y plantilla %s | Portal Casas. Home/listado: title/description del namespace seo en messages/es/en/fr.json; canonical sin filtros/query. `next.config.ts` desactiva streaming de metadata (htmlLimitedBots:/.*/) para entregar etiquetas en el head del HTML inicial incluso con User-Agent normal; puede aumentar TTFB al esperar lecturas de metadata, no medido.
+
+Detalle generateMetadata: títulos Property.titleEs/En/Fr (fallback español si vacío) y descripciones descEs/En/Fr del idioma actual. SiteContent Sobre nosotros no se usa para describir propiedades. `lib/seo-property.ts` comparte lectura de publicada con el render mediante React.cache por petición, sin caché persistente ni cambio de visibilidad. OG website/site_name/locale/url y Twitter summary_large_image: primera PHOTO de portada por coverOrder; fallback primera PHOTO por order/id; VIDEO excluido. Blob se conserva; rutas locales se convierten a absolutas. Sin foto se omite og:image/twitter:image, sin imagen social por defecto inventada.
+
+`app/sitemap.ts`: /sitemap.xml dinámico con home/listado + propiedades publicadas en3idiomas y alternates. **Property no tiene updatedAt**, solo createdAt: lastModified se omite para no publicar fecha falsa; no se cambia schema. `app/robots.ts`: Allow /; Disallow api/panel/admin/mi-cuenta/login/registro/recuperación, con y sin locale; sitemap absoluto. Metadata noindex/nofollow en panel/admin/mi-cuenta/autenticación, sin cambiar permisos/UI/actions. Canonical/hreflang se aplican a todas las páginas públicas indexables; no se anuncian equivalencias de recursos privados ni URLs con token. Robots no reemplaza autorización ni garantiza desindexar URLs previamente indexadas.
+
+JSON-LD bonus pendiente: confirmar clasificación de rentas nocturnas/anuales y representación de tarifas antes de publicar schema de alojamiento; no se incluye ni necesita validación schema.org en esta entrega.
+
+Validación offline:31scripts test-*.cjs pasan (30existentes+test-seo), TypeScript web limpio, lint0errores/8warnings heredados. test-seo ejecuta metadata/sitemap/robots reales con SQLite en memoria: locales/extractos, canonical/hreflang, portada/fallback/sin foto/VIDEO, publicados/404, noindex, origen y configuración bloqueante. No verifica el pipeline HTML de Next ni previews externos; QA HTTP pendiente de Emma. No se consultó Neon, no hubo migración/deploy ni cambios visuales.
+
+Prueba manual: configurar PUBLIC_SITE_URL en apps/web/.env.local, reiniciar `pnpm dev`; en /es, /en y /fr abrir home/listado/detalle y **Ver código fuente**: title + Portal Casas, description, canonical, hreflang es/en/fr/x-default, OG y Twitter. Listado filtrado conserva canonical sin query. Sin fotos no og:image; no publicada404. /sitemap.xml contiene3×(publicadas+2)URLs, sin privadas/lastmod; /robots.txt usa el mismo origen. Emma revisa meta checker o preview WhatsApp/Telegram con URL pública real tras deploy autorizado; localhost no es accesible a esos servicios. No crear/modificar datos de prueba en main. Checklist visual de detalle existente permanece sin cambios.
+
 ## HECHO Y FUNCIONANDO
 
 ### Detalle: fade ágil, mapa limpio y vidrio blanco en reserva (12 Oct 2026)

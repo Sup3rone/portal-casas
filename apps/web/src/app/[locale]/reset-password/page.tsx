@@ -2,6 +2,8 @@ import { db, passwordResetTokens } from '@portal/db';
 import { eq, and, gt, isNull } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
 import { resetPassword } from './actions';
+import { privateMetadata } from '@/lib/seo';
+export const metadata = privateMetadata;
 
 export default async function ResetPasswordPage({
   params, searchParams,

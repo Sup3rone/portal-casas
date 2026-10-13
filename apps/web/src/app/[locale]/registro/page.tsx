@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import AuthForm from '@/components/AuthForm';
+import { privateMetadata } from '@/lib/seo';
+export const metadata = privateMetadata;
 import { registerAction } from "./actions";
 
 export default async function RegisterPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ error?: string }> }) {

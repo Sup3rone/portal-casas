@@ -1,5 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { requestPasswordReset } from './actions';
+import { privateMetadata } from '@/lib/seo';
+export const metadata = privateMetadata;
 
 export default async function ForgotPasswordPage({
   params, searchParams,

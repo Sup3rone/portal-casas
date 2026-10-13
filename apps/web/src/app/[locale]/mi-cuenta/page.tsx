@@ -5,6 +5,9 @@ import { and, eq, desc } from "drizzle-orm";
 import { logoutAction } from "./actions";
 import Link from "next/link";
 import { getLocale } from "next-intl/server";
+import { privateMetadata } from '@/lib/seo';
+
+export const metadata = privateMetadata;
 
 export default async function MyAccountPage() {
   const session = await auth();

@@ -6,6 +6,13 @@ import PropertyCard from '@/components/PropertyCard';
 import Reveal from '@/components/Reveal';
 import { Link } from '@/i18n/navigation';
 import { propertySearch, type PropertySearchParams } from '@/lib/property-search';
+import { pageMetadata } from '@/lib/seo';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'seo' });
+  return pageMetadata(locale, '/casas', t('listingTitle'), t('listingDescription'));
+}
 
 export default async function PropertiesPage({
   params,

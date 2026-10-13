@@ -1,5 +1,9 @@
 # Contexto — Portal Casas
 
+## Deuda técnica — auditoría 13 Oct 2026
+
+Informe vigente: [AUDITORIA-2026-10-13.md](AUDITORIA-2026-10-13.md). Solo recomendaciones, sin implementación ni cambios en BD/deploy. Prioridades: contraste real del glass, entrega de imágenes, protección ante abuso público; luego metadata SEO, contenido de QA, fallback SSR de Reveal e interacción de mapa. Hay35tests offline pasando, TypeScript web limpio y lint0errores/6warnings heredados. LCP/INP/CLS, bundle/memoria y headers/analytics de producción no disponibles; no certificar rendimiento o WCAG sin medir. Fullpage actual usa snap del documento, gesto interceptado y reserva/footer libres: consolidación futura requiere preservar calendario/formulario/foco. No repetir tareas ya completas del historial. Cada mejora requiere aprobación posterior; alcance y reproducción en el informe.
+
 ## HECHO Y FUNCIONANDO
 
 ### Panel: traducir y rellenar en el formulario (13 Oct 2026)

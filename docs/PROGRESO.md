@@ -1,5 +1,19 @@
 # Progreso del Proyecto - Portal-Casas
 
+### Mapa interactivo desde el primer toque — 13 Oct 2026
+- LocationMap.tsx aplica pointerEvents:auto al iframe, anulando las2reglas globales none del detalle/fullpage sin modificar globals.css ni el motor. Añade tabIndex0 y outline de foco interior visible (claro/oscuro). URL, dimensiones, compartir y coordenadas intactos.
+- Revisado el contenedor: no overlay invisible cubriendo el mapa; botón compartir ocupa su esquina. Navegador local FR: pointer-events computado auto sin foco; elementFromPoint en centro devuelve IFRAME. Scroll fuera del mapa avanzó3989→4610 y navbar se ocultó; ↑ respondió. Galería/share y detail-scroll pasan; comprobación offline del iframe confirma eventos/foco; TypeScript limpio, lint0errores/6warnings heredados.
+- Limitación QA: automatización rechazó drag por coordenadas fraccionarias del iframe; no se afirma validación de pan/zoom/touch. Emma debe probar primer click/drag/wheel, touch/pinch en375px, Tab/foco, scroll fuera del mapa, lightbox/Escape, navbar e ↑. Dentro del iframe los gestos/zoom cooperativo pertenecen a Google; CSS de la app ya no bloquea eventos. No se fuerza una política de rueda en contenido cross-origin ni se instala API/key nueva.
+- Cambio únicamente en LocationMap y este registro; sin BD/backend/editoriales/fullpage/calendario/formulario/navbar ni estilos globales. Cambios previos del workspace conservados.
+
+### Limpieza de textos públicos FR — 13 Oct 2026
+- Recorridos manualmente /fr, /fr/casas y los2detalles publicados: del-canto-vallarta y arian-ocean-vallarta. Diccionario fr revisado sin Lorem/Test text/placeholders en valores; listado/Arian ya correctos, sin cambios allí.
+- Origen real: datos guardados, no fallbacks hardcodeados. SiteContent.about_fr «Texte de test sur nous» → texto oculto en home. Del Canto PropertySection.descriptionFr: destino «Test text about destiny in this apartment» y amenidades/habitaciones/lugar/advertencias «Texte de test sur le destin dans ce département» → narrativas ocultas. Los equivalentes españoles también son prueba, por lo que no se inventa una traducción factual.
+- i18n/public-french-text.ts filtra únicamente las expresiones de prueba identificables (incluye Lorem ipsum/Texto de prueba/Placeholder) en contenido mostrado en FR; no detecta idiomas arbitrariamente ni borra datos. Home/detalle aplican el filtro a about/narrativas/advertencias/descripciones; destacada FR sin descripción real no usa fallback español. Fotos reales se conservan; secciones solo con texto inválido y sin fotos se omiten por el filtro existente, sin caja/espacio vacío.
+- Sin cambios de estilo/layout, SEO, backend/APIs, BD, panel, es/en ni diccionarios. Al guardar contenido francés real mediante el panel existente reaparece automáticamente. Nombres propios/direcciones permanecen tal cual.
+- Nuevo test-public-french-text: placeholders, texto real, ausencia de cuadros vacíos, fotos, es/en intactos y sin fallback ES; usa SQLite en memoria. QA local posterior: home/Del Canto sin placeholders,0narrativas de prueba en DOM; listado correcto y Arian con descripción francesa real. No hubo guardados ni envíos.
+- Cómo probar: pnpm dev → /fr (sin «Texte de test sur nous», redes/destacada intactas) → /fr/casas → ambos detalles. En Del Canto no deben aparecer las5narrativas de prueba; fotos/mapa/reserva siguen presentes. Revisar /es y /en sin cambios. El contenido almacenado permanece pendiente de sustituir editorialmente por la clienta; ocultar no lo elimina de la BD ni de su editor.
+
 ### Imagen social por defecto — 13 Oct 2026
 - Foto existente reutilizada y ajustada sin IA con autorización: public/og-default.jpg1200×630,60658bytes. Lista, no pendiente de subir una imagen nueva.
 - Fallback OG/Twitter absoluto con PUBLIC_SITE_URL en layout y pageMetadata: home/listado/detalle sin fotos. Portada propia y URLs Blob se conservan.

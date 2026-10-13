@@ -6,6 +6,7 @@ import HomeVideoMotion from '@/components/HomeVideoMotion';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { pageMetadata } from '@/lib/seo';
+import { publicFrenchText } from '@/i18n/public-french-text';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -17,12 +18,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'home' });
   const content = await readSiteContent();
-  const about = content[locale === 'en' ? 'about_en' : locale === 'fr' ? 'about_fr' : 'about_es'];
+  const about = locale === 'fr' ? publicFrenchText(content.about_fr) : content[locale === 'en' ? 'about_en' : 'about_es'];
   const social = await getTranslations({ locale, namespace: 'siteContent' });
   const featured = await readFeaturedProperty(content.featured_property_id);
   const labels = await getTranslations({ locale, namespace: 'properties' });
   const featuredTitle = featured && ((locale === 'en' ? featured.property.titleEn : locale === 'fr' ? featured.property.titleFr : featured.property.titleEs).trim() || featured.property.titleEs);
-  const featuredDescription = featured && briefDescription((locale === 'en' ? featured.property.descEn : locale === 'fr' ? featured.property.descFr : featured.property.descEs).trim() || featured.property.descEs);
+  const featuredDescription = featured && briefDescription(locale === 'fr' ? publicFrenchText(featured.property.descFr) : (locale === 'en' ? featured.property.descEn : featured.property.descEs).trim() || featured.property.descEs);
   return (
     <main>
       {/* Una sola capa de video acompaña hero y Sobre nosotros. */}

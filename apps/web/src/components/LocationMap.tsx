@@ -19,7 +19,9 @@ export default async function LocationMap({ lat, lng, address, propertyTitle, ci
       <iframe
         title={t('mapTitle', { address })}
         src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&hl=${locale}&output=embed`}
-        className="aspect-square w-full"
+        className="aspect-square w-full focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-green-700 dark:focus-visible:outline-green-400"
+        style={{ pointerEvents: 'auto' }}
+        tabIndex={0}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
         allowFullScreen

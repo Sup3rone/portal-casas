@@ -21,6 +21,7 @@ import Footer from '@/components/Footer';
 import DetailFooterFlow from '@/components/DetailFooterFlow';
 import { descriptionExcerpt, pageMetadata } from '@/lib/seo';
 import { propertySeoPhoto, readPublishedProperty } from '@/lib/seo-property';
+import { publicFrenchText } from '@/i18n/public-french-text';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
@@ -50,9 +51,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     .orderBy(media.order);
   const sectionRows = await db.select().from(propertySections).where(eq(propertySections.propertyId, property.id));
   const editorial = editorialPresentation(property.id, locale, sectionRows, mediaList)
+    .map(slide => locale === 'fr' ? { ...slide, description: publicFrenchText(slide.description) } : slide)
     .filter(slide => Boolean(slide.description || slide.hero || slide.photos.length));
   const warnings = sectionRows.find(row => row.section === 'advertencias');
-  const warningDescription = (locale === 'en' ? warnings?.descriptionEn : locale === 'fr' ? warnings?.descriptionFr : warnings?.descriptionEs)?.trim() || '';
+  const warningDescription = locale === 'fr' ? publicFrenchText(warnings?.descriptionFr) : (locale === 'en' ? warnings?.descriptionEn : warnings?.descriptionEs)?.trim() || '';
   const warningHero = mediaList.find(item => item.id === warnings?.heroMediaId && item.type === 'PHOTO');
   const hasWarnings = Boolean(warningDescription || warningHero);
   const hasMap = property.lat != null && property.lng != null;
@@ -85,7 +87,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     fr: { title: property.titleFr, desc: property.descFr },
   };
   const { title, desc } = localeMap[locale] ?? localeMap.es;
-  const description = desc?.trim() || '';
+  const description = locale === 'fr' ? publicFrenchText(desc) : desc?.trim() || '';
   const location = [property.address?.trim(), property.city?.trim()].filter(Boolean).join(', ');
 
   // Agrupar medias por categoría

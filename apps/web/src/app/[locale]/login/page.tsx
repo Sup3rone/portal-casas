@@ -30,7 +30,7 @@ export default async function LoginPage({
           </p>
         )}
 
-        <AuthForm action={loginAction}>
+        <AuthForm action={loginAction} endpoint="/api/public-auth/login">
           <input type="hidden" name="locale" value={locale} />
 
           <div>

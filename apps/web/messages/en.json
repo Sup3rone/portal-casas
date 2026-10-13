@@ -279,6 +279,7 @@
     "derechos": "© {year} Portal Casas. All rights reserved."
   },
   "auth": {
+    "requestFailed": "Could not send the request. Please try again.",
     "requiredField": "Fill out this field.",
     "invalidEmail": "Enter a valid email address.",
     "loginTitle": "Log in",

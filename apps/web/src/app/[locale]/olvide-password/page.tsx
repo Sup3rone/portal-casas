@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { requestPasswordReset } from './actions';
+import AuthForm from '@/components/AuthForm';
 import { privateMetadata } from '@/lib/seo';
 export const metadata = privateMetadata;
 
@@ -24,7 +25,7 @@ export default async function ForgotPasswordPage({
             {t('forgotSent')}
           </div>
         ) : (
-          <form action={requestPasswordReset} className="space-y-4 rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm border dark:border-gray-700">
+          <AuthForm action={requestPasswordReset} endpoint="/api/public-auth/recovery" className="space-y-4 rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-sm border dark:border-gray-700">
             <input type="hidden" name="locale" value={locale} />
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">{t('email')}</label>
@@ -35,7 +36,7 @@ export default async function ForgotPasswordPage({
               className="w-full rounded-lg bg-purple-600 py-3 font-bold text-white dark:text-gray-100 transition-colors hover:bg-purple-700">
               {t('forgotButton')}
             </button>
-          </form>
+          </AuthForm>
         )}
       </div>
     </main>

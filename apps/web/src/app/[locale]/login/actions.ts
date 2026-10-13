@@ -3,8 +3,12 @@
 import { AuthError } from "next-auth";
 import { signIn } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { headers } from 'next/headers';
+import { consumeRateLimit } from '@/lib/rate-limit';
 
 export async function loginAction(formData: FormData) {
+  const retryAfter = consumeRateLimit('login', await headers());
+  if (retryAfter) return { retryAfter };
   const locale = String(formData.get("locale") ?? "es") || "es";
   const email = String(formData.get("email") ?? "").toLowerCase().trim();
   const password = String(formData.get("password") ?? "");

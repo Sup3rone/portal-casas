@@ -5,8 +5,12 @@ import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { randomUUID, randomBytes } from 'crypto';
 import { sendEmail } from '@/lib/mailer';
+import { headers } from 'next/headers';
+import { consumeRateLimit } from '@/lib/rate-limit';
 
 export async function requestPasswordReset(formData: FormData) {
+  const retryAfter = consumeRateLimit('recovery', await headers());
+  if (retryAfter) return { retryAfter };
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const locale = String(formData.get('locale') || 'es');
 

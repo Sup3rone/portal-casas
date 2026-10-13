@@ -1,5 +1,20 @@
 # Progreso del Proyecto - Portal-Casas
 
+## Limitador básico de flujos públicos — 13 Oct 2026
+
+Validación offline: TypeScript web limpio; pnpm lint0errores/6warnings heredados; 38scripts test-*.cjs pasan. test-rate-limit cubre todos los umbrales, IP/flujo, expiración, idioma, Retry-After y endpoints públicos sin BD. QA con login/cookies/email reales y móvil pendiente de Emma.
+
+lib/rate-limit.ts centraliza ventanas fijas por IP (primer valor x-forwarded-for): login10/15min, registro5/hora, recuperación3/hora, consultas5/15min. Sin servicios, dependencias ni migraciones. Map por instancia; limpieza de entradas expiradas cada minuto al recibir tráfico. Vercel puede distribuir peticiones entre funciones/instancias y reinicia memoria en despliegues: protección básica, NO cuota global garantizada. Si crece el sitio, evaluar almacenamiento compartido. Se confía en el header del proxy Vercel; fuera de él debe sanearlo el proxy y sin header se comparte el bucket unknown.
+
+Acciones login/registro/recuperación comprueban el limitador antes de validar/leer/escribir/enviar. Con autorización expresa se añade api/public-auth/[flow] como transporte POST multipart con Origin de mismo origen obligatorio. Invoca las mismas actions y devuelve429 RATE_LIMITED con mensaje es/en/fr y Retry-After; redirecciones exitosas/errores existentes se devuelven al cliente sin cambiar lógica de negocio. AuthForm conserva campos escritos en429 y errores de red. Olvide-password reutiliza AuthForm con sus clases originales. Sin JS las actions siguen limitadas, pero el transporte nativo de Server Actions no puede emitir429/Retry-After ni presentar ese error igual: el contrato HTTP429 corresponde al transporte nuevo con JS.
+
+API Auth.js limita solo POST callback/credentials, no lecturas de sesión; login admin antiguo también limita. Consultas /api/messages limita antes de validar/BD; MessageForm muestra el mensaje429 sin resetear sus campos. No hay correo WhatsApp interno separado en este flujo (wa.me es enlace externo). Traducción conserva translationAllowance por usuario: no se modifica ni duplica. Navegación/búsqueda/panel autenticado no se limitan.
+
+Prueba local SIN BD: en PowerShell ejecutar 11 veces curl.exe -i -X POST http://localhost:3000/api/public-auth/login -H "Origin: http://localhost:3000" -H "x-forwarded-for: 192.0.2.88" -F "locale=fr" -F "email=" -F "password=". Los primeros devuelven redirect de credenciales inválidas; el11 devuelve429, Retry-After y mensaje francés. No usar credenciales reales para esta prueba. Repetir con register/recovery y campos vacíos: umbrales5/3; consultas POST JSON vacío umbral5. Para recuperar disponibilidad esperar la ventana real (15min/1h); test-rate-limit usa reloj simulado para verificar expiración sin esperas. En producción no se puede asumir que todas las llamadas lleguen a la misma instancia ni falsificar el header como prueba fiable.
+
+QA manual pendiente: login/registro/recuperación normal y éxito con cookies; provocar429 y confirmar que los campos se conservan y mensaje es/en/fr; consulta válida única funciona como antes; móvil375px. No se ejecutan pruebas de usuarios/emails ni Neon desde esta tarea.
+
+
 ### Anticipación bidireccional de fondos — 13 Oct 2026
 - Diagnóstico: DeferredDetailImage no revierte ready ni desmonta la imagen al salir del viewport; el Map del fundido ya retiene referencias fuertes a todos los fondos preparados durante la vida del detalle. No había descarte explícito de fondos visitados; el margen de una pantalla limitaba la preparación anticipada.
 - DeferredDetailImage amplía rootMargin a dos alturas de viewport en ambos sentidos y threshold a 0.35. EditorialPresentation conserva la preparación inicial de dos fondos y prepara las próximas dos secciones al activar la actual. Los visitados permanecen montados/referenciados hasta desmontar el detalle; no cambia el fundido, eager inicial, SEO ni componentes interactivos.

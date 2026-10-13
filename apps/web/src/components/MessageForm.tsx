@@ -93,6 +93,7 @@ export default function MessageForm({
   const t = useTranslations('details.form');
   const formatoLocale = locale === 'en' ? 'en-GB' : locale === 'fr' ? 'fr-FR' : 'es-MX';
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [rateError, setRateError] = useState('');
   const { dates: { startDate, endDate }, setDates } = useReservationDates();
   const [guests, setGuests] = useState<number>(1);
   const [fields, setFields] = useState({ name: '', email: '', phone: '', body: '' });
@@ -125,12 +126,18 @@ export default function MessageForm({
     : '';
 
   async function handleSubmit(formData: FormData) {
+    setRateError('');
     setSubmitted(true);
     const submitted = inquiryFromFormData(formData);
     const checked = validateInquiry(submitted, { today: inquiryToday(), maxGuests, bookings: pricing.booked.map(booking => ({ startDate: booking.start, endDate: booking.end })) });
     if (Object.keys(checked).length) return;
     try {
       const res = await fetch('/api/messages', { method: 'POST', body: formData });
+      if (res.status === 429) {
+        const response = await res.json();
+        setRateError(response.message); setStatus('error');
+        return;
+      }
       if (res.status === 400) {
         const response = await res.json();
         const fieldErrors: InquiryErrors = {};
@@ -326,7 +333,7 @@ export default function MessageForm({
       </div>
 
       {status === 'error' && (
-        <p className="text-red-600 dark:text-red-400 text-xs tracking-wide">{t('error')}</p>
+        <p className="text-red-600 dark:text-red-400 text-xs tracking-wide">{rateError || t('error')}</p>
       )}
 
       <SubmitButton disabled={Object.keys(validationErrors).length > 0} />

@@ -30,7 +30,8 @@ assert.equal(validateInquiry({ ...valid, endDate: day(2) }, { ...context, bookin
 assert.equal(validateInquiry({ ...valid, startDate: day(2), endDate: day(6) }, { ...context, bookings: occupied }).startDate, 'datesOccupied');
 assert.deepEqual(validateInquiry({ ...valid, startDate: day(5), endDate: day(6) }, { ...context, bookings: occupied }), {});
 const form = values => { const data = new FormData(); for (const [key, value] of Object.entries({ propertyId: 'pa', ...values })) data.set(key, String(value)); return data; };
-const send = values => POST(new Request('http://localhost/api/messages', { method: 'POST', body: form(values) }));
+let requestIp = 0;
+const send = values => POST(new Request('http://localhost/api/messages', { method: 'POST', headers: { 'x-forwarded-for': `192.0.2.${++requestIp}` }, body: form(values) }));
 const count = () => memory.prepare('SELECT count(*) AS count FROM "Message"').get().count;
 async function main() {
   for (const lang of ['', 'zz-invalid', 'EN']) {

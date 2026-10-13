@@ -20,7 +20,7 @@ export default async function RegisterPage({ params, searchParams }: { params: P
         {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-400">
           {t(error === 'duplicado' ? 'duplicateEmail' : 'invalidRegistration')}
         </p>}
-        <AuthForm action={registerAction}>
+        <AuthForm action={registerAction} endpoint="/api/public-auth/register">
           <input type="hidden" name="locale" value={locale} />
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200">

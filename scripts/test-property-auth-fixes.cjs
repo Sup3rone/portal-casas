@@ -7,6 +7,8 @@ const React = req('react');
 const { renderToStaticMarkup } = req('react-dom/server');
 let locale = 'es', authFailure = false;
 const signedIn = [];
+let requestIp = 0;
+mockModule('next/headers', { headers: async () => new Headers({ 'x-forwarded-for': `192.0.2.${++requestIp}` }) });
 class AuthError extends Error {}
 // SQLite no admite DEFAULT en VALUES como PostgreSQL: adaptar únicamente el INSERT de User.
 mockModule('@portal/db', { ...portal, db: new Proxy(portal.db, { get(target, key) {

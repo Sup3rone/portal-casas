@@ -14,7 +14,7 @@ async function main() {
   for (const locale of ['es','en','fr']) {
     setLocale(locale); setSession(null);
     const messages = require('../apps/web/messages/' + locale + '.json');
-    const forgot = renderToStaticMarkup(await Forgot({params:Promise.resolve({locale}),searchParams:Promise.resolve({})}));
+    const forgot = renderToStaticMarkup(React.createElement(req('next-intl').NextIntlClientProvider, {locale,messages,timeZone:'UTC'}, await Forgot({params:Promise.resolve({locale}),searchParams:Promise.resolve({})})));
     assert.ok(forgot.includes(messages.auth.email));
     const data = new FormData(); data.set('locale',locale); data.set('token','valid-token'); data.set('password','short');
     await assert.rejects(()=>resetPassword(data), e=>e.message===`redirect: /${locale}/reset-password?token=valid-token&error=corta`);

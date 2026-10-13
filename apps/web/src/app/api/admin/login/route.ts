@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
+import { consumeRateLimit, rateLimitLocale, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const retry = consumeRateLimit('login', req.headers);
+  if (retry) return rateLimitResponse(retry, rateLimitLocale(req.headers));
   try {
     const formData = await req.formData();
     const password = formData.get('password') as string;

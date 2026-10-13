@@ -4,6 +4,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { auth } from '@/lib/auth';
+import { consumeRateLimit, rateLimitLocale, rateLimitResponse } from '@/lib/rate-limit';
 import { propertyBlocks } from '@/lib/occupation-calendar';
 import { inquiryFromFormData, inquiryToday, normalizeInquiry, validateInquiry, type InquiryErrors } from '@/lib/inquiry-validation';
 
@@ -11,6 +12,8 @@ const invalid = (fields: InquiryErrors, maxGuests?: number) =>
   NextResponse.json({ code: 'INVALID_INQUIRY', fields, maxGuests }, { status: 400 });
 
 export async function POST(req: NextRequest) {
+  const retry = consumeRateLimit('inquiry', req.headers);
+  if (retry) return rateLimitResponse(retry, rateLimitLocale(req.headers));
   let formData: FormData;
   try { formData = await req.formData(); }
   catch { return NextResponse.json({ code: 'INVALID_FORM_DATA' }, { status: 400 }); }

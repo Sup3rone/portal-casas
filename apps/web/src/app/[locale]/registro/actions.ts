@@ -5,8 +5,12 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, users } from "@portal/db";
+import { headers } from 'next/headers';
+import { consumeRateLimit } from '@/lib/rate-limit';
 
 export async function registerAction(formData: FormData) {
+  const retryAfter = consumeRateLimit('register', await headers());
+  if (retryAfter) return { retryAfter };
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").toLowerCase().trim();
   const phone = String(formData.get("phone") ?? "").trim() || null;

@@ -7,6 +7,8 @@ import Reveal from '@/components/Reveal';
 import { Link } from '@/i18n/navigation';
 import { propertySearch, type PropertySearchParams } from '@/lib/property-search';
 import { pageMetadata } from '@/lib/seo';
+import { readSiteContent } from '@/lib/site-content';
+import SiteListingBackground from '@/components/SiteListingBackground';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -23,6 +25,7 @@ export default async function PropertiesPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  const content = await readSiteContent();
   const filters = propertySearch(await searchParams ?? {});
 
   const rows = filters.invalid ? [] : await db
@@ -65,11 +68,7 @@ export default async function PropertiesPage({
     <main className="relative min-h-screen">
       {/* IMAGEN DE FONDO COMPLETA */}
       <div className="absolute inset-0 h-full w-full">
-        <img
-          src="/images/listado-bg.jpg"
-          alt=""
-          className="h-full w-full object-cover"
-        />
+        <SiteListingBackground key={content.listing_background_image} url={content.listing_background_image} />
         <div className="absolute inset-0 bg-black/10 dark:bg-black/60" />
       </div>
 

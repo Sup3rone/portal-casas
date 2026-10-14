@@ -1,13 +1,13 @@
 import { db, properties, seasonRates } from '@portal/db';
 import { asc } from 'drizzle-orm';
-import { managedProperties, managedResource, requireAdmin } from '@/lib/property-access';
+import { managedProperties, managedResource, requirePropertyManager } from '@/lib/property-access';
 import { AddTarifaForm, DeleteTarifaButton } from './components';
 import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminTarifasPage({ searchParams }: { searchParams?: Promise<{ error?: string }> }) {
-  const manager = await requireAdmin();
+  const manager = await requirePropertyManager();
   const errors = await getTranslations('panel');
   const error = (await searchParams)?.error;
   const errorKey = error && ['tariffProperty', 'tariffName', 'tariffStart', 'tariffEnd', 'tariffRange', 'tariffWeekday', 'tariffWeekend'].includes(error) ? error : error ? 'validation' : null;

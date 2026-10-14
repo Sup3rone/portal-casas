@@ -38,7 +38,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           preload="metadata"
           className="home-background-video absolute inset-0 h-full w-full object-cover"
         >
-          <source src="/videos/hero.mp4" type="video/mp4" media="(prefers-reduced-motion: no-preference)" />
+          <source src={content.home_background_video || '/videos/hero.mp4'} media="(prefers-reduced-motion: no-preference)" />
         </video>
 
         {/* Overlay oscuro para legibilidad */}

@@ -456,6 +456,13 @@
     "invalid": "Check the number of guests and select valid arrival and departure dates."
   },
   "siteContent": {
+    "imageLimits": "JPEG, PNG or WebP · up to 4 MB per photo after optimization. The selected image is applied when saved.",
+    "videoLabel": "Home background video",
+    "videoHint": "Direct HTTPS video URL (for example MP4). Empty uses the current video, without sound. Loading errors fall back to the local video.",
+    "listingImageLabel": "Properties page background image",
+    "listingImageHint": "Drop photos or choose files. The queue optimizes and uploads in order; the last successful upload is selected. Save to publish the change.",
+    "assetUploaded": "Image uploaded and selected. Save to apply.",
+    "assetClear": "Use current image (clear)",
     "contactWhatsappLabel": "Global contact WhatsApp",
     "contactWhatsappHint": "Country code and number: 8–15 digits only, without + or spaces. Leave empty to hide.",
     "contactWhatsappLink": "Contact via WhatsApp: {number}",

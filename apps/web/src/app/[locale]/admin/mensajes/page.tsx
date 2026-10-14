@@ -1,12 +1,12 @@
 import { db, messages, properties } from '@portal/db';
 import { desc, eq } from 'drizzle-orm';
 import MensajesList from '@/components/MensajesList';
-import { managedResource, requireAdmin } from '@/lib/property-access';
+import { managedResource, requirePropertyManager } from '@/lib/property-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminMensajesPage() {
-  const manager = await requireAdmin();
+  const manager = await requirePropertyManager();
   const rows = await db
     .select({
       id: messages.id,

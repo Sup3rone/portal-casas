@@ -4,7 +4,7 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 import { requireAdmin, AccessError } from './property-access';
 import { objectBody, PanelValidationError } from './panel-validation';
 
-export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp'] as const;
+export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image'] as const;
 export type SiteContentValues = Record<typeof siteContentKeys[number], string>;
 export class SiteContentError extends PanelValidationError {
   constructor(public code: string) { super('validation'); }
@@ -12,12 +12,12 @@ export class SiteContentError extends PanelValidationError {
 export function siteContentInput(input: unknown): SiteContentValues {
   let body;
   try { body = objectBody(input); } catch { throw new SiteContentError('INVALID_SITE_CONTENT'); }
-  if (Object.keys(body).length !== siteContentKeys.length || Object.keys(body).some(key => !siteContentKeys.includes(key as typeof siteContentKeys[number]))) {
+  if (siteContentKeys.slice(0, 7).some(key => !(key in body)) || Object.keys(body).some(key => !siteContentKeys.includes(key as typeof siteContentKeys[number]))) {
     throw new SiteContentError('INVALID_SITE_CONTENT');
   }
   const values = {} as SiteContentValues;
   for (const key of siteContentKeys) {
-    const raw = key === 'featured_property_id' && body[key] === null ? '' : body[key];
+    const raw = (key === 'home_background_video' || key === 'listing_background_image') && !(key in body) ? '' : key === 'featured_property_id' && body[key] === null ? '' : body[key];
     if (typeof raw !== 'string') throw new SiteContentError('INVALID_SITE_CONTENT');
     const value = raw.trim();
     if (key.startsWith('about_')) {
@@ -46,6 +46,14 @@ export async function readSiteContent(): Promise<SiteContentValues> {
 export async function saveSiteContent(input: unknown) {
   const actor = await requireAdmin();
   const values = siteContentInput(input);
+  // Un editor antiguo abierto antes del deploy no debe borrar los activos nuevos.
+  const supplied = input as Record<string, unknown>;
+  if (!('home_background_video' in supplied) || !('listing_background_image' in supplied)) {
+    const previous = await readSiteContent();
+    for (const key of ['home_background_video', 'listing_background_image'] as const) {
+      if (!(key in supplied)) values[key] = previous[key];
+    }
+  }
   if (values.featured_property_id) {
     const [property] = await db.select({ id: properties.id }).from(properties).where(and(eq(properties.id, values.featured_property_id), eq(properties.published, true))).limit(1);
     if (!property) throw new SiteContentError('INVALID_FEATURED_PROPERTY');

@@ -456,6 +456,13 @@
     "invalid": "Revisa la cantidad de huéspedes y selecciona llegada y salida válidas."
   },
   "siteContent": {
+    "imageLimits": "JPEG, PNG o WebP · máximo 4 MB por foto después de optimizar. La imagen elegida se aplica al guardar.",
+    "videoLabel": "Video de fondo de la home",
+    "videoHint": "URL HTTPS directa de un video (por ejemplo MP4). Vacío usa el video actual; sin audio. Si falla, vuelve al video local.",
+    "listingImageLabel": "Imagen de fondo de Casas",
+    "listingImageHint": "Arrastra fotos o elige archivos. La cola optimiza y sube en orden; la última subida correcta se selecciona. Guarda para publicar el cambio.",
+    "assetUploaded": "Imagen subida y seleccionada. Pulsa Guardar para aplicar.",
+    "assetClear": "Usar imagen actual (vaciar)",
     "contactWhatsappLabel": "WhatsApp de contacto global",
     "contactWhatsappHint": "Código de país y número: solo 8–15 dígitos, sin + ni espacios. Vacío para ocultarlo.",
     "contactWhatsappLink": "Contactar por WhatsApp: {number}",

@@ -457,6 +457,13 @@
     "invalid": "Vérifiez le nombre de voyageurs et sélectionnez des dates d’arrivée et de départ valides."
   },
   "siteContent": {
+    "imageLimits": "JPEG, PNG ou WebP · 4 Mo maximum par photo après optimisation. L’image sélectionnée est appliquée à l’enregistrement.",
+    "videoLabel": "Vidéo de fond de l’accueil",
+    "videoHint": "URL HTTPS directe d’une vidéo (par exemple MP4). Vide utilise la vidéo actuelle, sans son. En cas d’erreur, la vidéo locale est utilisée.",
+    "listingImageLabel": "Image de fond de la page des propriétés",
+    "listingImageHint": "Déposez des photos ou choisissez des fichiers. La file optimise et téléverse dans l’ordre ; la dernière image réussie est sélectionnée. Enregistrez pour publier.",
+    "assetUploaded": "Image téléversée et sélectionnée. Enregistrez pour appliquer.",
+    "assetClear": "Utiliser l’image actuelle (effacer)",
     "contactWhatsappLabel": "WhatsApp de contact global",
     "contactWhatsappHint": "Indicatif pays et numéro : 8 à 15 chiffres uniquement, sans + ni espaces. Laissez vide pour masquer.",
     "contactWhatsappLink": "Contacter par WhatsApp : {number}",

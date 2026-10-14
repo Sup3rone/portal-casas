@@ -23,7 +23,7 @@ async function main(){
     const response=await put(value);assert.equal(response.status,400);assert.equal((await response.json()).code,code);
   }
   assert.equal((await put(content)).status,200);
-  assert.deepEqual(await (await api.GET()).json(),content);
+  assert.deepEqual(await (await api.GET()).json(),{...content,home_background_video:'',listing_background_image:''});
   for(const locale of ['es','en','fr']){
     const html=await renderHome(locale);assert.ok(html.includes(content['about_'+locale]));
     assert.ok(html.indexOf('Sobre nosotros')>html.indexOf('</form>')||locale!=='es');

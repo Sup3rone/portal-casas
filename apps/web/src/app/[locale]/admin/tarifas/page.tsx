@@ -6,7 +6,7 @@ import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminTarifasPage({ searchParams }: { searchParams?: Promise<{ error?: string }> } = {}) {
+export default async function AdminTarifasPage({ searchParams }: { searchParams?: Promise<{ error?: string }> }) {
   const manager = await requireAdmin();
   const errors = await getTranslations('panel');
   const error = (await searchParams)?.error;

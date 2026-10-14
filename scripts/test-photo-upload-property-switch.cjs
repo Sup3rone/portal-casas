@@ -109,7 +109,7 @@ async function main() {
   assert.equal(memory.prepare('SELECT count(*) n FROM Media WHERE propertyId=?').get('pb').n,before+2);
   assert.ok(mounted.get(pageB.key).hooks.some(value=>value?.success===2&&value?.failed===3));
   const failures=mounted.get(pageB.key).hooks.find(value=>Array.isArray(value)&&value[0]?.code);
-  assert.deepEqual(failures.map(value=>[value.name,value.code]),[['http-fails.png','uploadError'],['invalid.txt','typeError'],['oversized.png','sizeError']]);
+  assert.deepEqual(failures.map(value=>[value.name,value.code]),[['http-fails.png','uploadFailed'],['invalid.txt','typeError'],['oversized.png','sizeError']]);
   for(const order of [10,11])assert.equal(memory.prepare('SELECT count(*) n FROM Media WHERE propertyId=? AND "order"=?').get('pb',order).n,1);
   unmount(pageB.key);
   // Abort de una cola A detiene todos los archivos pendientes y deja B independiente.

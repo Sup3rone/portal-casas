@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { PanelResources } from '@/lib/panel-resources';
-import { panelRequest, inputClass, buttonClass } from './request';
+import { panelRequest, panelResponseError, PanelRequestError, inputClass, buttonClass } from './request';
 import { photoMetadata, PhotoUploadError, photoTypes, photoCompression, optimizePhoto, type PhotoType } from '@/lib/photo-upload';
 import CoverEditor from './CoverEditor';
 
@@ -18,7 +18,7 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
   const [optimizing, setOptimizing] = useState(false), [optimizedSizes, setOptimizedSizes] = useState<{ original: number; final: number } | null>(null);
   const uploadRequest = useRef<AbortController | null>(null);
   const [queue, setQueue] = useState<{ current: number; total: number; name: string } | null>(null);
-  const [failures, setFailures] = useState<{ name: string; code: string; url?: string }[]>([]);
+  const [failures, setFailures] = useState<{ name: string; code: string; url?: string; panelError?: boolean }[]>([]);
   const [summary, setSummary] = useState<{ success: number; failed: number } | null>(null);
   useEffect(() => () => { uploadRequest.current?.abort(); }, [propertyId, resource]);
   async function uploadPhoto(files: FileList | null) {
@@ -46,10 +46,13 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       if (optimized.optimized) setOptimizedSizes({ original: Math.round(file.size / 100_000) / 10, final: Math.round(optimized.file.size / 1000) });
       photoMetadata(optimized.file.type, optimized.file.size);
       const data = new FormData(); data.set('file', optimized.file);
-      const response = await fetch(`/api/properties/${encodeURIComponent(propertyId)}/upload`, { method: 'POST', body: data, signal: controller.signal });
+      let response: Response;
+      try { response = await fetch(`/api/properties/${encodeURIComponent(propertyId)}/upload`, { method: 'POST', body: data, signal: controller.signal }); }
+      catch { throw new PanelRequestError('networkError'); }
       const blob = await response.json().catch(() => ({}));
       if (controller.signal.aborted) return;
-      if (!response.ok || typeof blob.url !== 'string') throw new Error(response.status === 401 || response.status === 403 || response.status === 404 ? 'forbidden' : 'error');
+      if (!response.ok) throw panelResponseError(response.status, blob);
+      if (typeof blob.url !== 'string') throw new PanelRequestError('error');
       setUploadedUrl(blob.url);
       blobUrl = blob.url;
       const urlField = formRef.current?.elements.namedItem('url');
@@ -61,8 +64,9 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       } catch (error) {
         if (controller.signal.aborted) return;
         failed++;
-        const code = error instanceof PhotoUploadError ? error.code === 'INVALID_FILE_SIZE' ? 'sizeError' : 'typeError' : error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError';
-        setFailures(current => [...current, { name: file.name, code, url: blobUrl || undefined }]);
+        const panelError = error instanceof PanelRequestError && error.message !== 'error';
+        const code = panelError ? error.message : error instanceof PhotoUploadError ? error.code === 'INVALID_FILE_SIZE' ? 'sizeError' : 'typeError' : error instanceof Error && ['forbidden', 'notFound'].includes(error.message) ? 'accessError' : 'uploadError';
+        setFailures(current => [...current, { name: file.name, code, panelError, url: blobUrl || undefined }]);
       } finally { setOptimizing(false); }
       }
       setSummary({ success, failed }); if (success) router.refresh();
@@ -118,7 +122,7 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       {uploading && queue && <div role="status" className="min-w-0 break-words"><label htmlFor={`upload-${propertyId}`}>{uploader(optimizing ? 'optimizing' : 'uploading')} · {uploader('queueProgress', queue)}</label><progress id={`upload-${propertyId}`} className="w-full accent-green-700" /></div>}
       {optimizedSizes && <p role="status" className="text-sm text-gray-600 dark:text-gray-300">{uploader('optimizedSize', optimizedSizes)}</p>}
       {uploadMessage && <p role={uploadMessage === 'success' ? 'status' : 'alert'}>{uploader(uploadMessage)}</p>}
-      {failures.length > 0 && <ul role="alert" className="space-y-2 break-words text-sm">{failures.map((failure,index)=><li key={index}>{uploader('fileFailure',{name:failure.name,error:uploader(failure.code)})}{failure.url&&<a href={failure.url} target="_blank" rel="noreferrer" className="ml-2 break-all underline">{uploader('uploadedUrl')} {failure.url}</a>}</li>)}</ul>}
+      {failures.length > 0 && <ul role="alert" className="space-y-2 break-words text-sm">{failures.map((failure,index)=><li key={index}>{uploader('fileFailure',{name:failure.name,error:failure.panelError ? t(failure.code) : uploader(failure.code)})}{failure.url&&<a href={failure.url} target="_blank" rel="noreferrer" className="ml-2 break-all underline">{uploader('uploadedUrl')} {failure.url}</a>}</li>)}</ul>}
       {summary && <div role="status" className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-lg rounded-xl border border-gray-300 bg-white p-4 text-gray-900 shadow-lg dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">{uploader('queueSummary',summary)}<button type="button" onClick={()=>setSummary(null)} className="ml-3 min-h-11 underline">{uploader('dismissSummary')}</button></div>}
       {uploadedUrl && <p className="break-all text-sm">{uploader('uploadedUrl')} <a href={uploadedUrl} target="_blank" rel="noreferrer" className="underline">{uploadedUrl}</a></p>}
     </div>}

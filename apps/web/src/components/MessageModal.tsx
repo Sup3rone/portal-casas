@@ -115,7 +115,7 @@ export default function MessageModal({
       >
         <button
           onClick={onClose}
-          className="absolute right-3 top-3 text-gray-400 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200"
+          className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center text-gray-400 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200"
           aria-label="Cerrar"
         >
           ✕

@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { panelRequest, panelErrorKey } from './panel/request';
 
 export default function MarkAsReadButton({
   messageId,
@@ -12,16 +14,16 @@ export default function MarkAsReadButton({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const t = useTranslations('panel');
 
   async function handleClick() {
-    setLoading(true);
+    setLoading(true); setError('');
     try {
-      await fetch('/api/messages/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: messageId }),
-      });
+      await panelRequest('/api/messages/read', 'POST', { id: messageId });
       router.refresh(); // el server component re-renderiza con datos frescos
+    } catch (error) {
+      setError(panelErrorKey(error, 'markReadError'));
     } finally {
       setLoading(false);
     }
@@ -32,12 +34,12 @@ export default function MarkAsReadButton({
   }
 
   return (
-    <button
-      onClick={handleClick}
+    <><button
+      onClick={event => { event.stopPropagation(); void handleClick(); }}
       disabled={loading}
       className="text-xs font-medium text-purple-600 dark:text-purple-400 underline hover:text-purple-800 dark:hover:text-purple-400 disabled:opacity-50"
     >
       {loading ? 'Marcando...' : 'Marcar como leído'}
-    </button>
+    </button>{error && <p role="alert">{t(error)}</p>}</>
   );
 }

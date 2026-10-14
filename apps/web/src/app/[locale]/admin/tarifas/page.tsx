@@ -2,17 +2,22 @@ import { db, properties, seasonRates } from '@portal/db';
 import { asc } from 'drizzle-orm';
 import { managedProperties, managedResource, requireAdmin } from '@/lib/property-access';
 import { AddTarifaForm, DeleteTarifaButton } from './components';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminTarifasPage() {
+export default async function AdminTarifasPage({ searchParams }: { searchParams?: Promise<{ error?: string }> } = {}) {
   const manager = await requireAdmin();
+  const errors = await getTranslations('panel');
+  const error = (await searchParams)?.error;
+  const errorKey = error && ['tariffProperty', 'tariffName', 'tariffStart', 'tariffEnd', 'tariffRange', 'tariffWeekday', 'tariffWeekend'].includes(error) ? error : error ? 'validation' : null;
   const propiedades = await db.select().from(properties).where(managedProperties(manager)).orderBy(asc(properties.slug));
   const tarifas = await db.select().from(seasonRates).where(managedResource(seasonRates.propertyId, manager)).orderBy(asc(seasonRates.propertyId), asc(seasonRates.startDate));
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <h1 className="mb-8 text-3xl font-bold">Tarifas por temporada</h1>
+      {errorKey && <p role="alert">{errors(errorKey)}</p>}
 
       <AddTarifaForm propiedades={propiedades.map(p => ({ id: p.id, slug: p.slug }))} />
 

@@ -14,7 +14,7 @@ function origin(booking: Booking) { return booking.manualBlock || booking.source
 function iso(d: Date) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 function bookingDelDia(bs: Booking[], id: string, day: string) { return bs.find(b=>b.propertyId===id && day>=b.start && day<b.end); }
 
-export default function CalendarBoard({ propiedades, bookings, canSync = false }: { propiedades: Prop[]; bookings: Booking[]; canSync?: boolean }) {
+export default function CalendarBoard({ propiedades, bookings, canSync = false, panelTouchTargets = false }: { propiedades: Prop[]; bookings: Booking[]; canSync?: boolean; panelTouchTargets?: boolean }) {
   const t = useTranslations('occupationCalendar'), locale = useLocale(), router = useRouter();
   const [month, setMonth] = useState(()=>new Date(new Date().getFullYear(),new Date().getMonth(),1));
   const [selection, setSelection] = useState<{id:string;start:string;end:string}|null>(null);
@@ -77,8 +77,9 @@ export default function CalendarBoard({ propiedades, bookings, canSync = false }
     {message && <p role="status" className={message===t('unlocked')?'fixed inset-x-4 bottom-4 z-50 mx-auto max-w-lg rounded-xl border border-green-700 bg-white p-4 text-green-800 shadow-lg dark:border-green-400 dark:bg-gray-900 dark:text-green-300':'mb-4'}>{message}{message===t('unlocked')&&<button type="button" onClick={()=>setMessage('')} className="ml-3 min-h-11 underline">{t('dismissNotice')}</button>}</p>}
     <div className="space-y-10">{propiedades.map(p=><section key={p.id} className="min-w-0 rounded-2xl border bg-white p-2 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-6">
       <h3 className="mb-4 break-words text-lg font-bold">{p.title??p.slug}</h3>
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 dark:text-gray-400">{weekdays.map(d=><div key={d}>{d}</div>)}</div>
-      <div className="grid grid-cols-7 gap-1">{days.map((d,i)=>{
+      <div className={panelTouchTargets ? 'max-[768px]:overflow-x-auto' : undefined}>
+      <div className={'grid grid-cols-7 gap-1 text-center text-xs text-gray-500 dark:text-gray-400'+(panelTouchTargets?' max-[768px]:min-w-[308px] max-[768px]:gap-0':'')}>{weekdays.map(d=><div key={d}>{d}</div>)}</div>
+      <div className={'grid grid-cols-7 gap-1'+(panelTouchTargets?' max-[768px]:min-w-[308px] max-[768px]:gap-0':'')}>{days.map((d,i)=>{
         if(!d)return <div key={'empty'+i}/>;
         const day=iso(d), booking=bookingDelDia(visibleBookings,p.id,day);
         const source=booking?origin(booking):undefined;
@@ -92,6 +93,7 @@ export default function CalendarBoard({ propiedades, bookings, canSync = false }
           onClick={()=>{if(booking)setDetail({id:p.id,day});else if(!busy)choose(p.id,day);}}
           className={'flex h-11 min-w-0 items-center justify-center rounded-lg text-sm font-medium '+(booking?(SOURCE_STYLE[source||'']||'bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-100'):selected?'bg-green-700 text-white ring-2 ring-green-500':'bg-gray-50 text-gray-500 dark:bg-gray-950 dark:text-gray-300')}>{d.getDate()}</button>;
       })}</div>
+      </div>
       {detail?.id===p.id&&<div className="mt-4 min-w-0 rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-950" onKeyDown={event=>{if(event.key==='Escape')setDetail(null);}}>
         <div role="tooltip" id={'calendar-info-'+p.id} className="space-y-2 break-words">
           {visibleBookings.filter(b=>b.propertyId===p.id&&detail.day>=b.start&&detail.day<b.end).map((b,i)=><p key={b.id||i}>{description(b)}</p>)}

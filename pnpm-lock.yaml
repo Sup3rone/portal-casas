@@ -162,6 +162,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  drizzle-orm: 0.45.2
+
 importers:
 
   .: {}
@@ -184,7 +187,7 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       drizzle-orm:
-        specifier: ^0.45.2
+        specifier: 0.45.2
         version: 0.45.2(@neondatabase/serverless@1.1.0)(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.11.6)(gel@2.2.1(supports-color@7.2.0))(prisma@6.19.3(typescript@5.9.3))
       leaflet:
         specifier: ^1.9.4
@@ -254,7 +257,7 @@ importers:
         specifier: ^17.4.2
         version: 17.4.2
       drizzle-orm:
-        specifier: ^0.45.2
+        specifier: 0.45.2
         version: 0.45.2(@neondatabase/serverless@1.1.0)(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.11.6)(gel@2.2.1(supports-color@7.2.0))(prisma@6.19.3(typescript@5.9.3))
     devDependencies:
       drizzle-kit:

@@ -76,7 +76,7 @@ async function main() {
   mockModule('react',{...React,useRef:()=>ref,useState:initial=>{const key=index++;if(!(key in states)) states[key]=initial;return [states[key],value=>states[key]=value];}});
   mockModule('next-intl',{useTranslations:()=>key=>key});
   const Button = load('apps/web/src/components/panel/TranslationDraftButton.tsx').default;
-  function render() { index=0; return Button({source:'es',prefix:'desc'}); }
+  function render(options = {}) { index=0; return Button({source:'es',prefix:'desc',...options}); }
   controls = fields('es'); const form={elements:{namedItem:name=>controls[name.slice(-2).toLowerCase()]}};
   const event={currentTarget:{closest:()=>form}};
   let release; calls=0;
@@ -91,6 +91,23 @@ async function main() {
   assert.equal(controls.en.value,'Manual'); assert.equal(controls.fr.value,''); assert.equal(find(render(),node=>node.props?.role==='status').props.children,'error');
   controls.es.value=''; calls=0; global.fetch=async()=>{calls++;return Response.json({});}; await click(event); assert.equal(calls,0);
   assert.equal(find(render(),node=>node.props?.role==='status').props.children,'emptySource');
+  controls = fields('es');
+  const names = { es: 'about_es', en: 'about_en', fr: 'about_fr' }, requested = [];
+  const siteForm = { elements: { namedItem: name => { requested.push(name); return controls[Object.keys(names).find(language => names[language] === name)]; } } };
+  const siteOptions = { fieldNames: names, useCentralErrors: true };
+  const siteClick = find(render(siteOptions), node => node.type === 'button').props.onClick;
+  global.fetch = async (_, options) => Response.json({ traduccion: JSON.parse(options.body).idiomaDestino });
+  await siteClick({ currentTarget: { closest: () => siteForm } });
+  assert.deepEqual(requested, ['about_es', 'about_en', 'about_fr']);
+  assert.equal(controls.en.value, 'en'); assert.equal(controls.fr.value, 'fr');
+  controls.en.value = ''; controls.fr.value = '';
+  global.fetch = async () => Response.json({ code: 'UNAUTHENTICATED' }, { status: 401 });
+  await siteClick({ currentTarget: { closest: () => siteForm } });
+  assert.equal(find(render(siteOptions), node => node.props?.role === 'status').props.children, 'sessionExpired');
+  assert.equal(controls.en.value, ''); assert.equal(controls.fr.value, '');
+  global.fetch = async () => { throw Error('offline'); };
+  await siteClick({ currentTarget: { closest: () => siteForm } });
+  assert.equal(find(render(siteOptions), node => node.props?.role === 'status').props.children, 'networkError');
   for(const locale of ['es','en','fr']) for(const key of ['button','translating','hint','prepared','emptySource','quota','rateLimit','sourceChanged','tooLong','busy','error']) assert.ok(require('../apps/web/messages/'+locale+'.json').panelTranslation[key]);
   console.log('OK traducción: tres orígenes, relleno atómico, ediciones protegidas, errores/cuota/rate, API autorizada, segmentos UTF-8 y botón sin doble clic.');
 }

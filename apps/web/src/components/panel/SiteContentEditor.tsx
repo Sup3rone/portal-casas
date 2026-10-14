@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import TranslationDraftButton from './TranslationDraftButton';
 import { useRouter } from '@/i18n/navigation';
 import type { SiteContentValues } from '@/lib/site-content';
 import { panelRequest, panelResponseError, panelErrorKey, inputClass, buttonClass } from './request';
@@ -61,6 +62,7 @@ export default function SiteContentEditor({ content, properties }: { content: Si
       {(['about_es', 'about_en', 'about_fr'] as const).map(key => <label key={key} className="block text-sm">{t(key)}
         <textarea name={key} rows={5} maxLength={2000} defaultValue={content[key]} className={inputClass} />
       </label>)}
+      <TranslationDraftButton source="es" prefix="desc" fieldNames={{ es: 'about_es', en: 'about_en', fr: 'about_fr' }} disabled={busy || uploading} useCentralErrors />
       {(['social_instagram', 'social_facebook'] as const).map(key => <label key={key} className="block text-sm">{t(key)}
         <input name={key} type="url" pattern="https://.+" title={t('socialHint')} maxLength={2048} defaultValue={content[key]} className={inputClass} />
       </label>)}

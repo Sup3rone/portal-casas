@@ -2,9 +2,11 @@
 import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { translateFields, type DraftLanguage, type TranslationControls } from '@/lib/panel-translation-drafts';
+import { PanelRequestError, panelResponseError, panelErrorKey } from './request';
 const activeForms = new WeakSet<HTMLFormElement>();
-export default function TranslationDraftButton({ source, prefix, disabled }: { source: DraftLanguage; prefix: 'title' | 'desc' | 'description'; disabled?: boolean }) {
+export default function TranslationDraftButton({ source, prefix, disabled, fieldNames, useCentralErrors = false }: { source: DraftLanguage; prefix: 'title' | 'desc' | 'description'; disabled?: boolean; fieldNames?: Record<DraftLanguage, string>; useCentralErrors?: boolean }) {
   const t = useTranslations('panelTranslation');
+  const panel = useTranslations('panel');
   const [notice, setNotice] = useState(''), [busy, setBusy] = useState(false);
   const running = useRef(false);
   async function translate(event: React.MouseEvent<HTMLButtonElement>) {
@@ -13,7 +15,7 @@ export default function TranslationDraftButton({ source, prefix, disabled }: { s
     running.current = true; activeForms.add(form); setBusy(true); setNotice('');
     try {
       function field(language: DraftLanguage) {
-        const control = form!.elements.namedItem(prefix + language[0].toUpperCase() + language.slice(1)) as HTMLInputElement | HTMLTextAreaElement | null;
+        const control = form!.elements.namedItem(fieldNames?.[language] ?? prefix + language[0].toUpperCase() + language.slice(1)) as HTMLInputElement | HTMLTextAreaElement | null;
         if (!control || typeof control.value !== 'string') throw new Error('error');
         return control;
       }
@@ -21,16 +23,20 @@ export default function TranslationDraftButton({ source, prefix, disabled }: { s
       const result = await translateFields(source, controls, async (text, from, to) => {
         let response: Response;
         try { response = await fetch('/api/traducir', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({texto:text,idiomaOrigen:from,idiomaDestino:to}) }); }
-        catch { throw new Error('error'); }
+        catch { throw useCentralErrors ? new PanelRequestError('networkError') : new Error('error'); }
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.code === 'TRANSLATION_QUOTA' ? 'quota' : data.code === 'TRANSLATION_RATE_LIMIT' ? 'rateLimit' : data.code === 'INVALID_TRANSLATION_TEXT' ? 'tooLong' : 'error');
+        if (!response.ok) {
+          const key = data.code === 'TRANSLATION_QUOTA' ? 'quota' : data.code === 'TRANSLATION_RATE_LIMIT' ? 'rateLimit' : data.code === 'INVALID_TRANSLATION_TEXT' ? 'tooLong' : null;
+          if (key) throw new Error(key);
+          throw useCentralErrors ? panelResponseError(response.status, data) : new Error('error');
+        }
         if (typeof data.traduccion !== 'string') throw new Error('error');
         return data.traduccion;
       });
       setNotice(t('prepared', { filled:result.filled.join(', ').toUpperCase() || '—', skipped:result.skipped.join(', ').toUpperCase() || '—' }));
     } catch (error) {
       const key = error instanceof Error && ['emptySource','sourceChanged','tooLong','quota','rateLimit'].includes(error.message) ? error.message : 'error';
-      setNotice(t(key));
+      setNotice(useCentralErrors && key === 'error' ? panel(panelErrorKey(error)) : t(key));
     } finally { running.current = false; activeForms.delete(form); setBusy(false); }
   }
   return <span className="mt-2 block space-y-1">

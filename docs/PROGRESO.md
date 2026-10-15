@@ -546,3 +546,12 @@ QA UX 12 Oct: subida múltiple, navbar translúcida y editoriales en flujo libre
 - Nueva API /api/traducir con requirePropertyManager, validación400, MyMemory gratuito sin key, segmentos450bytes/timeout20s, cuota429 y fallos502. Rate limit básico en memoria:4peticiones de destino/usuario/minuto; presupuesto5000caracteres/día/instancia. Límites oficiales verificados; dos destinos consumen dos veces el texto.
 -35scripts offline pasan, TypeScript web limpio y lint0errores/6warnings preexistentes. Nuevo test-panel-translation cubre relleno, errores, ediciones previas/concurrentes, API/permisos, cuotas y doble clic. Prueba pública del protocolo HTTP200; sin textos de usuarios/propiedades enviados, sin BD/merge/deploy.
 - Pendiente de Emma: QA autenticado, calidad/revisión de traducciones y Guardar/reabrir en los tres idiomas. Procedimiento, límites y supuestos en CONTEXTO.md.
+
+
+## 2026-10-15 — Fondo público de papel
+
+Home, /casas y ficha usan `--paper-bg: #F4F1EC` con grano SVG inline (alfa máxima 0.045, sin imagen externa ni animación). Modo oscuro: papel cálido #24211D y texto #F4F1EC. Títulos que antes eran blancos sobre fotos usan #29251F en claro. Las galerías, tarjetas y fotos editoriales se conservan; solo se desactivan fondos decorativos. El panel no cambia y conserva URLs/configuración.
+
+Reactivar los fondos anteriores: cambiar `PUBLIC_PHOTO_BACKGROUNDS` a `true` en `apps/web/src/lib/public-appearance.ts`; el mismo flag retira la clase `public-paper`, restaura video de home, SiteListingBackground y fondos de ficha/editoriales. Componentes y datos no se borraron. CSS en `apps/web/src/app/globals.css`; composición en las tres páginas y `EditorialPresentation.tsx`. En papel oscuro, vidrio de ficha al 85% blanco para sostener texto oscuro.
+
+QA: capturas aisladas con páginas reales y datos ficticios, sin Neon; comparar en sitio real antes de aprobación final.

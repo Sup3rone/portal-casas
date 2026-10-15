@@ -1,3 +1,5 @@
+import PropertySearchForm from '@/components/PropertySearchForm';
+import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
 // src/app/[locale]/page.tsx
 import { getTranslations } from 'next-intl/server';
 import Reveal from '@/components/Reveal';
@@ -7,6 +9,9 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { pageMetadata } from '@/lib/seo';
 import { publicFrenchText } from '@/i18n/public-french-text';
+
+// Reversible: true devuelve el formulario compartido al hero.
+const HOME_SEARCH_IN_HERO = false;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -25,10 +30,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const featuredTitle = featured && ((locale === 'en' ? featured.property.titleEn : locale === 'fr' ? featured.property.titleFr : featured.property.titleEs).trim() || featured.property.titleEs);
   const featuredDescription = featured && briefDescription(locale === 'fr' ? publicFrenchText(featured.property.descFr) : (locale === 'en' ? featured.property.descEn : featured.property.descEs).trim() || featured.property.descEs);
   return (
-    <main>
+    <main className={PUBLIC_PHOTO_BACKGROUNDS ? undefined : 'public-paper'}>
       {/* Una sola capa de video acompaña hero y Sobre nosotros. */}
       <div className="home-video-scene relative isolate overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+      {PUBLIC_PHOTO_BACKGROUNDS && <><div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
         <video
           id="home-background-video"
           autoPlay
@@ -44,7 +49,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         {/* Overlay oscuro para legibilidad */}
         <div className="absolute inset-0 bg-black/40 dark:bg-black/60" />
       </div>
-      <HomeVideoMotion />
+      <HomeVideoMotion /></>}
       <section className="relative h-screen min-h-[600px]">
 
         {/* Contenido centrado */}
@@ -52,62 +57,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <h1 className="mb-4 text-4xl font-light tracking-[0.3em] text-white dark:text-gray-100 md:text-6xl">
             {t('bienvenida')}
           </h1>
-          <h2 className="mb-12 text-2xl font-light tracking-[0.25em] text-white/90 dark:text-gray-200 md:text-3xl">
+          <h2 className={`${HOME_SEARCH_IN_HERO ? 'mb-12 ' : ''}text-2xl font-light tracking-[0.25em] text-white/90 dark:text-gray-200 md:text-3xl`}>
             {t('propiedadesEnRenta')}
           </h2>
 
           {/* Widget de búsqueda flotante */}
-          <form
-            action={`/${locale}/casas`}
-            method="GET"
-            className="glass-panel flex flex-wrap items-end justify-center gap-4 rounded-2xl p-6 shadow-2xl"
-          >
-            <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-600 dark:text-gray-300">
-                {t('llegada')}
-              </label>
-              <input
-                type="date"
-                name="start"
-                className="w-40 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-gray-900 dark:focus:border-green-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-              />
-            </div>
-
-            <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-600 dark:text-gray-300">
-                {t('salida')}
-              </label>
-              <input
-                type="date"
-                name="end"
-                className="w-40 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-gray-900 dark:focus:border-green-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-              />
-            </div>
-
-            <div className="text-left">
-              <label className="mb-1 block text-xs tracking-widest text-gray-600 dark:text-gray-300">
-                {t('huespedes')}
-              </label>
-              <select
-                name="guests"
-                className="w-32 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-gray-900 dark:focus:border-green-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-              >
-                <option value="">{t('cualquiera')}</option>
-                {[1, 2, 3, 4, 6, 8, 10].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              className="rounded-lg bg-black dark:bg-green-700 px-8 py-2.5 text-sm font-semibold tracking-widest text-white dark:text-gray-100 transition hover:bg-gray-800 dark:hover:bg-green-600"
-            >
-              {t('buscar')}
-            </button>
-          </form>
+          {HOME_SEARCH_IN_HERO && <PropertySearchForm />}
         </Reveal>
       </section>
       {(about || content.social_instagram || content.social_facebook) && <div className="home-about-video relative">
@@ -127,7 +82,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </div>
         </div>
       </Reveal></div>}
-      <div className="home-video-closing pointer-events-none absolute inset-x-0 bottom-0 h-24" aria-hidden="true" />
+      {PUBLIC_PHOTO_BACKGROUNDS && <div className="home-video-closing pointer-events-none absolute inset-x-0 bottom-0 h-24" aria-hidden="true" />}
       </div>
       {featured && <Reveal as="section" delay={200} className="about-reveal mx-auto max-w-6xl px-4 py-16">
         <div className="grid min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 md:grid-cols-2">

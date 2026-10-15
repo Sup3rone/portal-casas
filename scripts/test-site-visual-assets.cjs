@@ -20,10 +20,10 @@ for(const locale of ['es','en','fr']){
 setLocale(locale);const messages=JSON.parse(fs.readFileSync('apps/web/messages/'+locale+'.json'));
 const render=tree=>renderToStaticMarkup(React.createElement(NextIntlClientProvider,{locale,messages,timeZone:'America/Mexico_City'},tree));
 const home=render(await Home({params:Promise.resolve({locale})})),listing=render(await List({params:Promise.resolve({locale}),searchParams:Promise.resolve({guests:'9999'})})),editor=render(React.createElement(Editor,{content:assets,properties:[]}));
-assert.ok(home.includes(assets.home_background_video));assert.ok(home.includes('autoPlay')||home.includes('autoplay'));assert.ok(home.includes('muted'));assert.ok(home.includes('loop'));assert.ok(listing.includes(assets.listing_background_image));assert.ok(editor.includes('name="home_background_video"'));assert.ok(editor.includes('name="listing_background_image"'));assert.ok(editor.includes('type="file"'));
+assert.ok(!home.includes('<video'));assert.ok(!home.includes(assets.home_background_video));assert.ok(!listing.includes(assets.listing_background_image));assert.ok(home.includes('public-paper'));assert.ok(listing.includes('public-paper'));assert.ok(editor.includes('name="home_background_video"'));assert.ok(editor.includes('name="listing_background_image"'));assert.ok(editor.includes('type="file"'));
 if(process.env.SITE_ASSETS_QA_DIR&&locale==='es')for(const [name,body]of [['editor',editor],['home',home],['casas',listing]])fs.writeFileSync(path.join(process.env.SITE_ASSETS_QA_DIR,'assets-'+name+'.html'),`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/manager-qa.css"></head><body><p>QA OFFLINE — datos ficticios, recursos remotos de prueba</p>${body}</body></html>`);
 }
 assert.equal((await put({...base,home_background_video:'',listing_background_image:''})).status,200);
-const emptyHome=renderToStaticMarkup(await Home({params:Promise.resolve({locale:'es'})}));assert.ok(emptyHome.includes('/videos/hero.mp4'));
+const emptyHome=renderToStaticMarkup(await Home({params:Promise.resolve({locale:'es'})}));assert.ok(!emptyHome.includes('/videos/hero.mp4'));
 console.log('OK activos: ADMIN, 401/403, MIME/4MB400, put mock, URLs HTTPS400, persistencia/vaciado, cliente antiguo, SSR editor/home/casas es/en/fr.');
 }finally{memory.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

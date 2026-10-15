@@ -1,5 +1,42 @@
 @import "tailwindcss";
+@import "./public-chrome.css";
+@import "./panel-skin.css"; /* Revertir skin: comentar esta línea. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Papel público: sin overlays ni cambios en las superficies del panel. */
+:root {
+  --paper-bg: #F4F1EC;
+  --paper-text: #29251f;
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+}
+html.dark { --paper-bg: #24211D; --paper-text: #F4F1EC; }
+.public-paper,
+.property-detail:has(.public-paper) {
+  --background: var(--paper-bg);
+  background-color: var(--paper-bg);
+  background-image: var(--paper-grain);
+  color: var(--paper-text);
+}
+.public-paper .home-video-scene,
+.public-paper .home-about-video,
+.public-paper > .detail-screen,
+.public-paper [data-editorial-flow],
+.public-paper [data-editorial-slide],
+.public-paper #reservar {
+  background-color: transparent !important;
+  background-image: none;
+}
+.public-paper .home-video-scene :is(h1, h2),
+.public-paper .listing-heading,
+.public-paper .detail-image-heading,
+.public-paper .detail-image-heading :is(h1, p),
+.public-paper [data-detail-section="gallery"] > .reveal:first-child :is(h1, p) {
+  color: var(--paper-text) !important;
+  text-shadow: none;
+}
+.public-paper [data-detail-section="gallery"] > .reveal:first-child { background: transparent; }
+.public-paper .group :is(h3, p) { color: var(--paper-text); filter: none; }
+html.dark .public-paper.detail-snap-container { --glass-bg: rgba(255,255,255,.85); }
 
 @layer components {
   .glass-panel {

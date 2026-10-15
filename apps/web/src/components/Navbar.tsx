@@ -1,21 +1,73 @@
 // src/components/Navbar.tsx
 'use client';
 
-import { Link } from '@/i18n/navigation';
+import { useEffect, useId, useRef, useState } from 'react';
+import { Link, usePathname } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
 import LocaleSwitcher from './LocaleSwitcher';
 import ThemeToggle from './ThemeToggle';
+import PropertySearchForm from './PropertySearchForm';
 
 export default function Navbar() {
   const locale = useLocale();
+  const privatePage = /^\/(?:(?:es|en|fr)\/)?(?:panel|admin)(?:\/|$)/.test(usePathname());
   const t = useTranslations('nav');
+  const searchText = useTranslations('home');
   const { data: session, status } = useSession();
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
   const isManager = isAdmin || (session?.user as { role?: string } | undefined)?.role === 'COLLABORATOR';
 
+  const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchTrigger = useRef<HTMLButtonElement>(null);
+  const searchId = useId();
+  const accountRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
+
+  function closeAccount() {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    function outside(event: MouseEvent) {
+      if (event.target instanceof Node && !accountRef.current?.contains(event.target)) closeAccount();
+    }
+    function escape(event: KeyboardEvent) {
+      if (event.key === 'Escape') { event.preventDefault(); closeAccount(); }
+    }
+    document.addEventListener('click', outside);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('click', outside);
+      document.removeEventListener('keydown', escape);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    searchRef.current?.querySelector<HTMLInputElement>('input')?.focus();
+    function closeSearch() { setSearchOpen(false); searchTrigger.current?.focus(); }
+    function outside(event: MouseEvent) {
+      if (event.target instanceof Node && !searchRef.current?.contains(event.target)) closeSearch();
+    }
+    function escape(event: KeyboardEvent) {
+      if (event.key === 'Escape') { event.preventDefault(); closeSearch(); }
+    }
+    document.addEventListener('click', outside);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('click', outside);
+      document.removeEventListener('keydown', escape);
+    };
+  }, [searchOpen]);
+
   return (
-    <nav className="relative z-50 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+    <nav className={`relative z-50 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900${privatePage ? '' : ' public-header'}`}>
       <div className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between max-md:flex-wrap max-md:gap-4">
           {/* LOGO — izquierda */}
@@ -25,50 +77,42 @@ export default function Navbar() {
 
           {/* NAV LINKS + ACTIONS — derecha */}
           <div className="flex items-center gap-6 max-md:w-full max-md:flex-wrap max-md:gap-4">
-            <Link
-              href={`/casas`}
-              className="text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:text-gray-600 dark:hover:text-gray-300"
-            >
-              {t('casas')}
-            </Link>
+            <div ref={searchRef} data-header-search className="contents">
+              <button ref={searchTrigger} type="button" aria-label={searchText('buscar')} aria-expanded={searchOpen} aria-controls={searchId}
+                onClick={() => { setOpen(false); setSearchOpen(value => !value); searchTrigger.current?.focus(); }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
+              </button>
+              {searchOpen && <div id={searchId} className="header-search-popover absolute inset-x-0 top-full z-50 max-h-[70dvh] overflow-y-auto border-b border-gray-200 bg-white px-4 py-4 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                <div className="mx-auto max-w-5xl"><PropertySearchForm /></div>
+              </div>}
+            </div>
 
             <LocaleSwitcher />
             <ThemeToggle />
 
-            {status === 'loading' ? null : status === 'authenticated' ? (
-              <>
-                {isManager && <Link href="/panel" className="text-sm font-medium tracking-wide text-green-700 dark:text-green-400">{t(isAdmin ? 'panelAdmin' : 'panelCollaborator')}</Link>}
-
-                <Link
-                  href="/mi-cuenta"
-                  className="text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  {t('cuenta').toUpperCase()}
-                </Link>
-
-                <button
-                  onClick={() => signOut({ callbackUrl: `/${locale}` })}
-                  className="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300 transition-colors hover:text-gray-900 dark:hover:text-gray-100"
-                >
-                  {t('salir').toUpperCase()}
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  {t('login').toUpperCase()}
-                </Link>
-                <Link
-                  href="/registro"
-                  className="rounded-full bg-gray-900 dark:bg-green-700 px-6 py-2 text-sm font-semibold tracking-wide text-white dark:text-gray-100 transition-colors hover:bg-gray-800 dark:hover:bg-green-600"
-                >
-                  {t('registro').toUpperCase()}
-                </Link>
-              </>
-            )}
+            <div ref={accountRef} className="relative ml-auto">
+              <button ref={triggerRef} type="button" disabled={status === 'loading'}
+                aria-label={t('cuenta')} aria-expanded={open} aria-controls={menuId}
+                onClick={() => { if (open) closeAccount(); else { setSearchOpen(false); setOpen(true); } }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 disabled:opacity-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-6 w-6">
+                  <circle cx="12" cy="8" r="4" fill={status === 'authenticated' ? 'currentColor' : 'none'} />
+                  <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                </svg>
+              </button>
+              {open && status !== 'loading' && <div id={menuId} aria-label={t('cuenta')}
+                className="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                {status === 'authenticated' ? <>
+                  <Link href="/mi-cuenta" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('cuenta').toUpperCase()}</Link>
+                  {isManager && <Link href="/panel" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-green-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-green-400 dark:hover:bg-gray-800">{t(isAdmin ? 'panelAdmin' : 'panelCollaborator')}</Link>}
+                  <button type="button" onClick={() => { closeAccount(); void signOut({ callbackUrl: '/' + locale }); }} className="flex min-h-11 w-full items-center rounded-lg px-4 py-2 text-left text-sm font-medium text-gray-600 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-300 dark:hover:bg-gray-800">{t('salir').toUpperCase()}</button>
+                </> : <>
+                  <Link href="/login" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('login').toUpperCase()}</Link>
+                  <Link href="/registro" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('registro').toUpperCase()}</Link>
+                </>}
+              </div>}
+            </div>
           </div>
         </div>
       </div>

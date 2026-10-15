@@ -1,4 +1,6 @@
 'use client';
+import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
+
 import { useEffect, useRef, useState, type ReactNode, type HTMLAttributes } from 'react';
 import Image from 'next/image';
 import DeferredDetailImage from './DeferredDetailImage';
@@ -224,7 +226,7 @@ export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide
   function move(delta: number) { setIndex(value => (value + delta + count) % count); }
 
   return <section className={styles.screen} data-editorial-slide={flow ? slide.section : undefined} aria-label={t(titles[slide.section])}>
-    {!flow && slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
+    {PUBLIC_PHOTO_BACKGROUNDS && !flow && slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
     <div className={styles.floating} style={!count || !slide.description.trim() ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}>
     {count > 0 && <div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: t(titles[slide.section]) })}
       ref={carousel} tabIndex={count > 1 ? 0 : undefined} data-editorial-carousel
@@ -307,11 +309,11 @@ function EditorialFlow({ slides }: { slides: EditorialSlide[] }) {
   }, [slides]);
   if (!slides.length) return null;
   return <div ref={root} className={styles.flow} data-editorial-flow>
-    <div className={styles.flowBackdrop} aria-hidden="true"><div className={styles.flowBackgroundStage}>
+    {PUBLIC_PHOTO_BACKGROUNDS && <div className={styles.flowBackdrop} aria-hidden="true"><div className={styles.flowBackgroundStage}>
       {slides.map((slide,index)=><div key={slide.section} data-flow-background={slide.section} className={styles.backdrop} style={{ opacity: index === 0 ? 1 : 0 }}>
         {slide.hero && <DeferredDetailImage key={slide.hero.url} src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" />}
       </div>)}
-    </div></div>
+    </div></div>}
     {slides.map(slide=><EditorialScreen key={slide.section} slide={slide} flow />)}
   </div>;
 }

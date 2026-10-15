@@ -1,3 +1,4 @@
+import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
 // src/app/[locale]/casas/page.tsx
 import { getTranslations } from 'next-intl/server';
 import { and, asc, eq, gte, sql } from 'drizzle-orm';
@@ -65,17 +66,17 @@ export default async function PropertiesPage({
   const propertyList = [...grouped.values()];
 
   return (
-    <main className="relative min-h-screen">
+    <main className={`relative min-h-screen${PUBLIC_PHOTO_BACKGROUNDS ? '' : ' public-paper'}`}>
       {/* IMAGEN DE FONDO COMPLETA */}
-      <div className="absolute inset-0 h-full w-full">
+      {PUBLIC_PHOTO_BACKGROUNDS && <div className="absolute inset-0 h-full w-full">
         <SiteListingBackground key={content.listing_background_image} url={content.listing_background_image} />
         <div className="absolute inset-0 bg-black/10 dark:bg-black/60" />
-      </div>
+      </div>}
 
       {/* CONTENIDO FLOTANTE ENCIMA */}
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-6 pb-24">
         <div className="mb-12 rounded-full bg-white/20 dark:bg-white/20 px-8 py-3 backdrop-blur-sm">
-          <span className="text-sm font-medium tracking-widest text-white dark:text-gray-100">
+          <span className="listing-heading text-sm font-medium tracking-widest text-white dark:text-gray-100">
             {t('properties.destinations')}
           </span>
         </div>

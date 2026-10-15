@@ -1,0 +1,83 @@
+/* Prueba reversible. Tokens exclusivos del panel; no cambian su distribución. */
+.panel-skin {
+  --panel-canvas: #faf9fc;
+  --panel-surface: #ffffff;
+  --panel-accent: #f3efff;
+  --panel-accent-hover: #e8dff8;
+  --panel-text: #382651;
+  --panel-muted: #655c70;
+  --panel-border: #d7cede;
+  --panel-focus: #735196;
+  --panel-selected: #6e468f;
+  --panel-on-selected: #ffffff;
+  --panel-danger-bg: #fff0f2;
+  --panel-danger-text: #a32340;
+  --panel-card-radius: 1.25rem;
+  --panel-control-radius: 999px;
+  --panel-field-radius: .875rem;
+  --panel-touch: 44px;
+  --panel-weight: 600;
+  --panel-shadow: 0 4px 18px rgb(56 38 81 / 5%);
+  --panel-focus-ring: 0 0 0 3px rgb(115 81 150 / 25%);
+  --panel-transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  color: var(--panel-text);
+  background-color: var(--panel-canvas);
+}
+html.dark .panel-skin {
+  --panel-canvas: #18141e;
+  --panel-surface: #211b2a;
+  --panel-accent: #352844;
+  --panel-accent-hover: #463357;
+  --panel-text: #f3efff;
+  --panel-muted: #c1b8ce;
+  --panel-border: #594964;
+  --panel-focus: #c6a5eb;
+  --panel-selected: #cfb1ee;
+  --panel-on-selected: #211b2a;
+  --panel-danger-bg: #44232e;
+  --panel-danger-text: #ffc2ce;
+  --panel-shadow: 0 4px 18px rgb(0 0 0 / 12%);
+  --panel-focus-ring: 0 0 0 3px rgb(198 165 235 / 30%);
+}
+.panel-skin > main { color: var(--panel-text); background-color: var(--panel-canvas); }
+.panel-skin :is(h1, h2, h3) { color: var(--panel-text); font-weight: var(--panel-weight); }
+.panel-skin :is(article, form[class*="rounded"], div[class*="rounded"][class*="border"]) {
+  background-color: var(--panel-surface);
+  border-color: var(--panel-border);
+  border-radius: var(--panel-card-radius);
+  box-shadow: var(--panel-shadow);
+}
+.panel-skin :is(.text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700) { color: var(--panel-muted); }
+.panel-skin :is(a, .text-green-700, .text-purple-600) { color: var(--panel-text); }
+.panel-skin button:not([aria-pressed]), .panel-skin a[class*="rounded"] {
+  min-height: var(--panel-touch);
+  min-width: var(--panel-touch);
+  border-radius: var(--panel-control-radius);
+  background-color: var(--panel-accent);
+  color: var(--panel-text);
+  font-weight: var(--panel-weight);
+  transition: var(--panel-transition);
+}
+.panel-skin button:not([aria-pressed]):hover:not(:disabled), .panel-skin a[class*="rounded"]:hover {
+  background-color: var(--panel-accent-hover);
+}
+.panel-skin button[class*="bg-red"] { background-color: var(--panel-danger-bg); color: var(--panel-danger-text); }
+.panel-skin button[class*="bg-red"]:hover:not(:disabled) { background-color: var(--panel-danger-bg); color: var(--panel-danger-text); }
+.panel-skin :is(input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  min-height: var(--panel-touch);
+  border-radius: var(--panel-field-radius);
+  border-color: var(--panel-border);
+  background-color: var(--panel-surface);
+  color: var(--panel-text);
+  transition: var(--panel-transition);
+}
+.panel-skin :is(input, textarea)::placeholder { color: var(--panel-muted); opacity: 1; }
+.panel-skin :is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--panel-selected); }
+.panel-skin [aria-pressed="true"] { outline-color: var(--panel-focus); }
+.panel-skin :is(button, a, input, select, textarea, [role="button"]):focus-visible {
+  outline: 2px solid var(--panel-focus);
+  outline-offset: 2px;
+  box-shadow: var(--panel-focus-ring);
+}
+.panel-skin article[role="button"]:hover { border-color: var(--panel-focus); }
+@media (prefers-reduced-motion: reduce) { .panel-skin { --panel-transition: none; } }

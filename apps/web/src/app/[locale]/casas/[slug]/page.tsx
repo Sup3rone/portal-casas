@@ -1,3 +1,4 @@
+import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
 import { db, properties, media, bookings, seasonRates, propertySections } from '@portal/db';
 import { eq } from 'drizzle-orm';
@@ -94,10 +95,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
   return (
     <PropertyDetailScroll key={property.id}>
-      {[...new Set([property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url, ...editorial.map(slide => slide.hero?.url), property.sectionBgMapa, property.sectionBgReserva].filter((url): url is string => Boolean(url)))].map(url => <link key={url} rel="preload" as="image" href={url} />)}
-      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container detail-fullpage" tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
+      {PUBLIC_PHOTO_BACKGROUNDS && [...new Set([property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url, ...editorial.map(slide => slide.hero?.url), property.sectionBgMapa, property.sectionBgReserva].filter((url): url is string => Boolean(url)))].map(url => <link key={url} rel="preload" as="image" href={url} />)}
+      <DetailSectionTransitions className={`detail-editorial detail-independent detail-snap-container detail-fullpage${PUBLIC_PHOTO_BACKGROUNDS ? '' : ' public-paper'}`} tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
-      <SectionBackground url={property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url} name="gallery" className="detail-screen px-3 py-8 md:px-6">
+      <SectionBackground url={PUBLIC_PHOTO_BACKGROUNDS ? property.sectionBgInicio || principal.find(item => item.type === 'PHOTO')?.url : null} name="gallery" className="detail-screen px-3 py-8 md:px-6">
         <Reveal className={`relative mb-6 rounded-2xl ${property.sectionBgInicio ? 'detail-image-heading' : 'bg-black/30 dark:bg-black/50'} p-6 pr-16 text-center`}>
           <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={property.city} />
           <h1 className="break-words text-3xl font-bold tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
@@ -168,7 +169,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       </SectionBackground>
       {editorial.map(slide => <EditorialPresentation key={slide.section} slides={[slide]} />)}
       {(hasMap || hasWarnings) && (
-<SectionBackground url={property.sectionBgMapa} name="location" className="detail-screen px-4 py-16 md:px-6" label={t('details.mapWarnings')}>
+<SectionBackground url={PUBLIC_PHOTO_BACKGROUNDS ? property.sectionBgMapa : null} name="location" className="detail-screen px-4 py-16 md:px-6" label={t('details.mapWarnings')}>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {hasMap && <div className="detail-location-map min-w-0">
             <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={property.city} />
@@ -181,7 +182,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
         </div>
       </SectionBackground>
       )}
-<SectionBackground url={property.sectionBgReserva} id="reservar" name="reservation" className="detail-screen px-6 py-24">
+<SectionBackground url={PUBLIC_PHOTO_BACKGROUNDS ? property.sectionBgReserva : null} id="reservar" name="reservation" className="detail-screen px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal as="h2" className={`mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl${property.sectionBgReserva ? ' detail-image-heading' : ''}`}>
             {t('details.reservar')}

@@ -16,7 +16,7 @@ for (const file of ['apps/web/src/components/EditorialPresentation.module.css'])
 const editorialSource = fs.readFileSync(path.join(__dirname,'../apps/web/src/components/EditorialPresentation.tsx'),'utf8');
 assert.ok(!/setInterval|setTimeout/.test(editorialSource.slice(editorialSource.indexOf('function EditorialFlow'))),'El avance de secciones sigue por scroll');
 const originalEditorial = execFileSync('git',['show','a7e53aa57a24919592d28e8cffb4957a83510e9e:apps/web/src/components/EditorialPresentation.tsx'],{encoding:'utf8'});
-const backdrop = text => text.replace(/\r\n/g,'\n').replace('!flow && slide.hero','slide.hero').split('\n').find(line=>line.includes('{slide.hero && <div className={styles.backdrop}'));
+const backdrop = text => text.replace(/\r\n/g,'\n').replace('PUBLIC_PHOTO_BACKGROUNDS && ','').replace('!flow && slide.hero','slide.hero').split('\n').find(line=>line.includes('{slide.hero && <div className={styles.backdrop}'));
 assert.equal(backdrop(editorialSource),backdrop(originalEditorial),'Fondo editorial conservado');
 const { load, memory, req, setLocale, mockModule } = require('./test-property-access.cjs');
 const React = req('react'), { renderToStaticMarkup, renderToReadableStream } = req('react-dom/server');
@@ -85,8 +85,8 @@ async function main() {
     assert.deepEqual(children.filter(node=>node.type===Presentation).map(node=>node.props.slides.map(slide=>slide.section)),[['destino'],['amenidades'],['habitaciones'],['lugar']]);
     assert.equal((html.match(/data-editorial-flow=/g)||[]).length,4);
     assert.ok(!html.includes('detail-journey'));
-    assert.ok(html.includes('rel="preload" as="image" href="/photo0.jpg"'),'Hero precargado');
-    assert.equal((html.match(/data-flow-background=/g)||[]).length,4);
+    assert.ok(!html.includes('data-section-background='),'El papel no monta fotos de fondo');
+    assert.equal((html.match(/data-flow-background=/g)||[]).length,0);
     assert.equal((html.match(/data-editorial-panel=/g)||[]).length,0);
     assert.equal((html.match(/data-scene-stop="true"/g)||[]).length,0);
     assert.equal((html.match(/aria-haspopup="dialog"/g)||[]).length,1);

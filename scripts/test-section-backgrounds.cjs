@@ -51,9 +51,9 @@ async function main(){
     assert.ok(!editor.includes('/video.mp4'));
     const stream=await renderToReadableStream(wrap(await Page({params:Promise.resolve({locale,slug:'pa'})})));await stream.allReady;
     const html=await new Response(stream).text();
-    assert.equal((html.match(/data-section-background=/g)||[]).length,3);
-    assert.ok(!html.includes('dark:bg-gray-950/90'));assert.ok(html.includes('object-cover'));
-    assert.equal((html.match(/section-background-photo /g)||[]).length,3);
+    assert.equal((html.match(/data-section-background=/g)||[]).length,0);
+    assert.ok(!html.includes('dark:bg-gray-950/90'));assert.ok(html.includes('public-paper'));
+    assert.equal((html.match(/section-background-photo /g)||[]).length,0);
     assert.equal((html.match(/detail-image-heading/g)||[]).length,2);
     assert.ok(html.includes('id="reservar"'));assert.ok(html.includes('maps.google.com'));
   }

@@ -2,5 +2,5 @@ import { privateMetadata } from '@/lib/seo';
 
 export const metadata = privateMetadata;
 export default function AdminMetadataLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div className="panel-skin contents">{children}</div>;
 }

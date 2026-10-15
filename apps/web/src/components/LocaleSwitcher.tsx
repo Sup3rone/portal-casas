@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 
 const LOCALES = [
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'es', label: 'Español' },
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
 ] as const;
 
 export default function LocaleSwitcher() {
@@ -52,10 +52,9 @@ export default function LocaleSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 rounded-full border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:border-gray-400 dark:hover:border-gray-600"
+        className="flex min-h-11 items-center gap-1.5 rounded-full border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:border-gray-400 dark:hover:border-gray-600"
         aria-label={t('cambiarIdioma')}
       >
-        <span className="text-base leading-none">{actual.flag}</span>
         <span>{actual.code.toUpperCase()}</span>
         <span className={`text-xs transition-transform ${open ? 'rotate-180' : ''}`}>▼</span>
       </button>
@@ -70,7 +69,6 @@ export default function LocaleSwitcher() {
                 l.code === locale ? 'font-bold text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-200'
               }`}
             >
-              <span className="text-base">{l.flag}</span>
               {l.label}
               { l.code === locale && <span className="ml-auto text-gray-900 dark:text-gray-100">✓</span> }
             </button>

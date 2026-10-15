@@ -35,6 +35,9 @@ async function main(){
     for(const [path,detail]of [[`/${locale}`,false],[`/${locale}/casas`,false],[`/${locale}/casas/pa`,true]]){
       const html=await render(path,detail);
       assert.equal((html.match(/<footer /g)||[]).length,1);
+      assert.ok(html.includes('public-footer'));
+      for(const privatePath of ['/'+locale+'/panel','/'+locale+'/admin/tarifas']) assert.ok(!(await render(privatePath)).includes('public-footer'));
+      pathname=path;
       assert.ok(html.includes('hola@portalcasas.com'));
       assert.ok(html.includes('href="https://wa.me/5215512345678"'));
       assert.ok(html.includes('>+521 55 1234 5678</span>'));

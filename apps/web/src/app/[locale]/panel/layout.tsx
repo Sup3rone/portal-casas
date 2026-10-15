@@ -13,7 +13,7 @@ export default async function PanelLayout({ children, params }: { children: Reac
   const admin = await getTranslations({ locale, namespace: 'adminUsers' });
   const nav = await getTranslations({ locale, namespace: 'nav' });
   const content = await getTranslations({ locale, namespace: 'siteContent' });
-  return <main className="mx-auto max-w-6xl space-y-8 px-4 py-10">
+  return <main className="panel-skin mx-auto max-w-6xl space-y-8 px-4 py-10">
     <nav aria-label={t('title')} className="flex flex-wrap gap-6 border-b pb-4 dark:border-gray-700">
       {manager.role === 'COLLABORATOR' && <>
       <Link href="/panel" className="font-semibold text-green-700 dark:text-green-400">{t('properties')}</Link>

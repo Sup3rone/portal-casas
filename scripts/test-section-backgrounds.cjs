@@ -40,6 +40,11 @@ async function main(){
   setSession({user:{id:'admin'}});assert.equal((await route.PATCH(request({sectionBgInicio:ownUrl}),context)).status,200);
   memory.prepare('UPDATE "Property" SET titleEs=?,titleEn=?,titleFr=?,descEs=?,descEn=?,descFr=?,city=?,address=?,lat=20,lng=-100,maxGuests=4,bedrooms=2,bathrooms=1 WHERE id=?')
     .run('Casa','House','Maison','Texto','Text','Texte','City','Address','pa');
+  const retiredHero='https://store.public.blob.vercel-storage.com/retired-hero.jpg';
+  memory.prepare('INSERT INTO Media (id,propertyId,type,category,"order",url) VALUES (?,?,?,?,?,?)').run('retired-hero','pa','PHOTO','advertencias',10,retiredHero);
+  for(const section of ['destino','amenidades','habitaciones','lugar','advertencias']) {
+    memory.prepare('INSERT INTO PropertySection (propertyId,section,descriptionEs,descriptionEn,descriptionFr,heroMediaId) VALUES (?,?,?,?,?,?)').run('pa',section,'Contenido '+section,'Content '+section,'Contenu '+section,'retired-hero');
+  }
   const media=memory.prepare('SELECT * FROM "Media" WHERE propertyId=? ORDER BY "order"').all('pa');
   for(const locale of ['es','en','fr']){
     setLocale(locale);
@@ -52,9 +57,18 @@ async function main(){
     const stream=await renderToReadableStream(wrap(await Page({params:Promise.resolve({locale,slug:'pa'})})));await stream.allReady;
     const html=await new Response(stream).text();
     assert.equal((html.match(/data-section-background=/g)||[]).length,0);
+    assert.ok(!html.includes(retiredHero),'Portadas retiradas no generan imágenes ni precargas');
+    for(const section of ['destino','amenidades','habitaciones','lugar']) assert.ok(html.includes(`data-editorial-slide="${section}"`));
+    assert.ok(html.includes('https://store.public.blob.vercel-storage.com/own.jpg'),'Galería/fotos de contenido conservadas');
     assert.ok(!html.includes('dark:bg-gray-950/90'));assert.ok(html.includes('public-paper'));
     assert.equal((html.match(/section-background-photo /g)||[]).length,0);
-    assert.equal((html.match(/detail-image-heading/g)||[]).length,2);
+    assert.equal((html.match(/detail-image-heading/g)||[]).length,0);
+    assert.equal((html.match(/data-flow-background=/g)||[]).length,0);
+    assert.ok(!fs.readFileSync(path.join(__dirname,'../apps/web/src/app/[locale]/casas/[slug]/page.tsx'),'utf8').includes('rel="preload"')); // La galería conserva su priority legítimo.
+    const EditPage=load('apps/web/src/app/[locale]/panel/propiedades/[id]/page.tsx').default;
+    const editHtml=renderToStaticMarkup(wrap(await EditPage({params:Promise.resolve({locale,id:'pa'})})));
+    for(const field of fields) assert.ok(!editHtml.includes(`name="${field}"`));
+    assert.ok(!editHtml.includes(messages.panelSections.hero));
     assert.ok(html.includes('id="reservar"'));assert.ok(html.includes('maps.google.com'));
   }
   for(const field of fields)assert.equal((await route.PATCH(request({[field]:null}),context)).status,200);

@@ -8,6 +8,8 @@ import { panelRequest, buttonClass, inputClass } from './request';
 import TranslationDraftButton from './TranslationDraftButton';
 
 type Photo = { id: string; url: string; order: number; type: string };
+// Descontinuado en UI, vivo en BD; no se vacía heroMediaId al guardar narrativa.
+const SECTION_HERO_PICKER_ENABLED = false;
 const names = ['destino', 'amenidades', 'habitaciones', 'lugar', 'advertencias'] as const;
 const titles = { destino: 'destino', amenidades: 'amenidades', habitaciones: 'habitaciones', lugar: 'enLugar', advertencias: 'advertencias' } as const;
 
@@ -32,7 +34,7 @@ function SectionForm({ propertyId, name, value, photos }: { propertyId: string; 
     <h3 className="text-xl font-semibold">{details(titles[name])}</h3>
     <div className="grid gap-4 md:grid-cols-3">{(['descriptionEs', 'descriptionEn', 'descriptionFr'] as const).map(field =>
       <label key={field} className="block text-sm">{t(field)}<textarea name={field} maxLength={10000} rows={5} defaultValue={value?.[field] || ''} disabled={busy} className={inputClass} /><TranslationDraftButton source={field.slice(-2).toLowerCase() as 'es' | 'en' | 'fr'} prefix="description" disabled={busy} /></label>)}</div>
-    <label className="block text-sm">{t('hero')}<select value={hero} onChange={event => setHero(event.target.value)} disabled={busy} className={inputClass}>
+    {SECTION_HERO_PICKER_ENABLED && <><label className="block text-sm">{t('hero')}<select value={hero} onChange={event => setHero(event.target.value)} disabled={busy} className={inputClass}>
       <option value="">{t('noImage')}</option>
       {hero && !selected && <option value={hero}>{t('unavailable')}</option>}
       {photos.map(photo => <option key={photo.id} value={photo.id}>{t('photoOrder', { order: photo.order })} · {photo.id}</option>)}
@@ -42,13 +44,13 @@ function SectionForm({ propertyId, name, value, photos }: { propertyId: string; 
       aria-pressed={hero === photo.id} onClick={() => setHero(photo.id)} className="rounded-lg border p-2 dark:border-gray-700">
       <Image src={photo.url} alt={t('photoOrder', { order: photo.order })} width={80} height={56} unoptimized className="h-14 w-20 rounded object-cover" />
       <span className="text-sm">{t('photoOrder', { order: photo.order })}</span>
-    </button>)}</div>
+    </button>)}</div></>}
     {!photos.length && <p className="text-sm text-gray-600 dark:text-gray-300">{t('noPhotos')}</p>}
     <fieldset disabled={busy} className="space-y-3">
       <legend>{t('sectionPhotos')}</legend><p className="text-sm">{t('sectionPhotosHint')}</p>
       <button type="button" onClick={() => setPhotoIds([])} className={buttonClass}>{t('clearPhotos')}</button>
       <div className="flex flex-wrap gap-3">{photos.map(photo => <label key={photo.id} className="rounded-lg border p-2 dark:border-gray-700">
-        <input type="checkbox" checked={photoIds.includes(photo.id)} disabled={!photoIds.includes(photo.id) && photoIds.length >= 2}
+        <input type="checkbox" value={photo.id} checked={photoIds.includes(photo.id)} disabled={!photoIds.includes(photo.id) && photoIds.length >= 2}
           onChange={event => setPhotoIds(ids => event.target.checked ? [...ids, photo.id] : ids.filter(id => id !== photo.id))} />
         <Image src={photo.url} alt={t('photoOrder', { order: photo.order })} width={80} height={56} unoptimized className="h-14 w-20 rounded object-cover" />
         <span className="text-sm">{t('photoOrder', { order: photo.order })}{photoIds.includes(photo.id) ? ` · ${photoIds.indexOf(photo.id) + 1}` : ''}</span>

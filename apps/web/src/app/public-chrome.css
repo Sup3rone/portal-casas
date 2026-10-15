@@ -20,6 +20,10 @@ html.dark {
   --search-shadow: 0 8px 24px rgb(0 0 0 / 18%);
 }
 .public-header { background: var(--header-bg); border-color: var(--chrome-border); }
+.home-brand { --logo-color: #1a1a1a; }
+html.dark .home-brand { --logo-color: #ece7df; }
+.public-header .home-brand > span { color: var(--chrome-text); }
+.public-header .home-brand > span > span { color: var(--chrome-muted); }
 body:has(.property-detail) > nav.public-header,
 body:has(.property-detail) > nav.public-header.detail-nav-top {
   background: var(--header-bg);

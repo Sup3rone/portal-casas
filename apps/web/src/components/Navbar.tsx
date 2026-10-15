@@ -9,9 +9,19 @@ import LocaleSwitcher from './LocaleSwitcher';
 import ThemeToggle from './ThemeToggle';
 import PropertySearchForm from './PropertySearchForm';
 
+function AliaMonogram() {
+  return <svg role="img" aria-label="Logo Alia Forrent" viewBox="0 0 32 32"
+    width="24" height="20" fill="none" stroke="var(--logo-color)" strokeWidth="1.25"
+    strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+    <path d="M3 28 13 4l10 24M7 19h8m4 0h.25" />
+    <path d="M17 28V4h12M17 13h9" />
+  </svg>;
+}
+
 export default function Navbar() {
   const locale = useLocale();
-  const privatePage = /^\/(?:(?:es|en|fr)\/)?(?:panel|admin)(?:\/|$)/.test(usePathname());
+  const pathname = usePathname();
+  const privatePage = /^\/(?:(?:es|en|fr)\/)?(?:panel|admin)(?:\/|$)/.test(pathname);
   const t = useTranslations('nav');
   const searchText = useTranslations('home');
   const { data: session, status } = useSession();
@@ -71,8 +81,10 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between max-md:flex-wrap max-md:gap-4">
           {/* LOGO — izquierda */}
-          <Link href="/" className="text-xl font-semibold tracking-widest text-gray-900 dark:text-gray-100">
-            ALIA<span className="ml-1 text-gray-500 dark:text-gray-400">FOR</span>RENT
+          <Link href="/" className={`${privatePage ? '' : 'home-brand inline-flex items-center gap-[9px] '}text-xl font-semibold tracking-widest text-gray-900 dark:text-gray-100`}>
+            {!privatePage && <AliaMonogram />}
+            {!privatePage ? <span>ALIA<span className="ml-1 text-gray-500 dark:text-gray-400">FOR</span>RENT</span>
+              : <>ALIA<span className="ml-1 text-gray-500 dark:text-gray-400">FOR</span>RENT</>}
           </Link>
 
           {/* NAV LINKS + ACTIONS — derecha */}

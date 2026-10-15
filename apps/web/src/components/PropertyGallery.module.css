@@ -1,0 +1,11 @@
+.gallery { width: 100%; max-width: 64rem; margin-inline: auto; }
+.hero, .thumbnail { position: relative; display: block; overflow: hidden; border-radius: .5rem; background: var(--color-gray-800); cursor: pointer; }
+.hero { width: 100%; aspect-ratio: 16 / 9; }
+.photo { width: 100%; height: 100%; object-fit: cover; }
+.play { position: absolute; inset: 0; display: grid; place-items: center; color: white; background: rgb(0 0 0 / 30%); font-size: 2rem; }
+.strip { display: flex; gap: .5rem; overflow-x: auto; overscroll-behavior-x: contain; margin-top: .5rem; padding-block: .25rem; }
+.thumbnail { flex: 0 0 calc((100% - 1rem) / 3); min-width: 44px; min-height: 44px; aspect-ratio: 4 / 3; }
+.thumbnail[aria-pressed="true"] { outline: 3px solid var(--color-green-700); outline-offset: -3px; }
+.hero:focus-visible, .thumbnail:focus-visible, .arrow:focus-visible { outline: 3px solid var(--color-green-700); outline-offset: -3px; }
+.controls { display: flex; justify-content: space-between; margin-top: .25rem; }
+.arrow { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--color-green-700); color: white; font-size: 1.75rem; cursor: pointer; }

@@ -22,13 +22,13 @@ async function main() {
     const messages = JSON.parse(fs.readFileSync(path.join(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
     const wrap = child => React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } }, child);
     const html = renderToStaticMarkup(wrap(React.createElement(Gallery, { slides })));
-    assert.equal((html.match(/aria-haspopup="dialog"/g) ?? []).length, 8);
-    assert.equal((html.match(/loading="eager"/g) ?? []).length, 1, 'Solo la primera miniatura carga eager');
-    assert.equal((html.match(/loading="lazy"/g) ?? []).length, 6, 'Las otras seis imágenes cargan lazy; el video conserva su flujo');
+    assert.equal((html.match(/aria-haspopup="dialog"/g) ?? []).length, 1);
+    assert.equal((html.match(/loading="eager"/g) ?? []).length, 1, 'Solo la imagen principal carga eager');
+    assert.equal((html.match(/loading="lazy"/g) ?? []).length, 7, 'Las siete fotos de la franja cargan lazy; el video conserva su flujo');
     assert.ok(!html.includes('+47'));
     assert.ok(!html.includes('/images/photo-8.jpg'));
     const short = renderToStaticMarkup(wrap(React.createElement(Gallery, { slides: slides.slice(0, 3) })));
-    assert.equal((short.match(/aria-haspopup="dialog"/g) ?? []).length, 3);
+    assert.equal((short.match(/aria-haspopup="dialog"/g) ?? []).length, 1);
     assert.ok(html.includes('aria-modal="true"'));
     assert.ok(html.includes(messages.details.gallery.lightbox));
     assert.ok(html.includes('<video'));
@@ -70,39 +70,34 @@ async function main() {
     console.log(locale + ': mosaico, límite, video, mapa y share/copia/cancelación OK');
   }
   // Handlers reales: lightbox limitada y navegación circular/teclado entre 0 y 7.
-  let active = null;
-  mockModule('react', { ...React, useState: () => [active, next => { active = typeof next === 'function' ? next(active) : next; }], useRef: () => ({ current: null }), useEffect() {} });
+  let hooks=[], hookIndex=0;
+  mockModule('react', { ...React, useState: initial => {const slot=hookIndex++;if(!(slot in hooks))hooks[slot]=initial;return [hooks[slot], next => {hooks[slot]=typeof next==='function'?next(hooks[slot]):next;}];}, useRef: () => ({ current: null }), useEffect() {} });
   mockModule('next-intl', { useTranslations: () => (key, values) => key === 'posicion' ? `${values.number}/${values.count}` : key });
   const InteractiveGallery = load('apps/web/src/components/PropertyGallery-interactive.tsx', fs.readFileSync(path.join(__dirname, '../apps/web/src/components/PropertyGallery.tsx'), 'utf8')).default;
   const photos = Array.from({ length: 28 }, (_, i) => ({ url: `/test/${i}.jpg`, type: 'PHOTO' }));
-  const render = () => InteractiveGallery({ slides: photos });
+  const render = () => {hookIndex=0;return InteractiveGallery({ slides: photos });};
   function find(node, predicate) {
     if (!node || typeof node !== 'object') return;
     if (predicate(node)) return node;
     for (const child of [node.props?.children].flat(Infinity)) { const result = find(child, predicate); if (result) return result; }
   }
   let tree = render();
-  const grid = tree.props.children[0];
-  assert.equal(grid.props.children.length, 8);
-  grid.props.children[7].props.onClick({ currentTarget: { focus() {} } });
-  tree = render(); assert.equal(active, 7);
-  assert.equal(find(tree, node => node.props?.role === 'status').props.children.join(''), '8/8');
-  assert.ok(find(tree, node => node.props?.src === '/test/7.jpg'));
-  find(tree, node => node.props?.['aria-label'] === 'siguiente').props.onClick();
-  assert.equal(active, 0);
-  find(render(), node => node.props?.['aria-label'] === 'anterior').props.onClick();
-  assert.equal(active, 7);
-  find(render(), node => node.type === 'dialog').props.onKeyDown({ key: 'ArrowRight', preventDefault() {} });
-  assert.equal(active, 0);
-  assert.ok(!find(render(), node => node.props?.src === '/test/8.jpg'));
-  active = 7;
-  const renderFull = () => InteractiveGallery({ slides: photos, fullCollection: true });
-  find(renderFull(), node => node.props?.['aria-label'] === 'siguiente').props.onClick();
-  assert.equal(active, 8);
-  assert.ok(find(renderFull(), node => node.props?.src === '/test/8.jpg'));
-  assert.equal(find(renderFull(), node => node.props?.role === 'status').props.children.join(''), '9/28');
+  const thumbnails=find(tree,node=>node.props?.className==='strip');
+  assert.equal(thumbnails.props.children.length,8);
+  thumbnails.props.children[7].props.onClick();
+  tree=render();assert.equal(hooks[0],7,'La miniatura cambia la principal');assert.equal(hooks[1],null,'Seleccionar no abre el modal');
+  assert.equal(find(tree,node=>node.props?.className==='hero').props.children.props.src,'/test/7.jpg');
+  find(tree,node=>node.props?.className==='hero').props.onClick({currentTarget:{focus(){}}});
+  tree=render();assert.equal(hooks[1],7);
+  assert.equal(find(tree,node=>node.props?.role==='status').props.children.join(''),'8/8');
+  find(tree,node=>node.props?.['aria-label']==='siguiente'&&node.props.className!=='arrow').props.onClick();assert.equal(hooks[1],0);
+  find(render(),node=>node.type==='dialog').props.onKeyDown({key:'ArrowLeft',preventDefault(){}});assert.equal(hooks[1],7);
+  assert.ok(!find(render(),node=>node.props?.src==='/test/8.jpg'));
+  const renderFull=()=>{hookIndex=0;return InteractiveGallery({slides:photos,fullCollection:true});};
+  find(renderFull(),node=>node.props?.['aria-label']==='siguiente'&&node.props.className!=='arrow').props.onClick();assert.equal(hooks[1],8);
+  assert.equal(find(renderFull(),node=>node.props?.role==='status').props.children.join(''),'9/28');
   // Handler del botón: contenido calculado y feedback de ubicación/página correctos.
-  let hooks,index;
+  let index;
   mockModule('react',{...React,useEffect(){},useState(initial){const slot=index++;if(!(slot in hooks))hooks[slot]=initial;return [hooks[slot],value=>{hooks[slot]=value;}];}});
   const InteractiveShare=load('apps/web/src/components/PropertyShareButton-interactive.tsx',fs.readFileSync(path.join(__dirname,'../apps/web/src/components/PropertyShareButton.tsx'),'utf8')).default;
   const oldNavigator=Object.getOwnPropertyDescriptor(global,'navigator'),oldWindow=global.window;

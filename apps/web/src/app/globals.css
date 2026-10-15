@@ -361,7 +361,10 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 }
 
 /* Experimento fullpage: misma estructura, una escena por gesto cuando cabe. */
-html:has(.detail-fullpage) { scroll-snap-type: y mandatory; }
+html:has(.detail-fullpage[data-fullpage-enabled="true"]) { scroll-snap-type: y mandatory; }
+/* Pausa reversible: conservar la presentación sin capturar el scroll nativo. */
+html:has(.detail-fullpage[data-fullpage-enabled="false"]) { scroll-snap-type: none; }
+.detail-fullpage[data-fullpage-enabled="false"] :is([data-detail-section], [data-editorial-slide], [data-editorial-flow], #reservar) { scroll-snap-align: none; }
 html:has(.detail-fullpage).detail-free-scroll { scroll-snap-type: none; }
 .detail-fullpage { height: auto; overflow: visible; scroll-behavior: smooth; }
 .detail-fullpage #reservar { height: auto !important; min-height: 0 !important; max-height: none; scroll-snap-align: start; scroll-margin-top: 0; padding-top: max(24px, calc(var(--detail-nav-height, 88px) + 12px)); }

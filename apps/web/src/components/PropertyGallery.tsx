@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import Reveal from './Reveal';
+import styles from './PropertyGallery.module.css';
 
 type Slide = { url: string; type: 'PHOTO' | 'VIDEO' };
 const DETAIL_GALLERY_LIMIT = 8;
@@ -11,6 +12,8 @@ const DETAIL_GALLERY_LIMIT = 8;
 export default function PropertyGallery({ slides: allSlides, fullCollection = false }: { slides: Slide[]; fullCollection?: boolean }) {
   const slides = fullCollection ? allSlides : allSlides.slice(0, DETAIL_GALLERY_LIMIT);
   const t = useTranslations('details.gallery');
+  const [selected, setSelected] = useState(0);
+  const stripRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -45,22 +48,43 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
 
   return (
     <>
-      <Reveal className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
-        {slides.slice(0, DETAIL_GALLERY_LIMIT).map((slide, i) => {
-          return (
-            <button key={`${slide.url}-${i}`} type="button" aria-haspopup="dialog"
-              aria-label={t(slide.type === 'VIDEO' ? 'abrirVideo' : 'abrirFoto', { number: i + 1 })}
-              onClick={event => { openerRef.current = event.currentTarget; setIndex(i); }}
-              className="relative aspect-[4/3] min-w-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700">
-              {slide.type === 'VIDEO' ? (
-                <><video src={slide.url} preload="metadata" muted playsInline aria-hidden="true" className="h-full w-full object-cover" />
-                  <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-black/30 dark:bg-black/50 text-3xl text-white dark:text-gray-100">▶</span></>
-              ) : (
-                <Image src={slide.url} alt={t('foto', { number: i + 1 })} fill unoptimized loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : 'auto'} sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-cover" />
-              )}
-            </button>
-          );
-        })}
+      <Reveal className={styles.gallery}>
+        <button type="button" aria-haspopup="dialog"
+          aria-label={t(slides[selected].type === 'VIDEO' ? 'abrirVideo' : 'abrirFoto', { number: selected + 1 })}
+          onClick={event => { openerRef.current = event.currentTarget; setIndex(selected); }}
+          className={styles.hero}>
+          {slides[selected].type === 'VIDEO' ? (
+            <><video src={slides[selected].url} preload="metadata" muted playsInline aria-hidden="true" className={styles.photo} />
+              <span aria-hidden="true" className={styles.play}>▶</span></>
+          ) : (
+            <Image src={slides[selected].url} alt={t('foto', { number: selected + 1 })} fill unoptimized
+              loading="eager" fetchPriority={selected === 0 ? 'high' : 'auto'}
+              sizes="(max-width: 1024px) 100vw, 1024px" className={styles.photo} />
+          )}
+        </button>
+        {slides.length > 1 && <>
+          <div ref={stripRef} className={styles.strip}>
+            {slides.map((slide, i) => (
+              <button key={slide.url + '-' + i} type="button" aria-pressed={selected === i}
+                aria-label={t(slide.type === 'VIDEO' ? 'abrirVideo' : 'abrirFoto', { number: i + 1 })}
+                onClick={() => setSelected(i)} className={styles.thumbnail}>
+                {slide.type === 'VIDEO' ? (
+                  <><video src={slide.url} preload="metadata" muted playsInline aria-hidden="true" className={styles.photo} />
+                    <span aria-hidden="true" className={styles.play}>▶</span></>
+                ) : (
+                  <Image src={slide.url} alt={t('foto', { number: i + 1 })} fill unoptimized loading="lazy"
+                    sizes="(max-width: 1024px) 33vw, 336px" className={styles.photo} />
+                )}
+              </button>
+            ))}
+          </div>
+          {slides.length > 3 && <div className={styles.controls}>
+            <button type="button" aria-label={t('anterior')} className={styles.arrow}
+              onClick={() => stripRef.current?.scrollBy({ left: -stripRef.current.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}>‹</button>
+            <button type="button" aria-label={t('siguiente')} className={styles.arrow}
+              onClick={() => stripRef.current?.scrollBy({ left: stripRef.current.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}>›</button>
+          </div>}
+        </>}
       </Reveal>
 
       <dialog ref={dialogRef} aria-label={t('lightbox')} aria-modal="true"

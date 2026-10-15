@@ -68,6 +68,7 @@ async function main() {
     assert.equal(presentation.props.scenes,undefined,'El mosaico no entra al stage');
     assert.equal(presentation.props.afterScenes,undefined,'Mapa/reserva no entran al stage');
     const flow=find(tree,node=>node.props?.['data-detail-flow']!==undefined);
+    assert.equal(flow.props['data-fullpage-enabled'],'false','Detalle usa scroll nativo con experimento desactivado');
     const children=[flow.props.children].flat(Infinity).filter(Boolean);
     assert.ok(flow.props.className.includes('detail-snap-container'));
     assert.ok(!find(flow,node=>node.type===FooterFlow),'Footer después del contenedor snap');
@@ -88,7 +89,7 @@ async function main() {
     assert.equal((html.match(/data-flow-background=/g)||[]).length,4);
     assert.equal((html.match(/data-editorial-panel=/g)||[]).length,0);
     assert.equal((html.match(/data-scene-stop="true"/g)||[]).length,0);
-    assert.equal((html.match(/aria-haspopup="dialog"/g)||[]).length,6);
+    assert.equal((html.match(/aria-haspopup="dialog"/g)||[]).length,1);
   }
   memory.prepare('DELETE FROM "PropertySection"').run();
   let tree = await Page({params:Promise.resolve({locale:'es',slug:'pa'})});
@@ -243,7 +244,8 @@ async function main() {
     assert.match(detailCss,/background-color: var\(--background\); padding-bottom: clamp\(4rem, 8vh, 6rem\);/);
     assert.match(detailCss,/background: linear-gradient\(to bottom, transparent, var\(--background\)\); pointer-events: none;/);
     assert.match(detailCss,/detail-free-scroll \{ scroll-snap-type: none;/);
-    assert.match(detailCss,/html:has\(\.detail-fullpage\) \{ scroll-snap-type: y mandatory;/);
+    assert.match(detailCss,/html:has\(\.detail-fullpage\[data-fullpage-enabled="true"\]\) \{ scroll-snap-type: y mandatory;/);
+    assert.match(detailCss,/html:has\(\.detail-fullpage\[data-fullpage-enabled="false"\]\) \{ scroll-snap-type: none;/);
     assert.match(detailCss,/min-height: 100vh !important;[^}]*scroll-snap-align: start;[^}]*display: flex;/);
     assert.match(detailCss,/\.detail-independent > \.detail-screen,[\s\S]*?height: auto;[\s\S]*?min-height: 100vh !important;/);
     assert.match(detailCss,/\.detail-screen \{[^}]*min-height: 0;[^}]*padding: 1\.5rem 1rem;/);
@@ -297,6 +299,12 @@ async function main() {
     effects=[];motion.matches=false;
     mockModule('react',{...React,useRef:()=>({current:transitionRoot}),useEffect:effect=>effects.push(effect)});
     const Transitions=load('apps/web/src/components/EditorialPresentation-transitions-test.tsx',editorialSource).DetailSectionTransitions;
+    transitionRoot.matches=selector=>{ assert.equal(selector,'.detail-fullpage[data-fullpage-enabled="true"]'); return false; };
+    assert.equal(effects.length,0);
+    Transitions({className:'detail-fullpage','data-fullpage-enabled':'false',children:'Mounted'});
+    assert.equal(effects[0](),undefined,'Experimento apagado: no registrar interceptores wheel/touch');
+    delete transitionRoot.matches;
+    effects=[];
     const transitionUI=Transitions({className:'detail-snap-container',children:'Mounted'}),disposeTransitions=effects[1]();
     assert.equal(transitionUI.props.children,'Mounted');assert.equal(observerOptions.root,null);
     function visibleSections(heights){sectionObserver(transitionSections.map((target,index)=>({target,isIntersecting:heights[index]>0,intersectionRect:{height:heights[index]}})));}

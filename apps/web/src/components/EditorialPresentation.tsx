@@ -160,7 +160,7 @@ export function DetailSectionTransitions({ children, ...props }: HTMLAttributes<
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const container = root.current;
-    if (!container?.matches?.('.detail-fullpage')) return;
+    if (!container?.matches?.('.detail-fullpage[data-fullpage-enabled="true"]')) return;
     return attachFullpageNavigation(container, window.matchMedia('(prefers-reduced-motion: reduce)'));
   }, []);
   useEffect(() => {

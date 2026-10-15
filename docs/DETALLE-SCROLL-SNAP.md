@@ -1,5 +1,19 @@
 # Detalle por escenas y footer en flujo normal
 
+## Estado vigente — 15 Oct 2026: fullpage desactivado en ejecución
+
+La pausa documental anterior no apagaba el mecanismo: el commit6cc01d0ca activó `.detail-fullpage`, listeners no pasivos wheel/touchmove con preventDefault y snap mandatory en html. Esto consumía gestos y forzaba saltos/inercia en vez de scroll nativo. El contenedor ya tenía height:auto/overflow:visible; no era un segundo scrollbar. El overflow:hidden al abrir lightbox es intencional y se conserva.
+
+La página define `DETAIL_FULLPAGE_ENABLED = false` y lo comunica mediante `data-fullpage-enabled="false"`. EditorialPresentation registra attachFullpageNavigation únicamente con ese atributo en true; globals.css activa snap mandatory únicamente en true y lo desactiva explícitamente en false. Se conservan la clase visual, las secciones y sus alturas/fondos, transiciones locales, galería, contenido, navbar, botón↑ y reserva/footer. No se borra el motor: sus pruebas aisladas continúan pasando.
+
+Reactivación reversible: cambiar **solo** `DETAIL_FULLPAGE_ENABLED` a true en `apps/web/src/app/[locale]/casas/[slug]/page.tsx`, después de aprobación y QA. Esto habilita conjuntamente interceptores y snap; no basta con cambiar CSS. El experimento vuelve a los riesgos documentados de gestos, foco y reserva. No modificar defaults de otras páginas ni el bloqueo de scroll propio del lightbox.
+
+Validación: test-detail-scroll comprueba flag false en SSR es/en/fr y que el efecto apagado no registre interceptores; test-detail-fullpage conserva el motor recuperable. TypeScript y ESLint de archivos afectados. Reproducción manual: abrir detalle, rueda suave y rápida de inicio a footer y regreso; teclado PgDn/PgUp/Espacio y flechas fuera de inputs;375px swipe vertical; CTA#reservar y↑; lightbox abre/cierra y devuelve scroll; reduced-motion. Debe permitir posiciones intermedias sin salto obligatorio. Las secciones siguen siendo visualmente full-screen: desactivar el avance no reestructura el diseño. QA de teléfono físico no realizada.
+
+Las entradas anteriores son históricas y su snap activo no describe el estado actual.
+
+QA navegador con los controladores reales y contenido simulado, sin Neon: snap computado none; rueda parcial deja scrollY252, PageDown882 (viewport720, posiciones intermedias permitidas); End llega a3912, igual al máximo del documento, footer visible sin rebote. Ancho375px y botón↑ devuelve scrollY0, snap none. No es una prueba de propiedad real, mapa/reserva reales ni teléfono táctil físico; esos controles no se modificaron. Captura de fin de recorrido disponible como artefacto QA. El navegador emitió errores de telemetría propios de su entorno, sin impedir estas comprobaciones locales.
+
 ## Estado vigente al cierre — 13 Oct 2026: FULLPAGE PAUSADO
 
 Pausado para nuevos rediseños; no se desactiva código en este cierre documental. Estado implementado: secciones independientes mosaico → editoriales con datos → mapa/notas si existen → reserva de altura natural → footer normal fuera del escenario. Scroll del documento, snap/avance fullpage solo donde cabe, liberación al entrar en reserva; #reservar y ↑, navbar, lightbox y estado de fechas/campos conservados. Las descripciones de stage compartido/scroll interno de capítulos antiguos son HISTÓRICAS y no sustituyen este estado vigente.

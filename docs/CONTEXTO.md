@@ -1,5 +1,9 @@
 # Contexto — Portal Casas
 
+## Detalle: scroll nativo restaurado — 15 Oct 2026
+
+Fullpage ahora está desactivado en ejecución, no solo pausado documentalmente: `DETAIL_FULLPAGE_ENABLED = false` en casas/[slug]/page.tsx impide los listeners wheel/touchmove con preventDefault y el snap mandatory del documento. El motor permanece conservado en EditorialPresentation; para reactivarlo, cambiar el flag a true tras aprobación/QA. Se mantienen las clases visuales, fondos, alturas, contenido, galería, navbar y↑. Diagnóstico/origen6cc01d0ca y procedimiento en DETALLE-SCROLL-SNAP.md. La pausa del cierre13-Oct descrita abajo no apagaba código; esta actualización la sustituye en cuanto al comportamiento del scroll.
+
 ## Estado vigente al cierre13-Oct-2026
 
 Todos los P1 de implementación cerrados; resumen y deuda P2 en PROGRESO.md. Fullpage PAUSADO para nuevos ajustes: el comportamiento existente permanece, documentado en DETALLE-SCROLL-SNAP.md. Decisión de diseño vigente: vidrio oscuro; el CSS sigue temporalmente en blanco35% de comparación, pendiente de aplicar la decisión en una tarea de código. Conflictos documentales resueltos conservando ambas secciones complementarias, con fallback SEO actualizado. No hay deploy, migraciones ni cambios de app en este cierre.

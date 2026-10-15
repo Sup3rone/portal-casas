@@ -1,6 +1,7 @@
+import { parseFeaturedSelection } from './featured-selection';
 import 'server-only';
 import { db, siteContent, properties, media } from '@portal/db';
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { requireAdmin, AccessError } from './property-access';
 import { objectBody, PanelValidationError } from './panel-validation';
 
@@ -25,7 +26,7 @@ export function siteContentInput(input: unknown): SiteContentValues {
     } else if (key === 'contact_whatsapp') {
       if (value && !/^[0-9]{8,15}$/.test(value)) throw new SiteContentError('INVALID_CONTACT_WHATSAPP');
     } else if (key === 'featured_property_id') {
-      if (value.length > 200) throw new SiteContentError('INVALID_FEATURED_PROPERTY');
+      if (parseFeaturedSelection(value) === null) throw new SiteContentError('INVALID_FEATURED_PROPERTY');
     } else if (value) {
       try {
         const url = new URL(value);
@@ -54,9 +55,10 @@ export async function saveSiteContent(input: unknown) {
       if (!(key in supplied)) values[key] = previous[key];
     }
   }
-  if (values.featured_property_id) {
-    const [property] = await db.select({ id: properties.id }).from(properties).where(and(eq(properties.id, values.featured_property_id), eq(properties.published, true))).limit(1);
-    if (!property) throw new SiteContentError('INVALID_FEATURED_PROPERTY');
+  const featuredIds = parseFeaturedSelection(values.featured_property_id)!;
+  if (featuredIds.length) {
+    const selected = await db.select({ id: properties.id }).from(properties).where(and(inArray(properties.id, featuredIds), eq(properties.published, true)));
+    if (selected.length !== featuredIds.length) throw new SiteContentError('INVALID_FEATURED_PROPERTY');
   }
   // Guardado atómico de las claves; revalidar ADMIN dentro del statement.
   const rows = await db.execute(sql`
@@ -92,4 +94,9 @@ export async function readFeaturedProperty(id: string) {
         case when candidate."isCover" then candidate."coverOrder" else candidate."order" end asc, candidate.id asc limit 1
     )`)).where(and(eq(properties.id, id), eq(properties.published, true))).limit(1);
   return row && row.photo.url ? row : null;
+}
+
+export async function readFeaturedProperties(value: string) {
+  const rows = await Promise.all((parseFeaturedSelection(value) ?? []).map(readFeaturedProperty));
+  return rows.filter((row): row is NonNullable<typeof row> => row !== null);
 }

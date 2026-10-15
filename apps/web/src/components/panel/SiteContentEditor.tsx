@@ -4,12 +4,14 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import TranslationDraftButton from './TranslationDraftButton';
 import { useRouter } from '@/i18n/navigation';
+import { parseFeaturedSelection, serializeFeaturedSelection } from '@/lib/featured-selection';
 import type { SiteContentValues } from '@/lib/site-content';
 import { panelRequest, panelResponseError, panelErrorKey, inputClass, buttonClass } from './request';
 import { optimizePhoto, photoMetadata, photoTypes, photoCompression, PhotoUploadError, type PhotoType } from '@/lib/photo-upload';
 
 export default function SiteContentEditor({ content, properties }: { content: SiteContentValues; properties: { id: string; label: string; city: string }[] }) {
   const t = useTranslations('siteContent'), panel = useTranslations('panel'), router = useRouter();
+  const [featuredIds, setFeaturedIds] = useState(() => parseFeaturedSelection(content.featured_property_id) ?? []);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   const uploader = useTranslations('photoUpload');
   const [imageUrl, setImageUrl] = useState(content.listing_background_image);
@@ -51,7 +53,7 @@ export default function SiteContentEditor({ content, properties }: { content: Si
     event.preventDefault(); setBusy(true); setMessage('');
     const form = new FormData(event.currentTarget);
     try {
-      await panelRequest('/api/panel/site-content', 'PUT', Object.fromEntries(Object.keys(content).map(key => [key, form.get(key)])));
+      await panelRequest('/api/panel/site-content', 'PUT', { ...Object.fromEntries(Object.keys(content).map(key => [key, form.get(key)])), featured_property_id: serializeFeaturedSelection(featuredIds) });
       setMessage('saved'); router.refresh();
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
@@ -71,13 +73,14 @@ export default function SiteContentEditor({ content, properties }: { content: Si
         <input name="contact_whatsapp" type="tel" inputMode="numeric" pattern="[0-9]{8,15}" minLength={8} maxLength={15} title={t('contactWhatsappHint')} defaultValue={content.contact_whatsapp} className={inputClass} />
       </label>
       <p className="text-sm text-gray-600 dark:text-gray-300">{t('contactWhatsappHint')}</p>
-      <label className="block text-sm">{t('featuredLabel')}
-        <select name="featured_property_id" defaultValue={content.featured_property_id} className={inputClass}>
+      {Array.from({ length: 4 }, (_, index) => (<label key={index} className="block text-sm">{t('featuredLabel')} {index + 1}
+        <select name="featured_property_id" value={featuredIds[index] || ''} onChange={event => setFeaturedIds(current => Array.from({ length: 4 }, (_, slot) => slot === index ? event.target.value : current[slot] || ''))} className={inputClass}>
           <option value="">{t('featuredNone')}</option>
-          {content.featured_property_id && !properties.some(property=>property.id===content.featured_property_id) && <option value={content.featured_property_id} disabled>{t('featuredUnavailable')}</option>}
-          {properties.map(property=><option key={property.id} value={property.id}>{property.label} · {property.city}</option>)}
+          {featuredIds[index] && !properties.some(property=>property.id===featuredIds[index]) && <option value={featuredIds[index]} disabled>{t('featuredUnavailable')}</option>}
+          {properties.map(property=><option key={property.id} value={property.id} disabled={featuredIds.some((id, slot) => slot !== index && id === property.id)}>{property.label} · {property.city}</option>)}
         </select>
       </label>
+      ))}
       <p className="text-sm text-gray-600 dark:text-gray-300">{t('featuredHint')}</p>
       <label className="block text-sm">{t('videoLabel')}
         <input name="home_background_video" type="url" pattern="https://.+" maxLength={2048} defaultValue={content.home_background_video} className={inputClass} />

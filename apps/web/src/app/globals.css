@@ -84,6 +84,36 @@ html { scroll-behavior: smooth; }
 .reveal.about-reveal.reveal-visible { opacity: 1; transform: scale(1); }
 
 .home-featured-photo { transition: transform .3s ease-out; }
+.home-featured-image {
+  --featured-veil: rgb(0 0 0 / 28%);
+  --featured-text: #fff;
+  --featured-text-scrim: rgb(0 0 0 / 60%);
+  --featured-reveal-duration: 200ms;
+  display: flex;
+  align-items: flex-end;
+  min-height: min-content;
+}
+.home-featured-veil { background: linear-gradient(to bottom, transparent, var(--featured-veil) 40%, var(--featured-text-scrim)); opacity: 0; pointer-events: none; transition: opacity var(--featured-reveal-duration) ease-out; }
+.home-featured-content {
+  z-index: 1;
+  color: var(--featured-text);
+  text-shadow: 0 1px 4px rgb(0 0 0 / 85%);
+}
+.home-featured-content p { color: var(--featured-text); }
+.home-featured-title { font-size: clamp(1.6875rem, 4vw, 2.625rem); }
+.home-featured-subtitle { font-size: clamp(.9375rem, 1.07vw, .9625rem); }
+.home-featured-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; margin-top: .75rem; font-size: .875rem; line-height: 1.5; }
+.home-featured-reveal { opacity: 0; visibility: hidden; max-height: 0; overflow: hidden; transform: translateY(6px); transition: opacity var(--featured-reveal-duration) ease-out, transform var(--featured-reveal-duration) ease-out, max-height var(--featured-reveal-duration) ease-out, visibility var(--featured-reveal-duration); }
+.home-featured-image:is(:focus-visible, [data-revealed]) .home-featured-reveal { opacity: 1; visibility: visible; max-height: 15rem; transform: none; }
+.home-featured-image:is(:focus-visible, [data-revealed]) .home-featured-veil { opacity: 1; }
+.home-featured-cta { display: flex; width: fit-content; min-height: 44px; align-items: center; justify-content: center; margin: .75rem auto 0; padding-inline: 1rem; border: 1px solid var(--featured-text); border-radius: 999px; color: var(--featured-text); font-size: .9375rem; }
+@media (hover: hover) and (pointer: fine) {
+  .home-featured-image:is(:hover, :focus-visible) .home-featured-reveal { opacity: 1; visibility: visible; max-height: 15rem; transform: none; }
+  .home-featured-image:is(:hover, :focus-visible) .home-featured-veil { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-featured-veil, .home-featured-reveal { transition: none; transform: none; }
+}
 @media (hover: hover) and (pointer: fine) {
   .home-featured-image:hover .home-featured-photo { transform: scale(1.03); }
 }

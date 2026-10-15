@@ -45,17 +45,59 @@ async function main(){
     assert.ok(html.includes('https://test.invalid/cover.jpg'));
     assert.ok(!html.includes('https://test.invalid/second.jpg'));
     assert.ok(html.includes(`href="/${locale}/casas/pa"`));
-    assert.ok(html.includes(messages.properties.bathrooms));assert.ok(html.includes('…'));
+    assert.ok(html.includes(messages.common.verMas));
+    const card=html.match(/<a[^>]*class="home-featured-image [\s\S]*?<\/a>/)?.[0];
+    assert.ok(card && card.includes('home-featured-description'));
+    assert.ok(card.includes(locale==='es'?'descripción':locale==='en'?'description':'description FR'));
+    assert.ok(card.includes('class="home-featured-cta"'));
+    assert.ok(card.match(/<div class="home-featured-reveal">[\s\S]*?<\/div>/)?.[0].includes('home-featured-cta'),'CTA dentro del bloque revelado');
+    assert.ok(!card.includes('from-black/80'),'Sin oscurecimiento duplicado de toda la foto');
+    assert.equal((card.match(/<a\s/g)||[]).length,1,'Un único enlace por tarjeta');
+    assert.ok(!card.includes('<button'),'Sin botón/enlace interactivo anidado');
+    assert.ok(card.includes('aria-label='));
+    assert.ok(html.includes(messages.properties.guests));assert.ok(html.includes('font-serif'));assert.ok(html.includes('loading="lazy"'));
     assert.ok(html.indexOf(messages.siteContent.featuredTitle)>html.indexOf('home-video-closing'));
     assert.ok(html.includes('md:grid-cols-2'));assert.ok(html.includes('about-reveal'));
     const editor=await render(locale,Page);
     assert.ok(editor.includes('name="featured_property_id"'));
     assert.match(editor,/<option(?=[^>]*value="pa")(?=[^>]*selected="")[^>]*>/);assert.ok(!editor.includes('value="hidden"'));
   }
+  // Hasta cuatro selecciones en la misma clave, ordenadas y sin duplicados.
+  const { parseFeaturedSelection, serializeFeaturedSelection }=load('apps/web/src/lib/featured-selection.ts');
+  assert.deepEqual(parseFeaturedSelection('pa'),['pa']);
+  assert.deepEqual(parseFeaturedSelection(''),[]);
+  assert.equal(serializeFeaturedSelection(['','pa','','pc']),'["pa","pc"]');
+  for(const value of ['[','["pa","pa"]','[1]','["pa","pb","pc","pd","pe"]']) {
+    assert.equal(parseFeaturedSelection(value),null);
+    assert.equal((await put({...content,featured_property_id:value})).status,400);
+  }
+  for(const id of ['pc','pd','pe']) {
+    memory.prepare('INSERT INTO Property (id,ownerId,published,slug,titleEs,titleEn,titleFr,maxGuests) VALUES (?,?,?,?,?,?,?,?)').run(id,'a',1,id,id,id,id,6);
+    insert.run('photo-'+id,id,'https://test.invalid/'+id+'.jpg','PHOTO',0,0,null);
+  }
+  const selection=JSON.stringify(['pe','pa','pc','pd']);
+  assert.equal((await put({...content,featured_property_id:selection})).status,200);
+  assert.equal((await (await api.GET()).json()).featured_property_id,selection);
+  for(const locale of ['es','en','fr']) {
+    const html=await render(locale,Home);
+    assert.equal((html.match(/class="home-featured-image /g)||[]).length,4);
+    const positions=['pe','pa','pc','pd'].map(id=>html.indexOf('href="/'+locale+'/casas/'+id+'"'));
+    assert.ok(positions.every((position,index)=>position>=0&&(index===0||position>positions[index-1])));
+    const editor=await render(locale,Page);
+    assert.equal((editor.match(/name="featured_property_id"/g)||[]).length,4);
+  }
+  memory.prepare('UPDATE Property SET published=0 WHERE id=?').run('pc');
+  assert.equal((await put({...content,featured_property_id:selection})).status,400);
+  assert.equal(((await render('es',Home)).match(/class="home-featured-image /g)||[]).length,3);
+  memory.prepare('DELETE FROM Property WHERE id=?').run('pd');
+  assert.equal(((await render('es',Home)).match(/class="home-featured-image /g)||[]).length,2);
+  assert.equal((await put(content)).status,200); // Recuperar selección única para las regresiones siguientes.
   memory.prepare('UPDATE Media SET isCover=0,coverOrder=NULL WHERE propertyId=?').run('pa');
   assert.equal((await readFeaturedProperty('pa')).photo.id,'photo-first');
   memory.prepare('UPDATE Property SET titleEn=?,descEn=? WHERE id=?').run('','','pa');
-  const fallback=await render('en',Home);assert.ok(fallback.includes('Casa ES'));assert.ok(fallback.includes(briefDescription('descripción '.repeat(30))));
+  const fallback=await render('en',Home);assert.ok(fallback.includes('Casa ES'));
+  assert.ok(!fallback.includes('class="home-featured-description"'),'Descripción vacía no inventa texto');
+  assert.ok(fallback.includes('home-featured-cta'));
   memory.prepare('UPDATE Property SET published=0 WHERE id=?').run('pa');
   assert.equal(await readFeaturedProperty('pa'),null);
   assert.ok(!(await render('en',Home)).includes('home-featured-image'));
@@ -71,6 +113,17 @@ async function main(){
   const css=fs.readFileSync('apps/web/src/app/globals.css','utf8');
   assert.match(css,/home-featured-image:hover .home-featured-photo \{ transform: scale\(1\.03\)/);
   assert.match(css,/@media \(prefers-reduced-motion: reduce\) \{\s*.home-featured-image:hover .home-featured-photo \{ transform: none/);
+  assert.match(css, /--featured-veil: rgb\(0 0 0 \/ 28%\)/);
+  assert.match(css, /-webkit-line-clamp: 3/);
+  assert.match(css, /home-featured-image:is\(:hover, :focus-visible\)/);
+  assert.match(css, /home-featured-cta \{[^}]*min-height: 44px/);
+  assert.match(css, /prefers-reduced-motion: reduce\) \{\s*\.home-featured-veil, \.home-featured-reveal \{ transition: none; transform: none;/);
+  assert.match(css, /home-featured-reveal \{[^}]*opacity: 0; visibility: hidden; max-height: 0/);
+  assert.ok(css.includes('[data-revealed]'));
+  // Scrim inferior revelado: 60% negro detrás del texto blanco.
+  const alpha=Number(css.match(/--featured-text-scrim: rgb\(0 0 0 \/ (\d+)%\)/)[1])/100;
+  const channel=1-alpha,luminance=channel<=.04045?channel/12.92:((channel+.055)/1.055)**2.4;
+  assert.ok(1.05/(luminance+.05)>=4.5,'Texto sobre fotografía clara cumple AA');
   // CHECK propuesto admite la sexta clave sin abrir el catálogo a claves arbitrarias.
   const sql=fs.readFileSync('scripts/sql/site-content-featured.sql','utf8');
   const check=sql.match(/CHECK \(([\s\S]*?)\);/)[1];

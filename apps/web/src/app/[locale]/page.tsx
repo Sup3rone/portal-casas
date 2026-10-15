@@ -3,10 +3,10 @@ import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
 // src/app/[locale]/page.tsx
 import { getTranslations } from 'next-intl/server';
 import Reveal from '@/components/Reveal';
-import { readSiteContent, readFeaturedProperty, briefDescription } from '@/lib/site-content';
+import { readSiteContent, readFeaturedProperties } from '@/lib/site-content';
 import HomeVideoMotion from '@/components/HomeVideoMotion';
 import Image from 'next/image';
-import { Link } from '@/i18n/navigation';
+import HomeFeaturedLink from '@/components/HomeFeaturedLink';
 import { pageMetadata } from '@/lib/seo';
 import { publicFrenchText } from '@/i18n/public-french-text';
 
@@ -25,10 +25,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const content = await readSiteContent();
   const about = locale === 'fr' ? publicFrenchText(content.about_fr) : content[locale === 'en' ? 'about_en' : 'about_es'];
   const social = await getTranslations({ locale, namespace: 'siteContent' });
-  const featured = await readFeaturedProperty(content.featured_property_id);
+  const common = await getTranslations({ locale, namespace: 'common' });
+  const featured = await readFeaturedProperties(content.featured_property_id);
   const labels = await getTranslations({ locale, namespace: 'properties' });
-  const featuredTitle = featured && ((locale === 'en' ? featured.property.titleEn : locale === 'fr' ? featured.property.titleFr : featured.property.titleEs).trim() || featured.property.titleEs);
-  const featuredDescription = featured && briefDescription(locale === 'fr' ? publicFrenchText(featured.property.descFr) : (locale === 'en' ? featured.property.descEn : featured.property.descEs).trim() || featured.property.descEs);
   return (
     <main className={PUBLIC_PHOTO_BACKGROUNDS ? undefined : 'public-paper'}>
       {/* Una sola capa de video acompaña hero y Sobre nosotros. */}
@@ -84,19 +83,25 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </Reveal></div>}
       {PUBLIC_PHOTO_BACKGROUNDS && <div className="home-video-closing pointer-events-none absolute inset-x-0 bottom-0 h-24" aria-hidden="true" />}
       </div>
-      {featured && <Reveal as="section" delay={200} className="about-reveal mx-auto max-w-6xl px-4 py-16">
-        <div className="grid min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 md:grid-cols-2">
-          <div className="home-featured-image min-w-0 overflow-hidden">
-            <Image src={featured.photo.url} alt={featuredTitle || featured.property.titleEs} width={1200} height={900} unoptimized className="home-featured-photo aspect-[4/3] h-full w-full object-cover" />
-          </div>
-          <div className="min-w-0 space-y-4 p-6 text-gray-900 dark:text-gray-100 md:p-10">
-            <p className="text-sm font-medium tracking-widest text-green-800 dark:text-green-300">{social('featuredTitle')}</p>
-            <h2 className="break-words text-2xl font-light">{featuredTitle}</h2>
-            <p className="break-words text-gray-600 dark:text-gray-300">{featured.property.city}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{featured.property.maxGuests} {labels('guests')} · {featured.property.bedrooms} {labels('bedrooms')} · {featured.property.bathrooms} {labels('bathrooms')}</p>
-            {featuredDescription && <p className="break-words leading-relaxed">{featuredDescription}</p>}
-            <Link href={`/casas/${featured.property.slug}`} className="inline-flex min-h-11 items-center rounded-lg bg-green-700 px-4 py-2 font-medium text-white hover:bg-green-800 dark:hover:bg-green-600">{social('featuredView')}</Link>
-          </div>
+      {featured.length > 0 && <Reveal as="section" delay={200} className="about-reveal mx-auto max-w-6xl px-4 py-16">
+        <h2 className="mb-8 text-center text-2xl font-light tracking-widest">{social('featuredTitle')}</h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {featured.map(({ property, photo }) => {
+            const title = (locale === 'en' ? property.titleEn : locale === 'fr' ? property.titleFr : property.titleEs).trim() || property.titleEs;
+            const description = locale === 'fr' ? publicFrenchText(property.descFr) : ((locale === 'en' ? property.descEn : property.descEs) || '').trim();
+            return <HomeFeaturedLink aria-label={title + ' — ' + common('verMas')} key={property.id} href={`/casas/${property.slug}`} className="home-featured-image relative block aspect-[4/3] overflow-hidden rounded-2xl border border-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-700">
+              <Image src={photo.url} alt="" fill unoptimized loading="lazy" sizes="(max-width: 767px) 100vw, 560px" className="home-featured-photo object-cover" />
+              <div aria-hidden="true" className="home-featured-veil absolute inset-0" />
+              <div className="home-featured-content relative w-full p-6 md:p-8">
+                <h3 className="home-featured-title break-words font-serif leading-tight">{title}</h3>
+                <p className="home-featured-subtitle mt-3">{[property.city, property.maxGuests ? property.maxGuests + ' ' + labels('guests') : ''].filter(Boolean).join(' · ')}</p>
+                <div className="home-featured-reveal">
+                  {description && <p className="home-featured-description">{description}</p>}
+                <span aria-hidden="true" className="home-featured-cta">{common('verMas')}</span>
+                </div>
+              </div>
+            </HomeFeaturedLink>;
+          })}
         </div>
       </Reveal>}
     </main>

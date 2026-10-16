@@ -1,4 +1,5 @@
 const codes: Record<string, string> = {
+  INVALID_DESTINATION: 'invalidDestination',
   UNAUTHENTICATED: 'sessionExpired', SESSION_USER_NOT_FOUND: 'sessionExpired',
   FORBIDDEN: 'forbidden', ROLE_NOT_ALLOWED: 'forbidden', PROPERTY_NOT_FOUND: 'notFound',
   INVALID_COVER_SELECTION: 'invalidCoverSelection', INVALID_COVER_PHOTO: 'invalidCoverPhoto',

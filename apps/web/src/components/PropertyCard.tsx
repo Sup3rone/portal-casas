@@ -3,6 +3,7 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { propertyLocation } from '@/lib/destinations';
 
 type DbProperty = {
   id: string;
@@ -11,6 +12,8 @@ type DbProperty = {
   titleEn: string;
   titleFr: string;
   city: string;
+  state?: string | null;
+  destinationCity?: string | null;
   maxGuests: number;
   bedrooms: number;
   bathrooms: number;
@@ -53,7 +56,7 @@ export default function PropertyCard({ property, eager = false }: { property: Db
           <h3 className="text-lg font-medium tracking-wide text-white dark:text-gray-100 drop-shadow-md">
             {title.toUpperCase()}
           </h3>
-          <p className="text-sm text-white/80 dark:text-gray-200">{property.city}</p>
+          <p className="text-sm text-white/80 dark:text-gray-200">{propertyLocation(property)}</p>
           {property.rentalType === 'anual' && <span className="mt-2 inline-block rounded-full bg-white/85 px-3 py-1 text-xs text-green-800 dark:bg-gray-900/85 dark:text-green-300">{t('annualRent')}</span>}
           <p className="pt-1 text-xs text-white/60 dark:text-gray-400">
             {property.maxGuests} {t('guests')} · {property.bedrooms} {t('bedrooms')}

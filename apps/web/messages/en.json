@@ -22,6 +22,9 @@
     "dark": "Switch to dark mode"
   },
   "panel": {
+    "destinationEmpty": "Not selected",
+    "destinationUnavailable": "City not available? Contact the administrator.",
+    "invalidDestination": "Select a matching state and city from the catalog, or leave both empty.",
     "sessionExpired": "Your session expired or is no longer valid. Sign in again to continue.",
     "networkError": "There was a connection problem. Check your network and retry; the operation could not be confirmed.",
     "markReadError": "Could not mark the inquiry as read. Please retry.",
@@ -117,6 +120,7 @@
     "conflict": "The data conflicts with an existing resource. Check the values before saving again.",
     "back": "Back to properties",
     "fields": {
+      "state": "State",
       "rentalType": "Rental type",
       "contactName": "Contact name (optional)",
       "whatsapp": "WhatsApp (optional)",
@@ -267,6 +271,8 @@
     "ocupado": "Booked"
   },
   "home": {
+    "allStates": "All states",
+    "allCities": "All cities",
     "bienvenida": "WELCOME TO",
     "propiedadesEnRenta": "RENTAL PROPERTIES",
     "llegada": "ARRIVAL",
@@ -451,9 +457,9 @@
   },
   "listingSearch": {
     "empty": "No homes match your search.",
-    "adjust": "Try different dates or a different number of guests.",
+    "adjust": "Try another destination, different dates or a different number of guests.",
     "clear": "Clear filters",
-    "invalid": "Check the number of guests and select valid arrival and departure dates."
+    "invalid": "Check the state and city, number of guests, and arrival and departure dates."
   },
   "siteContent": {
     "imageLimits": "JPEG, PNG or WebP · up to 4 MB per photo after optimization. The selected image is applied when saved.",

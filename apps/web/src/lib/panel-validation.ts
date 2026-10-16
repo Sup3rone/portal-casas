@@ -1,4 +1,5 @@
 import type { properties } from '@portal/db';
+import { isDestinationValue } from './destinations';
 
 export class PanelValidationError extends Error {}
 export function objectBody(value: unknown): Record<string, unknown> {
@@ -28,11 +29,19 @@ const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'a
 const integers = ['maxGuests', 'bedrooms'] as const;
 const prices = ['baseWeekdayPrice', 'baseWeekendPrice'] as const;
 const backgroundFields = ['sectionBgInicio', 'sectionBgMapa', 'sectionBgReserva'] as const;
-const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'whatsapp']);
+const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'whatsapp', 'state', 'destinationCity']);
 export function propertyInput(value: unknown, creating = false) {
   const body = objectBody(value);
   if (!Object.keys(body).length || Object.keys(body).some(key => !allowed.has(key))) throw new PanelValidationError('validation');
   const changes: Partial<typeof properties.$inferInsert> = {};
+  if ('state' in body || 'destinationCity' in body || creating) {
+    const state = body.state === '' || body.state === null ? null : body.state;
+    const destinationCity = body.destinationCity === '' || body.destinationCity === null ? null : body.destinationCity;
+    const omitted = creating && !('state' in body) && !('destinationCity' in body);
+    if (!omitted && !(state === null && destinationCity === null) && !isDestinationValue({ state, destinationCity })) throw new PanelValidationError('invalidDestination');
+    changes.state = omitted ? null : state as string | null;
+    changes.destinationCity = omitted ? null : destinationCity as string | null;
+  }
   for (const key of backgroundFields) {
     if (!(key in body)) continue;
     if (body[key] === null) { changes[key] = null; continue; }
@@ -57,7 +66,11 @@ export function propertyInput(value: unknown, creating = false) {
     if (value !== null && (key === 'contactName' ? value.length > 100 : !/^[0-9]{8,15}$/.test(value))) throw new PanelValidationError('validation');
     changes[key] = value;
   }
-  for (const key of texts) if (key in body || creating) changes[key] = text(body[key]);
+  for (const key of texts) if (key !== 'city' && (key in body || creating)) changes[key] = text(body[key]);
+  if ('city' in body) {
+    if (typeof body.city !== 'string') throw new PanelValidationError('validation');
+    changes.city = body.city.trim();
+  } else if (creating) changes.city = ''; // Compatibilidad con NOT NULL legacy; sin pedir texto libre.
   for (const key of integers) if (key in body || creating) changes[key] = number(body[key], key === 'maxGuests' ? 1 : 0, true)!;
   for (const key of prices) if (key in body) changes[key] = number(body[key], 0, true, true);
   for (const key of ['bathrooms', 'lat', 'lng'] as const) {

@@ -21,6 +21,7 @@ function load(file) {
     if (name === '@/i18n/navigation') return { usePathname: () => testPath, Link: ({ href, ...props }) => React.createElement('a', { ...props, href: `/${locale}${href}` }) };
     if (name === 'next/navigation') return { useRouter: () => ({ push() {} }), usePathname: () => `/${locale}` };
     if (name === '@/lib/theme') return { getServerTheme: () => 'light', getTheme: () => 'light', getStoredTheme: () => 'light', subscribeTheme: () => () => {}, applyTheme() {} };
+    if (name === '@/lib/destinations') return load('apps/web/src/lib/destinations.ts');
     if (name.startsWith('./')) return load(`apps/web/src/components/${name.slice(2)}.tsx`);
     return req(name);
   }, exports);
@@ -51,7 +52,7 @@ if (require.main === module) {
     assert.ok(html.includes('aria-expanded="true"'));
     assert.ok(html.includes('action="/'+locale+'/casas"'));
     assert.ok(html.includes('method="GET"'));
-    for(const name of ['start','end','guests']) assert.ok(html.includes('name="'+name+'"'));
+    for(const name of ['start','end','guests','state','destinationCity']) assert.ok(html.includes('name="'+name+'"'));
     assert.equal((html.match(/<form/g)||[]).length,1);
     const messages = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
     const manager = role === 'ADMIN' || role === 'COLLABORATOR';

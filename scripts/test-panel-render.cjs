@@ -24,7 +24,7 @@ async function main() {
     assert.ok(listed.includes(`/${locale}/admin/mensajes`)); assert.ok(listed.includes(`/${locale}/admin/tarifas`)); assert.ok(!listed.includes('/admin/calendario'));
     assert.ok(listed.includes(t('properties'))); assert.ok(listed.includes('pa')); assert.ok(!listed.includes('/propiedades/pb'));
     const newForm = render(await create({ params }));
-    for (const name of ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address', 'city', 'maxGuests', 'bedrooms', 'bathrooms', 'lat', 'lng', 'baseWeekdayPrice', 'baseWeekendPrice']) assert.ok(newForm.includes(`name="${name}"`));
+    for (const name of ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address', 'state', 'destinationCity', 'maxGuests', 'bedrooms', 'bathrooms', 'lat', 'lng', 'baseWeekdayPrice', 'baseWeekendPrice']) assert.ok(newForm.includes(`name="${name}"`));
     assert.ok(newForm.includes(t('approvalHint')));
     const edited = render(await edit({ params: Promise.resolve({ locale, id: 'pa' }) }));
     for (const key of ['rates', 'availability', 'photos', 'blockHint', 'save']) assert.ok(edited.includes(t(key)));

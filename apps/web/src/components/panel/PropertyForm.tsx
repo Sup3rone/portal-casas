@@ -6,17 +6,23 @@ import type { PanelProperty } from '@/lib/panel-resources';
 import { panelRequest, inputClass, buttonClass } from './request';
 import MapsLocationInput from './MapsLocationInput';
 import TranslationDraftButton from './TranslationDraftButton';
+import { DESTINATION_STATES, citiesByState, isDestinationValue, type DestinationState } from '@/lib/destinations';
 
 export default function PropertyForm({ property }: { property?: PanelProperty }) {
   const t = useTranslations('panel'), router = useRouter();
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
-  const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address', 'city'] as const;
+  const validDestination = property && isDestinationValue(property);
+  const [state, setState] = useState<DestinationState | ''>(validDestination ? property.state as DestinationState : '');
+  const [destinationCity, setDestinationCity] = useState(validDestination ? property.destinationCity! : '');
+  const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address'] as const;
   const numbers = ['maxGuests', 'bedrooms', 'bathrooms', 'lat', 'lng', 'baseWeekdayPrice', 'baseWeekendPrice'] as const;
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage('');
     const form = new FormData(event.currentTarget);
     const body: Record<string, unknown> = {};
     for (const key of texts) body[key] = form.get(key);
+    body.state = form.get('state') || null;
+    body.destinationCity = form.get('destinationCity') || null;
     for (const key of numbers) body[key] = form.get(key) === '' ? null : Number(form.get(key));
     body.rentalType = form.get('rentalType') ?? 'nocturna';
     body.contactName = form.get('contactName') || null;
@@ -51,6 +57,19 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
             : <input name={key} required defaultValue={property?.[key]} className={inputClass} />}
           {(key.startsWith('desc') || key.startsWith('title')) && <TranslationDraftButton source={key.slice(-2).toLowerCase() as 'es' | 'en' | 'fr'} prefix={key.startsWith('desc') ? 'desc' : 'title'} disabled={busy} />}
         </label>)}
+        <label className="block text-sm">{t('fields.state')}
+          <select name="state" value={state} onChange={event => { setState(event.target.value as DestinationState | ''); setDestinationCity(''); }} className={`${inputClass} min-h-11`}>
+            <option value="">{t('destinationEmpty')}</option>
+            {DESTINATION_STATES.map(name => <option key={name} value={name}>{name}</option>)}
+          </select>
+        </label>
+        <label className="block text-sm">{t('fields.city')}
+          <select name="destinationCity" value={destinationCity} required={Boolean(state)} disabled={!state} onChange={event => setDestinationCity(event.target.value)} className={`${inputClass} min-h-11`}>
+            <option value="">{t('destinationEmpty')}</option>
+            {state && citiesByState(state).map(city => <option key={city} value={city}>{city}</option>)}
+          </select>
+        </label>
+        <p className="text-sm text-gray-600 dark:text-gray-300 md:col-span-2">{t('destinationUnavailable')}</p>
         <MapsLocationInput key={property?.id || 'new'} lat={property?.lat} lng={property?.lng} />
         {numbers.filter(key => key !== 'lat' && key !== 'lng').map(key => <label key={key} className="block text-sm">{t(`fields.${key}`)}
           <input key={`${key}:${property?.[key] ?? ''}`} name={key} type="number" required={['maxGuests', 'bedrooms', 'bathrooms'].includes(key)}

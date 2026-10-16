@@ -1,3 +1,4 @@
+import { propertyLocation } from '@/lib/destinations';
 import PropertySearchForm from '@/components/PropertySearchForm';
 import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
 // src/app/[locale]/page.tsx
@@ -94,7 +95,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <div aria-hidden="true" className="home-featured-veil absolute inset-0" />
               <div className="home-featured-content relative w-full p-6 md:p-8">
                 <h3 className="home-featured-title break-words font-serif leading-tight">{title}</h3>
-                <p className="home-featured-subtitle mt-3">{[property.city, property.maxGuests ? property.maxGuests + ' ' + labels('guests') : ''].filter(Boolean).join(' · ')}</p>
+                <p className="home-featured-subtitle mt-3">{[propertyLocation(property), property.maxGuests ? property.maxGuests + ' ' + labels('guests') : ''].filter(Boolean).join(' · ')}</p>
                 <div className="home-featured-reveal">
                   {description && <p className="home-featured-description">{description}</p>}
                 <span aria-hidden="true" className="home-featured-cta">{common('verMas')}</span>

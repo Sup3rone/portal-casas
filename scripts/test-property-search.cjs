@@ -6,6 +6,9 @@ const { NextIntlClientProvider } = req('next-intl');
 const Page = load('apps/web/src/app/[locale]/casas/page.tsx').default;
 const { propertySearch } = load('apps/web/src/lib/property-search.ts');
 memory.prepare('UPDATE Property SET titleEs=id,titleEn=id,titleFr=id,city=?,bedrooms=2,rentalType=?,createdAt=?,maxGuests=CASE WHEN id=? THEN 12 ELSE 6 END').run('City','nocturna','2026-01-01','pa');
+memory.prepare('UPDATE Property SET state=?,destinationCity=? WHERE id=?').run('Nayarit','Nuevo Vallarta','pa');
+memory.prepare('UPDATE Property SET state=?,destinationCity=? WHERE id=?').run('Jalisco','Guadalajara','pb');
+memory.prepare('UPDATE Property SET state=?,destinationCity=? WHERE id=?').run('Nayarit','Nuevo Vallarta','hidden');
 const search = query => Page({params:Promise.resolve({locale:'es'}),searchParams:Promise.resolve(query)});
 function cards(node) {
   if (!node || typeof node !== 'object') return [];
@@ -17,6 +20,14 @@ async function main() {
   assert.deepEqual(cards(await search({guests:'10'})),['pa']);
   assert.deepEqual(cards(await search({guests:'6'})).sort(),['pa','pb']);
   assert.deepEqual(cards(await search({guests:'99'})),[]);
+  const destination={state:'NAYARIT',destinationCity:'Nuevo Vallarta'};
+  assert.deepEqual(cards(await search(destination)),['pa']);
+  assert.deepEqual(cards(await search({state:'Jalisco'})),['pb']);
+  assert.deepEqual(cards(await search({state:'',destinationCity:''})).sort(),['pa','pb']);
+  assert.deepEqual(cards(await search({...destination,guests:'13'})),[]);
+  for(const query of [{state:'Otro'},{state:['Nayarit','Jalisco']},{state:'Jalisco',destinationCity:'Nuevo Vallarta'},{destinationCity:'Nuevo Vallarta'},{state:'Nayarit',destinationCity:['Nuevo Vallarta']}]) {
+    assert.ok(propertySearch(query).invalid);assert.deepEqual(cards(await search(query)),[]);
+  }
   for (const query of [{guests:'0'},{guests:'1.5'},{guests:'abc'},{guests:['6','10']},{start:'2030-01-01'},{start:'2030-02-30',end:'2030-03-02'},{start:'2030-01-03',end:'2030-01-01'}]) {
     assert.ok(propertySearch(query).invalid); assert.deepEqual(cards(await search(query)),[]);
   }
@@ -24,6 +35,8 @@ async function main() {
   memory.prepare('INSERT INTO Booking (id,propertyId,startDate,endDate,source) VALUES (?,?,?,?,?)').run('occupied-search','pa','2030-01-11','2030-01-12','airbnb');
   assert.deepEqual(cards(await search(dates)),['pb']);
   assert.deepEqual(cards(await search({...dates,guests:'10'})),[]);
+  assert.deepEqual(cards(await search({...dates,...destination,guests:'4'})),[],'Combina ubicación, capacidad y ocupación');
+  assert.deepEqual(cards(await search({state:'Jalisco',destinationCity:'Guadalajara',...dates,guests:'4'})),['pb']);
   memory.prepare('INSERT INTO BlockDate (id,propertyId,startDate,endDate,createdBy) VALUES (?,?,?,?,?)').run('block-search','pb','2030-01-13','2030-01-14','admin');
   assert.deepEqual(cards(await search(dates)),[]);
   memory.prepare('DELETE FROM Booking').run(); memory.prepare('DELETE FROM BlockDate').run();
@@ -37,6 +50,14 @@ async function main() {
     const page=await Page({params:Promise.resolve({locale}),searchParams:Promise.resolve({guests:'99'})});
     const html=renderToStaticMarkup(React.createElement(NextIntlClientProvider,{locale,messages,timeZone:'America/Mexico_City'},page));
     assert.ok(html.includes(messages.listingSearch.empty));assert.ok(html.includes(messages.listingSearch.clear));assert.ok(html.includes(`href="/${locale}/casas"`));
+    const selected=await Page({params:Promise.resolve({locale}),searchParams:Promise.resolve({...destination,...dates,guests:'4'})});
+    const selectedHtml=renderToStaticMarkup(React.createElement(NextIntlClientProvider,{locale,messages,timeZone:'America/Mexico_City'},selected));
+    assert.match(selectedHtml,/<option value="Nayarit" selected="">/);
+    assert.match(selectedHtml,/<option value="Nuevo Vallarta" selected="">/);
+    assert.ok(selectedHtml.includes('value="2030-01-10"'));
+    assert.match(selectedHtml,/<option value="4" selected="">/);
+    assert.ok(selectedHtml.includes(messages.home.allStates));
+    assert.ok(selectedHtml.includes(messages.home.allCities));
   }
   memory.close(); console.log('OK búsqueda: capacidad/publicación, filtros combinados, Booking/BlockDate, checkout, parámetros inválidos, vacío y limpiar es/en/fr.');
 }

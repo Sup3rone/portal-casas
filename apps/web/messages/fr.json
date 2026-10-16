@@ -22,6 +22,9 @@
     "dark": "Activer le mode sombre"
   },
   "panel": {
+    "destinationEmpty": "Non sélectionné",
+    "destinationUnavailable": "Votre ville n’est pas disponible ? Contactez l’administrateur.",
+    "invalidDestination": "Sélectionnez un État et une ville correspondants dans le catalogue, ou laissez les deux champs vides.",
     "sessionExpired": "Votre session a expiré ou est invalide. Reconnectez-vous pour continuer.",
     "networkError": "Un problème de connexion est survenu. Vérifiez votre réseau et réessayez ; l’opération ne peut pas être confirmée.",
     "markReadError": "Impossible de marquer la demande comme lue. Réessayez.",
@@ -117,6 +120,7 @@
     "conflict": "Les données entrent en conflit avec une ressource existante. Vérifiez les valeurs avant de sauvegarder à nouveau.",
     "back": "Retour aux logements",
     "fields": {
+      "state": "État",
       "rentalType": "Type de location",
       "contactName": "Nom du contact (facultatif)",
       "whatsapp": "WhatsApp (facultatif)",
@@ -267,6 +271,8 @@
     "ocupado": "Réservé"
   },
   "home": {
+    "allStates": "Tous les États",
+    "allCities": "Toutes les villes",
     "bienvenida": "BIENVENUE À",
     "propiedadesEnRenta": "PROPRIÉTÉS À LOUER",
     "llegada": "ARRIVÉE",
@@ -452,9 +458,9 @@
   },
   "listingSearch": {
     "empty": "Aucune maison ne correspond à votre recherche.",
-    "adjust": "Essayez d’autres dates ou un nombre de voyageurs différent.",
+    "adjust": "Essayez une autre destination, d’autres dates ou un autre nombre de voyageurs.",
     "clear": "Effacer les filtres",
-    "invalid": "Vérifiez le nombre de voyageurs et sélectionnez des dates d’arrivée et de départ valides."
+    "invalid": "Vérifiez l’État et la ville, le nombre de voyageurs et les dates d’arrivée et de départ."
   },
   "siteContent": {
     "imageLimits": "JPEG, PNG ou WebP · 4 Mo maximum par photo après optimisation. L’image sélectionnée est appliquée à l’enregistrement.",

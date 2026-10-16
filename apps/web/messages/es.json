@@ -22,6 +22,9 @@
     "dark": "Activar modo oscuro"
   },
   "panel": {
+    "destinationEmpty": "Sin seleccionar",
+    "destinationUnavailable": "¿Tu ciudad no está disponible? Contacta al administrador.",
+    "invalidDestination": "Selecciona un estado y una ciudad del catálogo que correspondan entre sí, o deja ambos vacíos.",
     "sessionExpired": "Tu sesión expiró o ya no es válida. Inicia sesión de nuevo para continuar.",
     "networkError": "Hubo un problema de conexión. Comprueba tu red y vuelve a intentar; no se pudo confirmar la operación.",
     "markReadError": "No se pudo marcar la consulta como leída. Vuelve a intentar.",
@@ -117,6 +120,7 @@
     "conflict": "Los datos entran en conflicto con un recurso existente. Revisa los valores antes de volver a guardar.",
     "back": "Volver a propiedades",
     "fields": {
+      "state": "Estado",
       "rentalType": "Tipo de renta",
       "contactName": "Nombre de contacto (opcional)",
       "whatsapp": "WhatsApp (opcional)",
@@ -267,6 +271,8 @@
     "ocupado": "Ocupado"
   },
   "home": {
+    "allStates": "Todos los estados",
+    "allCities": "Todas las ciudades",
     "bienvenida": "BIENVENIDOS A",
     "propiedadesEnRenta": "PROPIEDADES EN RENTA",
     "llegada": "LLEGADA",
@@ -451,9 +457,9 @@
   },
   "listingSearch": {
     "empty": "No encontramos casas para esta búsqueda.",
-    "adjust": "Prueba otras fechas o una cantidad de huéspedes diferente.",
+    "adjust": "Prueba otro destino, otras fechas o una cantidad de huéspedes diferente.",
     "clear": "Limpiar filtros",
-    "invalid": "Revisa la cantidad de huéspedes y selecciona llegada y salida válidas."
+    "invalid": "Revisa el estado y la ciudad, la cantidad de huéspedes y las fechas de llegada y salida."
   },
   "siteContent": {
     "imageLimits": "JPEG, PNG o WebP · máximo 4 MB por foto después de optimizar. La imagen elegida se aplica al guardar.",

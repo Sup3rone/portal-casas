@@ -35,7 +35,9 @@ export const properties = pgTable('Property', {
   address: text('address').notNull(),
   lat: doublePrecision('lat'),
   lng: doublePrecision('lng'),
-  city: text('city').notNull(),
+  city: text('city').notNull(), // Legacy: conservado; ya no es obligatorio en el editor/API.
+  state: text('state'),
+  destinationCity: text('destinationCity'), // city del catálogo; evita colisión con city legacy.
   maxGuests: integer('maxGuests').notNull(),
   bedrooms: integer('bedrooms').notNull(),
   bathrooms: doublePrecision('bathrooms').notNull(),
@@ -49,6 +51,7 @@ export const properties = pgTable('Property', {
   whatsapp: text('whatsapp'),
 }, table => [
   index('Property_ownerId_idx').on(table.ownerId),
+  check('Property_destination_pair_check', sql`(${table.state} is null and ${table.destinationCity} is null) or (${table.state} is not null and ${table.destinationCity} is not null and btrim(${table.state}) <> '' and btrim(${table.destinationCity}) <> '')`),
   check('Property_rentalType_check', sql`${table.rentalType} in ('nocturna', 'anual')`),
   check('Property_whatsapp_check', sql`${table.whatsapp} is null or ${table.whatsapp} ~ '^[0-9]{8,15}$'`),
 ]);

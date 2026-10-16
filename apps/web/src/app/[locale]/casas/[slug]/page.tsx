@@ -1,3 +1,4 @@
+import { propertyLocation } from '@/lib/destinations';
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
 import { db, properties, media, bookings, seasonRates, propertySections } from '@portal/db';
 import { eq } from 'drizzle-orm';
@@ -82,7 +83,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   };
   const { title, desc } = localeMap[locale] ?? localeMap.es;
   const description = locale === 'fr' ? publicFrenchText(desc) : desc?.trim() || '';
-  const location = [property.address?.trim(), property.city?.trim()].filter(Boolean).join(', ');
+  const destination = propertyLocation(property);
+  const location = [property.address?.trim(), destination].filter(Boolean).join(', ');
 
   // Agrupar medias por categoría
   const porCategoria = (cat: string) =>
@@ -98,13 +100,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <SectionBackground url={null} name="gallery" className="detail-screen px-3 py-8 md:px-6">
         <Reveal className="relative mb-6 rounded-2xl p-6 pr-16 text-center">
-          <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={property.city} />
+          <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={destination} />
           <h1 className="break-words text-3xl font-bold tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
             {title.toUpperCase()}
           </h1>
           {editorial.length > 0 && location && <p className="mt-3 break-words text-sm text-white/80">{location}</p>}
           <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80 dark:text-gray-200">
-            {property.city.toUpperCase()} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
+            {destination} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
           </p>
         </Reveal>
         <PropertyGallery slides={principal} />
@@ -170,7 +172,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 <SectionBackground url={null} name="location" className="detail-screen px-4 py-16 md:px-6" label={t('details.mapWarnings')}>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {hasMap && <div className="detail-location-map min-w-0">
-            <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={property.city} />
+            <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={destination} />
           </div>}
           {hasWarnings && <Reveal className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
             <h2 className="mb-4 text-2xl font-light tracking-wide">{t('details.advertencias')}</h2>

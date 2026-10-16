@@ -81,3 +81,44 @@ html.dark .panel-skin {
 }
 .panel-skin article[role="button"]:hover { border-color: var(--panel-focus); }
 @media (prefers-reduced-motion: reduce) { .panel-skin { --panel-transition: none; } }
+
+/* Paleta vigente: reutiliza papel/chrome públicos sin activarlos en otras rutas.
+ * Lavanda conservada arriba; quitar data-panel-palette="paper" de los dos
+ * layouts restaura sus tokens. No se cambian dimensiones ni distribución.
+ */
+html .panel-skin[data-panel-palette="paper"] {
+  --panel-canvas: var(--paper-bg);
+  --panel-surface: var(--header-bg);
+  --panel-accent: var(--footer-bg);
+  --panel-accent-hover: var(--chrome-border);
+  --panel-text: var(--chrome-text);
+  --panel-muted: var(--chrome-muted);
+  --panel-border: var(--chrome-border);
+  --panel-focus: var(--chrome-text);
+  --panel-selected: var(--chrome-text);
+  --panel-on-selected: var(--paper-bg);
+  --panel-shadow: var(--search-shadow);
+  --panel-focus-ring: 0 0 0 3px color-mix(in srgb, var(--chrome-text) 25%, transparent);
+  background-image: var(--paper-grain);
+}
+.panel-skin[data-panel-palette="paper"] :is(.bg-white, .glass-panel) {
+  background-color: var(--panel-surface);
+}
+.panel-skin[data-panel-palette="paper"] :is(.border, .border-b, .border-t, table, th, td) {
+  border-color: var(--panel-border);
+}
+/* El margen mt-20 del footer es estructural: se conserva, pintando también
+ * body y márgenes laterales. El wrapper admin usa display:contents.
+ */
+body:has(.panel-skin[data-panel-palette="paper"]) {
+  background-color: var(--paper-bg);
+  background-image: var(--paper-grain);
+  color: var(--paper-text);
+}
+body:has(.panel-skin[data-panel-palette="paper"]) > footer {
+  background-color: var(--footer-bg);
+  border-color: var(--chrome-border);
+  color: var(--chrome-text);
+}
+body:has(.panel-skin[data-panel-palette="paper"]) > footer :is(h3, h4, a) { color: var(--chrome-text); }
+body:has(.panel-skin[data-panel-palette="paper"]) > footer :is(p, ul, .text-gray-500) { color: var(--chrome-muted); }

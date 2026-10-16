@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "./public-chrome.css";
-@import "./panel-skin.css"; /* Revertir skin: comentar esta línea. */
+@import "./panel-skin.css"; /* Papel activo en layouts; lavanda conservada como alternativa. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Papel público: sin overlays ni cambios en las superficies del panel. */

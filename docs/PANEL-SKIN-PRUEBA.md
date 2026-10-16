@@ -43,3 +43,15 @@ Capturas: componentes y páginas reales renderizados con datos ficticios en SQLi
 ## Supuestos
 
 Se conservan la tipografía y los espaciados actuales. Modo oscuro adapta la paleta a ciruela sin forzar superficies blancas. El skin es una prueba pendiente de aprobación estética de la clienta; no se hizo deploy.
+# Paleta vigente: papel beige (2026-10-15)
+
+El import de panel-skin.css estaba presente: el skin lavanda no se perdió. Su fondo solo pintaba el main max-w-6xl de /panel; en /admin el wrapper display:contents no pinta fondo. Algunos contenedores bg-white tampoco coincidían con los selectores anteriores. El body seguía con el fondo global gray-50, y Footer omite public-footer en rutas privadas y conserva bg-white. El margen superior mt-20 del Footer deja ver el body (80px con la escala estándar); esa es la separación estructural encontrada en código, sin medición de píxeles en navegador.
+
+Ambos layouts ahora activan `data-panel-palette="paper"`. Sus tokens se enlazan a --paper-bg, --header-bg, --footer-bg y --chrome-* existentes: sin colores nuevos. El body y el footer se recolorean solo si existe ese marcador; el margen del footer se conserva integrado al papel. No cambia el navbar, ningún componente público ni la geometría del contenido. Las tarjetas/campos usan la superficie mate --header-bg, con borde --chrome-border para distinguirlas del canvas.
+
+Lavanda conservada: para restaurarla, retirar `data-panel-palette="paper"` de los layouts /panel y /admin; no borrar el import. El aspecto público no cambia. Los tokens de estados de peligro y del calendario conservan sus diferencias semánticas.
+
+Validación offline: contraste de pares de tokens AA, mínimo 5,51:1 claro y 4,74:1 oscuro; controles 44px conservados. Tests panel-skin, panel-render y manager-messages-rates pasan; TypeScript limpio, ESLint 0 errores/5 warnings existentes. No se abrió navegador: comprobar manualmente admin y colaborador, 1440px/375px, claro/oscuro, continuidad al footer y definición de tablas, tarjetas, campos y foco de teclado. La comprobación es de tokens, no una captura ni medición visual de la página real.
+
+---
+

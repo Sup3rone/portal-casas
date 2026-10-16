@@ -1,13 +1,28 @@
 // src/components/Navbar.tsx
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
 import LocaleSwitcher from './LocaleSwitcher';
 import ThemeToggle from './ThemeToggle';
 import PropertySearchForm from './PropertySearchForm';
+import { applyTheme, getServerTheme, getStoredTheme, getTheme, subscribeTheme } from '@/lib/theme';
+
+function AccountThemeOption() {
+  const t = useTranslations('theme'), locale = useLocale();
+  const theme = useSyncExternalStore(subscribeTheme, getTheme, getServerTheme);
+  useLayoutEffect(() => { applyTheme(getStoredTheme()); }, [locale]);
+  return <button type="button" onClick={() => applyTheme(theme === 'dark' ? 'light' : 'dark')}
+    className="flex min-h-11 w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5 shrink-0">
+      {theme === 'dark' ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></>
+        : <path d="M20.5 14a8.5 8.5 0 0 1-10.5-10.5A8.5 8.5 0 1 0 20.5 14Z" />}
+    </svg>
+    {t(theme === 'dark' ? 'light' : 'dark')}
+  </button>;
+}
 
 function AliaMonogram() {
   return <svg role="img" aria-label="Logo Alia Forrent" viewBox="0 0 32 32"
@@ -88,7 +103,7 @@ export default function Navbar() {
           </Link>
 
           {/* NAV LINKS + ACTIONS — derecha */}
-          <div className="flex items-center gap-6 max-md:w-full max-md:flex-wrap max-md:gap-4">
+          <div className={privatePage ? 'flex items-center gap-6 max-md:w-full max-md:flex-wrap max-md:gap-4' : 'ml-auto flex items-center justify-end gap-4 max-md:w-full'}>
             <div ref={searchRef} data-header-search className="contents">
               <button ref={searchTrigger} type="button" aria-label={searchText('buscar')} aria-expanded={searchOpen} aria-controls={searchId}
                 onClick={() => { setOpen(false); setSearchOpen(value => !value); searchTrigger.current?.focus(); }}
@@ -101,9 +116,9 @@ export default function Navbar() {
             </div>
 
             <LocaleSwitcher />
-            <ThemeToggle />
+            {privatePage && <ThemeToggle />}
 
-            <div ref={accountRef} className="relative ml-auto">
+            <div ref={accountRef} className={privatePage ? 'relative ml-auto' : 'relative'}>
               <button ref={triggerRef} type="button" disabled={status === 'loading'}
                 aria-label={t('cuenta')} aria-expanded={open} aria-controls={menuId}
                 onClick={() => { if (open) closeAccount(); else { setSearchOpen(false); setOpen(true); } }}
@@ -123,6 +138,7 @@ export default function Navbar() {
                   <Link href="/login" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('login').toUpperCase()}</Link>
                   <Link href="/registro" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('registro').toUpperCase()}</Link>
                 </>}
+                {!privatePage && <AccountThemeOption />}
               </div>}
             </div>
           </div>

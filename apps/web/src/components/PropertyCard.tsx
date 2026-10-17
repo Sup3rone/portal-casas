@@ -17,7 +17,7 @@ type DbProperty = {
   maxGuests: number;
   bedrooms: number;
   bathrooms: number;
-  rentalType: 'nocturna' | 'anual';
+  rentalType: 'nocturna' | 'anual' | 'ambas';
   media: { url: string; type: string }[];
 };
 

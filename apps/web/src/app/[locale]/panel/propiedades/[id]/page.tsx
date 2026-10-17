@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation';
 import { panelProperty } from '@/lib/panel-server';
 import { propertyResources } from '@/lib/panel-resources';
 import PropertyForm from '@/components/panel/PropertyForm';
+import PropertyRentalType, { RentalTypeResources } from '@/components/panel/PropertyRentalType';
 import PropertyPresentationEditor from '@/components/panel/PropertyPresentationEditor';
 import PublicationButton from '@/components/panel/PublicationButton';
 import ResourceEditor from '@/components/panel/ResourceEditor';
@@ -22,10 +23,14 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
     <Link href="/panel" className="text-green-700 dark:text-green-400 underline">{t('back')}</Link>
     <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-3xl font-semibold">{t('edit')}</h1>
       <span>{t(property.published ? 'published' : 'draft')}</span><PublicationButton id={id} published={property.published} admin={manager.role === 'ADMIN'} /></div>
+    <PropertyRentalType key={`${id}:${property.rentalType}`} initial={property.rentalType}>
     <PropertyForm property={property} />
     <PropertyPresentationEditor key={JSON.stringify(property.sectionTitles)} property={property} />
+    <RentalTypeResources>
     <ResourceEditor propertyId={id} resource="rates" items={resources.rates} />
     <AvailabilityEditor propertyId={id} bookings={resources.bookings} />
+    </RentalTypeResources>
+    </PropertyRentalType>
     {resources.media.length > 0 && <SectionSlider slides={resources.media} />}
     <ResourceEditor propertyId={id} resource="media" items={resources.media.filter(item => item.type === 'PHOTO')} />
     {/* <SectionBackgroundEditor property={property} media={resources.media} /> */}

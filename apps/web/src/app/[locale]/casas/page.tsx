@@ -1,7 +1,7 @@
 import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
 // src/app/[locale]/casas/page.tsx
 import { getTranslations } from 'next-intl/server';
-import { and, asc, eq, gte, sql } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { db, properties, media } from '@portal/db';
 import PropertyCard from '@/components/PropertyCard';
 import Reveal from '@/components/Reveal';
@@ -51,6 +51,7 @@ export default async function PropertiesPage({
       filters.state ? eq(properties.state, filters.state) : undefined,
       filters.destinationCity ? eq(properties.destinationCity, filters.destinationCity) : undefined,
       filters.guests !== undefined ? gte(properties.maxGuests, filters.guests) : undefined,
+      filters.start && filters.end ? inArray(properties.rentalType, ['nocturna', 'ambas']) : undefined,
       filters.start && filters.end ? sql`not exists (
         select 1 from "Booking" occupied where occupied."propertyId" = ${properties.id}
           and occupied."startDate" <= ${filters.end}::date and occupied."endDate" > ${filters.start}::date

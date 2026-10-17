@@ -38,7 +38,9 @@ async function main(){
   setLocale('fr');home=render('fr',await Home({params:Promise.resolve({locale:'fr'})}));detail=render('fr',await Detail({params:Promise.resolve({locale:'fr',slug:'pa'})}));
   assert.ok(home.includes('Nous vous aidons'));assert.ok(home.includes('Une description française authentique.'));
   assert.ok(detail.includes('Profitez de la région'));assert.ok(detail.includes('Une description française authentique.'));
-  const values=JSON.stringify(require('../apps/web/messages/fr.json'));assert.doesNotMatch(values,placeholders);
+  // Revisar textos visibles, no nombres internos de claves como namePlaceholder.
+  const texts=value=>typeof value==='string'?[value]:value&&typeof value==='object'?Object.values(value).flatMap(texts):[];
+  assert.doesNotMatch(texts(require('../apps/web/messages/fr.json')).join('\n'),placeholders);
   console.log('OK texte public FR: placeholders masqués, descriptions réelles/fotos conservées, pas de fallback ES et es/en inchangés.');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>memory.close());

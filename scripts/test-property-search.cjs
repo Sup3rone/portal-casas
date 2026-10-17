@@ -44,6 +44,23 @@ async function main() {
   assert.deepEqual(cards(await search(dates)),['pb'],'Salida ocupada se excluye igual que en reserva');
   memory.prepare('UPDATE Booking SET startDate=?,endDate=?').run('2030-01-08','2030-01-10');
   assert.deepEqual(cards(await search(dates)).sort(),['pa','pb'],'Llegada el día de checkout existente disponible');
+  // Tres modalidades: sin fechas se conserva la anual, con fechas solo nocturna/ambas.
+  memory.prepare('INSERT INTO Property (id,ownerId,published,slug,titleEs,titleEn,titleFr,city,state,destinationCity,maxGuests,bedrooms,bathrooms,rentalType,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+    .run('annual-search','a',1,'annual-search','Casa anual','Annual house','Maison annuelle','Nuevo Vallarta','Nayarit','Nuevo Vallarta',10,2,1,'anual','2026-01-01');
+  memory.prepare('UPDATE Property SET rentalType=? WHERE id=?').run('ambas','pb');
+  assert.deepEqual(cards(await search({})).sort(),['annual-search','pa','pb']);
+  assert.deepEqual(cards(await search({state:'',destinationCity:''})).sort(),['annual-search','pa','pb']);
+  assert.deepEqual(cards(await search(destination)).sort(),['annual-search','pa'],'Ciudad sin fechas incluye anual');
+  assert.deepEqual(cards(await search({guests:'10'})).sort(),['annual-search','pa'],'Capacidad se aplica a anual sin fechas');
+  assert.deepEqual(cards(await search({...destination,guests:'11'})),['pa']);
+  assert.deepEqual(cards(await search(dates)).sort(),['pa','pb'],'Nocturna/ambas disponibles; anual sin ocupación también excluida');
+  assert.deepEqual(cards(await search({...destination,...dates,guests:'4'})),['pa']);
+  memory.prepare('INSERT INTO Booking (id,propertyId,startDate,endDate,source) VALUES (?,?,?,?,?)').run('both-occupied','pb','2030-01-11','2030-01-12','manual');
+  assert.deepEqual(cards(await search(dates)),['pa'],'Ambas sigue respetando ocupación');
+  memory.prepare('DELETE FROM Booking WHERE id=?').run('both-occupied');
+  memory.prepare('UPDATE Property SET published=0 WHERE id=?').run('annual-search');
+  assert.deepEqual(cards(await search({})).sort(),['pa','pb'],'Anual no publicada nunca aparece');
+  memory.prepare('UPDATE Property SET published=1 WHERE id=?').run('annual-search');
   for (const locale of ['es','en','fr']) {
     setLocale(locale);
     const messages=require('../apps/web/messages/'+locale+'.json');
@@ -58,6 +75,10 @@ async function main() {
     assert.match(selectedHtml,/<option value="4" selected="">/);
     assert.ok(selectedHtml.includes(messages.home.allStates));
     assert.ok(selectedHtml.includes(messages.home.allCities));
+    const annualPage=await Page({params:Promise.resolve({locale}),searchParams:Promise.resolve(destination)});
+    const annualHtml=renderToStaticMarkup(React.createElement(NextIntlClientProvider,{locale,messages,timeZone:'America/Mexico_City'},annualPage));
+    assert.ok(annualHtml.includes(messages.properties.annualRent),'Distintivo anual visible y localizado sin fechas');
+    assert.ok(annualHtml.includes(`href="/${locale}/casas/annual-search"`));
   }
   memory.close(); console.log('OK búsqueda: capacidad/publicación, filtros combinados, Booking/BlockDate, checkout, parámetros inválidos, vacío y limpiar es/en/fr.');
 }

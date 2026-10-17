@@ -85,14 +85,13 @@ export default function MessageForm({
   pricing,
   maxGuests,
   compact = false,
+  mode = 'booking',
 }: {
   propertyId: string;
   propertySlug?: string;
   locale: string;
-  pricing: PricingInfo;
-  maxGuests: number;
   compact?: boolean;
-}) {
+} & ({ mode: 'annual'; pricing?: never; maxGuests?: never } | { mode?: 'booking'; pricing: PricingInfo; maxGuests: number })) {
   const t = useTranslations('details.form');
   const formatoLocale = locale === 'en' ? 'en-GB' : locale === 'fr' ? 'fr-FR' : 'es-MX';
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -104,9 +103,11 @@ export default function MessageForm({
   const [submitted, setSubmitted] = useState(false);
   const [serverValidation, setServerValidation] = useState<{ signature: string; errors: InquiryErrors; maxGuests?: number } | null>(null);
   const hoy = inquiryToday();
+  const contactOnly = mode === 'annual';
+  const validationContext = { today: hoy, contactOnly, maxGuests, bookings: pricing?.booked.map(booking => ({ startDate: booking.start, endDate: booking.end })) };
   const input = { ...fields, guests, startDate, endDate };
   const signature = JSON.stringify(input);
-  const localErrors = validateInquiry(input, { today: hoy, maxGuests, bookings: pricing.booked.map(booking => ({ startDate: booking.start, endDate: booking.end })) });
+  const localErrors = validateInquiry(input, validationContext);
   const serverErrors = serverValidation?.signature === signature ? serverValidation : null;
   const validationErrors: InquiryErrors = { ...localErrors, ...serverErrors?.errors };
   const errors: InquiryErrors = Object.fromEntries(inquiryFields
@@ -114,13 +115,13 @@ export default function MessageForm({
     .map(field => [field, validationErrors[field]]));
   function fieldError(field: InquiryField) {
     return errors[field] ? <p id={`${field}-error`} className="text-red-600 dark:text-red-400 text-xs tracking-wide" aria-live="polite">
-      {t(`validation.${errors[field]}`, { maxGuests: serverErrors?.maxGuests ?? maxGuests })}
+      {t(`validation.${errors[field]}`, { maxGuests: serverErrors?.maxGuests ?? maxGuests ?? 0 })}
     </p> : null;
   }
 
   const cotizacion = useMemo(
-    () => startDate && endDate ? calcularCotizacion(startDate, endDate, pricing) : null,
-    [startDate, endDate, pricing]
+    () => !contactOnly && pricing && startDate && endDate ? calcularCotizacion(startDate, endDate, pricing) : null,
+    [contactOnly, startDate, endDate, pricing]
   );
 
   // En globals.css o directamente en el component:
@@ -132,7 +133,7 @@ export default function MessageForm({
     setRateError('');
     setSubmitted(true);
     const submitted = inquiryFromFormData(formData);
-    const checked = validateInquiry(submitted, { today: inquiryToday(), maxGuests, bookings: pricing.booked.map(booking => ({ startDate: booking.start, endDate: booking.end })) });
+    const checked = validateInquiry(submitted, { ...validationContext, today: inquiryToday() });
     if (Object.keys(checked).length) return;
     try {
       const res = await fetch('/api/messages', { method: 'POST', body: formData });
@@ -182,7 +183,7 @@ export default function MessageForm({
             const field = event.target.getAttribute('name') as InquiryField;
             if (inquiryFields.includes(field)) setTouched(current => ({ ...current, [field]: true }));
           }}
-          className={compact ? formClasses + ' space-y-3' : 'space-y-6'}
+          className={(compact ? formClasses + ' space-y-3' : 'space-y-6') + (contactOnly ? ' [&_input:not([type=hidden])]:min-h-11 [&_textarea]:min-h-11 [&_button]:min-h-11 [&_input]:focus-visible:outline-2 [&_textarea]:focus-visible:outline-2 [&_button]:focus-visible:outline-2 [&_:focus-visible]:outline-offset-2 [&_:focus-visible]:outline-current' : '')}
         >
       <input type="hidden" name="propertyId" value={propertyId} />
       <input type="hidden" name="lang" value={locale} />
@@ -200,6 +201,7 @@ export default function MessageForm({
             name="name"
             minLength={2}
             maxLength={100}
+            placeholder={contactOnly ? t('namePlaceholder') : undefined}
             value={fields.name}
             onChange={event => setFields(current => ({ ...current, name: event.target.value }))}
             aria-invalid={!!errors.name}
@@ -217,6 +219,7 @@ export default function MessageForm({
             type="email"
             id="email"
             name="email"
+            placeholder={contactOnly ? t('emailPlaceholder') : undefined}
             value={fields.email}
             onChange={event => setFields(current => ({ ...current, email: event.target.value }))}
             aria-invalid={!!errors.email}
@@ -233,6 +236,7 @@ export default function MessageForm({
             type="tel"
             id="phone"
             name="phone"
+            placeholder={contactOnly ? t('phonePlaceholder') : undefined}
             value={fields.phone}
             maxLength={25}
             onChange={event => setFields(current => ({ ...current, phone: event.target.value }))}
@@ -245,7 +249,7 @@ export default function MessageForm({
       </div>
 
       {/* ===== FECHAS + HUESPEDES ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {!contactOnly && <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label htmlFor="startDate" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
             {t('llegada')}
@@ -318,8 +322,7 @@ export default function MessageForm({
             )}
           </div>
         </div>
-      </div>
-
+      </div>}
       {/* ===== MENSAJE ===== */}
       <div>
         <label htmlFor="body" className="block text-xs tracking-[0.25em] text-gray-400 dark:text-gray-300 mb-2 uppercase">
@@ -329,6 +332,7 @@ export default function MessageForm({
           required
           id="body"
           name="body"
+          placeholder={contactOnly ? t('messagePlaceholder') : undefined}
           rows={3}
           value={fields.body}
           onChange={event => setFields(current => ({ ...current, body: event.target.value }))}

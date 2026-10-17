@@ -47,7 +47,7 @@ async function main() {
     assert.ok(html.replace(/&#x27;/g, "'").includes(`https://wa.me/5215512345678?text=${encodeURIComponent(text)}`));
     assert.ok(!html.includes('Emma'));
     assert.ok(html.indexOf('https://wa.me/') > html.indexOf('type="submit"'));
-    assert.ok(html.includes(messages.details.whatsappButton));
+    assert.ok(html.includes(messages.details.contactWhatsapp));
     console.log(`${locale}: formulario, badge anual y enlace WhatsApp localizado OK`);
   }
   setSession({ user: { id: 'a' } });

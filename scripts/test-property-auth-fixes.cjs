@@ -23,7 +23,7 @@ mockModule('@/lib/auth', {
   auth: async () => ({ user: { id: 'a' } }),
   signIn: async (provider, options) => { if (authFailure) throw new AuthError(); signedIn.push(options); }
 });
-mockModule('react', { ...React, useState: value => [value, () => {}] });
+mockModule('react', { ...React, useState: value => [value, () => {}], useContext: () => null });
 const messages = code => JSON.parse(fs.readFileSync(path.join(__dirname, '../apps/web/messages', code + '.json'), 'utf8'));
 mockModule('next-intl', { ...req('next-intl'), useTranslations: namespace => req('next-intl').createTranslator({ locale, messages: messages(locale), namespace, onError(error) { throw error; } }) });
 const PropertyForm = load('apps/web/src/components/panel/PropertyForm.tsx').default;
@@ -52,17 +52,19 @@ global.fetch = async (url, options) => {
 };
 async function main() {
   setSession({ user: { id: 'a' } });
-  const values = { titleEs: 'Prueba', titleEn: 'Test', titleFr: 'Test', descEs: 'Texto', descEn: 'Text', descFr: 'Texte', address: 'Address', city: 'City', maxGuests: '7', bedrooms: '3', bathrooms: '2.5', lat: '', lng: '', baseWeekdayPrice: '100', baseWeekendPrice: '200', rentalType: 'anual', contactName: 'Emma', whatsapp: '5215512345678' };
+  const values = { titleEs: 'Prueba', titleEn: 'Test', titleFr: 'Test', descEs: 'Texto', descEn: 'Text', descFr: 'Texte', address: 'Address', city: 'City', maxGuests: '7', bedrooms: '3', bathrooms: '2.5', lat: '', lng: '', baseWeekdayPrice: '100', baseWeekendPrice: '200', rentalType: 'anual', contactName: 'Emma', contactEmail: 'emma@example.invalid', whatsapp: '5215512345678' };
   await PropertyForm({}).props.onSubmit({ preventDefault() {}, currentTarget: values });
   const created = memory.prepare('SELECT * FROM "Property" WHERE titleEs = ?').get('Prueba');
   assert.ok(created);
   assert.deepEqual([created.maxGuests, created.bathrooms, created.bedrooms], [7, 2.5, 3]);
   assert.deepEqual([created.rentalType, created.contactName, created.whatsapp], ['anual', 'Emma', '5215512345678']);
+  assert.equal(created.contactEmail, values.contactEmail);
   const before = PropertyForm({ property: created });
   await before.props.onSubmit({ preventDefault() {}, currentTarget: { ...values, maxGuests: '9', bathrooms: '4.5', bedrooms: '4' } });
   const refreshed = await managedProperty(created.id, { id: 'a', role: 'COLLABORATOR' });
   assert.deepEqual([refreshed.maxGuests, refreshed.bathrooms, refreshed.bedrooms], [9, 4.5, 4]);
   assert.deepEqual([refreshed.rentalType, refreshed.contactName, refreshed.whatsapp], ['anual', 'Emma', '5215512345678']);
+  assert.equal(refreshed.contactEmail, values.contactEmail);
   const after = PropertyForm({ property: refreshed });
   for (const name of ['maxGuests', 'bathrooms', 'bedrooms']) {
     const oldInput = find(before, node => node.props?.name === name);

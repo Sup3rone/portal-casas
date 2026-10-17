@@ -100,7 +100,7 @@ portal = { ...schema, db: drizzle(client, { schema }) };
 const insert = (table, row) => memory.prepare(`INSERT INTO "${table}" (${Object.keys(row).map(k => `"${k}"`).join(',')}) VALUES (${Object.keys(row).map(() => '?').join(',')})`).run(...Object.values(row));
 for (const [id, role] of [['admin', 'ADMIN'], ['a', 'COLLABORATOR'], ['b', 'COLLABORATOR'], ['client', 'CLIENT'], ['viewer', 'VIEWER']]) insert('User', { id, role, email: id + '@test.invalid', name: id });
 for (const [id, ownerId, published] of [['pa', 'a', 1], ['pb', 'b', 1], ['hidden', 'a', 0]]) {
-  insert('Property', { id, ownerId, published, slug: id, titleEs: id, titleEn: id, titleFr: id, maxGuests: 8 });
+  insert('Property', { id, ownerId, published, slug: id, titleEs: id, titleEn: id, titleFr: id, maxGuests: 8, rentalType: 'nocturna' });
 }
 for (const [id, propertyId, userId] of [['ma', 'pa', 'client'], ['mb', 'pb', 'viewer']]) insert('Message', { id, propertyId, userId, read: 0 });
 for (const [id, propertyId] of [['ra', 'pa'], ['rb', 'pb']]) insert('SeasonRate', { id, propertyId });

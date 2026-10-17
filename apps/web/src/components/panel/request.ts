@@ -1,4 +1,5 @@
 const codes: Record<string, string> = {
+  INVALID_CONTACT_EMAIL: 'invalidContactEmail',
   INVALID_HERO_VIDEO: 'invalidHeroVideo', INVALID_SECTION_TITLES: 'invalidSectionTitles',
   INVALID_VIDEO_TYPE: 'invalidVideoType', INVALID_VIDEO_SIZE: 'invalidVideoSize',
   INVALID_DESTINATION: 'invalidDestination',

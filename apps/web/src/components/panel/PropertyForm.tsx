@@ -6,10 +6,12 @@ import type { PanelProperty } from '@/lib/panel-resources';
 import { panelRequest, inputClass, buttonClass } from './request';
 import MapsLocationInput from './MapsLocationInput';
 import TranslationDraftButton from './TranslationDraftButton';
+import { usePropertyRentalType } from './PropertyRentalType';
 import { DESTINATION_STATES, citiesByState, isDestinationValue, type DestinationState } from '@/lib/destinations';
 
 export default function PropertyForm({ property }: { property?: PanelProperty }) {
   const t = useTranslations('panel'), router = useRouter();
+  const rental = usePropertyRentalType();
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   const validDestination = property && isDestinationValue(property);
   const [state, setState] = useState<DestinationState | ''>(validDestination ? property.state as DestinationState : '');
@@ -26,6 +28,7 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
     for (const key of numbers) body[key] = form.get(key) === '' ? null : Number(form.get(key));
     body.rentalType = form.get('rentalType') ?? 'nocturna';
     body.contactName = form.get('contactName') || null;
+    body.contactEmail = form.get('contactEmail') || null;
     body.whatsapp = form.get('whatsapp') || null;
     try {
       const result = await panelRequest(property ? `/api/properties/${property.id}` : '/api/properties', property ? 'PATCH' : 'POST', body);
@@ -36,13 +39,13 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
   }
   return (
     <form onSubmit={submit} className="space-y-6 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
-      <p className="text-sm text-gray-600 dark:text-gray-300">{t('approvalHint')}</p>
-      <div className="grid gap-4 md:grid-cols-2">
         <label className="block text-sm">{t('fields.rentalType')}
-          <select key={`rentalType:${property?.rentalType ?? 'nocturna'}`} name="rentalType" required defaultValue={property?.rentalType ?? 'nocturna'} className={inputClass}>
-            <option value="nocturna">{t('rentalNocturna')}</option><option value="anual">{t('rentalAnual')}</option>
+          <select key={`rentalType:${property?.rentalType ?? 'nocturna'}`} name="rentalType" required defaultValue={property?.rentalType ?? 'nocturna'} onChange={event => rental?.setRentalType(event.target.value as PanelProperty['rentalType'])} className={inputClass}>
+            <option value="nocturna">{t('rentalNocturna')}</option><option value="anual">{t('rentalAnual')}</option><option value="ambas">{t('rentalAmbas')}</option>
           </select>
         </label>
+      <p className="text-sm text-gray-600 dark:text-gray-300">{t('approvalHint')}</p>
+      <div className="grid gap-4 md:grid-cols-2">
         <label className="block text-sm">{t('fields.contactName')}
           <input key={`contactName:${property?.contactName ?? ''}`} name="contactName" maxLength={100} defaultValue={property?.contactName ?? ''} className={inputClass} />
         </label>
@@ -51,6 +54,9 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
             title={t('whatsappHint')} defaultValue={property?.whatsapp ?? ''} className={inputClass}
             onInvalid={event => event.currentTarget.setCustomValidity(t('whatsappHint'))} onInput={event => event.currentTarget.setCustomValidity('')} />
           <span className="text-xs text-gray-600 dark:text-gray-300">{t('whatsappHint')}</span>
+        </label>
+        <label className="block text-sm">{t('fields.contactEmail')}
+          <input key={`contactEmail:${property?.contactEmail ?? ''}`} name="contactEmail" type="email" maxLength={254} defaultValue={property?.contactEmail ?? ''} className={inputClass} />
         </label>
         {texts.map(key => <label key={key} className="block text-sm">{t(`fields.${key}`)}
           {key.startsWith('desc') ? <textarea name={key} required rows={4} defaultValue={property?.[key]} className={inputClass} />

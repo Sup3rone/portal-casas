@@ -7,12 +7,14 @@ import { AccessError, accessFailure, managedProperties, requirePropertyManager }
 export async function POST() {
   try {
     const manager = await requirePropertyManager();
-    const feeds = await db.select({ feed: icalFeeds }).from(icalFeeds)
+    const feeds = await db.select({ feed: icalFeeds, rentalType: properties.rentalType }).from(icalFeeds)
       .innerJoin(properties, eq(icalFeeds.propertyId, properties.id))
       .where(managedProperties(manager));
-    const feedRows = feeds.map(row => row.feed);
+    const skippedAnnual = feeds.filter(row => row.rentalType === 'anual').length;
+    const feedRows = feeds.filter(row => row.rentalType !== 'anual').map(row => row.feed);
+    if (skippedAnnual) console.info(`iCal: omitidos ${skippedAnnual} feeds de propiedades anuales`);
     if (feedRows.length === 0) {
-      return NextResponse.json({ success: true, synced: 0, message: 'No hay feeds configurados' });
+      return NextResponse.json({ success: true, synced: 0, skippedAnnual, message: 'No hay feeds elegibles para sincronizar' });
     }
 
     let totalSynced = 0;
@@ -60,6 +62,7 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       synced: totalSynced,
+      skippedAnnual,
       message: `Sincronización completada: ${totalSynced} eventos`
     });
   } catch (error) {

@@ -44,7 +44,8 @@ async function main() {
     const before = count(), reads = queryLog.length;
     const response = await send({ ...valid, [field]: value });
     assert.equal(response.status, 400); assert.equal((await response.json()).fields[field], code);
-    assert.equal(count(), before); assert.equal(queryLog.length, reads, 'Error sintáctico no debe consultar BD');
+    assert.equal(count(), before);
+    assert.equal(queryLog.length, reads + (['startDate', 'endDate'].includes(field) ? 1 : 0), 'Contacto inválido no lee BD; fechas requieren conocer la modalidad guardada');
   }
   const before = count();
   const guests = await send({ ...valid, guests: 9, maxGuests: 999 });

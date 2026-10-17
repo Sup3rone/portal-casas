@@ -25,13 +25,15 @@ export function normalizeInquiry(input: InquiryInput) {
   };
 }
 
-export function validateInquiry(input: InquiryInput, context: { today: string; maxGuests?: number; bookings?: BookingRange[] }): InquiryErrors {
+export function validateInquiry(input: InquiryInput, context: { today: string; maxGuests?: number; bookings?: BookingRange[]; contactOnly?: boolean }): InquiryErrors {
   const value = normalizeInquiry(input), errors: InquiryErrors = {};
   if (value.name.length < 2 || value.name.length > 100) errors.name = 'nameLength';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email) || value.email.length > 254) errors.email = 'emailFormat';
   const digits = value.phone.replace(/\D/g, '').length;
   if (input.phone != null && typeof input.phone !== 'string' || value.phone &&
       (!/^\+?[\d ]+$/.test(value.phone) || value.phone.length < 7 || value.phone.length > 25 || digits < 7 || digits > 15)) errors.phone = 'phoneFormat';
+  if (!value.body) errors.body = 'messageRequired';
+  if (context.contactOnly) return errors;
   const startValid = fechaDisponible(value.startDate, [], '0000-01-01');
   const endValid = fechaDisponible(value.endDate, [], '0000-01-01');
   if (!value.startDate) errors.startDate = 'startRequired';
@@ -46,6 +48,5 @@ export function validateInquiry(input: InquiryInput, context: { today: string; m
   }
   if (!Number.isInteger(value.guests) || value.guests < 1 ||
       context.maxGuests !== undefined && value.guests > context.maxGuests) errors.guests = 'guestsRange';
-  if (!value.body) errors.body = 'messageRequired';
   return errors;
 }

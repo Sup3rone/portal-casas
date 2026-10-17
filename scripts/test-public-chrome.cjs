@@ -8,6 +8,10 @@ const css = postcss.parse(fs.readFileSync(path.resolve(__dirname, '../apps/web/s
 const light = {}, dark = {};
 css.walkRules(rule => {
   if (rule.selector === ':root' || rule.selector === 'html.dark') rule.walkDecls(decl => { (rule.selector === ':root' ? light : dark)[decl.prop] = decl.value; });
+  // El monograma público añadió sus tokens en d9c35a2a; no son estilos de contenido/panel.
+  else if (['.home-brand', 'html.dark .home-brand'].includes(rule.selector)) {
+    rule.walkDecls(decl => assert.equal(decl.prop, '--logo-color', 'La excepción del monograma solo admite su token de color'));
+  }
   else assert.ok(rule.selectors.every(selector => /public-header|public-footer/.test(selector)), 'Estilos visuales aislados del panel y del contenido');
 });
 function luminance(hex) {

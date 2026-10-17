@@ -3,6 +3,7 @@ import { accessFailure } from './property-access';
 import { PanelValidationError } from './panel-validation';
 
 export function panelError(error: unknown) {
+  if (error instanceof PanelValidationError && error.message === 'invalidContactEmail') return NextResponse.json({ error: 'invalidContactEmail', code: 'INVALID_CONTACT_EMAIL' }, { status: 400 });
   if (error instanceof PanelValidationError && ['invalidHeroVideo', 'invalidSectionTitles'].includes(error.message)) return NextResponse.json({ error: error.message, code: error.message === 'invalidHeroVideo' ? 'INVALID_HERO_VIDEO' : 'INVALID_SECTION_TITLES' }, { status: 400 });
   const denied = accessFailure(error);
   if (denied) return NextResponse.json({ error: denied.message, code: denied.code }, { status: denied.status });

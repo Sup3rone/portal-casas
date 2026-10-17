@@ -47,14 +47,15 @@ export const properties = pgTable('Property', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   baseWeekdayPrice: integer('baseWeekdayPrice'),
   baseWeekendPrice: integer('baseWeekendPrice'),
-  rentalType: text('rentalType').$type<'nocturna' | 'anual'>().notNull().default('nocturna'),
+  rentalType: text('rentalType').$type<'nocturna' | 'anual' | 'ambas'>().notNull().default('nocturna'),
   contactName: text('contactName'),
+  contactEmail: text('contactEmail'),
   whatsapp: text('whatsapp'),
 }, table => [
   index('Property_ownerId_idx').on(table.ownerId),
   check('Property_section_titles_check', sql`${table.sectionTitles} is null or jsonb_typeof(${table.sectionTitles}) = 'object'`),
   check('Property_destination_pair_check', sql`(${table.state} is null and ${table.destinationCity} is null) or (${table.state} is not null and ${table.destinationCity} is not null and btrim(${table.state}) <> '' and btrim(${table.destinationCity}) <> '')`),
-  check('Property_rentalType_check', sql`${table.rentalType} in ('nocturna', 'anual')`),
+  check('Property_rentalType_check', sql`${table.rentalType} in ('nocturna', 'anual', 'ambas')`),
   check('Property_whatsapp_check', sql`${table.whatsapp} is null or ${table.whatsapp} ~ '^[0-9]{8,15}$'`),
 ]);
 

@@ -70,6 +70,7 @@ async function main() {
   }
   // Reducer de selección del formulario real: cambiar estado vacía ciudad.
   let state = [], cursor = 0;
+  mockModule('./PropertyRentalType', { usePropertyRentalType: () => null });
   mockModule('react', { ...React, useState: initial => { const index = cursor++; if (!(index in state)) state[index] = initial; return [state[index], value => { state[index] = value; }]; } });
   mockModule('next-intl', { useTranslations: () => key => key });
   const Interactive = load('apps/web/src/components/panel/PropertyForm-destinations-test.tsx', fs.readFileSync('apps/web/src/components/panel/PropertyForm.tsx','utf8')).default;

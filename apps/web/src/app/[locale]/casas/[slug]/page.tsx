@@ -48,13 +48,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   const property = await readPublishedProperty(slug);
   if (!property) notFound();
 
+  const isAnnual = property.rentalType === 'anual';
   const [mediaList, sectionRows, bookingRows, blockRows, rateRows, t] = await Promise.all([
     db.select().from(media).where(eq(media.propertyId, property.id)).orderBy(media.order),
     db.select().from(propertySections).where(eq(propertySections.propertyId, property.id)),
-    db.select({ startDate: bookings.startDate, endDate: bookings.endDate })
+    isAnnual ? Promise.resolve<{ startDate: string; endDate: string }[]>([]) : db.select({ startDate: bookings.startDate, endDate: bookings.endDate })
       .from(bookings).where(eq(bookings.propertyId, property.id)).orderBy(bookings.startDate),
-    propertyBlocks(property.id),
-    db.select().from(seasonRates).where(eq(seasonRates.propertyId, property.id)),
+    isAnnual ? Promise.resolve([]) : propertyBlocks(property.id),
+    isAnnual ? Promise.resolve([]) : db.select().from(seasonRates).where(eq(seasonRates.propertyId, property.id)),
     getTranslations({ locale }),
   ]);
   const titleFor = (section: PropertySectionKey) => sectionTitle(property.sectionTitles?.titles, section, locale, t('details.' + propertySectionLabels[section]));
@@ -70,7 +71,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   const hasMap = property.lat != null && property.lng != null;
   const hasEditorial = (name: string) => editorial.some(slide => slide.section === name);
 
-  const pricing = {
+  const pricing = isAnnual ? undefined : {
     base: { weekday: property.baseWeekdayPrice, weekend: property.baseWeekendPrice },
     seasons: rateRows.map(r => ({
       start: r.startDate, end: r.endDate,
@@ -191,9 +192,29 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 <SectionBackground url={null} id="reservar" name="reservation" className="detail-screen px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal as="h2" className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl">
-            {titleFor('reserva')}
+            {isAnnual ? t('details.annualContactTitle') : titleFor('reserva')}
           </Reveal>
-          <ReservationDatesProvider key={property.id}>
+          {isAnnual ? <ReservationDatesProvider key={property.id}>
+            <div className={`grid grid-cols-1 gap-8${property.whatsapp || property.contactEmail ? ' lg:grid-cols-2' : ''}`}>
+              <Reveal className="detail-reservation-form detail-lateral-reveal detail-from-left glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
+                <MessageForm propertyId={property.id} propertySlug={property.slug} locale={locale} mode="annual" compact />
+              </Reveal>
+              {(property.whatsapp || property.contactEmail) && <Reveal className="detail-lateral-reveal detail-from-right glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
+                <h3 className="mb-4 text-xl font-semibold">{t('details.contactTitle')}</h3>
+                <div className="space-y-4">
+                  {property.whatsapp && <PropertyWhatsAppLink propertySlug={property.slug} href={`https://wa.me/${property.whatsapp}?text=${encodeURIComponent(t('details.whatsappMessage', { propertyName: title }))}`} target="_blank" rel="noopener noreferrer"
+                    className="flex min-h-11 min-w-11 items-center gap-3 rounded-lg border border-current px-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-6 w-6 shrink-0"><path d="M21 11.5a9 9 0 0 1-13.3 7.9L3 21l1.6-4.7A9 9 0 1 1 21 11.5Z" /><path d="m8 7 2 3-1 1c1 2 2 3 4 4l1-1 3 2c-1 2-3 2-5 1-3-2-5-4-6-7 0-1 1-3 2-3Z" /></svg>
+                    <span className="min-w-0 break-words"><span className="block">{t('details.contactWhatsapp')}</span>+{property.whatsapp}</span>
+                  </PropertyWhatsAppLink>}
+                  {property.contactEmail && <a href={`mailto:${property.contactEmail}`} className="flex min-h-11 min-w-11 items-center gap-3 rounded-lg border border-current px-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-6 w-6 shrink-0"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 6 9 7 9-7" /></svg>
+                    <span className="min-w-0 break-all"><span className="block">{t('details.contactEmail')}</span>{property.contactEmail}</span>
+                  </a>}
+                </div>
+              </Reveal>}
+            </div>
+          </ReservationDatesProvider> : <ReservationDatesProvider key={property.id}>
           <div className="detail-booking-columns grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Móvil: calendario arriba; desktop a la derecha. */}
@@ -206,16 +227,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
             {/* Desktop: formulario a la izquierda; móvil debajo del calendario. */}
             <Reveal className="detail-reservation-form detail-lateral-reveal detail-from-left glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50 lg:order-1">
-              <MessageForm propertyId={property.id} propertySlug={property.slug} locale={locale} pricing={pricing} maxGuests={property.maxGuests} compact />
+              <MessageForm propertyId={property.id} propertySlug={property.slug} locale={locale} pricing={pricing!} maxGuests={property.maxGuests} compact />
               {property.whatsapp && <PropertyWhatsAppLink propertySlug={property.slug} href={`https://wa.me/${property.whatsapp}?text=${encodeURIComponent(t('details.whatsappMessage', { propertyName: title }))}`} target="_blank" rel="noopener noreferrer"
                 className="mt-3 block w-full rounded-lg border border-green-700 px-4 py-3 text-center text-sm font-medium text-green-800 transition hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-950">{t('details.whatsappButton')}</PropertyWhatsAppLink>}
             </Reveal>
           </div>
-          </ReservationDatesProvider>
+          </ReservationDatesProvider>}
         </div>
       </SectionBackground>
       </DetailSectionTransitions>
-      {editorial.length > 0 && <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{t('details.reservar')}</a>}
+      {editorial.length > 0 && <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{isAnnual ? t('details.annualContactTitle') : t('details.reservar')}</a>}
       <DetailFooterFlow><Footer inDetail /></DetailFooterFlow>
     </PropertyDetailScroll>
   );

@@ -560,3 +560,75 @@ QA: capturas aisladas con páginas reales y datos ficticios, sin Neon; comparar 
 ### 2026-10-15 — Fondos de secciones descontinuados en UI, vivos en BD
 La ficha mantiene papel beige #F4F1EC (papel oscuro del tema), sin fondos de inicio, mapa/reserva ni heroes editoriales o portada de advertencias. Se eliminan sus precargas explícitas y clases de título condicionadas a URLs guardadas. La galería principal y las fotos de contenido/carrusel editorial permanecen. Advertencias sin narrativa no genera un cuadro solo por su hero antiguo.
 En edición se omite SectionBackgroundEditor y se desactiva SECTION_HERO_PICKER_ENABLED en PropertySectionsEditor; el hero guardado se conserva al guardar los textos. Siguen activos biblioteca, portada del listado y selección de fotos de contenido. No se modifican columnas, registros, Blob ni endpoints: PATCH /api/properties/[id], PUT /api/properties/[id]/sections/[section] y subida de fotos se conservan. Restauración: reactivar import/render de SectionBackgroundEditor, poner SECTION_HERO_PICKER_ENABLED=true y reponer el cableado de fondos/hero y precargas del detalle desde el diff; PUBLIC_PHOTO_BACKGROUNDS continúa desactivado, no cambiarlo globalmente sin revisar home/listado. No hay QA de navegador automatizado; verificación visual pendiente de Emma.
+
+## Actualización de estado real — 16 Oct 2026
+
+Este cierre prevalece sobre estados históricos de experimentos, fallos de tests y pendientes ya resueltos citados arriba. «Hecho» significa implementado en código; no equivale a QA humana, aprobación de la clienta ni deployment verificado.
+
+**Rama y evidencia:** al revisar, el checkout está en `main`, HEAD `cdec8afd`, igual a la referencia local `origin/main`; árbol limpio antes de esta edición documental. No existe referencia local ni remota almacenada `experimento/redesign`. No se hizo fetch ni se consultó Vercel: **verificar** si esa rama existe actualmente en el servidor, qué preview corresponde y cómo se integraron los cambios. No afirmar «merge a main pendiente» como hecho: los commits revisados ya son ancestros del main local. Última entrada anterior del archivo: fondos descontinuados, commit `d4ae9eb0` (15 Oct).
+
+### Home: hero con video y navbar integrado — 16 Oct 2026
+**Estado: HECHO; PENDIENTE DE QA humana y aprobación del cliente.**
+- Commit `0ecf8cae` («Nuevos paneles»): `HOME_HERO_MEDIA_ENABLED=true`, video configurable con fallback actual; navbar transparente al inicio, se oculta al bajar dentro del hero y vuelve mate al subir/salir. Buscador permanece en la lupa; `HOME_SEARCH_IN_HERO=false`.
+- Reduced-motion conserva fallback estático. No se reactivan fondos del listado/ficha. Referencia: `docs/HOME-COMPOSICION.md`.
+
+### Home: carrusel de propiedades destacadas — 16 Oct 2026
+**Estado: HECHO; PENDIENTE DE QA humana y aprobación del cliente.**
+- Commit `0ecf8cae`: HomeFeaturedCarousel reutiliza las tarjetas de destacadas; tres visibles en escritorio, una en móvil, flechas y rotación cada 3 s cuando hay más de tres. Pausa por hover/foco y reduced-motion. Con hasta tres no rota automáticamente.
+- Verificar fotos, clic/revelado táctil, controles y selección de propiedades reales en preview; no consta aprobación visual nueva.
+
+### Home: Sobre nosotros después de destacadas — 16 Oct 2026
+**Estado: HECHO; PENDIENTE DE QA humana, configuración y aprobación del cliente.**
+- Commit `0ecf8cae`: imagen vertical 2:3, título/texto localizados y redes; requiere imagen y texto para renderizar. Editor SiteContent reutiliza subida existente y permite títulos por idioma. Reveal de una sola vez.
+- SQL `scripts/sql/site-content-about.sql` preparado; aplicación efectiva por entorno: **VERIFICAR**, no acreditada por git. Referencia: `docs/HOME-COMPOSICION.md`.
+
+### Ficha: video de hero, títulos editables y presentación zig-zag — 16 Oct 2026
+**Estado: HECHO; PENDIENTE DE QA humana y aprobación del cliente.**
+- Commit `0ecf8cae`: PropertyHeroVideo con poster/fallback y reduced-motion; PropertyPresentationEditor configura video por URL/subida MP4/WebM <=4 MB y títulos es/en/fr en `Property.sectionTitles`. Editoriales alternan imagen/texto; reserva nocturna/ambas mantiene formulario izquierda y calendario derecha. En móvil se apilan.
+- SQL `scripts/sql/property-presentation.sql` preparado; aplicación por entorno: **VERIFICAR**. Referencia: `docs/FICHA-PRESENTACION.md`. Galería y lógica de reservas conservadas.
+
+### Ficha: separación vertical compacta — 16 Oct 2026
+**Estado: HECHO; PENDIENTE DE QA humana.**
+- Incluido en `0ecf8cae`, `property-presentation.css`: distancia compartida 48 px escritorio / 32 px móvil; se elimina altura mínima heredada de fullpage en secciones exteriores. Se conservan padding interno, tamaños de imágenes y hero con video.
+- Verificar continuidad entre editoriales, mapa, reserva/contacto y footer, sin espacios muertos ni bloques pegados.
+
+### Ficha: Reveal lateral unificado de mapa y advertencias — 16 Oct 2026
+**Estado: HECHO; PENDIENTE DE QA humana.**
+- Commit `0ecf8cae`: mapa y título llegan desde derecha; advertencias desde izquierda. Se reutiliza Reveal existente, sin segundo observer/animación paralela; una vez, permanece visible y respeta reduced-motion.
+- Comprobar gestos del mapa, lectura y ausencia de desborde a 375 px.
+
+### Destinos: catálogo, edición dependiente y búsqueda — 15 Oct 2026
+**Estado: HECHO en código; PENDIENTE DE QA humana; datos por entorno, VERIFICAR.**
+- Commit `044207df` («Buscador por ciudades»): catálogo tipado de 44 destinos, helpers de normalización, `state` + `destinationCity`, conservación de `city` legacy y selects dependientes Estado → Ciudad. Listado combina ubicación, fechas y huéspedes; fichas/tarjetas muestran Ciudad, Estado con fallback legacy.
+- Se registra aquí como funcionalidad omitida en el cierre anterior, conservando su fecha de commit. Scripts de schema/backfill e instrucciones en `docs/UBICACION-CATALOGO.md`; Emma indicó después que las cuatro propiedades estaban migradas. No se consultó BD para corroborarlo ni se presupone igual estado en main de Neon.
+
+### Panel admin/colaborador: paleta beige y cierre sin franja blanca — 15 Oct 2026
+**Estado: HECHO; PENDIENTE DE QA humana y aprobación del cliente.**
+- Commit `1d4a04f0` («cambio de panel»): layouts de admin/panel activan variante papel usando tokens públicos; superficies, controles y espacio hasta footer se integran al beige. Skin lavanda conservado para reversión; distribución y funcionalidades intactas.
+- Referencia: `docs/PANEL-SKIN-PRUEBA.md`. Revisar formularios, tablas y tarjetas en ambos temas y tamaños.
+
+### Tipo de renta: trilogía completa — 16 Oct 2026
+**Estado: HECHO; PENDIENTE DE QA humana integral y aprobación del cliente.**
+- Commit `cdec8afd`: (1) modalidades `nocturna`/`anual`/`ambas`, contactEmail opcional, selector inicial, tarifas/disponibilidad ocultas sin borrar para anual y omisión de feeds anuales en iCal; (2) ficha anual con contacto sin fechas/precios/calendario y WhatsApp/correo condicionales, validación del tipo real en servidor; (3) búsqueda con fechas excluye anual, sin fechas la conserva con filtros de ciudad/capacidad/publicación.
+- SQL de sub-fase 1 aplicado según confirmación de Emma; branch de BD/estado por entorno: **VERIFICAR**. No hay migraciones adicionales de sub-fases 2/3. No se ejecutó SQL desde el agente.
+- Referencias: `docs/DIAGNOSTICO-RENTA.md` y cierre de sub-fases en CONTEXTO.md. Mensajes con fechas nulas comprobados offline en listas; envío/recepción real y sincronización autorizada siguen pendientes de QA.
+
+### Validación offline y corrección del test de chrome — 16 Oct 2026
+**Estado: HECHO; suite 52/52 en verde en la última ejecución registrada.**
+- `cdec8afd` contiene el cierre de tests: se corrige expectativa obsoleta de `.home-brand` introducida por `d9c35a2a`, admitiendo solo sus dos selectores de token de logo; aislamiento restante y contrastes AA conservados. Test francés comprueba valores traducidos, no nombres internos de claves.
+- Última validación de implementación: 52/52 scripts `test-*.cjs`, TypeScript web limpio y `pnpm lint` 0 errores / 5 warnings preexistentes. No se reejecutaron en esta tarea de documentación; árbol de código coincide con el cierre registrado. No implica build de producción ni QA de navegador exitosos.
+
+### Supuestos y límites de este cierre
+- Fechas tomadas de commits y registros existentes; no se infiere una fecha de aprobación/deploy a partir de la fecha de implementación.
+- «Pendiente de cliente» se conserva hasta aprobación expresa; el preview en Vercel en revisión procede del contexto de Emma, no de una comprobación del dashboard. URL/deployment concreto: **VERIFICAR**.
+- SQL aplicado y migración de cuatro propiedades son confirmaciones previas de Emma, no verificaciones nuevas de Neon. Scripts que solo constan como propuesta permanecen marcados para verificar.
+- Se modifica únicamente PROGRESO.md; sin cambios de código, ramas, commits, merges, BD ni servicios externos. No se abre navegador ni se generan capturas.
+
+## Pendientes reales al cierre — 16 Oct 2026
+
+1. **QA humana de Emma:** home/hero/navbar, carrusel y Sobre nosotros; ficha/video/fallback, títulos, zig-zag, separación compacta y Reveal; panel beige; catálogo/búsqueda y trilogía anual/nocturna/ambas con persistencia/envío/sync autorizados. Cubrir 1440/375 px, es/en/fr, claro/oscuro, teclado y reduced-motion. Usar checklists de HOME-COMPOSICION.md, FICHA-PRESENTACION.md y CONTEXTO.md.
+2. **Decisión de la clienta sobre preview de Vercel: PENDIENTE.** Verificar URL, deployment y commit que se está revisando; no consta aprobación final ni validación de producción en esta revisión.
+3. **Merge de experimento/redesign a main: VERIFICAR.** La rama no está en referencias disponibles y main local/origin-main almacenado ya contienen el cierre `cdec8afd`. Confirmar con Emma qué rama/PR queda por integrar antes de registrar un merge pendiente o completado. No se hizo ningún merge en esta tarea.
+4. **CSP en Report-Only:** preparado en `apps/web/vercel.json`, commit `ac0aba2b`; verificar headers desplegados y registrar violaciones reales de Maps/Blob/video/Analytics. No pasar a bloqueo sin revisar resultados. Procedimiento en `docs/CSP-HEADERS.md`.
+5. **Limpieza del fullpage descontinuado: PENDIENTE.** `DETAIL_FULLPAGE_ENABLED=false`; código experimental, reglas y tests históricos permanecen. El detalle vigente usa scroll nativo con presentación zig-zag; DETALLE-SCROLL-SNAP.md conserva descripciones de stage/100dvh ya históricas que requieren reconciliación antes de reactivar o retirar el experimento. No borrar ni reactivar como parte de este cierre.
+6. **Verificar configuración por entorno:** SQL de presentación/SiteContent, dominio PUBLIC_SITE_URL, Analytics activado/deploy y datos reales. Medir LCP/INP/CLS con tráfico de producción y validar optimizer antes de quitar `unoptimized`, pendientes históricos sin evidencia de cierre nueva.

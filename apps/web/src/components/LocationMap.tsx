@@ -14,7 +14,7 @@ export default async function LocationMap({ lat, lng, address, propertyTitle, ci
   const locale = await getLocale();
   const t = await getTranslations('details');
   return (
-    <Reveal className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+    <Reveal className="detail-lateral-reveal detail-from-right relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
       <PropertyShareButton title={propertyTitle} lat={lat} lng={lng} address={address} city={city} />
       <iframe
         title={t('mapTitle', { address })}

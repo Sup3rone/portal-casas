@@ -2,7 +2,7 @@
 export const editorialOrder = ['destino', 'amenidades', 'habitaciones', 'lugar'] as const;
 type Media = { id: string; propertyId: string; url: string; type: 'PHOTO' | 'VIDEO'; category: string; order: number };
 type Section = { propertyId: string; section: string; descriptionEs: string | null; descriptionEn: string | null; descriptionFr: string | null; heroMediaId: string | null; photoMediaIds?: string[] | null };
-export type EditorialSlide = { section: typeof editorialOrder[number]; description: string; hero?: { id: string; url: string }; photos: { id: string; url: string }[] };
+export type EditorialSlide = { section: typeof editorialOrder[number]; description: string; title?: string; hero?: { id: string; url: string }; photos: { id: string; url: string }[] };
 
 export function sceneGeometry(heights: number[], viewport: number) {
   let start = 0;

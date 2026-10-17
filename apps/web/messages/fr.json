@@ -22,6 +22,18 @@
     "dark": "Activer le mode sombre"
   },
   "panel": {
+    "heroVideoUploadFailed": "La vidéo n’a pas pu être ajoutée. Réessayez ; votre configuration précédente est conservée.",
+    "presentationTitle": "Présentation du logement",
+    "heroVideoLabel": "Vidéo de fond du bandeau principal (URL HTTPS)",
+    "heroVideoChoose": "Ajouter une vidéo de fond",
+    "heroVideoHint": "MP4 ou WebM, 4 Mo maximum. Utilisez une URL HTTPS pour les vidéos plus volumineuses. La photo principale apparaît si la lecture est impossible. Enregistrez pour appliquer les modifications.",
+    "heroVideoUploaded": "Vidéo ajoutée. Enregistrez pour l’appliquer au logement.",
+    "sectionTitlesHint": "Titres des sections : laissez les trois langues vides pour conserver les libellés actuels, ou complétez es/en/fr (150 caractères maximum par langue).",
+    "invalidSectionTitles": "Complétez les trois langues de chaque titre modifié, avec 150 caractères maximum, ou laissez les trois vides.",
+    "invalidHeroVideo": "Saisissez une URL HTTPS valide sans identifiants pour la vidéo, ou laissez le champ vide.",
+    "invalidVideoType": "Choisissez une vidéo MP4 ou WebM.",
+    "invalidVideoSize": "La vidéo doit peser entre 1 octet et 4 Mo. Pour une vidéo plus volumineuse, utilisez une URL HTTPS.",
+
     "destinationEmpty": "Non sélectionné",
     "destinationUnavailable": "Votre ville n’est pas disponible ? Contactez l’administrateur.",
     "invalidDestination": "Sélectionnez un État et une ville correspondants dans le catalogue, ou laissez les deux champs vides.",
@@ -463,6 +475,12 @@
     "invalid": "Vérifiez l’État et la ville, le nombre de voyageurs et les dates d’arrivée et de départ."
   },
   "siteContent": {
+    "about_title_es": "Titre À propos (espagnol)",
+    "about_title_en": "Titre À propos (anglais)",
+    "about_title_fr": "Titre À propos (français)",
+    "aboutImageLabel": "Image À propos",
+    "aboutImageHint": "Ajoutez une image verticale, affichée au format 2:3. La section apparaît si une image et un texte dans la langue active sont disponibles.",
+
     "imageLimits": "JPEG, PNG ou WebP · 4 Mo maximum par photo après optimisation. L’image sélectionnée est appliquée à l’enregistrement.",
     "videoLabel": "Vidéo de fond de l’accueil",
     "videoHint": "URL HTTPS directe d’une vidéo (par exemple MP4). Vide utilise la vidéo actuelle, sans son. En cas d’erreur, la vidéo locale est utilisée.",

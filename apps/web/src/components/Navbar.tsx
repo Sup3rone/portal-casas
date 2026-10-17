@@ -36,6 +36,8 @@ function AliaMonogram() {
 export default function Navbar() {
   const locale = useLocale();
   const pathname = usePathname();
+  const homePage = /^\/(?:(?:es|en|fr)\/?)?$/.test(pathname);
+  const navRef = useRef<HTMLElement>(null);
   const privatePage = /^\/(?:(?:es|en|fr)\/)?(?:panel|admin)(?:\/|$)/.test(pathname);
   const t = useTranslations('nav');
   const searchText = useTranslations('home');
@@ -51,6 +53,28 @@ export default function Navbar() {
   const accountRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
+
+  useEffect(() => {
+    if (!homePage) return;
+    const nav = navRef.current;
+    if (!nav) return;
+    let previous = window.scrollY, frame = 0;
+    function update() {
+      frame = 0;
+      const y = window.scrollY;
+      const hero = document.querySelector('[data-home-hero]');
+      const insideHero = Boolean(hero && hero.getBoundingClientRect().bottom > nav!.offsetHeight);
+      const focused = nav!.contains(document.activeElement);
+      nav!.toggleAttribute('data-home-top', y <= 8);
+      nav!.toggleAttribute('data-home-hidden', insideHero && y > 8 && y > previous && !focused);
+      previous = y;
+    }
+    function schedule() { if (!frame) frame = requestAnimationFrame(update); }
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    update();
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule); };
+  }, [homePage]);
 
   function closeAccount() {
     setOpen(false);
@@ -92,7 +116,7 @@ export default function Navbar() {
   }, [searchOpen]);
 
   return (
-    <nav className={`relative z-50 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900${privatePage ? '' : ' public-header'}`}>
+    <nav ref={navRef} data-home-top={homePage ? '' : undefined} className={`relative z-50 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900${privatePage ? '' : ' public-header'}${homePage ? ' home-navbar' : ''}`}>
       <div className="mx-auto max-w-7xl px-6 py-4">
         <div className="flex items-center justify-between max-md:flex-wrap max-md:gap-4">
           {/* LOGO — izquierda */}

@@ -15,11 +15,13 @@ export default function SiteContentEditor({ content, properties }: { content: Si
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   const uploader = useTranslations('photoUpload');
   const [imageUrl, setImageUrl] = useState(content.listing_background_image);
+  const [aboutImageUrl, setAboutImageUrl] = useState(content.about_image);
+  const uploadTarget = useRef<'listing_background_image' | 'about_image'>('listing_background_image');
   const [uploading, setUploading] = useState(false), [uploadStatus, setUploadStatus] = useState('');
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null), lock = useRef(false), controllerRef = useRef<AbortController | null>(null);
   useEffect(() => () => controllerRef.current?.abort(), []);
-  async function upload(files: FileList | null) {
+  async function upload(files: FileList | null, target: 'listing_background_image' | 'about_image' = 'listing_background_image') {
     if (!files?.length || busy || lock.current) return;
     lock.current = true; setUploading(true); setUploadErrors([]);
     const controller = new AbortController(); controllerRef.current = controller;
@@ -39,7 +41,8 @@ export default function SiteContentEditor({ content, properties }: { content: Si
           if (controller.signal.aborted) return;
           if (!response.ok) throw panelResponseError(response.status, payload);
           if (typeof payload.url !== 'string' || !payload.url.startsWith('https://')) throw new Error('error');
-          setImageUrl(payload.url);
+          if (target === 'about_image') setAboutImageUrl(payload.url);
+          else setImageUrl(payload.url);
           setUploadStatus(t('assetUploaded') + (optimized.optimized ? ' · ' + uploader('optimizedSize', { original: Math.round(file.size / 100_000) / 10, final: Math.round(optimized.file.size / 1000) }) : ''));
         } catch (error) {
           if (controller.signal.aborted) return;
@@ -61,6 +64,14 @@ export default function SiteContentEditor({ content, properties }: { content: Si
   return <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
     <p className="text-sm text-gray-600 dark:text-gray-300">{t('hint')}</p>
     <fieldset disabled={busy || uploading} className="space-y-4">
+      {(['about_title_es', 'about_title_en', 'about_title_fr'] as const).map(key => <label key={key} className="block text-sm">{t(key)}<input name={key} maxLength={200} defaultValue={content[key]} className={inputClass} /></label>)}
+      <TranslationDraftButton source="es" prefix="title" fieldNames={{ es: 'about_title_es', en: 'about_title_en', fr: 'about_title_fr' }} disabled={busy || uploading} useCentralErrors />
+      <label className="block text-sm">{t('aboutImageLabel')}<input name="about_image" type="url" value={aboutImageUrl} readOnly className={inputClass} /></label>
+      {aboutImageUrl && <><Image src={aboutImageUrl} alt={t('aboutImageLabel')} width={160} height={240} unoptimized className="aspect-[2/3] w-40 rounded-lg object-cover" /><button type="button" className={buttonClass} onClick={() => setAboutImageUrl('')}>{t('assetClear')}</button></>}
+      <div onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void upload(event.dataTransfer.files, 'about_image'); }} className="rounded-xl border border-dashed p-4">
+        <p>{t('aboutImageHint')}</p><p className="text-sm">{t('imageLimits')}</p>
+        <button type="button" className={buttonClass} disabled={busy || uploading} onClick={() => { uploadTarget.current = 'about_image'; fileRef.current?.click(); }}>{uploader(uploading ? 'uploading' : 'choose')}</button>
+      </div>
       {(['about_es', 'about_en', 'about_fr'] as const).map(key => <label key={key} className="block text-sm">{t(key)}
         <textarea name={key} rows={5} maxLength={2000} defaultValue={content[key]} className={inputClass} />
       </label>)}
@@ -94,8 +105,8 @@ export default function SiteContentEditor({ content, properties }: { content: Si
     </fieldset>
     <div onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void upload(event.dataTransfer.files); }} className="rounded-xl border border-dashed p-4 dark:border-gray-700" aria-busy={uploading}>
       <p>{t('listingImageHint')}</p><p className="text-sm">{t('imageLimits')}</p>
-      <input ref={fileRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={busy || uploading} onChange={event => { void upload(event.currentTarget.files); }} />
-      <button type="button" className={buttonClass} disabled={busy || uploading} onClick={() => fileRef.current?.click()}>{uploader(uploading ? 'uploading' : 'choose')}</button>
+      <input ref={fileRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={busy || uploading} onChange={event => { void upload(event.currentTarget.files, uploadTarget.current); }} />
+      <button type="button" className={buttonClass} disabled={busy || uploading} onClick={() => { uploadTarget.current = 'listing_background_image'; fileRef.current?.click(); }}>{uploader(uploading ? 'uploading' : 'choose')}</button>
       {uploading && <progress className="w-full accent-green-700" aria-label={uploader('uploading')} />}
       {uploadStatus && <p role="status">{uploadStatus}</p>}
       {uploadErrors.length > 0 && <ul role="alert" className="space-y-2 break-words text-sm">{uploadErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}

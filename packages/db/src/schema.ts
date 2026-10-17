@@ -7,7 +7,7 @@ export const mediaTypeEnum = pgEnum('MediaType', ['PHOTO', 'VIDEO']);
 export const siteContent = pgTable('SiteContent', {
   key: text('key').primaryKey(),
   value: text('value').notNull().default(''),
-}, table => [check('SiteContent_key_check', sql`${table.key} in ('about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image')`)]);
+}, table => [check('SiteContent_key_check', sql`${table.key} in ('about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image', 'about_title_es', 'about_title_en', 'about_title_fr', 'about_image')`)]);
 
 export const users = pgTable("User", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -21,6 +21,7 @@ export const users = pgTable("User", {
 });
 
 export const properties = pgTable('Property', {
+  sectionTitles: jsonb('sectionTitles').$type<{ heroVideoUrl: string | null; titles: Partial<Record<string, Record<'es' | 'en' | 'fr', string>>> }>(),
   sectionBgInicio: text('sectionBgInicio'),
   sectionBgMapa: text('sectionBgMapa'),
   sectionBgReserva: text('sectionBgReserva'),
@@ -51,6 +52,7 @@ export const properties = pgTable('Property', {
   whatsapp: text('whatsapp'),
 }, table => [
   index('Property_ownerId_idx').on(table.ownerId),
+  check('Property_section_titles_check', sql`${table.sectionTitles} is null or jsonb_typeof(${table.sectionTitles}) = 'object'`),
   check('Property_destination_pair_check', sql`(${table.state} is null and ${table.destinationCity} is null) or (${table.state} is not null and ${table.destinationCity} is not null and btrim(${table.state}) <> '' and btrim(${table.destinationCity}) <> '')`),
   check('Property_rentalType_check', sql`${table.rentalType} in ('nocturna', 'anual')`),
   check('Property_whatsapp_check', sql`${table.whatsapp} is null or ${table.whatsapp} ~ '^[0-9]{8,15}$'`),

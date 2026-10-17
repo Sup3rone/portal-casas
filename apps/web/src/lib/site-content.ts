@@ -5,7 +5,7 @@ import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { requireAdmin, AccessError } from './property-access';
 import { objectBody, PanelValidationError } from './panel-validation';
 
-export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image'] as const;
+export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image', 'about_title_es', 'about_title_en', 'about_title_fr', 'about_image'] as const;
 export type SiteContentValues = Record<typeof siteContentKeys[number], string>;
 export class SiteContentError extends PanelValidationError {
   constructor(public code: string) { super('validation'); }
@@ -18,10 +18,12 @@ export function siteContentInput(input: unknown): SiteContentValues {
   }
   const values = {} as SiteContentValues;
   for (const key of siteContentKeys) {
-    const raw = (key === 'home_background_video' || key === 'listing_background_image') && !(key in body) ? '' : key === 'featured_property_id' && body[key] === null ? '' : body[key];
+    const raw = siteContentKeys.slice(7).includes(key) && !(key in body) ? '' : key === 'featured_property_id' && body[key] === null ? '' : body[key];
     if (typeof raw !== 'string') throw new SiteContentError('INVALID_SITE_CONTENT');
     const value = raw.trim();
-    if (key.startsWith('about_')) {
+    if (key.startsWith('about_title_')) {
+      if (value.length > 200) throw new SiteContentError('INVALID_SITE_CONTENT');
+    } else if (key.startsWith('about_') && key !== 'about_image') {
       if (value.length > 2000) throw new SiteContentError('ABOUT_TOO_LONG');
     } else if (key === 'contact_whatsapp') {
       if (value && !/^[0-9]{8,15}$/.test(value)) throw new SiteContentError('INVALID_CONTACT_WHATSAPP');
@@ -49,11 +51,10 @@ export async function saveSiteContent(input: unknown) {
   const values = siteContentInput(input);
   // Un editor antiguo abierto antes del deploy no debe borrar los activos nuevos.
   const supplied = input as Record<string, unknown>;
-  if (!('home_background_video' in supplied) || !('listing_background_image' in supplied)) {
+  const optionalKeys = siteContentKeys.slice(7);
+  if (optionalKeys.some(key => !(key in supplied))) {
     const previous = await readSiteContent();
-    for (const key of ['home_background_video', 'listing_background_image'] as const) {
-      if (!(key in supplied)) values[key] = previous[key];
-    }
+    for (const key of optionalKeys) if (!(key in supplied)) values[key] = previous[key];
   }
   const featuredIds = parseFeaturedSelection(values.featured_property_id)!;
   if (featuredIds.length) {

@@ -17,7 +17,7 @@ async function main(){
   section.run('pa','amenidades','Texto de prueba ES','Test text EN','Lorem ipsum',null);
   section.run('pa','advertencias','Texto de prueba ES','Test text EN','Placeholder',null);
   const insert=memory.prepare('INSERT INTO SiteContent (key,value) VALUES (?,?)');
-  for(const [key,value]of Object.entries({about_es:'Texto de prueba ES',about_en:'Test text EN',about_fr:'Texte de test sur nous',featured_property_id:'pa',social_instagram:'',social_facebook:'',contact_whatsapp:''}))insert.run(key,value);
+  for(const [key,value]of Object.entries({about_image:'https://qa.public.blob.vercel-storage.com/about.jpg',about_es:'Texto de prueba ES',about_en:'Test text EN',about_fr:'Texte de test sur nous',featured_property_id:'pa',social_instagram:'',social_facebook:'',contact_whatsapp:''}))insert.run(key,value);
   const placeholders=/test text|texte de test|texto de prueba|lorem ipsum|placeholder/i;
   setLocale('fr');
   let home=render('fr',await Home({params:Promise.resolve({locale:'fr'})}));

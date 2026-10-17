@@ -1,5 +1,6 @@
 import type { properties } from '@portal/db';
 import { isDestinationValue } from './destinations';
+import { propertySectionLabels, type SectionTitles, type PropertySectionKey } from './property-presentation';
 
 export class PanelValidationError extends Error {}
 export function objectBody(value: unknown): Record<string, unknown> {
@@ -29,11 +30,33 @@ const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'a
 const integers = ['maxGuests', 'bedrooms'] as const;
 const prices = ['baseWeekdayPrice', 'baseWeekendPrice'] as const;
 const backgroundFields = ['sectionBgInicio', 'sectionBgMapa', 'sectionBgReserva'] as const;
-const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'whatsapp', 'state', 'destinationCity']);
+const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'whatsapp', 'state', 'destinationCity', 'sectionTitles']);
 export function propertyInput(value: unknown, creating = false) {
   const body = objectBody(value);
   if (!Object.keys(body).length || Object.keys(body).some(key => !allowed.has(key))) throw new PanelValidationError('validation');
   const changes: Partial<typeof properties.$inferInsert> = {};
+  if ('sectionTitles' in body) {
+    const config = body.sectionTitles === null ? {} : objectBody(body.sectionTitles);
+    if (Object.keys(config).some(key => !['titles', 'heroVideoUrl'].includes(key))) throw new PanelValidationError('invalidSectionTitles');
+    let heroVideoUrl: string | null = null;
+    if (config.heroVideoUrl !== undefined && config.heroVideoUrl !== null && config.heroVideoUrl !== '') {
+      heroVideoUrl = text(config.heroVideoUrl);
+      try { const url = new URL(heroVideoUrl); if (heroVideoUrl.length > 2048 || url.protocol !== 'https:' || url.username || url.password) throw new Error(); }
+      catch { throw new PanelValidationError('invalidHeroVideo'); }
+    }
+    const titles = config.titles === undefined ? {} : objectBody(config.titles);
+    const valid: SectionTitles = {};
+    for (const [key, raw] of Object.entries(titles)) {
+      if (!Object.hasOwn(propertySectionLabels, key)) throw new PanelValidationError('invalidSectionTitles');
+      const row = objectBody(raw);
+      if (Object.keys(row).some(language => !['es', 'en', 'fr'].includes(language))) throw new PanelValidationError('invalidSectionTitles');
+      const values = ['es', 'en', 'fr'].map(language => typeof row[language] === 'string' ? row[language].trim() : null);
+      if (values.every(value => value === '')) continue;
+      if (values.some(value => !value || value.length > 150)) throw new PanelValidationError('invalidSectionTitles');
+      valid[key as PropertySectionKey] = { es: values[0]!, en: values[1]!, fr: values[2]! };
+    }
+    changes.sectionTitles = Object.keys(valid).length || heroVideoUrl ? { titles: valid, heroVideoUrl } : null;
+  }
   if ('state' in body || 'destinationCity' in body || creating) {
     const state = body.state === '' || body.state === null ? null : body.state;
     const destinationCity = body.destinationCity === '' || body.destinationCity === null ? null : body.destinationCity;

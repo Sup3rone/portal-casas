@@ -1,3 +1,5 @@
+import PropertyHeroVideo from '@/components/PropertyHeroVideo';
+import { propertySectionLabels, sectionTitle, type PropertySectionKey } from '@/lib/property-presentation';
 import { propertyLocation } from '@/lib/destinations';
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
 import { db, properties, media, bookings, seasonRates, propertySections } from '@portal/db';
@@ -55,12 +57,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     db.select().from(seasonRates).where(eq(seasonRates.propertyId, property.id)),
     getTranslations({ locale }),
   ]);
+  const titleFor = (section: PropertySectionKey) => sectionTitle(property.sectionTitles?.titles, section, locale, t('details.' + propertySectionLabels[section]));
   bookingRows.push(...blockRows);
   const editorial = editorialPresentation(property.id, locale, sectionRows, mediaList)
     .map(slide => locale === 'fr' ? { ...slide, description: publicFrenchText(slide.description) } : slide)
     .filter(slide => Boolean(slide.description || slide.photos.length))
     // Fondos descontinuados en UI; heroMediaId permanece intacto en BD.
-    .map(slide => ({ ...slide, hero: undefined }));
+    .map(slide => ({ ...slide, hero: undefined, title: titleFor(slide.section) }));
   const warnings = sectionRows.find(row => row.section === 'advertencias');
   const warningDescription = locale === 'fr' ? publicFrenchText(warnings?.descriptionFr) : (locale === 'en' ? warnings?.descriptionEn : warnings?.descriptionEs)?.trim() || '';
   const hasWarnings = Boolean(warningDescription);
@@ -96,9 +99,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
   return (
     <PropertyDetailScroll key={property.id}>
-      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container detail-fullpage public-paper" tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
+      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container detail-fullpage public-paper detail-zigzag" tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <SectionBackground url={null} name="gallery" className="detail-screen px-3 py-8 md:px-6">
+        <div className="property-detail-hero" data-hero-video={property.sectionTitles?.heroVideoUrl ? 'true' : undefined}>
+        {property.sectionTitles?.heroVideoUrl && <PropertyHeroVideo src={property.sectionTitles?.heroVideoUrl} poster={principal.find(item => item.type === 'PHOTO')?.url} />}
         <Reveal className="relative mb-6 rounded-2xl p-6 pr-16 text-center">
           <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={destination} />
           <h1 className="break-words text-3xl font-bold tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
@@ -109,6 +114,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             {destination} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
           </p>
         </Reveal>
+        </div>
         <PropertyGallery slides={principal} />
       {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
       {description && <Reveal as="div" className=" mx-auto max-w-2xl px-6 py-16 text-center">
@@ -131,7 +137,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             {editorial.length === 0 && (
             <Reveal className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
               <h2 className="mb-4 text-center text-2xl font-light tracking-[0.3em] text-gray-900 dark:text-gray-100">
-                {t('details.destino')}
+                {titleFor('destino')}
               </h2>
               <p className="mb-6 text-center text-sm font-light leading-relaxed text-gray-600 dark:text-gray-300">
                 {location}
@@ -148,8 +154,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
       {/* ===== AMENIDADES: info + imagen ===== */}
       {porCategoria('amenidades').length > 0 && (!hasEditorial('amenidades') || porCategoria('amenidades').some(item => item.type === 'VIDEO')) && (
-      <div className="mt-8"><CategorySection
-        label={t('details.amenidades')}
+      <div className="mt-8"><Reveal as="h2" className="mb-6 text-center text-2xl font-semibold">{titleFor('amenidades')}</Reveal><CategorySection
+        label={titleFor('amenidades')}
         slides={porCategoria('amenidades')}
         items={[]}
       /></div>
@@ -157,8 +163,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
       {/* ===== HABITACIONES: imagen + info (invertido) ===== */}
       {porCategoria('habitaciones').length > 0 && (!hasEditorial('habitaciones') || porCategoria('habitaciones').some(item => item.type === 'VIDEO')) && (
-      <div className="mt-8"><CategorySection
-        label={t('details.habitaciones')}
+      <div className="mt-8"><Reveal as="h2" className="mb-6 text-center text-2xl font-semibold">{titleFor('habitaciones')}</Reveal><CategorySection
+        label={titleFor('habitaciones')}
         slides={porCategoria('habitaciones')}
         reverse
         items={[]}
@@ -169,13 +175,14 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       </SectionBackground>
       {editorial.map(slide => <EditorialPresentation key={slide.section} slides={[slide]} />)}
       {(hasMap || hasWarnings) && (
-<SectionBackground url={null} name="location" className="detail-screen px-4 py-16 md:px-6" label={t('details.mapWarnings')}>
+<SectionBackground url={null} name="location" className="detail-screen px-4 py-16 md:px-6" label={titleFor('mapa')}>
+        {hasMap && <Reveal as="h2" className="detail-lateral-reveal detail-from-right mb-8 text-center text-2xl font-semibold">{titleFor('mapa')}</Reveal>}
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {hasMap && <div className="detail-location-map min-w-0">
             <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={destination} />
           </div>}
-          {hasWarnings && <Reveal className="glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
-            <h2 className="mb-4 text-2xl font-light tracking-wide">{t('details.advertencias')}</h2>
+          {hasWarnings && <Reveal className="detail-lateral-reveal detail-from-left glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
+            <h2 className="mb-4 text-2xl font-light tracking-wide">{titleFor('advertencias')}</h2>
             {warningDescription && <p className="whitespace-pre-wrap break-words leading-relaxed">{warningDescription}</p>}
           </Reveal>}
         </div>
@@ -184,21 +191,21 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 <SectionBackground url={null} id="reservar" name="reservation" className="detail-screen px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal as="h2" className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl">
-            {t('details.reservar')}
+            {titleFor('reserva')}
           </Reveal>
           <ReservationDatesProvider key={property.id}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="detail-booking-columns grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-            {/* Columna izquierda: Calendario */}
-            <Reveal className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
+            {/* Móvil: calendario arriba; desktop a la derecha. */}
+            <Reveal className="detail-calendar detail-lateral-reveal detail-from-right glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50 lg:order-2">
               <h3 className="mb-3 text-[0.65rem] tracking-[0.25em] text-gray-400 dark:text-gray-300 uppercase">
-                {t('details.disponibilidad').toUpperCase()}
+                {titleFor('disponibilidad')}
               </h3>
               <AvailabilityCalendar bookings={bookingRows} />
             </Reveal>
 
-            {/* Columna derecha: Formulario */}
-            <Reveal className="glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50">
+            {/* Desktop: formulario a la izquierda; móvil debajo del calendario. */}
+            <Reveal className="detail-reservation-form detail-lateral-reveal detail-from-left glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/20 dark:ring-gray-700/50 lg:order-1">
               <MessageForm propertyId={property.id} propertySlug={property.slug} locale={locale} pricing={pricing} maxGuests={property.maxGuests} compact />
               {property.whatsapp && <PropertyWhatsAppLink propertySlug={property.slug} href={`https://wa.me/${property.whatsapp}?text=${encodeURIComponent(t('details.whatsappMessage', { propertyName: title }))}`} target="_blank" rel="noopener noreferrer"
                 className="mt-3 block w-full rounded-lg border border-green-700 px-4 py-3 text-center text-sm font-medium text-green-800 transition hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-950">{t('details.whatsappButton')}</PropertyWhatsAppLink>}

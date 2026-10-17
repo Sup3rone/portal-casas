@@ -6,7 +6,7 @@ const api=load('apps/web/src/app/api/panel/site-content/route.ts');
 const Home=load('apps/web/src/app/[locale]/page.tsx').default;
 const ContentPage=load('apps/web/src/app/[locale]/panel/contenido/page.tsx').default;
 const Layout=load('apps/web/src/app/[locale]/panel/layout.tsx').default;
-const content={about_es:'Nosotros ES',about_en:'About EN',about_fr:'À propos FR',social_instagram:'https://www.instagram.com/example/',social_facebook:'https://www.facebook.com/example/',featured_property_id:'',contact_whatsapp:''};
+const content={about_title_es:'Nuestra historia',about_title_en:'Our story',about_title_fr:'Notre histoire',about_image:'https://qa.public.blob.vercel-storage.com/about.jpg',about_es:'Nosotros ES',about_en:'About EN',about_fr:'À propos FR',social_instagram:'https://www.instagram.com/example/',social_facebook:'https://www.facebook.com/example/',featured_property_id:'',contact_whatsapp:''};
 const put=value=>api.PUT(new Request('http://localhost/api/panel/site-content',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(value)}));
 async function renderHome(locale){setLocale(locale);const messages=require('../apps/web/messages/'+locale+'.json');return renderToStaticMarkup(React.createElement(NextIntlClientProvider,{locale,messages,timeZone:'America/Mexico_City'},await Home({params:Promise.resolve({locale})})));}
 async function main(){
@@ -26,7 +26,8 @@ async function main(){
   assert.deepEqual(await (await api.GET()).json(),{...content,home_background_video:'',listing_background_image:''});
   for(const locale of ['es','en','fr']){
     const html=await renderHome(locale);assert.ok(html.includes(content['about_'+locale]));
-    assert.ok(html.indexOf('Sobre nosotros')>html.indexOf('</form>')||locale!=='es');
+    assert.ok(html.includes(content['about_title_'+locale]));
+    assert.ok(html.includes(content.about_image));
     assert.ok(html.includes('target="_blank"'));assert.ok(html.includes('rel="noopener noreferrer"'));assert.ok(html.includes('--reveal-delay:100ms'));
     const messages=require('../apps/web/messages/'+locale+'.json');
     const page=await ContentPage({params:Promise.resolve({locale})});
@@ -44,7 +45,7 @@ async function main(){
   assert.equal((await put({...content,about_es:'',about_en:'',about_fr:'',social_facebook:'',social_instagram:''})).status,200);
   assert.ok(!(await renderHome('fr')).includes('À propos de nous'));
   assert.equal((await put({...content,about_es:'',about_en:'',about_fr:'',social_facebook:''})).status,200);
-  const socialOnly=await renderHome('en');assert.ok(socialOnly.includes('https://www.instagram.com/example/'));assert.ok(!socialOnly.includes('About us'));
+  const socialOnly=await renderHome('en');assert.ok(!socialOnly.includes('https://www.instagram.com/example/'));assert.ok(!socialOnly.includes('About us'));
   memory.close();console.log('OK SiteContent: ADMIN/denegaciones, validación 400, UPSERT, vaciado, home localizada/Reveal/redes, menú y editor es/en/fr.');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

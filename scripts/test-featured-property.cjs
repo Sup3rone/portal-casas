@@ -57,7 +57,7 @@ async function main(){
     assert.ok(card.includes('aria-label='));
     assert.ok(html.includes(messages.properties.guests));assert.ok(html.includes('font-serif'));assert.ok(html.includes('loading="lazy"'));
     assert.ok(html.indexOf(messages.siteContent.featuredTitle)>html.indexOf('home-video-closing'));
-    assert.ok(html.includes('md:grid-cols-2'));assert.ok(html.includes('about-reveal'));
+    assert.ok(html.includes('home-featured-track'));assert.ok(html.includes('about-reveal'));
     const editor=await render(locale,Page);
     assert.ok(editor.includes('name="featured_property_id"'));
     assert.match(editor,/<option(?=[^>]*value="pa")(?=[^>]*selected="")[^>]*>/);assert.ok(!editor.includes('value="hidden"'));

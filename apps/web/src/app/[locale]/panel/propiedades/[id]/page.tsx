@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation';
 import { panelProperty } from '@/lib/panel-server';
 import { propertyResources } from '@/lib/panel-resources';
 import PropertyForm from '@/components/panel/PropertyForm';
+import PropertyPresentationEditor from '@/components/panel/PropertyPresentationEditor';
 import PublicationButton from '@/components/panel/PublicationButton';
 import ResourceEditor from '@/components/panel/ResourceEditor';
 // Descontinuado en UI, vivo en BD: restaurar import y render para reactivar.
@@ -22,6 +23,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
     <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-3xl font-semibold">{t('edit')}</h1>
       <span>{t(property.published ? 'published' : 'draft')}</span><PublicationButton id={id} published={property.published} admin={manager.role === 'ADMIN'} /></div>
     <PropertyForm property={property} />
+    <PropertyPresentationEditor key={JSON.stringify(property.sectionTitles)} property={property} />
     <ResourceEditor propertyId={id} resource="rates" items={resources.rates} />
     <AvailabilityEditor propertyId={id} bookings={resources.bookings} />
     {resources.media.length > 0 && <SectionSlider slides={resources.media} />}

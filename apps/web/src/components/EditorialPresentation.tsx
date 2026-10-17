@@ -1,4 +1,5 @@
 'use client';
+import Reveal from './Reveal';
 import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
 
 import { useEffect, useRef, useState, type ReactNode, type HTMLAttributes } from 'react';
@@ -206,6 +207,8 @@ export function DetailSectionTransitions({ children, ...props }: HTMLAttributes<
 
 export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide; flow?: boolean }) {
   const t = useTranslations('details'), gallery = useTranslations('details.gallery');
+  const title = slide.title || t(titles[slide.section]);
+  const reverse = slide.section === 'amenidades' || slide.section === 'lugar';
   const count = slide.photos.length;
   const [index, setIndex] = useState(0);
   const active = index % Math.max(1, count);
@@ -225,10 +228,10 @@ export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide
   }, [count]);
   function move(delta: number) { setIndex(value => (value + delta + count) % count); }
 
-  return <section className={styles.screen} data-editorial-slide={flow ? slide.section : undefined} aria-label={t(titles[slide.section])}>
+  return <section className={styles.screen} data-editorial-slide={flow ? slide.section : undefined} aria-label={title}>
     {PUBLIC_PHOTO_BACKGROUNDS && !flow && slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
     <div className={styles.floating} style={!count || !slide.description.trim() ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}>
-    {count > 0 && <div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: t(titles[slide.section]) })}
+    {count > 0 && <Reveal className={`detail-lateral-reveal detail-editorial-image ${reverse ? 'detail-from-right' : 'detail-from-left'}`}><div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: title })}
       ref={carousel} tabIndex={count > 1 ? 0 : undefined} data-editorial-carousel
       onMouseEnter={() => { interaction.current.hover = true; }} onMouseLeave={() => { interaction.current.hover = false; }}
       onFocus={() => { interaction.current.focus = true; }} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) interaction.current.focus = false; }}
@@ -252,13 +255,13 @@ export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide
         <div className={styles.dots}>{slide.photos.map((photo, number) => <button key={photo.id} type="button" onClick={() => setIndex(number)} aria-label={gallery('irFoto', { number: number + 1 })} aria-pressed={number === active}><span /></button>)}</div>
         <button type="button" onClick={() => move(1)} aria-label={gallery('siguiente')}>›</button>
       </div>}
-    </div>}
-    {slide.description.trim() && <div data-editorial-narrative className={`${styles.narrative} glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`}>
-      <h2 className="break-words text-2xl font-light tracking-widest md:text-4xl">{t(titles[slide.section])}</h2>
-      {slide.description && <div className={styles.description} tabIndex={0} aria-label={t('presentation.description', { section: t(titles[slide.section]) })}>
+    </div></Reveal>}
+    {slide.description.trim() && <Reveal className={`detail-lateral-reveal detail-editorial-text ${reverse ? 'detail-from-left' : 'detail-from-right'}`}><div data-editorial-narrative className={`${styles.narrative} glass-panel rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`}>
+      <h2 className="break-words text-2xl font-light tracking-widest md:text-4xl">{title}</h2>
+      {slide.description && <div className={styles.description} tabIndex={0} aria-label={t('presentation.description', { section: title })}>
         <p className="whitespace-pre-wrap break-words leading-relaxed">{slide.description}</p></div>}
 
-    </div>}
+    </div></Reveal>}
     </div>
   </section>;
 }

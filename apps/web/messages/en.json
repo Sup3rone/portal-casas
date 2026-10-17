@@ -22,6 +22,18 @@
     "dark": "Switch to dark mode"
   },
   "panel": {
+    "heroVideoUploadFailed": "The video could not be uploaded. Try again; your previous configuration is preserved.",
+    "presentationTitle": "Property presentation",
+    "heroVideoLabel": "Main hero background video (HTTPS URL)",
+    "heroVideoChoose": "Upload background video",
+    "heroVideoHint": "MP4 or WebM, maximum 4 MB. Use an HTTPS URL for larger videos. The main photo is used if playback is unavailable. Save to apply changes.",
+    "heroVideoUploaded": "Video uploaded. Save to apply it to the property.",
+    "sectionTitlesHint": "Section titles: leave all three languages empty to use current labels, or complete es/en/fr (up to 150 characters each).",
+    "invalidSectionTitles": "Complete all three languages for each edited title, up to 150 characters, or leave all three empty.",
+    "invalidHeroVideo": "Enter a valid HTTPS video URL without credentials, or leave it empty.",
+    "invalidVideoType": "Choose an MP4 or WebM video.",
+    "invalidVideoSize": "The video must be between 1 byte and 4 MB. Use an HTTPS URL for a larger video.",
+
     "destinationEmpty": "Not selected",
     "destinationUnavailable": "City not available? Contact the administrator.",
     "invalidDestination": "Select a matching state and city from the catalog, or leave both empty.",
@@ -462,6 +474,12 @@
     "invalid": "Check the state and city, number of guests, and arrival and departure dates."
   },
   "siteContent": {
+    "about_title_es": "About us title (Spanish)",
+    "about_title_en": "About us title (English)",
+    "about_title_fr": "About us title (French)",
+    "aboutImageLabel": "About us image",
+    "aboutImageHint": "Upload a portrait image. It will use a 2:3 ratio. The section appears when an image and text in the active language are available.",
+
     "imageLimits": "JPEG, PNG or WebP · up to 4 MB per photo after optimization. The selected image is applied when saved.",
     "videoLabel": "Home background video",
     "videoHint": "Direct HTTPS video URL (for example MP4). Empty uses the current video, without sound. Loading errors fall back to the local video.",

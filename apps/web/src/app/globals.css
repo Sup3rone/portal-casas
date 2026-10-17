@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "./public-chrome.css";
 @import "./panel-skin.css"; /* Papel activo en layouts; lavanda conservada como alternativa. */
+@import "./home-composition.css";
+@import "./property-presentation.css";
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Papel público: sin overlays ni cambios en las superficies del panel. */

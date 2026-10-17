@@ -22,6 +22,18 @@
     "dark": "Activar modo oscuro"
   },
   "panel": {
+    "heroVideoUploadFailed": "No se pudo subir el video. Vuelve a intentar; la configuración anterior se conserva.",
+    "presentationTitle": "Presentación de la propiedad",
+    "heroVideoLabel": "Video de fondo del hero principal (URL HTTPS)",
+    "heroVideoChoose": "Subir video de fondo",
+    "heroVideoHint": "MP4 o WebM, máximo 4 MB. Para videos mayores utiliza una URL HTTPS. La foto principal se usa si el video no puede reproducirse. Guarda para aplicar los cambios.",
+    "heroVideoUploaded": "Video subido. Guarda para aplicarlo a la propiedad.",
+    "sectionTitlesHint": "Títulos por sección: deja los tres idiomas vacíos para usar los textos actuales, o completa es/en/fr (máximo 150 caracteres cada uno).",
+    "invalidSectionTitles": "Completa los tres idiomas de cada título editado, con un máximo de 150 caracteres, o deja los tres vacíos.",
+    "invalidHeroVideo": "Introduce una URL HTTPS válida para el video, sin credenciales, o deja el campo vacío.",
+    "invalidVideoType": "Elige un video MP4 o WebM.",
+    "invalidVideoSize": "El video debe pesar entre 1 byte y 4 MB. Para uno mayor utiliza una URL HTTPS.",
+
     "destinationEmpty": "Sin seleccionar",
     "destinationUnavailable": "¿Tu ciudad no está disponible? Contacta al administrador.",
     "invalidDestination": "Selecciona un estado y una ciudad del catálogo que correspondan entre sí, o deja ambos vacíos.",
@@ -462,6 +474,12 @@
     "invalid": "Revisa el estado y la ciudad, la cantidad de huéspedes y las fechas de llegada y salida."
   },
   "siteContent": {
+    "about_title_es": "Título de Sobre nosotros (español)",
+    "about_title_en": "Título de Sobre nosotros (inglés)",
+    "about_title_fr": "Título de Sobre nosotros (francés)",
+    "aboutImageLabel": "Imagen de Sobre nosotros",
+    "aboutImageHint": "Sube una imagen vertical. Se mostrará con proporción 2:3. La sección aparece cuando hay imagen y texto en el idioma activo.",
+
     "imageLimits": "JPEG, PNG o WebP · máximo 4 MB por foto después de optimizar. La imagen elegida se aplica al guardar.",
     "videoLabel": "Video de fondo de la home",
     "videoHint": "URL HTTPS directa de un video (por ejemplo MP4). Vacío usa el video actual; sin audio. Si falla, vuelve al video local.",

@@ -1,6 +1,7 @@
 import type { properties } from '@portal/db';
 import { isDestinationValue } from './destinations';
 import { propertySectionLabels, type SectionTitles, type PropertySectionKey } from './property-presentation';
+import { moduleNames, emptySectionModules, type SectionModules } from './section-modules';
 
 export class PanelValidationError extends Error {}
 export function objectBody(value: unknown): Record<string, unknown> {
@@ -30,11 +31,16 @@ const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'a
 const integers = ['maxGuests', 'bedrooms'] as const;
 const prices = ['baseWeekdayPrice', 'baseWeekendPrice'] as const;
 const backgroundFields = ['sectionBgInicio', 'sectionBgMapa', 'sectionBgReserva'] as const;
-const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'contactEmail', 'whatsapp', 'state', 'destinationCity', 'sectionTitles']);
+const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'contactEmail', 'whatsapp', 'state', 'destinationCity', 'sectionTitles', 'sectionsEnabled']);
 export function propertyInput(value: unknown, creating = false) {
   const body = objectBody(value);
   if (!Object.keys(body).length || Object.keys(body).some(key => !allowed.has(key))) throw new PanelValidationError('validation');
   const changes: Partial<typeof properties.$inferInsert> = {};
+  if ('sectionsEnabled' in body || creating) {
+    const value = 'sectionsEnabled' in body ? objectBody(body.sectionsEnabled) : emptySectionModules();
+    if (Object.entries(value).some(([name, enabled]) => !moduleNames.includes(name as typeof moduleNames[number]) || typeof enabled !== 'boolean' || name === 'reserva' && !enabled)) throw new PanelValidationError('validation');
+    changes.sectionsEnabled = { ...(creating ? emptySectionModules() : {}), ...value as SectionModules, reserva: true };
+  }
   if ('sectionTitles' in body) {
     const config = body.sectionTitles === null ? {} : objectBody(body.sectionTitles);
     if (Object.keys(config).some(key => !['titles', 'heroVideoUrl'].includes(key))) throw new PanelValidationError('invalidSectionTitles');

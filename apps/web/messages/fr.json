@@ -407,6 +407,11 @@
     }
   },
   "panelSections": {
+    "modulesHint": "Activez uniquement les sections à afficher. Les interrupteurs sont enregistrés automatiquement ; désactiver conserve vos données.",
+    "active": "Activé",
+    "inactive": "Désactivé",
+    "reservationRequired": "Réservation et contact restent toujours actifs pour permettre les demandes concernant le logement.",
+    "mapFieldsHint": "La carte utilise l’emplacement enregistré dans les informations de base du logement. Son titre se modifie dans Présentation.",
     "title": "Sections de la propriété",
     "descriptionEs": "Description (espagnol)",
     "descriptionEn": "Description (anglais)",

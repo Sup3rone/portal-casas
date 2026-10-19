@@ -406,6 +406,11 @@
     }
   },
   "panelSections": {
+    "modulesHint": "Activa solo las secciones que quieras mostrar. Los interruptores se guardan automáticamente; apagar no borra tus datos.",
+    "active": "Activado",
+    "inactive": "Desactivado",
+    "reservationRequired": "Reserva y contacto siempre están activos para que puedan consultarte sobre la propiedad.",
+    "mapFieldsHint": "El mapa usa la ubicación guardada en los datos básicos de la propiedad. Su título se edita en Presentación.",
     "title": "Secciones de la propiedad",
     "descriptionEs": "Descripción (español)",
     "descriptionEn": "Descripción (inglés)",

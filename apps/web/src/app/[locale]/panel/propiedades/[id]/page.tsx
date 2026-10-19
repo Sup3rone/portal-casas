@@ -13,11 +13,13 @@ import AvailabilityEditor from '@/components/panel/AvailabilityEditor';
 import SectionSlider from '@/components/SectionSlider';
 import PropertySectionsEditor from '@/components/panel/PropertySectionsEditor';
 import { sectionsForProperty } from '@/lib/property-sections';
+import { sectionModules } from '@/lib/section-modules';
 
 export default async function EditPropertyPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params, { manager, property } = await panelProperty(id, locale);
   const resources = await propertyResources(id, manager);
   const sections = await sectionsForProperty(id, manager);
+  const modules = sectionModules(property, sections, resources.media);
   const t = await getTranslations({ locale, namespace: 'panel' });
   return <section key={property.id} className="space-y-8">
     <Link href="/panel" className="text-green-700 dark:text-green-400 underline">{t('back')}</Link>
@@ -25,7 +27,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
       <span>{t(property.published ? 'published' : 'draft')}</span><PublicationButton id={id} published={property.published} admin={manager.role === 'ADMIN'} /></div>
     <PropertyRentalType key={`${id}:${property.rentalType}`} initial={property.rentalType}>
     <PropertyForm property={property} />
-    <PropertyPresentationEditor key={JSON.stringify(property.sectionTitles)} property={property} />
+    <PropertyPresentationEditor key={JSON.stringify(property.sectionTitles)} property={property} modules={modules} />
     <RentalTypeResources>
     <ResourceEditor propertyId={id} resource="rates" items={resources.rates} />
     <AvailabilityEditor propertyId={id} bookings={resources.bookings} />
@@ -34,6 +36,6 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
     {resources.media.length > 0 && <SectionSlider slides={resources.media} />}
     <ResourceEditor propertyId={id} resource="media" items={resources.media.filter(item => item.type === 'PHOTO')} />
     {/* <SectionBackgroundEditor property={property} media={resources.media} /> */}
-    <PropertySectionsEditor propertyId={id} sections={sections} media={resources.media} />
+    <PropertySectionsEditor propertyId={id} sections={sections} media={resources.media} modules={modules} />
   </section>;
 }

@@ -11,8 +11,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const manager = await requirePropertyManager();
     const { id } = await params;
-    await managedProperty(id, manager);
+    const current = await managedProperty(id, manager);
     const changes = propertyInput(await req.json().catch(() => null));
+    if (changes.sectionsEnabled) changes.sectionsEnabled = { ...current.sectionsEnabled, ...changes.sectionsEnabled, reserva: true };
     const urls = [...new Set([changes.sectionBgInicio, changes.sectionBgMapa, changes.sectionBgReserva].filter((value): value is string => typeof value === 'string'))];
     if (urls.length) {
       const photos = await db.select({ url: media.url }).from(media)

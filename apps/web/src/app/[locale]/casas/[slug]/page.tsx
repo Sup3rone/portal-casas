@@ -1,6 +1,7 @@
 import PropertyHeroVideo from '@/components/PropertyHeroVideo';
 import { propertySectionLabels, sectionTitle, type PropertySectionKey } from '@/lib/property-presentation';
 import { propertyLocation } from '@/lib/destinations';
+import { sectionModules } from '@/lib/section-modules';
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
 import { db, properties, media, bookings, seasonRates, propertySections } from '@portal/db';
 import { eq } from 'drizzle-orm';
@@ -60,15 +61,17 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
   ]);
   const titleFor = (section: PropertySectionKey) => sectionTitle(property.sectionTitles?.titles, section, locale, t('details.' + propertySectionLabels[section]));
   bookingRows.push(...blockRows);
+  const modules = sectionModules(property, sectionRows, mediaList);
   const editorial = editorialPresentation(property.id, locale, sectionRows, mediaList)
+    .filter(slide => modules[slide.section])
     .map(slide => locale === 'fr' ? { ...slide, description: publicFrenchText(slide.description) } : slide)
     .filter(slide => Boolean(slide.description || slide.photos.length))
     // Fondos descontinuados en UI; heroMediaId permanece intacto en BD.
     .map(slide => ({ ...slide, hero: undefined, title: titleFor(slide.section) }));
   const warnings = sectionRows.find(row => row.section === 'advertencias');
   const warningDescription = locale === 'fr' ? publicFrenchText(warnings?.descriptionFr) : (locale === 'en' ? warnings?.descriptionEn : warnings?.descriptionEs)?.trim() || '';
-  const hasWarnings = Boolean(warningDescription);
-  const hasMap = property.lat != null && property.lng != null;
+  const hasWarnings = modules.advertencias && Boolean(warningDescription);
+  const hasMap = modules.mapa && property.lat != null && property.lng != null;
   const hasEditorial = (name: string) => editorial.some(slide => slide.section === name);
 
   const pricing = isAnnual ? undefined : {
@@ -127,7 +130,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       </Reveal>}
 
       {/* ===== EL DESTINO — ubicación guardada ===== */}
-      {editorial.length === 0 && location && (
+      {modules.destino && editorial.length === 0 && location && (
       <div className="px-6 py-16">
         <div className="mx-auto max-w-7xl">
 
@@ -154,7 +157,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       )}
 
       {/* ===== AMENIDADES: info + imagen ===== */}
-      {porCategoria('amenidades').length > 0 && (!hasEditorial('amenidades') || porCategoria('amenidades').some(item => item.type === 'VIDEO')) && (
+      {modules.amenidades && porCategoria('amenidades').length > 0 && (!hasEditorial('amenidades') || porCategoria('amenidades').some(item => item.type === 'VIDEO')) && (
       <div className="mt-8"><Reveal as="h2" className="mb-6 text-center text-2xl font-semibold">{titleFor('amenidades')}</Reveal><CategorySection
         label={titleFor('amenidades')}
         slides={porCategoria('amenidades')}
@@ -163,7 +166,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       )}
 
       {/* ===== HABITACIONES: imagen + info (invertido) ===== */}
-      {porCategoria('habitaciones').length > 0 && (!hasEditorial('habitaciones') || porCategoria('habitaciones').some(item => item.type === 'VIDEO')) && (
+      {modules.habitaciones && porCategoria('habitaciones').length > 0 && (!hasEditorial('habitaciones') || porCategoria('habitaciones').some(item => item.type === 'VIDEO')) && (
       <div className="mt-8"><Reveal as="h2" className="mb-6 text-center text-2xl font-semibold">{titleFor('habitaciones')}</Reveal><CategorySection
         label={titleFor('habitaciones')}
         slides={porCategoria('habitaciones')}

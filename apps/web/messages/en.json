@@ -406,6 +406,11 @@
     }
   },
   "panelSections": {
+    "modulesHint": "Enable only the sections you want to display. Switches save automatically; disabling a section keeps your data.",
+    "active": "Enabled",
+    "inactive": "Disabled",
+    "reservationRequired": "Booking and contact always remain enabled so guests can enquire about the property.",
+    "mapFieldsHint": "The map uses the location saved in the property's basic details. Edit its title in Presentation.",
     "title": "Property sections",
     "descriptionEs": "Description (Spanish)",
     "descriptionEn": "Description (English)",

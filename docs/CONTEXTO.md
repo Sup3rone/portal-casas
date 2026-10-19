@@ -764,3 +764,34 @@ Archivos de sub-fase 3: página pública del listado, `scripts/test-property-sea
 Validación final: **52/52 scripts test-*.cjs pasan**, incluido test-public-chrome; TypeScript web (`tsc --noEmit --incremental false`) limpio; `pnpm lint` 0 errores y 5 warnings preexistentes. Además se verifica que una anual despublicada no aparece y que el distintivo anual y enlace funcionan en SSR es/en/fr sin fechas. Los fallos pendientes citados en entradas históricas de sub-fases 1/2 quedan resueltos en esta entrada final.
 
 Checklist Emma: (1) fechas futuras libres → nocturna/ambas, ninguna anual; (2) ciudad + sin fechas → incluye anual de esa ciudad; (3) huéspedes sin fechas → anual solo si capacidad suficiente; (4) listado sin filtros → todas las publicadas; (5) comprobar distintivo anual, limpiar filtros, es/en/fr, 375px/1440px y ambos temas. QA visual/funcional real pendiente de Emma; no se utiliza navegador automatizado ni se consulta Neon.
+
+### 2026-10-19 — Módulos de secciones de propiedad (SQL pendiente)
+
+Estado implementado; pendiente de aplicar SQL y QA humana. Nuevo `Property.sectionsEnabled` JSONB nullable, mapa parcial de booleanos para `destino`, `amenidades`, `habitaciones`, `lugar`, `advertencias`, `mapa`, `reserva`. Configuración independiente de narrativas/fotos/títulos: no se reutiliza sectionTitles para evitar que guardar presentación borre activaciones. SQL propuesto `scripts/sql/property-section-modules.sql`, **NO ejecutado**: Emma aplica primero en Respaldo, verifica y después en main antes de desplegar. No hay UPDATE de propiedades ni borrado de datos/Blob. Las lecturas completas de Property requieren que la columna exista.
+
+NULL/clave ausente conserva compatibilidad: se infiere activación desde narrativa en cualquier idioma o selección/fotos de categoría existentes; destino también contempla ubicación básica para conservar su fallback actual; mapa requiere coordenadas. El render sigue exigiendo contenido válido para el idioma activo. Reserva siempre true incluso si una configuración manual indicara false. Nuevas propiedades creadas por POST guardan explícitamente opcionales=false y reserva=true: no se activan solo por introducir la dirección obligatoria en datos básicos.
+
+PropertySectionsEditor muestra cinco módulos editoriales + Mapa + Reserva. Interruptores accesibles aria-pressed, foco visible, mínimo 44px; cambios se guardan automáticamente por PATCH existente de propiedad con permisos dueño/admin. No hay cambios optimistas: si falla se mantiene el estado anterior y se muestra error. OFF contrae campos; se mantienen montados para conservar también borradores locales de texto/selección. Guardar contenido sigue siendo una acción separada. PATCH parcial combina flags con los persistidos; omitir sectionsEnabled en otros guardados no altera activaciones. API rechaza apagar Reserva o enviar claves/tipos inválidos.
+
+Mapa y Reserva no tenían formularios propios dentro de PropertySectionsEditor: se añaden sus encabezados, interruptor y ayuda. Coordenadas siguen en PropertyForm sin cambios (datos básicos compartidos con otras funciones); calendario/formulario/contactos y tarifas/disponibilidad no se reubican ni modifican. Reserva se muestra activa y bloqueada con explicación visible y title. Los títulos permanecen en PropertyPresentationEditor, su editor actual; sus campos se ocultan al apagar el módulo tras refresh y permanecen montados para no borrar títulos al guardar. No se mueve el video ni se cambia layout zig-zag/reveal.
+
+Ficha: se filtran editoriales, fallback de Destino, galerías de categoría Amenidades/Habitaciones, Mapa y Advertencias antes de renderizar. OFF queda fuera del DOM público sin hueco; biblioteca/galería principal no se modifica. #reservar sigue existiendo para anual/nocturna/ambas; CTA depende de editoriales visibles y nunca apunta a una sección eliminada. No se agrega navegación/reordenado ni drag & drop. Configuración ON sin datos no genera contenido vacío.
+
+Archivos de esta tarea (una línea por cambio):
+- `packages/db/src/schema.ts`: nueva columna nullable sectionsEnabled.
+- `scripts/sql/property-section-modules.sql`: ALTER propuesto y protocolo Respaldo → main.
+- `apps/web/src/lib/section-modules.ts`: claves tipadas, defaults e inferencia compartidos.
+- `apps/web/src/lib/panel-validation.ts`: valida booleanos/claves, fuerza Reserva y defaults de creación.
+- `apps/web/src/app/api/properties/route.ts`: persiste defaults de módulos en nuevas propiedades.
+- `apps/web/src/app/api/properties/[id]/route.ts`: conserva flags anteriores al guardar cambios parciales.
+- `apps/web/src/app/[locale]/panel/propiedades/[id]/page.tsx`: calcula estado y lo pasa a ambos editores.
+- `apps/web/src/components/panel/PropertySectionsEditor.tsx`: interruptores, contracción y persistencia con feedback.
+- `apps/web/src/components/panel/PropertyPresentationEditor.tsx`: oculta títulos de módulos apagados sin vaciarlos.
+- `apps/web/src/app/[locale]/casas/[slug]/page.tsx`: filtra módulos y fallbacks públicos sin tocar presentación.
+- `apps/web/messages/es.json`, `en.json`, `fr.json`: ayuda, estados y explicación de Reserva/Mapa.
+- `scripts/test-section-modules.cjs`: defaults, POST/PATCH, permisos, datos preservados, SSR, anclas y eventos de interruptores con fallos.
+- `docs/CONTEXTO.md` y `docs/PROGRESO.md`: decisión de almacenamiento, alcance y QA pendiente.
+
+Checklist Emma tras SQL en Respaldo: (1) propiedad existente con datos conserva módulos visibles; (2) apagar Amenidades, esperar guardado, comprobar ausencia de sección y fallback en ficha, reactivar y verificar textos/fotos; (3) crear propiedad nueva: seis opcionales OFF, Reserva ON; (4) comprobar Reserva bloqueada con ayuda y #reservar accesible; (5) apagar Mapa/Advertencias/Destino y comprobar que quedan solo bloques con datos/activados; (6) títulos se ocultan en Presentación sin perderse; (7) guardar otros datos no restablece módulos; (8) Tab/Espacio/Enter, 375px/1440px, es/en/fr, claro/oscuro. Sin navegador automatizado ni cambios en BD desde el agente.
+
+Validación offline de esta entrega: **53/53 tests** pasando; TypeScript web limpio; `pnpm lint` 0 errores/5 warnings preexistentes. La prueba nueva usa SQLite/React simulados, no certifica DDL PostgreSQL ni QA visual de navegador. SQL, persistencia real y controles táctiles/teclado quedan en la checklist humana.

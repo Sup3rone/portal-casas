@@ -7,8 +7,9 @@ import { propertySectionLabels, type SectionTitles } from '@/lib/property-presen
 import { heroVideoMetadata } from '@/lib/hero-video-upload';
 import { PhotoUploadError } from '@/lib/photo-upload';
 import { panelRequest, panelResponseError, inputClass, buttonClass } from './request';
+import type { ModuleName } from '@/lib/section-modules';
 
-export default function PropertyPresentationEditor({ property }: { property: PanelProperty }) {
+export default function PropertyPresentationEditor({ property, modules }: { property: PanelProperty; modules?: Record<ModuleName, boolean> }) {
   const t = useTranslations('panel'), details = useTranslations('details'), router = useRouter();
   const [url, setUrl] = useState(property.sectionTitles?.heroVideoUrl || '');
   const [busy, setBusy] = useState(false), [notice, setNotice] = useState('');
@@ -49,7 +50,7 @@ export default function PropertyPresentationEditor({ property }: { property: Pan
       <p className="text-sm">{t('heroVideoHint')}</p>
       {url && <video src={url} controls muted playsInline preload="metadata" className="max-h-64 w-full rounded-xl" />}
       <p className="text-sm">{t('sectionTitlesHint')}</p>
-      {(Object.entries(propertySectionLabels) as [keyof SectionTitles, string][]).map(([section, label]) => <fieldset key={section} className="grid gap-3 md:grid-cols-3">
+      {(Object.entries(propertySectionLabels) as [keyof SectionTitles, string][]).map(([section, label]) => <fieldset key={section} hidden={modules && section in modules ? !modules[section as ModuleName] : false} className={modules && section in modules && !modules[section as ModuleName] ? 'hidden' : 'grid gap-3 md:grid-cols-3'}>
         <legend className="font-semibold">{details(label)}</legend>
         {(['es', 'en', 'fr'] as const).map(language => <label key={language} className="text-sm">{language.toUpperCase()}<input name={`${section}_${language}`} maxLength={150} defaultValue={property.sectionTitles?.titles?.[section]?.[language] || ''} className={`${inputClass} min-h-11`} /></label>)}
       </fieldset>)}

@@ -1,3 +1,4 @@
+import loadingStyles from '@/components/PageLoading.module.css';
 import { PUBLIC_PHOTO_BACKGROUNDS } from '@/lib/public-appearance';
 // src/app/[locale]/casas/page.tsx
 import { getTranslations } from 'next-intl/server';
@@ -70,7 +71,7 @@ export default async function PropertiesPage({
   const propertyList = [...grouped.values()];
 
   return (
-    <main className={`relative min-h-screen${PUBLIC_PHOTO_BACKGROUNDS ? '' : ' public-paper'}`}>
+    <main className={`relative min-h-screen${PUBLIC_PHOTO_BACKGROUNDS ? '' : ' public-paper'} ${loadingStyles.content}`}>
       {/* IMAGEN DE FONDO COMPLETA */}
       {PUBLIC_PHOTO_BACKGROUNDS && <div className="absolute inset-0 h-full w-full">
         <SiteListingBackground key={content.listing_background_image} url={content.listing_background_image} />

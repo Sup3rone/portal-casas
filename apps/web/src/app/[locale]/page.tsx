@@ -1,3 +1,4 @@
+import loadingStyles from '@/components/PageLoading.module.css';
 import { propertyLocation } from '@/lib/destinations';
 import PropertySearchForm from '@/components/PropertySearchForm';
 import HomeFeaturedCarousel from '@/components/HomeFeaturedCarousel';
@@ -33,7 +34,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const featured = await readFeaturedProperties(content.featured_property_id);
   const labels = await getTranslations({ locale, namespace: 'properties' });
   return (
-    <main className="public-paper home-composition">
+    <main className={`public-paper home-composition ${loadingStyles.content}`}>
       {/* Una sola capa de video para el hero; Sobre nosotros fluye después de destacadas. */}
       <div className="home-video-scene relative isolate overflow-hidden">
       {HOME_HERO_MEDIA_ENABLED && <><div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">

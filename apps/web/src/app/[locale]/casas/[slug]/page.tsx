@@ -1,3 +1,4 @@
+import loadingStyles from '@/components/PageLoading.module.css';
 import PropertyHeroVideo from '@/components/PropertyHeroVideo';
 import { propertySectionLabels, sectionTitle, type PropertySectionKey } from '@/lib/property-presentation';
 import { propertyLocation } from '@/lib/destinations';
@@ -219,7 +220,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
 
   return (
     <PropertyDetailScroll key={property.id}>
-      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container detail-fullpage public-paper detail-zigzag" tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
+      <DetailSectionTransitions className={`detail-editorial detail-independent detail-snap-container detail-fullpage public-paper detail-zigzag ${loadingStyles.content}`} tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
       <SectionBackground url={null} name="gallery" className="detail-screen px-3 py-8 md:px-6">
         <div className="property-detail-hero" data-hero-video={property.sectionTitles?.heroVideoUrl ? 'true' : undefined}>

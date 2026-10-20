@@ -1,0 +1,29 @@
+.block {
+  position: relative;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .block::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 20%, color-mix(in srgb, var(--color-gray-50) 45%, transparent) 50%, transparent 80%);
+    animation: shimmer 1.8s linear infinite;
+  }
+
+  .content {
+    animation: content-arrival 200ms ease-out;
+  }
+
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+
+  @keyframes content-arrival {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}

@@ -690,3 +690,11 @@ Validación offline: **55/55 scripts pasan**, TypeScript web limpio, ESLint 0 er
 QA Emma: Amenidades apagar→reactivar con campos inmediatos; escribir/guardar/recargar; apagar→recargar→reactivar; repetir Destino/Habitaciones; Mapa/Reserva mantienen texto; teclado en interruptores; 375px, temas y reduced-motion. Si persiste, reportar nombre exacto del módulo y si falla también al recargar con él activo para distinguir código servido/estado del navegador del render probado.
 
 Validación del ajuste: 55/55 scripts offline pasan; TypeScript web limpio; ESLint 0 errores / 5 avisos preexistentes. Incluye arranque con módulo apagado y activación sin recarga. No se ejecutó navegador; el resultado visual reportado por Emma sigue pendiente de confirmación.
+
+## Shimmer de skeletons y fade de contenido — 19 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Reutiliza PageLoading en sus tres variantes/rutas loading: shimmer diagonal por bloque 1.8s; elimina pulse. CSS Module compartido con fade 200ms ease-out en contenedores existentes de home/listado/ficha, excluyendo navbar/footer/botón ↑. Cero JS de animación, sin cambios de fetch/navegación ni geometría. Colores existentes con alpha; todas las animaciones dentro de no-preference, reduced-motion estático. Nueva prueba test-page-loading.cjs cubre SSR de variantes/bloques/ARIA, ausencia de pulse, tokens y restricciones de movimiento.
+
+QA Emma: pnpm dev, navegar home→casas→ficha con Network Slow 3G y Disable cache; observar shimmer durante espera y fade al aparecer contenido; confirmar ausencia de saltos nuevos y que navbar/footer no animan; repetir es/en/fr, claro/oscuro, 1440/375px y emulación reduced-motion. Caché/prefetch pueden evitar que el skeleton aparezca; fade CSS también se aplica al montaje inicial aunque no se haya visto fallback. No se hicieron pruebas de navegador ni capturas automáticas.
+
+Validación offline: **56/56 scripts pasan** (baseline 55 + nueva cobertura de carga); TypeScript web limpio; ESLint 0 errores / 5 avisos preexistentes; git diff --check limpio.

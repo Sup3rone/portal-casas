@@ -412,6 +412,7 @@
     "moveUp": "Monter {section}",
     "moveDown": "Descendre {section}",
     "dragHint": "Faites glisser pour réordonner, ou utilisez les flèches.",
+    "visibleCount": "{active} sections actives affichées · {inactive} désactivées (à gérer dans le volet)",
     "modulesHint": "Activez uniquement les sections à afficher. Les interrupteurs sont enregistrés automatiquement ; désactiver conserve vos données.",
     "active": "Activé",
     "inactive": "Désactivé",

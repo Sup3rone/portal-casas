@@ -61,7 +61,7 @@ async function main() {
     const messages = JSON.parse(fs.readFileSync(path.join(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
     const html = renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(e) { throw e; } }, await page({ params: Promise.resolve({ locale, id: 'pa' }) })));
     assert.ok(html.includes(messages.panelSections.title));
-    assert.equal((html.match(/name="descriptionEs"/g) || []).length, 5);
+    assert.equal((html.match(/name="descriptionEs"/g) || []).length, 1, 'Solo Advertencias tiene contenido/activación en esta propiedad; el resto permanece en el riel');
     for (const key of ['destino', 'amenidades', 'habitaciones', 'enLugar', 'advertencias']) assert.ok(html.includes(messages.details[key]));
     // El video se conserva en la galería existente, pero no en las opciones hero.
     assert.ok(!html.includes('value="video-a"')); assert.ok(html.includes('value="photo-a"'));

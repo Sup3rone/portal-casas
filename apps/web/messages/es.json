@@ -411,6 +411,7 @@
     "moveUp": "Subir {section}",
     "moveDown": "Bajar {section}",
     "dragHint": "Arrastra para cambiar el orden; también puedes usar las flechas.",
+    "visibleCount": "Mostrando {active} secciones activas · {inactive} desactivadas (se gestionan en el riel)",
     "modulesHint": "Activa solo las secciones que quieras mostrar. Los interruptores se guardan automáticamente; apagar no borra tus datos.",
     "active": "Activado",
     "inactive": "Desactivado",

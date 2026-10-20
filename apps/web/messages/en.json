@@ -411,6 +411,7 @@
     "moveUp": "Move {section} up",
     "moveDown": "Move {section} down",
     "dragHint": "Drag to reorder, or use the arrow buttons.",
+    "visibleCount": "Showing {active} active sections · {inactive} inactive (managed in the rail)",
     "modulesHint": "Enable only the sections you want to display. Switches save automatically; disabling a section keeps your data.",
     "active": "Enabled",
     "inactive": "Disabled",

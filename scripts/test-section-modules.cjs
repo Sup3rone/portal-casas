@@ -68,8 +68,12 @@ async function main() {
     }
     assert.match(standalone, /aria-pressed="true"[^>]*disabled=""/);
     assert.ok(standalone.includes(messages.panelSections.reservationRequired));
-    const card = html => html.match(new RegExp(`<form id="property-module-${fresh.id}-amenidades"[\\s\\S]*?</form>`))[0];
-    assert.match(card(standalone), /<div hidden=""/, 'Tarjeta desactivada contraída');
+    const translate = req('next-intl').createTranslator({locale,messages,namespace:'panelSections'});
+    assert.ok(standalone.includes(translate('visibleCount',{active:1,inactive:6})));
+    assert.equal((standalone.match(/<(?:section|form)[^>]* id="property-module-/g)||[]).length,1,'Solo Reserva en lista vacía');
+    assert.ok(standalone.includes('aria-disabled="true" tabindex="-1"'),'Nombres inactivos no navegan');
+    const card = html => html.match(new RegExp(`<form[^>]* id="property-module-${fresh.id}-amenidades"[\\s\\S]*?</form>`))[0];
+    assert.ok(!standalone.includes(`id="property-module-${fresh.id}-amenidades"`), 'Desactivada ausente del DOM');
     const expanded = renderToStaticMarkup(wrap(React.createElement(Editor, { propertyId: fresh.id, sections: [], media: [], modules: { ...sectionModules(fresh, [], []), amenidades: true } })));
     assert.doesNotMatch(card(expanded), /<div hidden=""/, 'Estado activado por riel expande los campos');
   }
@@ -85,10 +89,30 @@ async function main() {
   // Eventos del interruptor real: fallo conserva estado; éxito contrae; reserva no envía.
   let index = 0, refreshes = 0; const states = [];
   mockModule('react', { ...React, useState: initial => { const slot = index++; if (!(slot in states)) states[slot] = initial; return [states[slot], value => { states[slot] = typeof value === 'function' ? value(states[slot]) : value; }]; } });
-  mockModule('next-intl', { useTranslations: () => key => key });
+  mockModule('next-intl', { useTranslations: () => (key, values) => key === 'visibleCount' ? `${key}:${values.active}:${values.inactive}` : key });
   mockModule('@/i18n/navigation', { useRouter: () => ({ refresh() { refreshes++; } }) });
   const Interactive = load('apps/web/src/components/panel/PropertySectionsEditor-modules-test.tsx', fs.readFileSync('apps/web/src/components/panel/PropertySectionsEditor.tsx', 'utf8')).default;
-  const render = () => { index = 0; return Interactive({ propertyId: 'pa', sections: [], media: [], modules: { ...emptySectionModules(), amenidades: true } }); };
+  const render = (amenidades = true) => { index = 0; return Interactive({ propertyId: 'pa', sections: [], media: [], modules: { ...emptySectionModules(), destino: true, amenidades, lugar: true } }); };
+  // Ejecuta también SectionForm: antes solo se comprobaban sus props, no los campos.
+  function assertEditableCard(card, expectedText = '') {
+    const parentIndex = index;
+    index = 30;
+    states.splice(30); // Nuevo montaje del formulario, como al reactivar.
+    const form = card.type(card.props);
+    index = parentIndex;
+    function visibleFields(node, hidden = false) {
+      if (!node || typeof node !== 'object') return [];
+      const concealed = hidden || node.props?.hidden === true;
+      return [...(!concealed && node.type === 'textarea' ? [node] : []), ...React.Children.toArray(node.props?.children).flatMap(child => visibleFields(child, concealed))];
+    }
+    assert.ok(!nodes(form).some(node => Object.hasOwn(node.props, 'hidden')), 'Tarjeta montada sin segunda compuerta de ocultamiento');
+    const fields = visibleFields(form);
+    assert.deepEqual(fields.map(field => field.props.name), ['descriptionEs','descriptionEn','descriptionFr']);
+    assert.ok(fields.every(field => !field.props.disabled), 'Campos editables, sin ancestro hidden');
+    assert.equal(fields[0].props.defaultValue, expectedText);
+    assert.ok(nodes(form).some(node => node.type === 'fieldset' && !node.props.disabled), 'Selector de fotos presente');
+  }
+  assertEditableCard(nodes(render()).find(node => node.props.name === 'amenidades'));
   const nativeFetch = global.fetch;
   const railButton = () => nodes(nodes(render()).find(node => node.props['data-module'] === 'amenidades')).find(node => node.type === 'button');
   try {
@@ -101,7 +125,7 @@ async function main() {
     railButton().props.onClick();
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(payload.sectionsEnabled.amenidades, false); assert.equal(payload.sectionsEnabled.reserva, true);
-    assert.equal(nodes(render()).find(node => node.props.name === 'amenidades').props.enabled, false); assert.equal(refreshes, 1);
+    assert.ok(!nodes(render()).some(node => node.props.name === 'amenidades')); assert.equal(refreshes, 1);
     const reservation = nodes(render()).find(node => node.type === 'button' && node.props.title);
     assert.equal(reservation.props.disabled, true); await reservation.props.onClick(); assert.equal(refreshes, 1);
     assert.equal(railButton().props['aria-pressed'], false);
@@ -111,6 +135,26 @@ async function main() {
     assert.equal(nodes(render()).find(node => node.props.name === 'amenidades').props.enabled, true, 'Riel refleja inmediatamente en encabezado antes de respuesta');
     assert.equal(railButton().props['aria-pressed'], true);
     resolve(Response.json({ success: true })); await new Promise(done => setImmediate(done));
+    // Borradores y orden se conservan al desmontar/reactivar desde el riel.
+    let card = nodes(render()).find(node => node.props.name === 'amenidades');
+    card.props.onDraft({ descriptionEs: 'Borrador sin guardar', photoMediaIds: ['foto'] });
+    const initialOrder = [...states[4]];
+    railButton().props.onClick();
+    assert.ok(!nodes(render()).some(node => node.props.name === 'amenidades'));
+    assert.ok(nodes(render()).some(node => node.props.children === 'visibleCount:3:4'),'Conteo actualizado al apagar');
+    const disabledLink = nodes(render()).find(node => node.props.id === 'rail-property-module-pa-amenidades');
+    assert.equal(disabledLink.props['aria-disabled'], true); assert.equal(disabledLink.props.href, undefined);
+    disabledLink.props.onClick({preventDefault(){}}); // Sin DOM ni navegación al estar apagado.
+    resolve(Response.json({success:true})); await new Promise(done => setImmediate(done));
+    assert.deepEqual(states[4], initialOrder); assert.ok(!('sectionsOrder' in payload));
+    railButton().props.onClick(); resolve(Response.json({success:true})); await new Promise(done => setImmediate(done));
+    card = nodes(render()).find(node => node.props.name === 'amenidades');
+    assertEditableCard(card, 'Borrador sin guardar');
+    assert.equal(card.props.value.descriptionEs,'Borrador sin guardar'); assert.deepEqual(card.props.value.photoMediaIds,['foto']);
+    assert.equal(card.props.revealed,true); assert.deepEqual(states[4],initialOrder);
+    assert.deepEqual(nodes(render()).filter(node=>node.props.name).map(node=>node.props.name),['destino','amenidades','lugar'],'Reactivada vuelve al puesto original entre vecinas');
+    const count = nodes(render()).find(node => node.type === 'p' && node.props.children === 'visibleCount:4:3');
+    assert.ok(count);
     const menu = nodes(render()).find(node => node.props['aria-expanded'] !== undefined);
     assert.equal(menu.props['aria-expanded'], false); menu.props.onClick();
     assert.equal(nodes(render()).find(node => node.props['aria-expanded'] !== undefined).props['aria-expanded'], true);
@@ -119,11 +163,30 @@ async function main() {
       let reduced = false, scrolled, prevented = false;
       global.window = { matchMedia: () => ({ matches: reduced }) };
       global.document = { getElementById: id => ({ scrollIntoView(options) { scrolled = { id, ...options }; } }) };
-      const link = nodes(render()).find(node => node.type === 'a' && node.props.href.endsWith('-amenidades'));
+      const link = nodes(render()).find(node => node.type === 'a' && node.props.href?.endsWith('-amenidades'));
       link.props.onClick({ preventDefault() { prevented = true; } });
       assert.ok(prevented); assert.equal(scrolled.id, 'property-module-pa-amenidades'); assert.equal(scrolled.behavior, 'smooth');
       reduced = true; link.props.onClick({ preventDefault() {} }); assert.equal(scrolled.behavior, 'instant');
+      const nativeFrame=global.requestAnimationFrame;
+      try {
+        let top=900; scrolled=null; global.window.innerHeight=800;
+        global.requestAnimationFrame=callback=>callback();
+        global.document={getElementById:id=>({getBoundingClientRect:()=>({top,bottom:top+200}),scrollIntoView(options){scrolled={id,...options};}})};
+        railButton().props.onClick(); resolve(Response.json({success:true})); await new Promise(done=>setImmediate(done));
+        railButton().props.onClick(); resolve(Response.json({success:true})); await new Promise(done=>setImmediate(done));
+        assert.equal(scrolled.block,'nearest'); assert.equal(scrolled.behavior,'instant','Reduced-motion sin scroll animado');
+        top=100; scrolled=null;
+        railButton().props.onClick(); resolve(Response.json({success:true})); await new Promise(done=>setImmediate(done));
+        railButton().props.onClick(); resolve(Response.json({success:true})); await new Promise(done=>setImmediate(done));
+        assert.equal(scrolled,null,'Sin auto-scroll si la tarjeta ya está en vista');
+      } finally {global.requestAnimationFrame=nativeFrame;}
     } finally { global.window = nativeWindow; global.document = nativeDocument; }
+    // Nueva sesión del editor con Amenidades apagada: activar sin recargar otra vez.
+    states.length = 0; render(false);
+    assert.ok(!nodes(render()).some(node => node.props.name === 'amenidades'));
+    global.fetch = async () => Response.json({ success: true });
+    railButton().props.onClick(); await new Promise(done => setImmediate(done));
+    assertEditableCard(nodes(render()).find(node => node.props.name === 'amenidades'));
   } finally { global.fetch = nativeFetch; }
   console.log('OK UI módulos: feedback de fallo, guardado automático, contracción y Reserva bloqueada.');
 }

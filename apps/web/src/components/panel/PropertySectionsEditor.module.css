@@ -32,3 +32,13 @@
     .module { scroll-margin-top: 7rem; }
   }
 }
+
+.moduleLink[aria-disabled="true"] { opacity: .55; cursor: default; }
+.module[data-revealed="true"] { animation: module-arrival 600ms ease-out; }
+@keyframes module-arrival {
+  from { opacity: .65; box-shadow: 0 0 0 3px var(--panel-focus); }
+  to { opacity: 1; box-shadow: 0 0 0 0 transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .module[data-revealed="true"] { animation: none; }
+}

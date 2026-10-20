@@ -674,3 +674,19 @@ Validación offline: **53/53 tests pasan**, incluida la cobertura de riel único
 Test nuevo test-photo-library.cjs: alta plegada, URL ausente del texto de biblioteca, edición con orden numérico, cancelación/confirmación de borrado, PATCH/DELETE existentes y tarifas sin plegar. QA Emma: grilla y acciones sobre fotos claras/oscuras; editar/guardar/quitar; alta URL; cola/dropzone; teclado; 1440/375px; es/en/fr y ambos temas.
 
 Validación: **55/55 scripts test-*.cjs pasan**, TypeScript web limpio, pnpm lint 0 errores / 5 avisos preexistentes; git diff --check limpio. Sin consultas a BD real ni verificación de navegador. Categorías legacy sin etiqueta usan Fotos como alt accesible, sin cambiar sus datos.
+
+## Módulos apagados solo en el riel — 19 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Lista principal solo con activos, en orden persistido; línea es/en/fr con conteos de activos/apagados. Apagar no quita el módulo de sectionsOrder; reactivar restaura su puesto y borradores de textos/fotos. Riel conserva inventario y único interruptor; nombre apagado deshabilitado (alternativa accesible elegida), sin enlace muerto. Activación exitosa: realce breve y scroll nearest solo fuera de vista; sin robar foco; reduced-motion sin animación. Reserva permanece obligatoria. Sin cambios de API/persistencia/ficha ni SQL. Tests adaptados: ausencia DOM, conteos, Reserva sola, rollback, orden intacto, borradores, enlaces deshabilitados y desplazamiento condicionado.
+
+QA Emma: apagar Amenidades y reactivar con borrador; confirmar posición entre vecinas y datos/fotos; varios toggles y conteos; todos opcionales off = solo Reserva; nombre apagado no navega, interruptor sí; 1440/375px, menú sticky, teclado, es/en/fr, ambos temas y reduced-motion.
+
+Validación offline: **55/55 scripts pasan**, TypeScript web limpio, ESLint 0 errores y 5 avisos preexistentes. Sin navegador, capturas ni acceso a BD real.
+
+## Campos de módulos reactivados — 19 Oct 2026
+
+**Estado: ajuste defensivo HECHO; causa visual NO reproducida offline y QA humana PENDIENTE.** SectionForm usaba hidden={!enabled} además del filtro de activos de la lista. No existe estado expandido separado ni condición de datos. Prueba nueva ejecutando el formulario real pasa ANTES del ajuste: carga y reactivación ya producen campos visibles en el código actual; no se puede afirmar si el síntoma ocurre solo en caliente o también al recargar en el navegador afectado. Se elimina la segunda compuerta hidden en una línea para garantizar que una tarjeta montada siempre está desplegada. Sin cambios de riel, orden, guardado ni Mapa/Reserva informativos. Tests cubren textareas editables sin ancestro hidden, selector de fotos y borrador tras apagar/reactivar.
+
+QA Emma: Amenidades apagar→reactivar con campos inmediatos; escribir/guardar/recargar; apagar→recargar→reactivar; repetir Destino/Habitaciones; Mapa/Reserva mantienen texto; teclado en interruptores; 375px, temas y reduced-motion. Si persiste, reportar nombre exacto del módulo y si falla también al recargar con él activo para distinguir código servido/estado del navegador del render probado.
+
+Validación del ajuste: 55/55 scripts offline pasan; TypeScript web limpio; ESLint 0 errores / 5 avisos preexistentes. Incluye arranque con módulo apagado y activación sin recarga. No se ejecutó navegador; el resultado visual reportado por Emma sigue pendiente de confirmación.

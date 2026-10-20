@@ -63,7 +63,7 @@ async function main() {
   mockModule('next-intl',{useTranslations:()=>key=>key});
   mockModule('@/i18n/navigation',{useRouter:()=>({refresh(){}})});
   const Editor=load('apps/web/src/components/panel/PropertySectionsEditor-order-test.tsx',fs.readFileSync('apps/web/src/components/panel/PropertySectionsEditor.tsx','utf8')).default;
-  const render=()=>{index=0;return Editor({propertyId:'pa',sections:[],media:[]});};
+  const render=()=>{index=0;return Editor({propertyId:'pa',sections:[],media:[],modules:Object.fromEntries(moduleNames.map(name=>[name,true]))});};
   const items=()=>nodes(render()).filter(node=>node.props['data-module']);
   const item=name=>items().find(node=>node.props['data-module']===name);
   const nativeFetch=global.fetch,nativeFrame=global.requestAnimationFrame,nativeDocument=global.document;

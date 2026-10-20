@@ -1,6 +1,11 @@
 // Configuración independiente del contenido: null conserva la visibilidad histórica.
 export const moduleNames = ['destino', 'amenidades', 'habitaciones', 'lugar', 'advertencias', 'mapa', 'reserva'] as const;
 export type ModuleName = typeof moduleNames[number];
+export function validSectionOrder(value: unknown): value is ModuleName[] {
+  return Array.isArray(value) && value.length === moduleNames.length && new Set(value).size === moduleNames.length
+    && value.every(name => moduleNames.includes(name)) && value.at(-1) === 'reserva';
+}
+export function sectionOrder(value: unknown): ModuleName[] { return validSectionOrder(value) ? [...value] : [...moduleNames]; }
 export type SectionModules = Partial<Record<ModuleName, boolean>>;
 export const emptySectionModules = () => Object.fromEntries(moduleNames.map(name => [name, name === 'reserva'])) as Record<ModuleName, boolean>;
 

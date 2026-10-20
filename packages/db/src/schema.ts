@@ -21,6 +21,7 @@ export const users = pgTable("User", {
 });
 
 export const properties = pgTable('Property', {
+  sectionsOrder: jsonb('sectionsOrder').$type<('destino' | 'amenidades' | 'habitaciones' | 'lugar' | 'advertencias' | 'mapa' | 'reserva')[]>(),
   sectionsEnabled: jsonb('sectionsEnabled').$type<Partial<Record<'destino' | 'amenidades' | 'habitaciones' | 'lugar' | 'advertencias' | 'mapa' | 'reserva', boolean>>>(),
   sectionTitles: jsonb('sectionTitles').$type<{ heroVideoUrl: string | null; titles: Partial<Record<string, Record<'es' | 'en' | 'fr', string>>> }>(),
   sectionBgInicio: text('sectionBgInicio'),

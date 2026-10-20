@@ -71,6 +71,7 @@
     "rentalAnual": "Rentas amplias (anual)",
     "rentalAmbas": "Ambas",
     "invalidContactEmail": "Escribe un correo de contacto válido de hasta 254 caracteres, o deja el campo vacío.",
+    "invalidSectionsOrder": "Incluye todos los módulos una sola vez y deja Reserva al final.",
     "whatsappHint": "Incluye el código de país: de 8 a 15 dígitos, sin + ni espacios. Ejemplo: 5215512345678.",
     "title": "Panel del colaborador",
     "properties": "Mis propiedades",
@@ -406,6 +407,9 @@
     }
   },
   "panelSections": {
+    "moveUp": "Subir {section}",
+    "moveDown": "Bajar {section}",
+    "dragHint": "Arrastra para cambiar el orden; también puedes usar las flechas.",
     "modulesHint": "Activa solo las secciones que quieras mostrar. Los interruptores se guardan automáticamente; apagar no borra tus datos.",
     "active": "Activado",
     "inactive": "Desactivado",

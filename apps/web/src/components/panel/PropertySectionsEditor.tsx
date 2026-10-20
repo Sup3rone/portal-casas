@@ -6,15 +6,17 @@ import { useRouter } from '@/i18n/navigation';
 import type { EditorialSection, SectionName } from '@/lib/property-sections';
 import { panelRequest, buttonClass, inputClass } from './request';
 import TranslationDraftButton from './TranslationDraftButton';
-import { moduleNames, sectionModules, type ModuleName } from '@/lib/section-modules';
+import { sectionOrder, sectionModules, type ModuleName } from '@/lib/section-modules';
+import styles from './PropertySectionsEditor.module.css';
+
+const moduleId = (propertyId: string, name: ModuleName) => `property-module-${encodeURIComponent(propertyId)}-${name}`;
 
 type Photo = { id: string; url: string; order: number; type: string };
 // Descontinuado en UI, vivo en BD; no se vacía heroMediaId al guardar narrativa.
 const SECTION_HERO_PICKER_ENABLED = false;
-const names = ['destino', 'amenidades', 'habitaciones', 'lugar', 'advertencias'] as const;
 const titles = { destino: 'destino', amenidades: 'amenidades', habitaciones: 'habitaciones', lugar: 'enLugar', advertencias: 'advertencias' } as const;
 
-function SectionForm({ propertyId, name, value, photos, enabled, busyToggle, toggle }: { propertyId: string; name: SectionName; value?: EditorialSection; photos: Photo[]; enabled: boolean; busyToggle: boolean; toggle: () => void }) {
+function SectionForm({ propertyId, name, value, photos, enabled }: { propertyId: string; name: SectionName; value?: EditorialSection; photos: Photo[]; enabled: boolean }) {
   const t = useTranslations('panelSections'), details = useTranslations('details'), panel = useTranslations('panel'), router = useRouter();
   const [hero, setHero] = useState(value?.heroMediaId || ''), [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   const selected = photos.find(photo => photo.id === hero);
@@ -31,9 +33,9 @@ function SectionForm({ propertyId, name, value, photos, enabled, busyToggle, tog
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
-  return <form onSubmit={submit} className="space-y-4 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+  return <form id={moduleId(propertyId, name)} aria-describedby={`${moduleId(propertyId, name)}-state`} onSubmit={submit} className={`${styles.module} space-y-4 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900`}>
     <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-xl font-semibold">{details(titles[name])}</h3>
-      <button type="button" aria-pressed={enabled} aria-label={details(titles[name])} disabled={busyToggle || busy} onClick={toggle} className={`${buttonClass} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:focus-visible:outline-green-400`}>{t(enabled ? 'active' : 'inactive')}</button></div>
+      <span id={`${moduleId(propertyId, name)}-state`} role="status" className={styles.state}>{t(enabled ? 'active' : 'inactive')}</span></div>
     <div hidden={!enabled} className="space-y-4">
     <div className="grid gap-4 md:grid-cols-3">{(['descriptionEs', 'descriptionEn', 'descriptionFr'] as const).map(field =>
       <label key={field} className="block text-sm">{t(field)}<textarea name={field} maxLength={10000} rows={5} defaultValue={value?.[field] || ''} disabled={busy} className={inputClass} /><TranslationDraftButton source={field.slice(-2).toLowerCase() as 'es' | 'en' | 'fr'} prefix="description" disabled={busy} /></label>)}</div>
@@ -65,28 +67,77 @@ function SectionForm({ propertyId, name, value, photos, enabled, busyToggle, tog
   </form>;
 }
 
-export default function PropertySectionsEditor({ propertyId, sections, media, modules }: { propertyId: string; sections: EditorialSection[]; media: Photo[]; modules?: Record<ModuleName, boolean> }) {
+export default function PropertySectionsEditor({ propertyId, sections, media, modules, order: savedOrder }: { propertyId: string; sections: EditorialSection[]; media: Photo[]; modules?: Record<ModuleName, boolean>; order?: ModuleName[] | null }) {
   const t = useTranslations('panelSections'), details = useTranslations('details'), panel = useTranslations('panel'), router = useRouter();
   const [enabled, setEnabled] = useState(modules || sectionModules({}, sections, media));
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
+  const [railOpen, setRailOpen] = useState(false);
+  const [order, setOrder] = useState(sectionOrder(savedOrder));
+  const label = (name: ModuleName) => details(name === 'mapa' ? 'locationSection' : name === 'reserva' ? 'reservar' : titles[name]);
+  function navigate(event: React.MouseEvent<HTMLAnchorElement>, name: ModuleName) {
+    event.preventDefault();
+    document.getElementById(moduleId(propertyId, name))?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+  }
   async function toggle(name: ModuleName) {
     if (name === 'reserva' || busy) return;
     const next = { ...enabled, [name]: !enabled[name] };
+    setEnabled(next);
     setBusy(true); setMessage('');
     try {
       await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}`, 'PATCH', { sectionsEnabled: next });
-      setEnabled(next); setMessage('saved'); router.refresh();
-    } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
+      setMessage('saved'); router.refresh();
+    } catch (error) { setEnabled(enabled); setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
+  async function move(name: ModuleName, target: ModuleName) {
+    if (busy || name === 'reserva' || target === 'reserva' || name === target) return;
+    const next = order.filter(item => item !== name);
+    next.splice(order.indexOf(target), 0, name);
+    setOrder(next); setBusy(true); setMessage('');
+    try {
+      await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}`, 'PATCH', { sectionsOrder: next });
+      setMessage('saved'); router.refresh();
+    } catch (error) { setOrder(order); setMessage(error instanceof Error ? error.message : 'error'); }
+    finally { setBusy(false); }
+  }
+  function moveWithKeyboard(name: ModuleName, target: ModuleName) {
+    void move(name, target);
+    requestAnimationFrame(() => document.getElementById(`rail-${moduleId(propertyId, name)}`)?.focus({ preventScroll: true }));
+  }
   const photos = media.filter(photo => photo.type === 'PHOTO');
-  return <section className="space-y-4"><h2 className="text-2xl font-semibold">{t('title')}</h2><p>{t('modulesHint')}</p>
-    {names.map(name => <SectionForm key={name} name={name} propertyId={propertyId} value={sections.find(section => section.section === name)} photos={photos} enabled={enabled[name]} busyToggle={busy} toggle={() => { void toggle(name); }} />)}
-    {moduleNames.filter(name => name === 'mapa' || name === 'reserva').map(name => <section key={name} className="space-y-4 rounded-2xl border bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
+  return <section className={styles.editor}><h2 className="mb-4 text-2xl font-semibold">{t('title')}</h2>
+    <div className={styles.layout}>
+    <aside className={styles.rail}>
+      <button type="button" aria-expanded={railOpen} aria-controls={`modules-rail-${encodeURIComponent(propertyId)}`} onClick={() => setRailOpen(open => !open)} className={`${styles.menuButton} ${buttonClass}`}>{t('title')}</button>
+      <div id={`modules-rail-${encodeURIComponent(propertyId)}`} className={styles.railBody} data-open={railOpen}>
+        <p className="mb-3 text-sm">{t('modulesHint')}</p>
+        <nav aria-label={t('title')}><ul className="space-y-2">
+          {order.map((name, index) => <li key={name} data-module={name} className={styles.railItem} draggable={!busy && name !== 'reserva'}
+            onDragStart={event => { if (name === 'reserva' || busy) { event.preventDefault(); return; } event.dataTransfer.setData('application/x-property-module', name); event.dataTransfer.effectAllowed = 'move'; }}
+            onDragOver={event => { if (!busy && name !== 'reserva') event.preventDefault(); }}
+            onDrop={event => { event.preventDefault(); const source = event.dataTransfer.getData('application/x-property-module'); if (order.includes(source as ModuleName)) void move(source as ModuleName, name); }}>
+            <a id={`rail-${moduleId(propertyId, name)}`} href={`#${moduleId(propertyId, name)}`} onClick={event => navigate(event, name)} className={styles.moduleLink}>{label(name)}</a>
+            <button type="button" aria-label={label(name)} aria-pressed={enabled[name]} disabled={busy || name === 'reserva'} title={name === 'reserva' ? t('reservationRequired') : undefined} onClick={() => { void toggle(name); }} className={`${styles.switchButton} ${buttonClass}`}>
+              {name === 'reserva' && <span aria-hidden="true">🔒 </span>}{t(enabled[name] ? 'active' : 'inactive')}
+            </button>
+            {name !== 'reserva' && <div className={styles.moveControls}>
+              <span aria-hidden="true" title={t('dragHint')}>↕</span>
+              <button type="button" aria-label={t('moveUp', { section: label(name) })} disabled={busy || index === 0} onClick={() => moveWithKeyboard(name, order[index - 1])} className={buttonClass}>↑</button>
+              <button type="button" aria-label={t('moveDown', { section: label(name) })} disabled={busy || index >= order.length - 2} onClick={() => moveWithKeyboard(name, order[index + 1])} className={buttonClass}>↓</button>
+            </div>}
+          </li>)}
+        </ul></nav>
+        <p className="mt-3 text-xs">{t('reservationRequired')}</p>
+      </div>
+      {message && <p role={message === 'saved' ? 'status' : 'alert'} className="mt-2 text-sm">{panel(message)}</p>}
+    </aside>
+    <div className="min-w-0 space-y-4">
+    {order.map(name => name !== 'mapa' && name !== 'reserva' ? <SectionForm key={name} name={name} propertyId={propertyId} value={sections.find(section => section.section === name)} photos={photos} enabled={enabled[name]} /> : <section key={name} id={moduleId(propertyId, name)} aria-describedby={`${moduleId(propertyId, name)}-state`} className={`${styles.module} space-y-4 rounded-2xl border bg-white p-6 dark:border-gray-700 dark:bg-gray-900`}>
       <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-xl font-semibold">{details(name === 'mapa' ? 'locationSection' : 'reservar')}</h3>
-        <button type="button" aria-pressed={enabled[name]} aria-label={details(name === 'mapa' ? 'locationSection' : 'reservar')} disabled={busy || name === 'reserva'} title={name === 'reserva' ? t('reservationRequired') : undefined} onClick={() => { void toggle(name); }} className={`${buttonClass} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:focus-visible:outline-green-400`}>{t(enabled[name] ? 'active' : 'inactive')}</button></div>
+        <span id={`${moduleId(propertyId, name)}-state`} role="status" className={styles.state}>{t(enabled[name] ? 'active' : 'inactive')}</span></div>
       {name === 'reserva' ? <p className="text-sm">{t('reservationRequired')}</p> : enabled[name] && <p className="text-sm">{t('mapFieldsHint')}</p>}
     </section>)}
-    {message && <p role={message === 'saved' ? 'status' : 'alert'}>{panel(message)}</p>}
+    </div>
+    </div>
   </section>;
 }

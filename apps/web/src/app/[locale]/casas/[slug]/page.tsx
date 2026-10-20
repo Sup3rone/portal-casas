@@ -1,7 +1,8 @@
 import PropertyHeroVideo from '@/components/PropertyHeroVideo';
 import { propertySectionLabels, sectionTitle, type PropertySectionKey } from '@/lib/property-presentation';
 import { propertyLocation } from '@/lib/destinations';
-import { sectionModules } from '@/lib/section-modules';
+import { sectionModules, sectionOrder, validSectionOrder, type ModuleName } from '@/lib/section-modules';
+import { Fragment, type ReactNode } from 'react';
 // apps/web/src/app/[locale]/casas/[slug]/page.tsx
 import { db, properties, media, bookings, seasonRates, propertySections } from '@portal/db';
 import { eq } from 'drizzle-orm';
@@ -101,37 +102,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
     ? porCategoria('principal')
     : mediaList; // fallback: si nada tiene categoría, todo es principal
 
-  return (
-    <PropertyDetailScroll key={property.id}>
-      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container detail-fullpage public-paper detail-zigzag" tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
-{/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
-      <SectionBackground url={null} name="gallery" className="detail-screen px-3 py-8 md:px-6">
-        <div className="property-detail-hero" data-hero-video={property.sectionTitles?.heroVideoUrl ? 'true' : undefined}>
-        {property.sectionTitles?.heroVideoUrl && <PropertyHeroVideo src={property.sectionTitles?.heroVideoUrl} poster={principal.find(item => item.type === 'PHOTO')?.url} />}
-        <Reveal className="relative mb-6 rounded-2xl p-6 pr-16 text-center">
-          <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={destination} />
-          <h1 className="break-words text-3xl font-bold tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
-            {title.toUpperCase()}
-          </h1>
-          {editorial.length > 0 && location && <p className="mt-3 break-words text-sm text-white/80">{location}</p>}
-          <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80 dark:text-gray-200">
-            {destination} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
-          </p>
-        </Reveal>
-        </div>
-        <PropertyGallery slides={principal} />
-      {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
-      {description && <Reveal as="div" className=" mx-auto max-w-2xl px-6 py-16 text-center">
-        <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
-          <p className="whitespace-pre-wrap leading-relaxed text-gray-700 dark:text-gray-200 font-light">
-            {description}
-          </p>
-        </div>
-      </Reveal>}
-
-      {/* ===== EL DESTINO — ubicación guardada ===== */}
-      {modules.destino && editorial.length === 0 && location && (
-      <div className="px-6 py-16">
+  const customOrder = validSectionOrder(property.sectionsOrder);
+  const destinationFallback = (<>{modules.destino && editorial.length === 0 && location && (
+      <div className="px-6 py-16" style={{ paddingBlock: 'calc(var(--detail-section-gap) / 2)' }}>
         <div className="mx-auto max-w-7xl">
 
           {/* Ubicación real, sin listas genéricas */}
@@ -154,32 +127,24 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           </div>
         </div>
       </div>
-      )}
-
-      {/* ===== AMENIDADES: info + imagen ===== */}
-      {modules.amenidades && porCategoria('amenidades').length > 0 && (!hasEditorial('amenidades') || porCategoria('amenidades').some(item => item.type === 'VIDEO')) && (
+      )}</>);
+  const amenitiesFallback = (<>{modules.amenidades && porCategoria('amenidades').length > 0 && (!hasEditorial('amenidades') || porCategoria('amenidades').some(item => item.type === 'VIDEO')) && (
       <div className="mt-8"><Reveal as="h2" className="mb-6 text-center text-2xl font-semibold">{titleFor('amenidades')}</Reveal><CategorySection
         label={titleFor('amenidades')}
         slides={porCategoria('amenidades')}
         items={[]}
       /></div>
-      )}
-
-      {/* ===== HABITACIONES: imagen + info (invertido) ===== */}
-      {modules.habitaciones && porCategoria('habitaciones').length > 0 && (!hasEditorial('habitaciones') || porCategoria('habitaciones').some(item => item.type === 'VIDEO')) && (
+      )}</>);
+  const roomsFallback = (<>{modules.habitaciones && porCategoria('habitaciones').length > 0 && (!hasEditorial('habitaciones') || porCategoria('habitaciones').some(item => item.type === 'VIDEO')) && (
       <div className="mt-8"><Reveal as="h2" className="mb-6 text-center text-2xl font-semibold">{titleFor('habitaciones')}</Reveal><CategorySection
         label={titleFor('habitaciones')}
         slides={porCategoria('habitaciones')}
         reverse
         items={[]}
       /></div>
-      )}
-
-
-      </SectionBackground>
-      {editorial.map(slide => <EditorialPresentation key={slide.section} slides={[slide]} />)}
-      {(hasMap || hasWarnings) && (
-<SectionBackground url={null} name="location" className="detail-screen px-4 py-16 md:px-6" label={titleFor('mapa')}>
+      )}</>);
+  const locationBlock = (hasMap || hasWarnings) && (
+<SectionBackground key="location" url={null} name="location" className="detail-screen px-4 py-16 md:px-6" label={titleFor('mapa')}>
         {hasMap && <Reveal as="h2" className="detail-lateral-reveal detail-from-right mb-8 text-center text-2xl font-semibold">{titleFor('mapa')}</Reveal>}
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {hasMap && <div className="detail-location-map min-w-0">
@@ -191,8 +156,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           </Reveal>}
         </div>
       </SectionBackground>
-      )}
-<SectionBackground url={null} id="reservar" name="reservation" className="detail-screen px-6 py-24">
+      );
+  const reservationBlock = (<SectionBackground key="reservation" url={null} id="reservar" name="reservation" className="detail-screen px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal as="h2" className="mb-10 text-center text-3xl font-light tracking-[0.35em] text-gray-900 dark:text-gray-100 md:text-4xl">
             {isAnnual ? t('details.annualContactTitle') : titleFor('reserva')}
@@ -237,7 +202,64 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           </div>
           </ReservationDatesProvider>}
         </div>
+      </SectionBackground>);
+  const moduleNodes: Partial<Record<ModuleName, ReactNode>> = {};
+  for (const slide of editorial) moduleNodes[slide.section] = <EditorialPresentation key={slide.section} slides={[slide]} />;
+  moduleNodes.destino = <>{destinationFallback}{moduleNodes.destino}</>;
+  moduleNodes.amenidades = <>{amenitiesFallback}{moduleNodes.amenidades}</>;
+  moduleNodes.habitaciones = <>{roomsFallback}{moduleNodes.habitaciones}</>;
+  moduleNodes.mapa = hasMap && <SectionBackground url={null} name="location" className="detail-screen px-4 py-16 md:px-6" label={titleFor('mapa')}>{hasMap && <Reveal as="h2" className="detail-lateral-reveal detail-from-right mb-8 text-center text-2xl font-semibold">{titleFor('mapa')}</Reveal>}<div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">{hasMap && <div className="detail-location-map min-w-0">
+            <LocationMap lat={property.lat!} lng={property.lng!} address={property.address} propertyTitle={title} city={destination} />
+          </div>}</div></SectionBackground>;
+  moduleNodes.advertencias = hasWarnings && <SectionBackground url={null} name="warnings" className="detail-screen px-4 py-16 md:px-6" label={titleFor('advertencias')}><div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">{hasWarnings && <Reveal className="detail-lateral-reveal detail-from-left glass-panel min-w-0 rounded-2xl p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100">
+            <h2 className="mb-4 text-2xl font-light tracking-wide">{titleFor('advertencias')}</h2>
+            {warningDescription && <p className="whitespace-pre-wrap break-words leading-relaxed">{warningDescription}</p>}
+          </Reveal>}</div></SectionBackground>;
+  moduleNodes.reserva = reservationBlock;
+
+  return (
+    <PropertyDetailScroll key={property.id}>
+      <DetailSectionTransitions className="detail-editorial detail-independent detail-snap-container detail-fullpage public-paper detail-zigzag" tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
+{/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
+      <SectionBackground url={null} name="gallery" className="detail-screen px-3 py-8 md:px-6">
+        <div className="property-detail-hero" data-hero-video={property.sectionTitles?.heroVideoUrl ? 'true' : undefined}>
+        {property.sectionTitles?.heroVideoUrl && <PropertyHeroVideo src={property.sectionTitles?.heroVideoUrl} poster={principal.find(item => item.type === 'PHOTO')?.url} />}
+        <Reveal className="relative mb-6 rounded-2xl p-6 pr-16 text-center">
+          <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={destination} />
+          <h1 className="break-words text-3xl font-bold tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
+            {title.toUpperCase()}
+          </h1>
+          {editorial.length > 0 && location && <p className="mt-3 break-words text-sm text-white/80">{location}</p>}
+          <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80 dark:text-gray-200">
+            {destination} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
+          </p>
+        </Reveal>
+        </div>
+        <PropertyGallery slides={principal} />
+      {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}
+      {description && <Reveal as="div" className=" mx-auto max-w-2xl px-6 py-16 text-center">
+        <div className="rounded-2xl bg-white/85 dark:bg-gray-900/85 backdrop-blur-md p-6 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50">
+          <p className="whitespace-pre-wrap leading-relaxed text-gray-700 dark:text-gray-200 font-light">
+            {description}
+          </p>
+        </div>
+      </Reveal>}
+
+      {/* ===== EL DESTINO — ubicación guardada ===== */}
+      {!customOrder && destinationFallback}
+
+      {/* ===== AMENIDADES: info + imagen ===== */}
+      {!customOrder && amenitiesFallback}
+
+      {/* ===== HABITACIONES: imagen + info (invertido) ===== */}
+      {!customOrder && roomsFallback}
+
+
       </SectionBackground>
+      {customOrder ? sectionOrder(property.sectionsOrder).filter(name => modules[name]).map(name => <Fragment key={name}>{moduleNodes[name]}</Fragment>) : [
+        ...editorial.map(slide => <EditorialPresentation key={slide.section} slides={[slide]} />),
+        locationBlock, reservationBlock,
+      ]}
       </DetailSectionTransitions>
       {editorial.length > 0 && <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{isAnnual ? t('details.annualContactTitle') : t('details.reservar')}</a>}
       <DetailFooterFlow><Footer inDetail /></DetailFooterFlow>

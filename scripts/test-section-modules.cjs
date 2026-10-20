@@ -60,9 +60,18 @@ async function main() {
     const panel = renderToStaticMarkup(wrap(await EditorPage({ params: Promise.resolve({ locale, id: 'pa' }) })));
     assert.ok(panel.includes(messages.panelSections.modulesHint));
     const standalone = renderToStaticMarkup(wrap(React.createElement(Editor, { propertyId: fresh.id, sections: [], media: [], modules: sectionModules(fresh, [], []) })));
-    assert.equal((standalone.match(/aria-pressed="false"/g) || []).length, 6);
+    assert.equal((standalone.match(/aria-pressed="false"/g) || []).length, 6, 'Solo seis interruptores opcionales en riel');
+    assert.equal((standalone.match(/aria-pressed="true"/g) || []).length, 1, 'Reserva solo tiene interruptor en riel');
+    for (const card of standalone.matchAll(/<(?:form|section) id="property-module-[\s\S]*?<\/(?:form|section)>/g)) {
+      assert.ok(!card[0].includes('aria-pressed='), 'Tarjetas sin interruptor propio');
+      assert.ok(card[0].includes('aria-describedby='), 'Estado de lectura asociado a la tarjeta');
+    }
     assert.match(standalone, /aria-pressed="true"[^>]*disabled=""/);
     assert.ok(standalone.includes(messages.panelSections.reservationRequired));
+    const card = html => html.match(new RegExp(`<form id="property-module-${fresh.id}-amenidades"[\\s\\S]*?</form>`))[0];
+    assert.match(card(standalone), /<div hidden=""/, 'Tarjeta desactivada contraída');
+    const expanded = renderToStaticMarkup(wrap(React.createElement(Editor, { propertyId: fresh.id, sections: [], media: [], modules: { ...sectionModules(fresh, [], []), amenidades: true } })));
+    assert.doesNotMatch(card(expanded), /<div hidden=""/, 'Estado activado por riel expande los campos');
   }
   assert.equal((await patch.PATCH(request({ sectionsEnabled: { amenidades: true, mapa: true, destino: true } }), context('pa'))).status, 200);
   assert.deepEqual({ ...stored() }, snapshot);
@@ -75,25 +84,46 @@ async function main() {
 
   // Eventos del interruptor real: fallo conserva estado; éxito contrae; reserva no envía.
   let index = 0, refreshes = 0; const states = [];
-  mockModule('react', { ...React, useState: initial => { const slot = index++; if (!(slot in states)) states[slot] = initial; return [states[slot], value => { states[slot] = value; }]; } });
+  mockModule('react', { ...React, useState: initial => { const slot = index++; if (!(slot in states)) states[slot] = initial; return [states[slot], value => { states[slot] = typeof value === 'function' ? value(states[slot]) : value; }]; } });
   mockModule('next-intl', { useTranslations: () => key => key });
   mockModule('@/i18n/navigation', { useRouter: () => ({ refresh() { refreshes++; } }) });
   const Interactive = load('apps/web/src/components/panel/PropertySectionsEditor-modules-test.tsx', fs.readFileSync('apps/web/src/components/panel/PropertySectionsEditor.tsx', 'utf8')).default;
   const render = () => { index = 0; return Interactive({ propertyId: 'pa', sections: [], media: [], modules: { ...emptySectionModules(), amenidades: true } }); };
   const nativeFetch = global.fetch;
+  const railButton = () => nodes(nodes(render()).find(node => node.props['data-module'] === 'amenidades')).find(node => node.type === 'button');
   try {
     let payload;
     global.fetch = async (url, options) => { payload = JSON.parse(options.body); return Response.json({ error: 'error' }, { status: 500 }); };
-    await nodes(render()).find(node => node.props.name === 'amenidades').props.toggle();
+    railButton().props.onClick();
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(nodes(render()).find(node => node.props.name === 'amenidades').props.enabled, true); assert.equal(refreshes, 0);
     global.fetch = async (url, options) => { payload = JSON.parse(options.body); return Response.json({ success: true }); };
-    await nodes(render()).find(node => node.props.name === 'amenidades').props.toggle();
+    railButton().props.onClick();
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(payload.sectionsEnabled.amenidades, false); assert.equal(payload.sectionsEnabled.reserva, true);
     assert.equal(nodes(render()).find(node => node.props.name === 'amenidades').props.enabled, false); assert.equal(refreshes, 1);
     const reservation = nodes(render()).find(node => node.type === 'button' && node.props.title);
     assert.equal(reservation.props.disabled, true); await reservation.props.onClick(); assert.equal(refreshes, 1);
+    assert.equal(railButton().props['aria-pressed'], false);
+    let resolve;
+    global.fetch = () => new Promise(done => { resolve = done; });
+    railButton().props.onClick();
+    assert.equal(nodes(render()).find(node => node.props.name === 'amenidades').props.enabled, true, 'Riel refleja inmediatamente en encabezado antes de respuesta');
+    assert.equal(railButton().props['aria-pressed'], true);
+    resolve(Response.json({ success: true })); await new Promise(done => setImmediate(done));
+    const menu = nodes(render()).find(node => node.props['aria-expanded'] !== undefined);
+    assert.equal(menu.props['aria-expanded'], false); menu.props.onClick();
+    assert.equal(nodes(render()).find(node => node.props['aria-expanded'] !== undefined).props['aria-expanded'], true);
+    const nativeWindow = global.window, nativeDocument = global.document;
+    try {
+      let reduced = false, scrolled, prevented = false;
+      global.window = { matchMedia: () => ({ matches: reduced }) };
+      global.document = { getElementById: id => ({ scrollIntoView(options) { scrolled = { id, ...options }; } }) };
+      const link = nodes(render()).find(node => node.type === 'a' && node.props.href.endsWith('-amenidades'));
+      link.props.onClick({ preventDefault() { prevented = true; } });
+      assert.ok(prevented); assert.equal(scrolled.id, 'property-module-pa-amenidades'); assert.equal(scrolled.behavior, 'smooth');
+      reduced = true; link.props.onClick({ preventDefault() {} }); assert.equal(scrolled.behavior, 'instant');
+    } finally { global.window = nativeWindow; global.document = nativeDocument; }
   } finally { global.fetch = nativeFetch; }
   console.log('OK UI módulos: feedback de fallo, guardado automático, contracción y Reserva bloqueada.');
 }

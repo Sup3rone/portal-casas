@@ -71,6 +71,7 @@
     "rentalAnual": "Locations longue durée (annuelles)",
     "rentalAmbas": "Les deux",
     "invalidContactEmail": "Saisissez une adresse e-mail de contact valide de 254 caractères maximum, ou laissez le champ vide.",
+    "invalidSectionsOrder": "Incluez chaque module une seule fois et placez Réservation en dernier.",
     "whatsappHint": "Incluez l'indicatif du pays : 8 à 15 chiffres, sans + ni espaces. Exemple : 5215512345678.",
     "title": "Espace hôte",
     "properties": "Mes propriétés",
@@ -407,6 +408,9 @@
     }
   },
   "panelSections": {
+    "moveUp": "Monter {section}",
+    "moveDown": "Descendre {section}",
+    "dragHint": "Faites glisser pour réordonner, ou utilisez les flèches.",
     "modulesHint": "Activez uniquement les sections à afficher. Les interrupteurs sont enregistrés automatiquement ; désactiver conserve vos données.",
     "active": "Activé",
     "inactive": "Désactivé",

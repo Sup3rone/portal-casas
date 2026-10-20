@@ -643,3 +643,26 @@ Este cierre prevalece sobre estados históricos de experimentos, fallos de tests
 - Cobertura nueva `scripts/test-section-modules.cjs`: defaults, persistencia, contenido/fotos intactos, permisos 401/403/404, Reserva forzada, SSR es/en/fr, anclas, reactivación y feedback del interruptor. Decisiones, inventario de archivos y checklist completos en CONTEXTO.md, sección 2026-10-19.
 - Validación offline: **53/53 scripts test-*.cjs pasan**, TypeScript web limpio, ESLint 0 errores y 5 warnings preexistentes; DDL PostgreSQL y QA real pendientes.
 - QA humana pendiente: propiedad con datos y propiedad nueva; apagar/reactivar Amenidades/Mapa, guardar/reabrir, conservar títulos/fotos; Reserva bloqueada; Tab/Espacio/Enter; 375px/1440px, es/en/fr y ambos temas. Sin navegador automatizado ni migraciones ejecutadas por el agente.
+
+## Riel de módulos del editor — 19 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE de QA humana.**
+- Riel derecho sticky con columna reservada en desktop >=1024px si editor tiene >=960px útiles; en móvil/panel estrecho, menú compacto sticky. Un solo DOM y fuente de estado, con toggle inmediato y rollback ante fallo. Reserva bloqueada con candado; nombres enlazan a cada bloque sin robar foco, respetando reduced-motion.
+- Solo PropertySectionsEditor, su CSS local, test de módulos y documentación. Sin API/schema/ficha/otros editores ni reordenado. Se reutilizan textos existentes. Tests de sincronía, menú y desplazamiento ampliados; TypeScript limpio y ESLint 0 errores/5 warnings anteriores.
+- Suite offline completa: **53/53 tests pasan**. Verificación visual pendiente de Emma; sin navegador ni capturas automáticas.
+- QA Emma: riel 1440px, menú 375px, ambos controles sincronizados, enlaces de módulo, teclado y Reserva; es/en/fr y ambos temas. Decisión: sticky limitado al editor, no overlay fixed sobre campos; móvil conserva menú abierto tras navegación para no esconder el enlace enfocado. Detalles en CONTEXTO.md.
+
+### Riel único: retirada de interruptores duplicados — 19 Oct 2026
+**Estado: HECHO; PENDIENTE QA humana.** Tarjetas sin interruptor propio; solo título y estado sutil de lectura (aria-describedby + role=status). Riel/menú conserva activación, guardado, rollback y Reserva bloqueada. Campos ocultos permanecen montados sin perder datos; no se toca API/schema/ficha. Tests adaptados para ausencia de duplicados, expansión/contracción y operación desde riel. TypeScript limpio y lint 0 errores/5 warnings preexistentes. QA Emma: 1440/375px, es/en/fr, temas, Tab/Enter/Espacio y anuncio de estado con lector.
+
+Validación offline: **53/53 tests pasan**, incluida la cobertura de riel único; sin navegador ni capturas automáticas.
+
+## Orden modular con Reserva al final — 19 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE SQL manual y QA humana.**
+- Columna nullable `Property.sectionsOrder`, independiente de activación; SQL propuesto `scripts/sql/property-sections-order.sql`, no ejecutado. Emma: Respaldo → pruebas → main antes del deploy. Sin UPDATE de datos; propiedades sin personalización conservan composición/orden previos.
+- Riel y tarjetas comparten orden: drag/drop nativo y botones subir/bajar con etiquetas es/en/fr, autosave optimista y rollback. Reserva bloqueada al final, sin arrastre/flechas. Servidor rechaza cualquier orden incompleto/duplicado o Reserva fuera del final con 400 diagnosticable.
+- Ficha: orden explícito compone módulos activos en secuencia real, con respaldo incluido; galería inicial y footer no entran en el orden. Mapa/Advertencias se separan si hay orden personalizado para poder moverlos de forma independiente; sin orden guardado mantienen la fila anterior. Zig-zag/reveal y lógica de reserva/contacto intactos; #reservar siempre al final.
+- Nuevo test-section-order.cjs: defaults, persistencia, permisos, validación, render/anclas es/en/fr, botones/foco, drag/drop y fallos. Móvil: botones, sin prometer arrastre táctil. No se añade animación de movimiento; navegación existente respeta reduced-motion.
+- QA Emma pendiente: arrastrar, recargar, verificar ficha/activación, Reserva y payload inválido; teclado/foco, 375px/1440px, es/en/fr y ambos temas. Decisiones e inventario en CONTEXTO.md. Sin navegador automatizado ni migración ejecutada.
+- Validación offline: **54/54 tests pasan**, TypeScript web limpio y ESLint 0 errores/5 warnings preexistentes. DDL PostgreSQL, arrastre real y QA visual pendientes de Emma.

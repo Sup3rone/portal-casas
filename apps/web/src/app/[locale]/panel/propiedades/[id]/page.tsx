@@ -36,6 +36,6 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
     {resources.media.length > 0 && <SectionSlider slides={resources.media} />}
     <ResourceEditor propertyId={id} resource="media" items={resources.media.filter(item => item.type === 'PHOTO')} />
     {/* <SectionBackgroundEditor property={property} media={resources.media} /> */}
-    <PropertySectionsEditor propertyId={id} sections={sections} media={resources.media} modules={modules} />
+    <PropertySectionsEditor propertyId={id} sections={sections} media={resources.media} modules={modules} order={property.sectionsOrder} />
   </section>;
 }

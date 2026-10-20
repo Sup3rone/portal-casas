@@ -6,6 +6,8 @@ import type { PanelResources } from '@/lib/panel-resources';
 import { panelRequest, panelResponseError, PanelRequestError, inputClass, buttonClass } from './request';
 import { photoMetadata, PhotoUploadError, photoTypes, photoCompression, optimizePhoto, type PhotoType } from '@/lib/photo-upload';
 import CoverEditor from './CoverEditor';
+import Image from 'next/image';
+import styles from './ResourceEditor.module.css';
 
 type Item = PanelResources['rates'][number] | PanelResources['media'][number];
 export default function ResourceEditor({ propertyId, resource, items }: { propertyId: string; resource: 'rates' | 'media'; items: Item[] }) {
@@ -95,16 +97,7 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
     finally { setBusy(false); }
   }
   const photos = items.filter((item): item is PanelResources['media'][number] => 'url' in item && item.type === 'PHOTO');
-  return <><section className="space-y-4 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
-    <h2 className="text-xl font-semibold">{t(resource === 'rates' ? 'rates' : 'photos')}</h2>
-    {resource === 'media' && <p className="text-sm text-gray-600 dark:text-gray-300">{t('photoHint')}</p>}
-    {!items.length && <p>{t(resource === 'rates' ? 'emptyRates' : 'emptyPhotos')}</p>}
-    <ul className="space-y-3">{items.map(item => <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 dark:border-gray-700">
-      <span className="min-w-0 break-all">{'name' in item ? `${item.name} · ${item.startDate} → ${item.endDate} · ${item.weekdayPrice}/${item.weekendPrice} MXN` : item.url}</span>
-      <div className="flex gap-3"><button type="button" disabled={busy || uploading} onClick={() => { setEditing(item); setMessage(''); }} className="underline">{t('edit')}</button>
-        <button type="button" disabled={busy || uploading} onClick={() => remove(item.id)} className="underline">{t('remove')}</button></div>
-    </li>)}</ul>
-    <form ref={formRef} key={editing?.id ?? 'new'} onSubmit={submit} className="grid gap-4 md:grid-cols-2">
+  const editorForm = <form ref={formRef} key={editing?.id ?? 'new'} onSubmit={submit} className="grid gap-4 md:grid-cols-2">
       {fields.map(field => <label key={field} className="block text-sm">{t(field === 'url' ? 'photoUrl' : field)}
         {field === 'category' ? <select name={field} disabled={busy || uploading} defaultValue={initial(field)} className={inputClass}>{['principal', 'habitaciones', 'amenidades', 'lugar'].map(value => <option key={value} value={value}>{t(value)}</option>)}</select>
           : <input name={field} required type={['startDate', 'endDate'].includes(field) ? 'date' : ['weekdayPrice', 'weekendPrice', 'priority', 'order'].includes(field) ? 'number' : 'text'}
@@ -112,7 +105,33 @@ export default function ResourceEditor({ propertyId, resource, items }: { proper
       </label>)}
       <div className="flex gap-3"><button disabled={busy || uploading} className={buttonClass}>{t(busy ? 'saving' : editing ? 'save' : resource === 'rates' ? 'addRate' : 'addPhoto')}</button>
         {editing && <button type="button" disabled={busy || uploading} onClick={() => setEditing(null)}>{t('cancel')}</button>}</div>
-    </form>
+    </form>;
+  return <><section className="space-y-4 rounded-2xl border bg-white dark:bg-gray-900 p-6 shadow-sm dark:border-gray-700">
+    <h2 className="text-xl font-semibold">{t(resource === 'rates' ? 'rates' : 'photos')}</h2>
+    {resource === 'media' && <p className="text-sm text-gray-600 dark:text-gray-300">{t('photoHint')}</p>}
+    {!items.length && <p>{t(resource === 'rates' ? 'emptyRates' : 'emptyPhotos')}</p>}
+    {resource === 'media' ? <ul className={styles.grid}>{photos.map((photo, index) => {
+      const label = `${t(['principal', 'habitaciones', 'amenidades', 'lugar'].includes(photo.category || '') ? photo.category! : 'photos')} · ${index + 1}`;
+      return <li key={photo.id} className={styles.thumbnail}>
+        <Image src={photo.url} alt={label} width={256} height={256} loading="lazy" unoptimized />
+        <div className={styles.actions}>
+          <button type="button" disabled={busy || uploading} aria-label={`${t('edit')} — ${label}`} title={t('edit')} onClick={() => { setEditing(photo); setMessage(''); }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15Z" /></svg>
+          </button>
+          <button type="button" disabled={busy || uploading} aria-label={`${t('remove')} — ${label}`} title={t('remove')} onClick={() => remove(photo.id)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5" /></svg>
+          </button>
+        </div>
+      </li>;
+    })}</ul> : <ul className="space-y-3">{items.map(item => <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 dark:border-gray-700">
+      <span className="min-w-0 break-all">{'name' in item ? `${item.name} · ${item.startDate} → ${item.endDate} · ${item.weekdayPrice}/${item.weekendPrice} MXN` : item.url}</span>
+      <div className="flex gap-3"><button type="button" disabled={busy || uploading} onClick={() => { setEditing(item); setMessage(''); }} className="underline">{t('edit')}</button>
+        <button type="button" disabled={busy || uploading} onClick={() => remove(item.id)} className="underline">{t('remove')}</button></div>
+    </li>)}</ul>}
+    {resource === 'media' ? <details key={editing?.id ?? 'manual'} open={editing ? true : undefined} className={styles.manual}>
+      <summary>{t(editing ? 'edit' : 'addPhotoUrl')}</summary>
+      {editorForm}
+    </details> : editorForm}
     {resource === 'media' && !editing && <div className="space-y-3 rounded-xl border-2 border-dashed border-gray-300 p-4 dark:border-gray-600"
       onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void uploadPhoto(event.dataTransfer.files); }} aria-busy={uploading}>
       <p className="font-medium">{uploader('drop')}</p><p className="text-sm text-gray-600 dark:text-gray-300">{uploader('hint')}</p>

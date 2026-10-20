@@ -108,6 +108,7 @@
     "remove": "Retirer",
     "removeConfirm": "Retirer cet élément ?",
     "photos": "Images",
+    "addPhotoUrl": "Ajouter par URL",
     "photoUrl": "URL de l’image",
     "photoHint": "Photothèque complète : téléversez, modifiez, classez et ordonnez les images du détail. Choisissez séparément les images de la liste dans Couverture.",
     "category": "Catégorie",

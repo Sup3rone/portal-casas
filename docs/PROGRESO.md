@@ -666,3 +666,11 @@ Validación offline: **53/53 tests pasan**, incluida la cobertura de riel único
 - Nuevo test-section-order.cjs: defaults, persistencia, permisos, validación, render/anclas es/en/fr, botones/foco, drag/drop y fallos. Móvil: botones, sin prometer arrastre táctil. No se añade animación de movimiento; navegación existente respeta reduced-motion.
 - QA Emma pendiente: arrastrar, recargar, verificar ficha/activación, Reserva y payload inválido; teclado/foco, 375px/1440px, es/en/fr y ambos temas. Decisiones e inventario en CONTEXTO.md. Sin navegador automatizado ni migración ejecutada.
 - Validación offline: **54/54 tests pasan**, TypeScript web limpio y ESLint 0 errores/5 warnings preexistentes. DDL PostgreSQL, arrastre real y QA visual pendientes de Emma.
+
+## Biblioteca de fotos con miniaturas — 19 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Filas de URLs sustituidas por miniaturas cuadradas lazy con botones SVG de editar/quitar (44px), foco visible y acciones permanentes en touch. Alta por URL plegada y localizada es/en/fr; edición conserva URL/categoría/orden y borrado pide la confirmación existente. Subida/dropzone/compresión y tarifas sin cambios. Sin migraciones ni cambios de endpoints. Reordenado de miniaturas por arrastre queda fuera de esta fase.
+
+Test nuevo test-photo-library.cjs: alta plegada, URL ausente del texto de biblioteca, edición con orden numérico, cancelación/confirmación de borrado, PATCH/DELETE existentes y tarifas sin plegar. QA Emma: grilla y acciones sobre fotos claras/oscuras; editar/guardar/quitar; alta URL; cola/dropzone; teclado; 1440/375px; es/en/fr y ambos temas.
+
+Validación: **55/55 scripts test-*.cjs pasan**, TypeScript web limpio, pnpm lint 0 errores / 5 avisos preexistentes; git diff --check limpio. Sin consultas a BD real ni verificación de navegador. Categorías legacy sin etiqueta usan Fotos como alt accesible, sin cambiar sus datos.

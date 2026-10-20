@@ -108,6 +108,7 @@
     "remove": "Remove",
     "removeConfirm": "Remove this item?",
     "photos": "Images",
+    "addPhotoUrl": "Add by URL",
     "photoUrl": "Image URL",
     "photoHint": "Complete photo library: upload, edit, categorise and order the detail images. Select listing images separately in Cover.",
     "category": "Category",

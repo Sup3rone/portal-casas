@@ -108,6 +108,7 @@
     "remove": "Quitar",
     "removeConfirm": "¿Quieres quitar este recurso?",
     "photos": "Imágenes",
+    "addPhotoUrl": "Añadir por URL",
     "photoUrl": "URL de imagen",
     "photoHint": "Biblioteca completa de fotos: sube, edita, categoriza y ordena las imágenes del detalle. La selección para el listado se gestiona por separado en Portada.",
     "category": "Categoría",

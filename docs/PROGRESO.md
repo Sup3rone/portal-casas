@@ -762,3 +762,25 @@ Validación: **57/57 scripts offline pasan**, TypeScript web limpio, ESLint0 err
 QA Emma: pnpm dev→/es,/en,/fr; segunda línea ALIA FORRENT y primera bienvenida localizada;1440/375px,claro/oscuro; navbar transparente legible, reveal y resto del hero intactos. Sin navegador ni consultas Neon.
 
 Validación: **57/57 scripts offline pasan**, TypeScript web limpio, ESLint0 errores/5 avisos preexistentes; git diff --check limpio.
+
+## Logo Marcellus — verificación de solicitud reiterada, 20 Oct 2026
+
+El cambio ya estaba implementado: se conserva sin modificaciones de código. Solo actualización documental de esta revisión. Header usa Marcellus400 via next/font, variable exclusiva al wordmark; SVG, footer Portal Casas, Cinzel y hero intactos. Verificación previa del loader autoalojado sigue documentada (22.9KB WOFF2, URLs locales); no nueva descarga/build. Contraste estático pasa AA; hero calculado5.41:1 bajo supuestos de scrim, pendiente QA real.
+
+QA Emma: pnpm dev→/es,/en,/fr y /casas; header mate y transparente sobre hero, claro/oscuro,1440/375px. Comprobar Marcellus en wordmark, monograma original, hero ALIA FORRENT en Cinzel sin cambios, logo sin desbordes y fallback visible mientras carga (Network Slow3G/Disablecache). Fonts debe cargar /_next/static/media/ sin solicitudes runtime a Google Fonts. No se ejecutó navegador automático.
+
+Validación de esta revisión: **57/57 scripts pasan**, TypeScript web limpio, ESLint0 errores/5 avisos preexistentes y diff sin errores de whitespace.
+
+## Regresión ampliada de reactivación — 20 Oct 2026
+
+**Estado: INVESTIGACIÓN; defecto visual NO reproducido/NO declarado corregido.** Código actual ya carece de compuerta de expansión en SectionForm (hidden retirado en e6386e6e); campos siempre renderizados para módulos montados. Sin modificaciones de producción/riel/orden/guardado. Nueva cobertura test-sections-reactivation.cjs:12 escenarios, cuatro módulos × es/en/fr; caliente/frío, borradores/fotos, guardado explícito antes de recarga, sin PUT ni order espurios por toggle; Reserva e informativos intactos.
+
+Pendiente: dato real del control que Emma pulsa manualmente y si falla en caliente/frío/ambos; primera respuesta contenía plantilla sin rellenar y se solicitó aclarar. QA humana:375/1440px, menú sticky/riel, temas, teclado y foco en interruptor; Amenidades/Destino/Habitaciones/Lugar, campos inmediatos tras reactivar, guardar y recargar; Reserva bloqueada. No se usó navegador automatizado y no se inventa causa raíz.
+
+## Lightbox móvil — verificación de solicitud reiterada, 20 Oct 2026
+
+La corrección ya está aplicada; no se modifica código de producción ni tests en esta revisión. Se conserva grid de3 filas con medio limitado al viewport y controles inferiores visibles,100dvh/safe-area, solo<1024px; desktop y flechas inline intactos. No hay nueva causa raíz confirmada ni reproducción visual del síntoma; pendiente QA Emma sobre esta versión. Documentación actualizada sin aplicar parches adicionales.
+
+QA: pnpm dev→ficha→foto principal;375/768px con foto vertical alta y horizontal, navegar todas sin scroll del dialog; Escape/clic fuera/foco/Tab/flechas; temas/es/en/fr;1440 sin regresión. Si falla, anotar URL/versión y estilos Computed del dialog abierto (debe ser grid en móvil, alto100dvh,overflowhidden). No navegador/capturas del agente.
+
+Validación actual del workspace: **58/58 scripts pasan** (incluida regresión de módulos de la tarea previa); TypeScript web limpio, ESLint0 errores/5 avisos preexistentes; diff sin errores de whitespace.

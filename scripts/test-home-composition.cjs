@@ -23,6 +23,11 @@ async function main(){
   const html=render(await Home({params:Promise.resolve({locale})}));
   assert.ok(html.indexOf('home-featured-carousel')<html.indexOf('home-about-section'));
   assert.ok(html.includes(content['about_title_'+locale])); assert.ok(html.includes(content['about_'+locale]));
+  const hero=html.match(/<section data-home-hero[\s\S]*?<\/section>/)[0];
+  assert.match(hero,/<h1[^>]*>/);assert.ok(hero.includes(messages.home.bienvenida));
+  assert.match(hero,/<h2[^>]*>ALIA FORRENT<\/h2>/);
+  assert.ok(!hero.includes(messages.home.propiedadesEnRenta));
+  assert.ok(messages.home.propiedadesEnRenta,'Texto anterior conservado para reversión');
   assert.ok(html.includes('aspect-[2/3]')); assert.ok(html.includes('data-home-hero'));
   for(const count of [1,2,3,4]){
    const carousel=render(React.createElement(Carousel,null,Array.from({length:count},(_,i)=>React.createElement('a',{href:'/x',key:i},'Card'))));

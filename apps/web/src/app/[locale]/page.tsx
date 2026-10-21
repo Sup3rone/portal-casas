@@ -62,7 +62,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             {t('bienvenida')}
           </h1>
           <h2 className={`${HOME_SEARCH_IN_HERO ? 'mb-12 ' : ''}text-2xl font-light tracking-[0.25em] text-white/90 dark:text-gray-200 md:text-3xl`}>
-            {t('propiedadesEnRenta')}
+            {t('heroBrand')}
           </h2>
 
           {/* Widget de búsqueda flotante */}

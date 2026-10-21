@@ -754,3 +754,11 @@ Validación final: **57/57 scripts offline pasan**, TypeScript web limpio, ESLin
 Tests de galería ampliados: estilos375/768, imagen limitada, cabecera/controles reservados, desktop sin override; cierre/cancel y clic fuera devuelven foco con refs persistentes; cobertura previa mantenida. QA Emma: pnpm dev→ficha→foto principal; a375/768 abrir imagen vertical alta y horizontal, verificar imagen completa/contain y botones sin scroll, recorrer todas; safe-area/barra móvil real si posible. Escape/clic fuera/foco/Tab/flechas de teclado; temas,es/en/fr;1440 sin cambio. Sin navegador ni capturas automáticas del agente.
 
 Validación: **57/57 scripts offline pasan**, TypeScript web limpio, ESLint0 errores/5 avisos preexistentes y diff sin errores de whitespace.
+
+## Home: título de marca en segunda línea — 20 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Diagnóstico: texto de diccionarios home.propiedadesEnRenta, no contenido editable ni BD. H2 del hero usa nueva home.heroBrand = ALIA FORRENT en es/en/fr. Primera bienvenida intacta; clave/textos anteriores conservados como descontinuados en UI y restaurables cambiando la clave del h2. Sin cambios de layout/estilos/reveal/banderas, navbar ni otros textos. Test-home-composition verifica bienvenida por idioma, nueva marca en h2 y ausencia del texto anterior en el hero, conservando su clave.
+
+QA Emma: pnpm dev→/es,/en,/fr; segunda línea ALIA FORRENT y primera bienvenida localizada;1440/375px,claro/oscuro; navbar transparente legible, reveal y resto del hero intactos. Sin navegador ni consultas Neon.
+
+Validación: **57/57 scripts offline pasan**, TypeScript web limpio, ESLint0 errores/5 avisos preexistentes; git diff --check limpio.

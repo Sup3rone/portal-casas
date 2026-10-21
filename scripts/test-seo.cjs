@@ -39,6 +39,8 @@ async function main() {
   const noPhoto = await detail.generateMetadata({params:Promise.resolve({locale:'es',slug:'pb'})});
   assert.deepEqual(noPhoto.openGraph.images,[seo.defaultSocialImage()]); assert.deepEqual(noPhoto.twitter.images,['https://portal.test/og-default.jpg']);
   mockModule('../globals.css', {});
+  // next/font se transforma en compilación; este test de metadata no ejecuta webpack.
+  mockModule('next/font/google', { Marcellus: () => ({ variable: 'marcellus-logo-variable' }) });
   const layoutMetadata = load('apps/web/src/app/[locale]/layout.tsx').metadata;
   assert.deepEqual(layoutMetadata.openGraph.images,[seo.defaultSocialImage()]);
   assert.deepEqual(layoutMetadata.twitter.images,['https://portal.test/og-default.jpg']);

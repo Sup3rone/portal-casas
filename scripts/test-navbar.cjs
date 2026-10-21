@@ -8,6 +8,7 @@ const ts = req('typescript'), React = req('react');
 const { renderToStaticMarkup } = req('react-dom/server');
 const { NextIntlClientProvider } = req('next-intl');
 let role, locale, menuOpen = false, testPath = '/';
+const destinationFixture = [{state:'Jalisco',cities:['Guadalajara']},{state:'Nayarit',cities:['Nuevo Vallarta']}];
 const cache = new Map();
 function load(file) {
   if (cache.has(file)) return cache.get(file);
@@ -16,6 +17,7 @@ function load(file) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
   }).outputText;
   new Function('require', 'exports', code)(name => {
+    if (name === 'next/font/google') return { Marcellus: options => { assert.deepEqual(options, { weight: '400', subsets: ['latin'], display: 'swap', variable: '--font-logo-family' }); return { variable: 'marcellus-logo-variable' }; } };
     if (name === 'react' && file.endsWith('/Navbar.tsx')) return {...React, useState: initial => React.useState(menuOpen || initial)};
     if (name === 'next-auth/react') return { useSession: () => ({ data: role ? { user: { role } } : null, status: role ? 'authenticated' : 'unauthenticated' }), signOut() {} };
     if (name === '@/i18n/navigation') return { usePathname: () => testPath, Link: ({ href, ...props }) => React.createElement('a', { ...props, href: `/${locale}${href}` }) };
@@ -27,19 +29,22 @@ function load(file) {
   }, exports);
   cache.set(file, exports); return exports;
 }
-function renderNavbar(selectedRole, selectedLocale, open = false, pathname = '/') {
+function renderNavbar(selectedRole, selectedLocale, open = false, pathname = '/', destinations = destinationFixture) {
   testPath = pathname;
   menuOpen = open;
   role = selectedRole; locale = selectedLocale;
   const messages = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
   const Navbar = load('apps/web/src/components/Navbar.tsx').default;
-  return renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(e) { throw e; } }, React.createElement(Navbar)));
+  return renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(e) { throw e; } }, React.createElement(Navbar,{destinations})));
 }
 if (require.main === module) {
   for (const locale of ['es', 'en', 'fr']) for (const role of ['ADMIN', 'COLLABORATOR', 'CLIENT', 'VIEWER', null]) {
     const closed = renderNavbar(role, locale);
     assert.ok(closed.includes('aria-expanded="false"'));
+    assert.ok(closed.includes('M3 6h18M3 12h18M3 18h18'), 'Trigger hamburguesa');
+    assert.ok(!closed.includes('M4 21v-2'), 'Sin avatar anterior');
     assert.ok(closed.includes('public-header'));
+    assert.equal((closed.match(/marcellus-logo-variable/g)||[]).length,1,'Fuente exclusivamente en wordmark');
     for(const privatePath of ['/panel','/admin/tarifas']) assert.ok(!renderNavbar(role,locale,false,privatePath).includes('public-header'));
     renderNavbar(role,locale);
     assert.ok(!closed.includes('href="/'+locale+'/casas"'));
@@ -52,6 +57,13 @@ if (require.main === module) {
     assert.ok(html.includes('aria-expanded="true"'));
     assert.ok(html.includes('action="/'+locale+'/casas"'));
     assert.ok(html.includes('method="GET"'));
+    assert.ok(html.includes('/casas?state=Nayarit&amp;destinationCity=Nuevo+Vallarta'));
+    assert.ok(html.includes('/casas?state=Jalisco&amp;destinationCity=Guadalajara'));
+    const empty=renderNavbar(role,locale,true,'/',[]);
+    assert.ok(!empty.includes('<summary'),'Sin destinos, se oculta todo el grupo');
+    assert.ok(!html.includes('destinationCity=Canc'),'Sin catálogo completo en el menú');
+    assert.ok(html.includes('max-h-[70dvh]'));
+    assert.ok(html.includes('<summary class="min-h-11'));
     for(const name of ['start','end','guests','state','destinationCity']) assert.ok(html.includes('name="'+name+'"'));
     assert.equal((html.match(/<form/g)||[]).length,1);
     const messages = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));

@@ -73,8 +73,16 @@ async function main() {
     assert.match(selectedHtml,/<option value="Nuevo Vallarta" selected="">/);
     assert.ok(selectedHtml.includes('value="2030-01-10"'));
     assert.match(selectedHtml,/<option value="4" selected="">/);
+    for (const field of ['start','end','guests']) assert.match(selectedHtml,new RegExp(`<label for="[^"]+-${field}" class="[^"]*font-bold`));
+    for (const field of ['state','city']) assert.doesNotMatch(selectedHtml,new RegExp(`<label for="[^"]+-${field}" class="[^"]*font-bold`));
     assert.ok(selectedHtml.includes(messages.home.allStates));
     assert.ok(selectedHtml.includes(messages.home.allCities));
+    const oldDestination=await Page({params:Promise.resolve({locale}),searchParams:Promise.resolve({state:'Yucatán',destinationCity:'Mérida'})});
+    const oldHtml=renderToStaticMarkup(React.createElement(NextIntlClientProvider,{locale,messages,timeZone:'UTC'},oldDestination));
+    assert.match(oldHtml,/<option value="Yucatán" selected="">/);
+    assert.match(oldHtml,/<option value="Mérida" selected="">/);
+    assert.ok(oldHtml.includes(messages.listingSearch.empty),'Destino válido sin publicadas conserva filtro y muestra vacío');
+
     const annualPage=await Page({params:Promise.resolve({locale}),searchParams:Promise.resolve(destination)});
     const annualHtml=renderToStaticMarkup(React.createElement(NextIntlClientProvider,{locale,messages,timeZone:'America/Mexico_City'},annualPage));
     assert.ok(annualHtml.includes(messages.properties.annualRent),'Distintivo anual visible y localizado sin fechas');

@@ -31,6 +31,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       .where(and(eq(properties.id, id), managedProperties(manager), publication))
       .returning({ id: properties.id });
     if (!rows.length) throw new AccessError(404);
+    if (['published', 'state', 'destinationCity'].some(key => key in changes)) revalidatePath('/[locale]', 'layout');
     revalidatePath('/[locale]/casas', 'page');
     revalidatePath('/[locale]/casas/[slug]', 'page');
     revalidatePath('/[locale]/panel', 'layout');

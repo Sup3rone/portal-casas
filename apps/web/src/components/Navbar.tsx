@@ -5,10 +5,14 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalSto
 import { Link, usePathname } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
+import { Marcellus } from 'next/font/google';
 import LocaleSwitcher from './LocaleSwitcher';
+import type { PublishedDestinationGroup } from '@/lib/published-destinations';
 import ThemeToggle from './ThemeToggle';
 import PropertySearchForm from './PropertySearchForm';
 import { applyTheme, getServerTheme, getStoredTheme, getTheme, subscribeTheme } from '@/lib/theme';
+
+const logoFont = Marcellus({ weight: '400', subsets: ['latin'], display: 'swap', variable: '--font-logo-family' });
 
 function AccountThemeOption() {
   const t = useTranslations('theme'), locale = useLocale();
@@ -33,7 +37,7 @@ function AliaMonogram() {
   </svg>;
 }
 
-export default function Navbar() {
+export default function Navbar({ destinations = [] }: { destinations?: PublishedDestinationGroup[] } = {}) {
   const locale = useLocale();
   const pathname = usePathname();
   const homePage = /^\/(?:(?:es|en|fr)\/?)?$/.test(pathname);
@@ -41,6 +45,7 @@ export default function Navbar() {
   const privatePage = /^\/(?:(?:es|en|fr)\/)?(?:panel|admin)(?:\/|$)/.test(pathname);
   const t = useTranslations('nav');
   const searchText = useTranslations('home');
+  const propertyText = useTranslations('properties');
   const { data: session, status } = useSession();
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
   const isManager = isAdmin || (session?.user as { role?: string } | undefined)?.role === 'COLLABORATOR';
@@ -122,8 +127,7 @@ export default function Navbar() {
           {/* LOGO — izquierda */}
           <Link href="/" className={`${privatePage ? '' : 'home-brand inline-flex items-center gap-[9px] '}text-xl font-semibold tracking-widest text-gray-900 dark:text-gray-100`}>
             {!privatePage && <AliaMonogram />}
-            {!privatePage ? <span>ALIA<span className="ml-1 text-gray-500 dark:text-gray-400">FOR</span>RENT</span>
-              : <>ALIA<span className="ml-1 text-gray-500 dark:text-gray-400">FOR</span>RENT</>}
+            <span className={`brand-wordmark ${logoFont.variable}`}>ALIA<span className="ml-1 text-gray-500 dark:text-gray-400">FOR</span>RENT</span>
           </Link>
 
           {/* NAV LINKS + ACTIONS — derecha */}
@@ -135,7 +139,7 @@ export default function Navbar() {
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
               </button>
               {searchOpen && <div id={searchId} className="header-search-popover absolute inset-x-0 top-full z-50 max-h-[70dvh] overflow-y-auto border-b border-gray-200 bg-white px-4 py-4 shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                <div className="mx-auto max-w-5xl"><PropertySearchForm /></div>
+                <div className="mx-auto max-w-5xl"><PropertySearchForm destinations={destinations} /></div>
               </div>}
             </div>
 
@@ -144,16 +148,15 @@ export default function Navbar() {
 
             <div ref={accountRef} className={privatePage ? 'relative ml-auto' : 'relative'}>
               <button ref={triggerRef} type="button" disabled={status === 'loading'}
-                aria-label={t('cuenta')} aria-expanded={open} aria-controls={menuId}
+                aria-label={t('menu')} aria-expanded={open} aria-controls={menuId}
                 onClick={() => { if (open) closeAccount(); else { setSearchOpen(false); setOpen(true); } }}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 disabled:opacity-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-6 w-6">
-                  <circle cx="12" cy="8" r="4" fill={status === 'authenticated' ? 'currentColor' : 'none'} />
-                  <path d="M4 21v-2a8 8 0 0 1 16 0v2" />
+                  <path d="M3 6h18M3 12h18M3 18h18" />
                 </svg>
               </button>
-              {open && status !== 'loading' && <div id={menuId} aria-label={t('cuenta')}
-                className="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+              {open && status !== 'loading' && <div id={menuId} aria-label={t('menu')}
+                className="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] max-h-[70dvh] overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
                 {status === 'authenticated' ? <>
                   <Link href="/mi-cuenta" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('cuenta').toUpperCase()}</Link>
                   {isManager && <Link href="/panel" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-green-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-green-400 dark:hover:bg-gray-800">{t(isAdmin ? 'panelAdmin' : 'panelCollaborator')}</Link>}
@@ -162,6 +165,15 @@ export default function Navbar() {
                   <Link href="/login" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('login').toUpperCase()}</Link>
                   <Link href="/registro" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('registro').toUpperCase()}</Link>
                 </>}
+                {destinations.length > 0 && <details className="rounded-lg">
+                  <summary className="min-h-11 cursor-pointer rounded-lg px-4 py-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-green-700">{propertyText('destinations')}</summary>
+                  <ul>{destinations.map(({ state, cities }) => <li key={state}>
+                    <p className="px-4 pt-3 text-xs font-semibold">{state}</p>
+                    <ul>{cities.map(city => <li key={city}>
+                    <Link href={`/casas?${new URLSearchParams({ state, destinationCity: city })}`} onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{city}</Link>
+                  </li>)}</ul>
+                  </li>)}</ul>
+                </details>}
                 {!privatePage && <AccountThemeOption />}
               </div>}
             </div>

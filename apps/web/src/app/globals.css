@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./public-chrome.css";
+@import "./typography.css";
 @import "./panel-skin.css"; /* Papel activo en layouts; lavanda conservada como alternativa. */
 @import "./home-composition.css";
 @import "./property-presentation.css";

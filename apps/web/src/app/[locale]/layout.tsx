@@ -7,6 +7,7 @@ import AuthProvider from '@/components/AuthProvider';
 import SiteAnalytics from '@/components/SiteAnalytics';
 import FooterContactsProvider from '@/components/FooterContactsProvider';
 import { readSiteContent } from '@/lib/site-content';
+import { readPublishedDestinations } from '@/lib/published-destinations';
 import type { Metadata } from 'next';
 import { defaultSocialImage, siteUrl } from '@/lib/seo';
 
@@ -29,7 +30,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   const messages = await getMessages();
-  const { social_instagram, social_facebook, contact_whatsapp } = await readSiteContent();
+  const [{ social_instagram, social_facebook, contact_whatsapp }, destinations] = await Promise.all([readSiteContent(), readPublishedDestinations()]);
 
   return (
     <html lang={locale} className="light" suppressHydrationWarning>
@@ -41,7 +42,7 @@ export default async function LocaleLayout({
             <NextIntlClientProvider>
               <AuthProvider>
                 <FooterContactsProvider value={{ social_instagram, social_facebook, contact_whatsapp }}>
-                <Navbar />
+                <Navbar destinations={destinations} />
                 {children}
                 <Footer />
                 </FooterContactsProvider>

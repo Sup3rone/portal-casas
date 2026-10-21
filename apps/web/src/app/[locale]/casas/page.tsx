@@ -12,6 +12,7 @@ import { pageMetadata } from '@/lib/seo';
 import { readSiteContent } from '@/lib/site-content';
 import SiteListingBackground from '@/components/SiteListingBackground';
 import PropertySearchForm from '@/components/PropertySearchForm';
+import { readPublishedDestinations } from '@/lib/published-destinations';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -28,7 +29,7 @@ export default async function PropertiesPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  const content = await readSiteContent();
+  const [content, destinations] = await Promise.all([readSiteContent(), readPublishedDestinations()]);
   const filters = propertySearch(await searchParams ?? {});
 
   const rows = filters.invalid ? [] : await db
@@ -86,7 +87,7 @@ export default async function PropertiesPage({
           </span>
         </div>
 
-        <div className="mb-6 w-full"><PropertySearchForm key={JSON.stringify(filters)} initial={filters} /></div>
+        <div className="mb-6 w-full"><PropertySearchForm destinations={destinations} boldLabels key={JSON.stringify(filters)} initial={filters} /></div>
         {filters.active && <Link href="/casas" className="mb-6 rounded-lg bg-white/90 px-4 py-3 text-sm font-medium text-green-800 dark:bg-gray-900 dark:text-green-300">{t('listingSearch.clear')}</Link>}
         {!propertyList.length && <div role="status" className="rounded-2xl bg-white/90 p-6 text-center text-gray-900 dark:bg-gray-900/90 dark:text-gray-100">
           <p>{t(filters.invalid ? 'listingSearch.invalid' : 'listingSearch.empty')}</p>

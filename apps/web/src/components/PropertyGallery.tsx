@@ -80,9 +80,9 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
           </div>
           {slides.length > 3 && <div className={styles.controls}>
             <button type="button" aria-label={t('anterior')} className={styles.arrow}
-              onClick={() => stripRef.current?.scrollBy({ left: -stripRef.current.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}>‹</button>
+              onClick={() => stripRef.current?.scrollBy({ left: -stripRef.current.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}><svg aria-hidden="true" width="36" height="28" viewBox="0 0 32 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M28 12H4m8-8-8 8 8 8" /></svg></button>
             <button type="button" aria-label={t('siguiente')} className={styles.arrow}
-              onClick={() => stripRef.current?.scrollBy({ left: stripRef.current.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}>›</button>
+              onClick={() => stripRef.current?.scrollBy({ left: stripRef.current.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}><svg aria-hidden="true" width="36" height="28" viewBox="0 0 32 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12h24m-8-8 8 8-8 8" /></svg></button>
           </div>}
         </>}
       </Reveal>
@@ -103,7 +103,7 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
           if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
           if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
         }}
-        className="property-lightbox fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-0 text-white dark:text-gray-100 backdrop:bg-black/85 open:flex open:flex-col">
+        className={`${styles.lightbox} property-lightbox fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-0 text-white dark:text-gray-100 backdrop:bg-black/85 open:flex open:flex-col`}>
         {current && <>
           <div className="flex shrink-0 items-center justify-between gap-4 px-4 py-3">
             <p role="status" aria-live="polite" aria-label={t('posicion', { number: index! + 1, count: slides.length })}>
@@ -112,7 +112,7 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
             <button ref={closeRef} type="button" onClick={close} aria-label={t('cerrar')} title={t('cerrar')}
               className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 dark:bg-white/10 text-2xl hover:bg-white/20 dark:hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white">×</button>
           </div>
-          <div className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-8">
+          <div className={`${styles.lightboxMedia} flex min-h-0 flex-1 items-center justify-center p-4 sm:p-8`}>
             {current.type === 'VIDEO' ? (
               <video key={current.url} src={current.url} controls playsInline aria-label={t('abrirVideo', { number: index! + 1 })} className="max-h-full max-w-full" />
             ) : (

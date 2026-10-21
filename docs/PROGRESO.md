@@ -698,3 +698,59 @@ Validación del ajuste: 55/55 scripts offline pasan; TypeScript web limpio; ESLi
 QA Emma: pnpm dev, navegar home→casas→ficha con Network Slow 3G y Disable cache; observar shimmer durante espera y fade al aparecer contenido; confirmar ausencia de saltos nuevos y que navbar/footer no animan; repetir es/en/fr, claro/oscuro, 1440/375px y emulación reduced-motion. Caché/prefetch pueden evitar que el skeleton aparezca; fade CSS también se aplica al montaje inicial aunque no se haya visto fallback. No se hicieron pruebas de navegador ni capturas automáticas.
 
 Validación offline: **56/56 scripts pasan** (baseline 55 + nueva cobertura de carga); TypeScript web limpio; ESLint 0 errores / 5 avisos preexistentes; git diff --check limpio.
+
+## Ajustes de tipografía y header — 20 Oct 2026
+
+**Estado: Cinzel, menú, flechas y etiquetas HECHOS en código; QA humana PENDIENTE. Vilaka PENDIENTE de archivo/licencia web.** Cinzel variable local con licencia OFL: títulos h1–h6, body/captions/labels intactos. Logo con clase/token aislado para Vilaka y fallback actual, sin URL inexistente. El enlace DaFont aportado identifica demo solo uso personal; se solicitó archivo comercial/web autorizado. No se descarga demo ni se afirma Vilaka cargada.
+
+Hamburguesa reemplaza avatar y conserva opciones por sesión; Destinos en details accesible lista catálogo existente y navega al filtro de ciudad. Menú max70dvh y controles44px. Galería: flechas SVG más largas, botones64×48 debajo de miniaturas; mismos handlers/lightbox. Tokens de contraste:10.01:1 claro/12.33:1 oscuro para flechas. Solo /casas pone en negrita Llegada/Salida/Huéspedes mediante prop opcional; resto de labels intacto. Tests ampliados navbar, public-chrome y búsqueda; fuentes comprobadas como archivo TrueType válido/licencia y ruta pública existente, sin validación de navegador ni HTTP local.
+
+QA Emma: home,/casas,ficha en es/en/fr,1440/375px y temas; comprobar títulos Cinzel/cuerpo intacto, menúhamburguesa usable con teclado/Escape/clic fuera/con y sin sesión, destinos Nuevo Vallarta/Guadalajara filtran listado, flechas franja+lightbox, tres labelsbold y otros sin cambio, Network fuente200 y sin404. Contraste sobre video/fotos requiere revisión humana con contenido real.
+
+Validación: **56/56 scripts offline pasan**, TypeScript web limpio y pnpm lint 0 errores / 5 warnings preexistentes. Sin navegador ni capturas; Vilaka sigue pendiente de archivo autorizado.
+
+## Logo definitivo en Marcellus (OFL) — 20 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana/aceptación de clienta.** Sustituye el pendiente Vilaka por Marcellus400 mediante next/font/google, latin, swap y variable aislada al wordmark. Solo logo: Cinzel/títulos/body/labels intactos. SVG A-F conserva sus paths; footer Portal Casas no replica Alia, intacto. Shortlist/documentación en CONTEXTO: descartadas Cormorant Garamond y Playfair Display SC por menor firmeza/contraste de trazo para este uso. Licencia OFL verificada en repositorio oficial Google Fonts.
+
+Loader real Next en modo producción verificado en memoria:2 WOFF2,22932bytes(total),14272bytes latin con preload; CSS reescrito a rutas locales sin HTTP externo. Sin build, navegador ni BD. Certificados locales Node requieren --use-system-ca para esta prueba; TLS sigue activo. Contraste chrome mínimo5.51:1 claro/7.89:1 oscuro en FOR; modelo conservador del scrim de hero5.41:1, pendiente confirmar dimensiones/fotogramas en QA.
+
+QA Emma: pnpm dev (si Node local falla con certificados, iniciarlo con NODE_OPTIONS=--use-system-ca); home tope navbar transparente y después mate, /casas y ficha; es/en/fr,1440/375px, temas; wordmark legible/sin empujar controles, monograma sin cambio; DevTools Network Fonts muestra archivos /_next/static/media/ y ninguna petición runtime a fonts.googleapis.com/fonts.gstatic.com. Confirmar fuente Marcellus en Computed del wordmark y Cinzel en títulos; contenido/footer sin cambio.
+
+Validación final: **56/56 scripts offline pasan**; TypeScript web limpio; ESLint 0 errores / 5 warnings preexistentes; diff sin errores de whitespace. Tests ajustados para transformación next/font en navbar/home/SEO, sin quitar aserciones de negocio; loader real comprobado separadamente con descarga y emisión en memoria.
+
+## Menú de destinos dinámico — 20 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Diagnóstico: menú recorría catálogo SECTUR completo en Navbar; título localizado existente, enlaces /casas?state&destinationCity. Sustituido por props del layout servidor desde una consulta published=true agrupada, solo pares válidos completos, orden alfabético español por estado/ciudad. Sin ciudades legacy ni borradores; sin duplicados; grupo vacío oculto. Catálogo y claves i18n conservados, sin rutas nuevas ni fetch cliente.
+
+React.cache deduplica solo durante render; destinos y SiteContent consultados en paralelo. PATCH publicación/state/destinationCity invalida layout /[locale], sin alterar permisos/validaciones ni otros guardados. Panel→publicar/despublicar→recargar vista pública refleja menú sin redeploy; pestañas ya abiertas no se sincronizan solas. SQL externo sin invalidación no forma parte de esta garantía. Nuevo test SQL/SSR/invalidation + test-navbar adaptado al array servidor. Sin cambios de fuentes/galería/buscador ni CSS.
+
+QA Emma (Respaldo): publicar propiedad válida en destino sin otras publicadas, recargar home y abrir menú; comprobar estado/ciudad; enlace lleva a listado filtrado. Despublicar última propiedad, recargar, destino desaparece; si queda otra publicada debe permanecer. Todas sin destinos válidos: grupo oculto, opciones cuenta/tema intactas. Repetir es/en/fr,1440/375px, temas y teclado/cierre/scroll del menú. Sin navegador ni consultas Neon desde el agente.
+
+Validación: **57/57 scripts offline pasan** (56 previos + destinos publicados), TypeScript web limpio, ESLint 0 errores / 5 avisos preexistentes; git diff --check limpio.
+
+## Buscador con destinos publicados — 20 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Selects de lupa y /casas consumen la misma lista servidor del menú. Navbar pasa prop existente; listado usa readPublishedDestinations (React.cache por render con layout) junto a SiteContent en paralelo. Sin consulta por apertura del buscador, sin duplicar agrupación ni catálogo. Orden alfabético y dependencia Estado→Ciudad intactos; Todos/Todas y estilos/fechas/huéspedes sin cambios. Catálogo completo conservado, recorrido descontinuado en opciones públicas y reversible en PropertySearchForm.
+
+URL con destino válido sin publicadas: conserva opción activa en ambos selects hasta cambiarla; devuelve vacío habitual. Sin destinos/filtros: solo Todos/Todas y resto del buscador funcional. Validación de parejas no cambia. Tests ampliados de publicados y búsqueda: SSR es/en/fr de ambos usos, sin opciones de destinos vacíos, URL de estado y ciudad sin publicadas, caso ciudad retirada bajo estado aún publicado, vacío y handlers dependientes reales con hooks simulados.
+
+QA Emma (Respaldo): lupa y /casas en es/en/fr,1440/375px,claro/oscuro; comparar opciones con menú; estado cambia y limpia ciudad; publicar/despublicar última propiedad de una ciudad, recargar y confirmar aparición/desaparición; URL /es/casas?state=Yucat%C3%A1n&destinationCity=M%C3%A9rida (si sin publicadas) conserva filtros y estado vacío; limpiar filtros vuelve a Todos/Todas. Sin publicados siguen fechas/huéspedes; sin navegador automatizado.
+
+Validación: **57/57 scripts offline pasan**, TypeScript web limpio, ESLint 0 errores / 5 avisos preexistentes; diff sin errores de whitespace.
+
+## Flechas de galería en móvil — 20 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Causa: controls estaba después de strip en flujo normal a todos los tamaños, no había breakpoint causante. CSS bajo1024px coloca visualmente hero→controls centrados→strip, con8px antes de controles; reglas desktop intactas. Sin cambios React/JS, lightbox, traducciones, tamaños de miniaturas ni animaciones. Targets64×48 y contraste/foco previos conservados. Orden DOM de teclado permanece igual; confirmar recorrido usable en QA.
+
+Tests de galería ampliados para CSS375/768/1440, controles junto al hero, desktop sin display nuevo, y scrollBy/reduced-motion; mantienen cobertura lightbox/teclado/share. QA Emma: pnpm dev, ficha con>3 fotos; DevTools375 y768: flechas centradas inmediatamente bajo foto antes de miniaturas, sin hueco largo;1440 idéntico al previo. Clic/Enter/Espacio en flechas, miniaturas cambian principal, swipe de franja, abrir/cerrar lightbox y flechas de teclado; claro/oscuro y es/en/fr; reduced-motion. Sin navegador ni capturas automatizadas.
+
+Validación final: **57/57 scripts offline pasan**, TypeScript web limpio, ESLint0 errores/5 avisos preexistentes y git diff --check limpio.
+
+## Lightbox móvil sin desplazamiento para navegar — 20 Oct 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Se diagnosticó dialog100dvh flex-col con navegación final y límite porcentual max-h-full en zona flex, sin reserva grid explícita ni contención de overflow. No se afirmó medición de exceso real del navegador de Emma. Ajuste localizado: dos clases en lightbox/media y CSS solo<1024px con filas auto/minmax(0,1fr)/auto; viewport dinámico, safe-area y medio contain ajustado al hueco. Navegación inferior visible sin overlay nuevo; botones44px, aria, handlers, foco, Escape/clic fuera y reduced-motion conservados. Desktop y galería inline intactos.
+
+Tests de galería ampliados: estilos375/768, imagen limitada, cabecera/controles reservados, desktop sin override; cierre/cancel y clic fuera devuelven foco con refs persistentes; cobertura previa mantenida. QA Emma: pnpm dev→ficha→foto principal; a375/768 abrir imagen vertical alta y horizontal, verificar imagen completa/contain y botones sin scroll, recorrer todas; safe-area/barra móvil real si posible. Escape/clic fuera/foco/Tab/flechas de teclado; temas,es/en/fr;1440 sin cambio. Sin navegador ni capturas automáticas del agente.
+
+Validación: **57/57 scripts offline pasan**, TypeScript web limpio, ESLint0 errores/5 avisos preexistentes y diff sin errores de whitespace.

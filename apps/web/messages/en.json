@@ -159,6 +159,7 @@
     }
   },
   "nav": {
+    "menu": "Menu",
     "cambiarIdioma": "Change language",
     "casas": "Homes",
     "admin": "Admin",

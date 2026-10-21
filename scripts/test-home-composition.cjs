@@ -48,6 +48,7 @@ async function main(){
  mockModule('next-intl',{useLocale:()=> 'es',useTranslations:()=>key=>key});
  mockModule('next-auth/react',{useSession:()=>({data:null,status:'unauthenticated'}),signOut(){}});
  mockModule('@/i18n/navigation',{usePathname:()=> '/',Link:'a'});
+ mockModule('next/font/google',{Marcellus:()=>({variable:'marcellus-logo-variable'})});
  const Nav=load('apps/web/src/components/Navbar-home-unit.tsx',fs.readFileSync('apps/web/src/components/Navbar.tsx','utf8')).default;
  try{
   global.window={scrollY:0,addEventListener:(name,fn)=>{events[name]=fn;},removeEventListener(){}};

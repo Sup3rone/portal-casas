@@ -1,0 +1,14 @@
+/* Fuente local: sin peticiones a Google en producción. Licencia junto al archivo. */
+@font-face {
+  font-family: 'Cinzel';
+  src: url('/fonts/Cinzel-Variable.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root { --font-heading: 'Cinzel', Georgia, serif; }
+:where(h1, h2, h3, h4, h5, h6) { font-family: var(--font-heading); }
+
+/* Variable de next/font aplicada solo al span del wordmark. */
+.brand-wordmark { font-family: var(--font-logo-family, Georgia, serif); font-weight: 400; font-synthesis: none; }

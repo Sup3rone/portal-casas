@@ -6,7 +6,7 @@ import { useRouter } from '@/i18n/navigation';
 type Prop = { id: string; slug: string; title: string | null };
 type Booking = { id?: string; propertyId: string; start: string; end: string; source: string; guestName: string | null; manualBlock: boolean; ownBlock: boolean };
 const SOURCE_STYLE: Record<string, string> = {
-  manual: 'bg-purple-600 text-white', airbnb: 'bg-rose-500 text-white', google: 'bg-blue-500 text-white',
+  manual: 'bg-[var(--brand-brown)] text-white', airbnb: 'bg-rose-500 text-white', google: 'bg-blue-500 text-white',
   host: 'bg-amber-700 text-white', external: 'bg-gray-600 text-white',
 };
 export function isUnlockableBlock(booking: Booking) { return booking.source === 'host-block' && Boolean(booking.id); }

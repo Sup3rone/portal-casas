@@ -30,10 +30,10 @@ export default async function ForgotPasswordPage({
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">{t('email')}</label>
               <input required type="email" id="email" name="email"
-                className="mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                className="mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-[var(--brand-brown)] focus:ring-[var(--brand-brown)] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
             </div>
             <button type="submit"
-              className="w-full rounded-lg bg-purple-600 py-3 font-bold text-white dark:text-gray-100 transition-colors hover:bg-purple-700">
+              className="w-full rounded-lg bg-[var(--brand-brown)] py-3 font-bold text-white dark:text-gray-100 transition-colors hover:bg-[var(--brand-brown-strong)]">
               {t('forgotButton')}
             </button>
           </AuthForm>

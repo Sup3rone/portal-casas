@@ -46,7 +46,7 @@ export default function Gallery({ media }: { media: MediaItem[] }) {
       {!expanded && photos.length > PREVIEW_COUNT && (
         <button
           onClick={() => setExpanded(true)}
-          className="mt-4 w-full rounded-xl border border-[#6d4aff] px-4 py-3 font-medium text-[#6d4aff] transition hover:bg-[#6d4aff] hover:text-white"
+          className="mt-4 w-full rounded-xl border border-[var(--brand-brown)] px-4 py-3 font-medium text-[var(--brand-brown)] transition hover:bg-[var(--brand-brown)] hover:text-white"
         >
           Ver {photos.length - PREVIEW_COUNT} fotos más
         </button>

@@ -30,7 +30,7 @@ function resolveTokens(tokens) {
   const resolve = value => /^var\(--[\w-]+\)$/.test(value) ? resolve(tokens[value.slice(4,-1)]) : value;
   return Object.fromEntries(Object.entries(tokens).map(([key,value]) => [key,resolve(value)]));
 }
-const palettes = [['lavanda claro',light],['lavanda oscuro',{...light,...dark}],
+const palettes = [['café claro',resolveTokens({...sharedLight,...light})],['café oscuro',resolveTokens({...sharedLight,...light,...dark})],
   ['papel claro',resolveTokens({...sharedLight,...light,...paper})],
   ['papel oscuro',resolveTokens({...sharedLight,...sharedDark,...light,...dark,...paper})]];
 for (const [name, tokens] of palettes) {

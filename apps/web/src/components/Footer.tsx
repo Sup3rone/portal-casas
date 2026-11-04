@@ -26,7 +26,7 @@ export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-100 mb-4">{t('navegacion')}</h4>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-              <li><Link href="/casas" className="hover:text-purple-600 dark:hover:text-purple-400">{nav('casas')}</Link></li>
+              <li><Link href="/casas" className="hover:text-[var(--brand-brown)] dark:hover:text-[var(--brand-brown-light)]">{nav('casas')}</Link></li>
             </ul>
           </div>
           <div>

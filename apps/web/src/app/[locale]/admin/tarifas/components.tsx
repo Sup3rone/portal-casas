@@ -12,7 +12,7 @@ export function AddTarifaForm({ propiedades }: { propiedades: { id: string; slug
       <input name="endDate" type="date" required className="rounded-lg border p-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
       <input name="weekdayPrice" type="number" placeholder="$ entre semana" required className="rounded-lg border p-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
       <input name="weekendPrice" type="number" placeholder="$ finde" required className="rounded-lg border p-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-      <button className="col-span-2 rounded-lg bg-purple-600 py-2 font-bold text-white dark:text-gray-100 hover:bg-purple-700 md:col-span-3">
+      <button className="col-span-2 rounded-lg bg-[var(--brand-brown)] py-2 font-bold text-white dark:text-gray-100 hover:bg-[var(--brand-brown-strong)] md:col-span-3">
         ➕ Agregar tarifa
       </button>
     </form>

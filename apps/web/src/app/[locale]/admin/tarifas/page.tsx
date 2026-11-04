@@ -32,7 +32,7 @@ export default async function AdminTarifasPage({ searchParams }: { searchParams?
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 📅 {t.startDate} → {t.endDate} · Prioridad {t.priority}
               </p>
-              <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
+              <p className="text-sm font-medium text-[var(--brand-brown)] dark:text-[var(--brand-brown-light)]">
                 ${t.weekdayPrice.toLocaleString('es-MX')} entre semana · ${t.weekendPrice.toLocaleString('es-MX')} fin de semana
               </p>
             </div>

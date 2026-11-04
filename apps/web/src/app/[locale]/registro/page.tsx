@@ -32,7 +32,7 @@ export default async function RegisterPage({ params, searchParams }: { params: P
               type="text"
               required
               autoComplete="name"
-              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 dark:bg-gray-800 dark:text-gray-100"
+              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-[var(--brand-brown)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-brown)] dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
@@ -46,7 +46,7 @@ export default async function RegisterPage({ params, searchParams }: { params: P
               type="email"
               required
               autoComplete="email"
-              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 dark:bg-gray-800 dark:text-gray-100"
+              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-[var(--brand-brown)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-brown)] dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
@@ -59,7 +59,7 @@ export default async function RegisterPage({ params, searchParams }: { params: P
               name="phone"
               type="tel"
               autoComplete="tel"
-              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 dark:bg-gray-800 dark:text-gray-100"
+              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-[var(--brand-brown)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-brown)] dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
@@ -74,13 +74,13 @@ export default async function RegisterPage({ params, searchParams }: { params: P
               required
               minLength={6}
               autoComplete="new-password"
-              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 dark:bg-gray-800 dark:text-gray-100"
+              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-[var(--brand-brown)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-brown)] dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-purple-600 py-3 font-semibold text-white dark:text-gray-100 transition hover:bg-purple-700"
+            className="w-full rounded-lg bg-[var(--brand-brown)] py-3 font-semibold text-white dark:text-gray-100 transition hover:bg-[var(--brand-brown-strong)]"
           >
             {t('registerButton')}
           </button>
@@ -88,7 +88,7 @@ export default async function RegisterPage({ params, searchParams }: { params: P
 
         <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
           {t('hasAccount')}{" "}
-          <Link href={`/${locale}/login`} className="text-purple-600 dark:text-purple-400 underline">
+          <Link href={`/${locale}/login`} className="text-[var(--brand-brown)] dark:text-[var(--brand-brown-light)] underline">
             {t('loginLink')}
           </Link>
         </p>

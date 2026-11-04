@@ -37,7 +37,7 @@ export default function MarkAsReadButton({
     <><button
       onClick={event => { event.stopPropagation(); void handleClick(); }}
       disabled={loading}
-      className="text-xs font-medium text-purple-600 dark:text-purple-400 underline hover:text-purple-800 dark:hover:text-purple-400 disabled:opacity-50"
+      className="text-xs font-medium text-[var(--brand-brown)] dark:text-[var(--brand-brown-light)] underline hover:text-[var(--brand-brown-strong)] dark:hover:text-[var(--brand-brown-light)] disabled:opacity-50"
     >
       {loading ? 'Marcando...' : 'Marcar como leído'}
     </button>{error && <p role="alert">{t(error)}</p>}</>

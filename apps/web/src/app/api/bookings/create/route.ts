@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
           subject: `✅ Tu reserva está confirmada — ${prop.title}`,
           html: `
             <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-              <h2 style="color: #6d4aff;">¡Reserva confirmada! 🎉</h2>
+              <h2 style="color: #654838;">¡Reserva confirmada! 🎉</h2>
               <p>Hola ${nombreDestino || 'huesped'},</p>
               <p>Tu reserva en <strong>${prop.title}</strong> está confirmada:</p>
               <div style="background: #f5f3ff; border-radius: 8px; padding: 16px; margin: 16px 0;">

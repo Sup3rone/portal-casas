@@ -784,3 +784,7 @@ La corrección ya está aplicada; no se modifica código de producción ni tests
 QA: pnpm dev→ficha→foto principal;375/768px con foto vertical alta y horizontal, navegar todas sin scroll del dialog; Escape/clic fuera/foco/Tab/flechas; temas/es/en/fr;1440 sin regresión. Si falla, anotar URL/versión y estilos Computed del dialog abierto (debe ser grid en móvil, alto100dvh,overflowhidden). No navegador/capturas del agente.
 
 Validación actual del workspace: **58/58 scripts pasan** (incluida regresión de módulos de la tarea previa); TypeScript web limpio, ESLint0 errores/5 avisos preexistentes; diff sin errores de whitespace.
+
+## Acento de marca café — 4 Nov 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Se reemplazaron los acentos morados residuales por la escala café de Alia Forrent, centralizada en `--brand-brown: #654838` y variantes de hover, superficie y modo oscuro. Incluye autenticación, mensajes, tarifas, galería, footer, scrollbar, calendario manual, foco de inputs y plantillas de correo de reserva/recuperación. Estados semánticos rojo/azul/verde no cambiaron. El skin alternativo del panel también quedó café; la paleta papel activa continúa intacta.

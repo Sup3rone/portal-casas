@@ -58,7 +58,7 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
                 <h2 className="font-semibold text-lg">
                   {m.name}{" "}
                   {!m.read && (
-                    <span className="ml-2 inline-block rounded-full bg-purple-600 px-2 py-0.5 align-middle text-xs text-white dark:text-gray-100">
+                    <span className="ml-2 inline-block rounded-full bg-[var(--brand-brown)] px-2 py-0.5 align-middle text-xs text-white dark:text-gray-100">
                       NUEVO
                     </span>
                   )}
@@ -96,7 +96,7 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
                 </span>
               )}
             </div>
-            <p className="mt-2 text-right text-xs font-medium text-purple-600 dark:text-purple-400">
+            <p className="mt-2 text-right text-xs font-medium text-[var(--brand-brown)] dark:text-[var(--brand-brown-light)]">
               Click para ver detalle y confirmar fechas →
             </p>
           </article>

@@ -41,7 +41,7 @@ export default async function ResetPasswordPage({
             {error === 'corta'
               ? t('resetTooShort')
               : t('resetInvalid')}
-            <a href={`/${locale}/olvide-password`} className="mt-2 block font-medium text-purple-600 dark:text-purple-400 underline">
+            <a href={`/${locale}/olvide-password`} className="mt-2 block font-medium text-[var(--brand-brown)] dark:text-[var(--brand-brown-light)] underline">
               {t('resetTryAgain')}
             </a>
           </div>
@@ -53,10 +53,10 @@ export default async function ResetPasswordPage({
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200">{t('newPassword')}</label>
               <input required type="password" id="password" name="password" minLength={8}
-                className="mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                className="mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-[var(--brand-brown)] focus:ring-[var(--brand-brown)] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
             </div>
             <button type="submit"
-              className="w-full rounded-lg bg-purple-600 py-3 font-bold text-white dark:text-gray-100 transition-colors hover:bg-purple-700">
+              className="w-full rounded-lg bg-[var(--brand-brown)] py-3 font-bold text-white dark:text-gray-100 transition-colors hover:bg-[var(--brand-brown-strong)]">
               {t('resetButton')}
             </button>
           </form>

@@ -1,14 +1,14 @@
-/* Prueba reversible. Tokens exclusivos del panel; no cambian su distribución. */
+/* Alternativa café reversible. Tokens exclusivos del panel; no cambian su distribución. */
 .panel-skin {
-  --panel-canvas: #faf9fc;
-  --panel-surface: #ffffff;
-  --panel-accent: #f3efff;
-  --panel-accent-hover: #e8dff8;
-  --panel-text: #382651;
-  --panel-muted: #655c70;
-  --panel-border: #d7cede;
-  --panel-focus: #735196;
-  --panel-selected: #6e468f;
+  --panel-canvas: #f8f3ee;
+  --panel-surface: #fffdfa;
+  --panel-accent: #eee2d8;
+  --panel-accent-hover: #dfcfc2;
+  --panel-text: #3f2b20;
+  --panel-muted: #6d5545;
+  --panel-border: #d9c5b6;
+  --panel-focus: var(--brand-brown);
+  --panel-selected: var(--brand-brown);
   --panel-on-selected: #ffffff;
   --panel-danger-bg: #fff0f2;
   --panel-danger-text: #a32340;
@@ -17,27 +17,27 @@
   --panel-field-radius: .875rem;
   --panel-touch: 44px;
   --panel-weight: 600;
-  --panel-shadow: 0 4px 18px rgb(56 38 81 / 5%);
-  --panel-focus-ring: 0 0 0 3px rgb(115 81 150 / 25%);
+  --panel-shadow: 0 4px 18px rgb(101 72 56 / 5%);
+  --panel-focus-ring: 0 0 0 3px rgb(101 72 56 / 25%);
   --panel-transition: background-color .15s ease, color .15s ease, border-color .15s ease;
   color: var(--panel-text);
   background-color: var(--panel-canvas);
 }
 html.dark .panel-skin {
-  --panel-canvas: #18141e;
-  --panel-surface: #211b2a;
-  --panel-accent: #352844;
-  --panel-accent-hover: #463357;
-  --panel-text: #f3efff;
-  --panel-muted: #c1b8ce;
-  --panel-border: #594964;
-  --panel-focus: #c6a5eb;
-  --panel-selected: #cfb1ee;
-  --panel-on-selected: #211b2a;
+  --panel-canvas: #211a16;
+  --panel-surface: #2b211c;
+  --panel-accent: #3a2a22;
+  --panel-accent-hover: #4c3629;
+  --panel-text: #f4ece5;
+  --panel-muted: #d6c0b1;
+  --panel-border: #6f5545;
+  --panel-focus: #ddbca5;
+  --panel-selected: #e5c4ad;
+  --panel-on-selected: #2b211c;
   --panel-danger-bg: #44232e;
   --panel-danger-text: #ffc2ce;
   --panel-shadow: 0 4px 18px rgb(0 0 0 / 12%);
-  --panel-focus-ring: 0 0 0 3px rgb(198 165 235 / 30%);
+  --panel-focus-ring: 0 0 0 3px rgb(221 188 165 / 30%);
 }
 .panel-skin > main { color: var(--panel-text); background-color: var(--panel-canvas); }
 .panel-skin :is(h1, h2, h3) { color: var(--panel-text); font-weight: var(--panel-weight); }
@@ -48,7 +48,7 @@ html.dark .panel-skin {
   box-shadow: var(--panel-shadow);
 }
 .panel-skin :is(.text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700) { color: var(--panel-muted); }
-.panel-skin :is(a, .text-green-700, .text-purple-600) { color: var(--panel-text); }
+.panel-skin :is(a, .text-green-700) { color: var(--panel-text); }
 .panel-skin button:not([aria-pressed]), .panel-skin a[class*="rounded"] {
   min-height: var(--panel-touch);
   min-width: var(--panel-touch);
@@ -83,7 +83,7 @@ html.dark .panel-skin {
 @media (prefers-reduced-motion: reduce) { .panel-skin { --panel-transition: none; } }
 
 /* Paleta vigente: reutiliza papel/chrome públicos sin activarlos en otras rutas.
- * Lavanda conservada arriba; quitar data-panel-palette="paper" de los dos
+ * La variante café queda arriba; quitar data-panel-palette="paper" de los dos
  * layouts restaura sus tokens. No se cambian dimensiones ni distribución.
  */
 html .panel-skin[data-panel-palette="paper"] {

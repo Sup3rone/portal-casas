@@ -128,7 +128,7 @@ export default function MessageModal({
         <div className="space-y-4 text-sm">
           <div>
             <strong className="block text-xs uppercase text-gray-500 dark:text-gray-400">Propiedad</strong>
-            <span className="font-semibold text-purple-600 dark:text-purple-400">
+            <span className="font-semibold text-[var(--brand-brown)] dark:text-[var(--brand-brown-light)]">
               {message.propertyName}
             </span>
           </div>
@@ -156,14 +156,14 @@ export default function MessageModal({
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:border-purple-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:border-[var(--brand-brown)] focus:outline-none dark:bg-gray-800 dark:text-gray-100"
               />
               <span className="text-gray-400 dark:text-gray-300">→</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:border-purple-500 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:border-[var(--brand-brown)] focus:outline-none dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
             {startDate && endDate && !valid && (
@@ -191,7 +191,7 @@ export default function MessageModal({
           <button
             onClick={handleConfirm}
             disabled={!valid || saving}
-            className="flex-1 rounded-lg bg-purple-600 py-3 font-bold text-white dark:text-gray-100 transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-lg bg-[var(--brand-brown)] py-3 font-bold text-white dark:text-gray-100 transition hover:bg-[var(--brand-brown-strong)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "Confirmando..." : "✅ Confirmar fechas"}
           </button>

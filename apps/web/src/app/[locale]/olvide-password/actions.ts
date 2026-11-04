@@ -37,11 +37,11 @@ export async function requestPasswordReset(formData: FormData) {
         subject: 'Recupera tu contraseña — Portal Casas',
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-            <h2 style="color: #6d4aff;">Recuperación de contraseña</h2>
+            <h2 style="color: #654838;">Recuperación de contraseña</h2>
             <p>Hola ${user.name ?? ''},</p>
             <p>Recibimos una solicitud para cambiar la contraseña de tu cuenta. Este enlace expira en <strong>1 hora</strong>:</p>
             <p style="margin: 24px 0;">
-              <a href="${resetUrl}" style="background: #6d4aff; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+              <a href="${resetUrl}" style="background: #654838; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                 Cambiar mi contraseña
               </a>
             </p>

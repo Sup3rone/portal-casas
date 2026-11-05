@@ -796,3 +796,7 @@ Validación actual del workspace: **58/58 scripts pasan** (incluida regresión d
 ## Emblema de navbar — 4 Nov 2026
 
 **Estado: HECHO en código; PENDIENTE QA humana.** El icono SVG A-F del navbar público se reemplazó por el emblema espiral café proporcionado por la clienta, como PNG transparente local optimizado mediante `next/image`. Wordmark, menús y navegación permanecen intactos.
+
+## Acentos arena y dorado — 4 Nov 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** Los acentos verdes de acción se centralizaron en `#b5af94`, con tinta/borde derivados de contraste para reserva, carga y envío de consultas. En modo oscuro, el acento azul visual cambió a `#c78e43`. Colores de estado y fuentes externas siguen diferenciados.

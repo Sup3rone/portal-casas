@@ -925,3 +925,7 @@ El wordmark del Navbar se muestra como `ALIA FOR RENT`, con espacios visibles y 
 ### 2026-11-04 — Emblema espiral en navbar
 
 El monograma SVG A-F del navbar público fue sustituido por el activo proporcionado `public/brand/alia-spiral-emblem.png`. Es un PNG transparente de 1277×1231 px, servido con `next/image` a 24×24 px para conservar proporción, reserva de espacio y optimización. El wordmark `ALIA FOR RENT`, rutas y navegación no cambian. Para restaurar el monograma anterior habría que recuperar el SVG inline `AliaMonogram` en `Navbar.tsx`; no se borró de historial Git.
+
+### 2026-11-04 — Acentos de acción arena y oscuro dorado
+
+Los tonos verdes de acción usan ahora `--brand-action: #b5af94`, con superficie, borde, hover y tinta oscura derivados para mantener contraste AA: reserva, envío de consultas, carga, controles, foco, disponibilidad y enlaces verdes históricos. En modo oscuro, los acentos visuales que eran azules se sustituyen por `--brand-dark-accent: #c78e43`. Se preservan azul de Google e iCal/Airbnb cuando comunican el origen de un evento, y rojo para errores: son colores semánticos, no de marca. La compatibilidad se centraliza en `globals.css` para que las clases Tailwind heredadas adopten los tokens sin alterar los componentes.

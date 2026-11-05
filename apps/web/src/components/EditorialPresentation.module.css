@@ -11,7 +11,7 @@
 .floating { position: absolute; inset: 5svh max(1rem, calc((100vw - 72rem) / 2)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: center; overflow-y: auto; }
 .images, .narrative { min-width: 0; }
 .images { touch-action: pan-y; }
-.images:focus-visible { outline: 3px solid var(--color-green-700); outline-offset: 3px; }
+.images:focus-visible { outline: 3px solid var(--brand-action-border); outline-offset: 3px; }
 .frames { position: relative; height: clamp(140px, 30svh, 320px); }
 .photo { position: absolute; inset: 0; border-radius: .75rem; overflow: hidden; transition: opacity 400ms ease; }
 .description { max-height: 48svh; overflow-y: auto; margin-top: 1rem; overflow-wrap: anywhere; }
@@ -27,7 +27,7 @@
   background-color: var(--glass-bg);
   color: var(--glass-text); backdrop-filter: blur(var(--glass-blur));
 }
-:global(.dark) .images:focus-visible { outline-color: var(--color-green-400); }
+:global(.dark) .images:focus-visible { outline-color: var(--brand-action); }
 @media (max-width: 1023px) { .floating { inset: 1rem; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-content: center; } .frames { height: clamp(110px, 22svh, 220px); } .description { max-height: 27svh; } }
 @media (max-height: 650px) { .floating { align-content: start; } }
 @media (max-width: 1023px) { .flow .floating { align-content: start; } .flow .description { max-height: none; } }
@@ -46,7 +46,7 @@
 /* Controles del carrusel editorial; las fotos mantienen sus capas y tamaño. */
 .controls { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .5rem; }
 .controls button { min-width: 44px; min-height: 44px; border-radius: 9999px; cursor: pointer; }
-.controls button:focus-visible { outline: 2px solid var(--color-green-400); outline-offset: 2px; }
+.controls button:focus-visible { outline: 2px solid var(--brand-action-border); outline-offset: 2px; }
 .dots { display: flex; flex-wrap: wrap; justify-content: center; }
 .dots button { display: grid; place-items: center; }
 .dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--color-gray-400); }

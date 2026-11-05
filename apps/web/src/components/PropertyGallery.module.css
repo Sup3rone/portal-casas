@@ -5,8 +5,8 @@
 .play { position: absolute; inset: 0; display: grid; place-items: center; color: white; background: rgb(0 0 0 / 30%); font-size: 2rem; }
 .strip { display: flex; gap: .5rem; overflow-x: auto; overscroll-behavior-x: contain; margin-top: .5rem; padding-block: .25rem; }
 .thumbnail { flex: 0 0 calc((100% - 1rem) / 3); min-width: 44px; min-height: 44px; aspect-ratio: 4 / 3; }
-.thumbnail[aria-pressed="true"] { outline: 3px solid var(--color-green-700); outline-offset: -3px; }
-.hero:focus-visible, .thumbnail:focus-visible, .arrow:focus-visible { outline: 3px solid var(--color-green-700); outline-offset: -3px; }
+.thumbnail[aria-pressed="true"] { outline: 3px solid var(--brand-action-border); outline-offset: -3px; }
+.hero:focus-visible, .thumbnail:focus-visible, .arrow:focus-visible { outline: 3px solid var(--brand-action-border); outline-offset: -3px; }
 .controls { display: flex; justify-content: space-between; margin-top: .25rem; }
 .arrow { display: grid; place-items: center; width: 64px; height: 48px; border-radius: 999px; background: var(--chrome-text); color: var(--header-bg); cursor: pointer; }
 

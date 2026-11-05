@@ -933,3 +933,7 @@ Los tonos verdes de acción usan ahora `--brand-action: #b5af94`, con superficie
 ### 2026-11-04 — Nombre del footer
 
 El encabezado y los derechos del footer muestran `ALIA FOR RENT` en los tres idiomas. La sustitución es visual/localizada: los metadatos y referencias técnicas que aún usan el nombre histórico Portal Casas no cambian en esta tarea.
+
+### 2026-11-05 — Video de fondo de home administrado por Blob
+
+`/panel/contenido` reemplaza la URL manual del video de home con una zona de arrastrar/soltar y selector para MP4/WebM de hasta 4 MB. El endpoint ADMIN sube el nuevo archivo a `site/home-video/`, actualiza inmediatamente `home_background_video`, revalida la home y después elimina el video previo solo si es un Blob administrado con esa ruta. Una URL externa nunca se borra. Si la escritura de SiteContent falla, se intenta limpiar el Blob recién subido y se conserva el video vigente. Si la limpieza posterior falla, el reemplazo permanece publicado y se registra la incidencia; no se revierte a un video anterior. El formulario general sigue guardando el resto de contenido sin sobrescribir el nuevo valor.

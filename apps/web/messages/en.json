@@ -505,7 +505,11 @@
 
     "imageLimits": "JPEG, PNG or WebP · up to 4 MB per photo after optimization. The selected image is applied when saved.",
     "videoLabel": "Home background video",
-    "videoHint": "Direct HTTPS video URL (for example MP4). Empty uses the current video, without sound. Loading errors fall back to the local video.",
+    "videoDrop": "Drag an MP4 or WebM video here.",
+    "videoChoose": "Choose video",
+    "videoUploading": "Uploading video…",
+    "videoUploaded": "Video updated. The previous Blob video was removed automatically.",
+    "videoHint": "MP4 or WebM · 4 MB maximum. The change applies when the upload finishes; a previous Blob video is removed so files do not accumulate.",
     "listingImageLabel": "Properties page background image",
     "listingImageHint": "Drop photos or choose files. The queue optimizes and uploads in order; the last successful upload is selected. Save to publish the change.",
     "assetUploaded": "Image uploaded and selected. Save to apply.",

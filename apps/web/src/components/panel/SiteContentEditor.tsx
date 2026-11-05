@@ -8,6 +8,7 @@ import { parseFeaturedSelection, serializeFeaturedSelection } from '@/lib/featur
 import type { SiteContentValues } from '@/lib/site-content';
 import { panelRequest, panelResponseError, panelErrorKey, inputClass, buttonClass } from './request';
 import { optimizePhoto, photoMetadata, photoTypes, photoCompression, PhotoUploadError, type PhotoType } from '@/lib/photo-upload';
+import { heroVideoMetadata } from '@/lib/hero-video-upload';
 
 export default function SiteContentEditor({ content, properties }: { content: SiteContentValues; properties: { id: string; label: string; city: string }[] }) {
   const t = useTranslations('siteContent'), panel = useTranslations('panel'), router = useRouter();
@@ -16,10 +17,12 @@ export default function SiteContentEditor({ content, properties }: { content: Si
   const uploader = useTranslations('photoUpload');
   const [imageUrl, setImageUrl] = useState(content.listing_background_image);
   const [aboutImageUrl, setAboutImageUrl] = useState(content.about_image);
+  const [videoUrl, setVideoUrl] = useState(content.home_background_video);
   const uploadTarget = useRef<'listing_background_image' | 'about_image'>('listing_background_image');
   const [uploading, setUploading] = useState(false), [uploadStatus, setUploadStatus] = useState('');
+  const [videoUploading, setVideoUploading] = useState(false), [videoStatus, setVideoStatus] = useState('');
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
-  const fileRef = useRef<HTMLInputElement>(null), lock = useRef(false), controllerRef = useRef<AbortController | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null), videoFileRef = useRef<HTMLInputElement>(null), lock = useRef(false), controllerRef = useRef<AbortController | null>(null);
   useEffect(() => () => controllerRef.current?.abort(), []);
   async function upload(files: FileList | null, target: 'listing_background_image' | 'about_image' = 'listing_background_image') {
     if (!files?.length || busy || lock.current) return;
@@ -52,6 +55,23 @@ export default function SiteContentEditor({ content, properties }: { content: Si
       }
     } finally { controllerRef.current = null; lock.current = false; setUploading(false); if (fileRef.current) fileRef.current.value = ''; }
   }
+  async function uploadVideo(file?: File) {
+    if (!file || busy || uploading || videoUploading) return;
+    setVideoUploading(true); setVideoStatus('');
+    try {
+      heroVideoMetadata(file.type, file.size);
+      const data = new FormData(); data.set('file', file); data.set('purpose', 'home-background-video');
+      const response = await fetch('/api/panel/site-content/upload', { method: 'POST', body: data });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw panelResponseError(response.status, payload);
+      if (typeof payload.url !== 'string' || !payload.url.startsWith('https://')) throw new Error('error');
+      setVideoUrl(payload.url); setVideoStatus('videoUploaded'); router.refresh();
+    } catch (error) {
+      setVideoStatus(error instanceof PhotoUploadError ? error.code === 'INVALID_VIDEO_SIZE' ? 'invalidVideoSize' : 'invalidVideoType' : panelErrorKey(error));
+    } finally {
+      setVideoUploading(false); if (videoFileRef.current) videoFileRef.current.value = '';
+    }
+  }
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage('');
     const form = new FormData(event.currentTarget);
@@ -63,7 +83,7 @@ export default function SiteContentEditor({ content, properties }: { content: Si
   }
   return <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
     <p className="text-sm text-gray-600 dark:text-gray-300">{t('hint')}</p>
-    <fieldset disabled={busy || uploading} className="space-y-4">
+    <fieldset disabled={busy || uploading || videoUploading} className="space-y-4">
       {(['about_title_es', 'about_title_en', 'about_title_fr'] as const).map(key => <label key={key} className="block text-sm">{t(key)}<input name={key} maxLength={200} defaultValue={content[key]} className={inputClass} /></label>)}
       <TranslationDraftButton source="es" prefix="title" fieldNames={{ es: 'about_title_es', en: 'about_title_en', fr: 'about_title_fr' }} disabled={busy || uploading} useCentralErrors />
       <label className="block text-sm">{t('aboutImageLabel')}<input name="about_image" type="url" value={aboutImageUrl} readOnly className={inputClass} /></label>
@@ -93,10 +113,17 @@ export default function SiteContentEditor({ content, properties }: { content: Si
       </label>
       ))}
       <p className="text-sm text-gray-600 dark:text-gray-300">{t('featuredHint')}</p>
-      <label className="block text-sm">{t('videoLabel')}
-        <input name="home_background_video" type="url" pattern="https://.+" maxLength={2048} defaultValue={content.home_background_video} className={inputClass} />
-      </label>
-      <p className="text-sm text-gray-600 dark:text-gray-300">{t('videoHint')}</p>
+      <input name="home_background_video" type="hidden" value={videoUrl} readOnly />
+      <div onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void uploadVideo(event.dataTransfer.files?.[0]); }} className="rounded-xl border border-dashed p-4 dark:border-gray-700" aria-busy={videoUploading}>
+        <p className="font-medium">{t('videoLabel')}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300">{t('videoDrop')}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300">{t('videoHint')}</p>
+        <input ref={videoFileRef} type="file" accept="video/mp4,video/webm" className="sr-only" disabled={busy || uploading || videoUploading} onChange={event => { void uploadVideo(event.currentTarget.files?.[0]); }} />
+        <button type="button" className={`${buttonClass} mt-3`} disabled={busy || uploading || videoUploading} onClick={() => videoFileRef.current?.click()}>{t(videoUploading ? 'videoUploading' : 'videoChoose')}</button>
+        {videoUploading && <progress className="mt-3 w-full accent-green-700" aria-label={t('videoUploading')} />}
+        {videoStatus && <p role={videoStatus === 'videoUploaded' ? 'status' : 'alert'} className="mt-3">{videoStatus === 'videoUploaded' ? t(videoStatus) : panel(videoStatus)}</p>}
+      </div>
+      {videoUrl && <video src={videoUrl} controls muted playsInline preload="metadata" className="max-h-64 w-full rounded-xl" />}
       <label className="block text-sm">{t('listingImageLabel')}
         <input name="listing_background_image" type="url" readOnly value={imageUrl} className={inputClass} />
       </label>

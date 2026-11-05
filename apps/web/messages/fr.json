@@ -506,7 +506,11 @@
 
     "imageLimits": "JPEG, PNG ou WebP · 4 Mo maximum par photo après optimisation. L’image sélectionnée est appliquée à l’enregistrement.",
     "videoLabel": "Vidéo de fond de l’accueil",
-    "videoHint": "URL HTTPS directe d’une vidéo (par exemple MP4). Vide utilise la vidéo actuelle, sans son. En cas d’erreur, la vidéo locale est utilisée.",
+    "videoDrop": "Déposez ici une vidéo MP4 ou WebM.",
+    "videoChoose": "Choisir une vidéo",
+    "videoUploading": "Envoi de la vidéo…",
+    "videoUploaded": "Vidéo mise à jour. La précédente vidéo Blob a été supprimée automatiquement.",
+    "videoHint": "MP4 ou WebM · 4 Mo maximum. Le changement est appliqué à la fin de l’envoi ; une vidéo Blob précédente est supprimée pour éviter d’accumuler des fichiers.",
     "listingImageLabel": "Image de fond de la page des propriétés",
     "listingImageHint": "Déposez des photos ou choisissez des fichiers. La file optimise et téléverse dans l’ordre ; la dernière image réussie est sélectionnée. Enregistrez pour publier.",
     "assetUploaded": "Image téléversée et sélectionnée. Enregistrez pour appliquer.",

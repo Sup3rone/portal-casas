@@ -937,3 +937,7 @@ El encabezado y los derechos del footer muestran `ALIA FOR RENT` en los tres idi
 ### 2026-11-05 — Video de fondo de home administrado por Blob
 
 `/panel/contenido` reemplaza la URL manual del video de home con una zona de arrastrar/soltar y selector para MP4/WebM de hasta 4 MB. El endpoint ADMIN sube el nuevo archivo a `site/home-video/`, actualiza inmediatamente `home_background_video`, revalida la home y después elimina el video previo solo si es un Blob administrado con esa ruta. Una URL externa nunca se borra. Si la escritura de SiteContent falla, se intenta limpiar el Blob recién subido y se conserva el video vigente. Si la limpieza posterior falla, el reemplazo permanece publicado y se registra la incidencia; no se revierte a un video anterior. El formulario general sigue guardando el resto de contenido sin sobrescribir el nuevo valor.
+
+### 2026-11-05 — Permiso de publicación para colaboradores
+
+El nuevo booleano `User.canPublishProperties` queda en `false` por defecto y se activa solo desde el detalle de `/panel/usuarios` por un ADMIN. Un colaborador autorizado puede publicar y despublicar exclusivamente sus propias propiedades; ADMIN conserva control total. La API valida el permiso tanto antes como dentro del `UPDATE`, por lo que el botón no puede saltarse con una llamada directa. Cambiar un rol restablece el permiso a `false`; la auditoría registra `PUBLICATION_PERMISSION`. SQL pendiente `scripts/sql/user-publication-permission.sql`: aplicar manualmente Respaldo → QA → main antes de desplegar; no fue ejecutado por el agente.

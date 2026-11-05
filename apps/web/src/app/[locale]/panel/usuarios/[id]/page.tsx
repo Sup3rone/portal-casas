@@ -15,7 +15,7 @@ export default async function UserPage({ params }: { params: Promise<{ locale: s
   return <section className="space-y-6">
     <Link href="/panel/usuarios" className="text-green-700 dark:text-green-400 underline">{t('back')}</Link>
     <h1 className="break-all text-3xl font-semibold">{user.email}</h1><p>{t('role')}: {t(`roles.${user.role}`)}</p>
-    <UserActions id={id} role={user.role} self={actor.id === id} />
+    <UserActions id={id} role={user.role} self={actor.id === id} canPublishProperties={user.canPublishProperties} />
     <h2 className="text-xl font-semibold">{t('properties')}</h2>
     {!properties.length && <p>{t('noProperties')}</p>}
     {properties.map(property => <article key={property.id} className="rounded-lg border p-4 dark:border-gray-700">

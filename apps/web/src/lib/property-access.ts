@@ -4,7 +4,7 @@ import { db, properties, users } from '@portal/db';
 import { eq, inArray, sql, type AnyColumn } from 'drizzle-orm';
 import { auth } from './auth';
 
-export type PropertyManager = { id: string; role: 'ADMIN' | 'COLLABORATOR' };
+export type PropertyManager = { id: string; role: 'ADMIN' | 'COLLABORATOR'; canPublishProperties: boolean };
 
 export class AccessError extends Error {
   constructor(public status: 401 | 403 | 404, public code?: 'SESSION_USER_NOT_FOUND' | 'ROLE_NOT_ALLOWED') {
@@ -17,13 +17,13 @@ export async function requirePropertyManager(): Promise<PropertyManager> {
   const session = await auth();
   const id = session?.user?.id;
   if (!id) throw new AccessError(401);
-  const [user] = await db.select({ id: users.id, role: users.role })
+  const [user] = await db.select({ id: users.id, role: users.role, canPublishProperties: users.canPublishProperties })
     .from(users).where(eq(users.id, id)).limit(1);
   if (!user) throw new AccessError(403, 'SESSION_USER_NOT_FOUND');
   if (user.role !== 'ADMIN' && user.role !== 'COLLABORATOR') {
     throw new AccessError(403, 'ROLE_NOT_ALLOWED');
   }
-  return { id: user.id, role: user.role };
+  return { id: user.id, role: user.role, canPublishProperties: Boolean(user.canPublishProperties) };
 }
 
 export async function requireAdmin() {

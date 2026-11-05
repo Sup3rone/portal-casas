@@ -4,10 +4,10 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { panelRequest, buttonClass } from './request';
 
-export default function PublicationButton({ id, published, admin }: { id: string; published: boolean; admin: boolean }) {
+export default function PublicationButton({ id, published, canManagePublication }: { id: string; published: boolean; canManagePublication: boolean }) {
   const t = useTranslations('panel'), router = useRouter();
   const [busy, setBusy] = useState(false), [error, setError] = useState('');
-  if (!published && !admin) return null;
+  if (!canManagePublication) return null;
   async function change() {
     setBusy(true); setError('');
     try { await panelRequest(`/api/properties/${id}`, 'PATCH', { published: !published }); router.refresh(); }

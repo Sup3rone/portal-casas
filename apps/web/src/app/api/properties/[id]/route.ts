@@ -22,10 +22,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         return NextResponse.json({ error: 'validation', code: 'INVALID_BACKGROUND_PHOTO' }, { status: 400 });
       }
     }
-    if (changes.published === true && manager.role !== 'ADMIN') throw new AccessError(403);
-    // Revalidar aprobación del admin dentro del UPDATE, no solo en el formulario.
-    const publication = changes.published === true
-      ? sql`exists (select 1 from "User" actor where actor."id" = ${manager.id} and actor."role"::text = 'ADMIN')`
+    if ('published' in changes && manager.role !== 'ADMIN' && !manager.canPublishProperties) throw new AccessError(403);
+    // Revalidar el permiso dentro del UPDATE, no solo en el formulario.
+    const publication = 'published' in changes
+      ? sql`exists (select 1 from "User" actor where actor."id" = ${manager.id} and (actor."role"::text = 'ADMIN' or (actor."role"::text = 'COLLABORATOR' and actor."canPublishProperties" = true)))`
       : sql`true`;
     const rows = await db.update(properties).set(changes)
       .where(and(eq(properties.id, id), managedProperties(manager), publication))

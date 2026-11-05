@@ -14,6 +14,7 @@ export const users = pgTable("User", {
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   phone: text("phone"),
+  canPublishProperties: boolean('canPublishProperties').notNull().default(false),
   passwordHash: text("passwordHash"),
   emailVerifiedAt: timestamp("emailVerifiedAt"),
   role: userRoleEnum("role").notNull().default("CLIENT"),
@@ -170,7 +171,10 @@ export const adminUserAudit = pgTable('AdminUserAudit', {
   previousRole: text('previousRole'),
   newRole: text('newRole'),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
-}, table => [index('AdminUserAudit_target_created_idx').on(table.targetUserId, table.createdAt)]);
+}, table => [
+  index('AdminUserAudit_target_created_idx').on(table.targetUserId, table.createdAt),
+  check('AdminUserAudit_action_check', sql`${table.action} in ('ROLE_CHANGE', 'PASSWORD_RESET', 'PUBLICATION_PERMISSION')`),
+]);
 
 // Historial sin FK: debe sobrevivir a la eliminación de recursos de negocio.
 export const ownershipMigrations = pgTable('OwnershipMigration', {

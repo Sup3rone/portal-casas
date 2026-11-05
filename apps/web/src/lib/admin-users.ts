@@ -17,7 +17,7 @@ export async function adminUsersPage() {
 
 // Nunca seleccionar passwordHash: el estado solo indica si hay contraseña.
 export const userFields = {
-  id: users.id, email: users.email, role: users.role, createdAt: users.createdAt,
+  id: users.id, email: users.email, role: users.role, canPublishProperties: users.canPublishProperties, createdAt: users.createdAt,
   hasPassword: sql<boolean>`${users.passwordHash} is not null and ${users.passwordHash} <> ''`,
 };
 
@@ -48,20 +48,24 @@ export async function mutateAdminUser(id: string, input: unknown) {
   const actor = await requireAdmin();
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new PanelValidationError('validation');
   const value = input as Record<string, unknown>;
-  if (value.confirmed !== true || !['role', 'password'].includes(String(value.action))) throw new PanelValidationError('validation');
+  if (value.confirmed !== true || !['role', 'password', 'publication'].includes(String(value.action))) throw new PanelValidationError('validation');
   const target = await getAdminUser(id);
   const roleChange = value.action === 'role';
+  const publicationChange = value.action === 'publication';
   if (roleChange && (actor.id === id || target.role === 'ADMIN')) throw new AccessError(403);
   if (roleChange && (!['CLIENT', 'COLLABORATOR'].includes(String(value.role)) || !['CLIENT', 'COLLABORATOR', 'VIEWER'].includes(target.role))) {
     throw new PanelValidationError('validation');
   }
   if (roleChange && value.role === target.role) throw new PanelValidationError('validation');
-  const temporaryPassword = roleChange ? null : randomBytes(18).toString('base64url');
+  if (publicationChange && (target.role !== 'COLLABORATOR' || typeof value.allowed !== 'boolean' || value.allowed === target.canPublishProperties)) throw new PanelValidationError('validation');
+  const temporaryPassword = roleChange || publicationChange ? null : randomBytes(18).toString('base64url');
   const hash = temporaryPassword ? await bcrypt.hash(temporaryPassword, 10) : null;
   // Un único statement PostgreSQL: si el log falla, también se revierte el UPDATE.
   // Revalidar ADMIN y rol anterior dentro de la mutación para cambios concurrentes.
-  const changes = roleChange ? sql`"role" = ${value.role as string}::"UserRole"` : sql`"passwordHash" = ${hash}`;
-  const restriction = roleChange ? sql`and target."id" <> ${actor.id} and target."role"::text in ('CLIENT', 'COLLABORATOR', 'VIEWER')` : sql``;
+  const changes = roleChange ? sql`"role" = ${value.role as string}::"UserRole", "canPublishProperties" = false`
+    : publicationChange ? sql`"canPublishProperties" = ${value.allowed as boolean}` : sql`"passwordHash" = ${hash}`;
+  const restriction = roleChange ? sql`and target."id" <> ${actor.id} and target."role"::text in ('CLIENT', 'COLLABORATOR', 'VIEWER')`
+    : publicationChange ? sql`and target."role"::text = 'COLLABORATOR' and target."canPublishProperties" = ${target.canPublishProperties}` : sql``;
   const result = await db.execute(sql`
     with changed as (
       update "User" target set ${changes}
@@ -71,11 +75,11 @@ export async function mutateAdminUser(id: string, input: unknown) {
       returning target."id"
     ), logged as (
       insert into "AdminUserAudit" ("id", "actorId", "targetUserId", "action", "previousRole", "newRole")
-      select ${randomUUID()}, ${actor.id}, changed."id", ${roleChange ? 'ROLE_CHANGE' : 'PASSWORD_RESET'},
+      select ${randomUUID()}, ${actor.id}, changed."id", ${roleChange ? 'ROLE_CHANGE' : publicationChange ? 'PUBLICATION_PERMISSION' : 'PASSWORD_RESET'},
         ${target.role}, ${roleChange ? value.role as string : target.role} from changed returning "id"
     ) select "id" from logged
   `);
   if (!result.rows.length) throw new AccessError(403);
   // El secreto existe solo en memoria y en esta respuesta; nunca en el log/BD.
-  return temporaryPassword ? { temporaryPassword } : { success: true };
+  return temporaryPassword ? { temporaryPassword } : { success: true, canPublishProperties: publicationChange ? value.allowed : undefined };
 }

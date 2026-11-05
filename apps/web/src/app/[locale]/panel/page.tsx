@@ -18,7 +18,7 @@ export default async function PanelPage({ params }: { params: Promise<{ locale: 
       <div><h2 className="text-xl font-semibold">{locale === 'en' ? property.titleEn : locale === 'fr' ? property.titleFr : property.titleEs}</h2>
         <p className="text-gray-600 dark:text-gray-300">{propertyLocation(property)} · {t(property.published ? 'published' : 'draft')}</p></div>
       <div className="flex flex-wrap items-center gap-4"><Link href={`/panel/propiedades/${property.id}`} className="text-green-700 dark:text-green-400 underline">{t('edit')}</Link>
-        <PublicationButton id={property.id} published={property.published} admin={manager.role === 'ADMIN'} /></div>
+        <PublicationButton id={property.id} published={property.published} canManagePublication={manager.role === 'ADMIN' || manager.canPublishProperties} /></div>
     </article>)}
   </section>;
 }

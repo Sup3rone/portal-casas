@@ -73,7 +73,8 @@ for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates'
   const config = getTableConfig(schema[name]);
   memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => {
     const numeric = /integer|boolean|double/.test(column.getSQLType());
-    return `"${column.name}" ${numeric ? 'REAL' : 'TEXT'}${column.primary ? ' PRIMARY KEY' : ''}`;
+    const defaultValue = column.name === 'canPublishProperties' ? ' DEFAULT 0' : '';
+    return `"${column.name}" ${numeric ? 'REAL' : 'TEXT'}${defaultValue}${column.primary ? ' PRIMARY KEY' : ''}`;
   }).join(', ')}${config.primaryKeys.map(key => `, PRIMARY KEY (${key.columns.map(column => `"${column.name}"`).join(', ')})`).join('')})`);
 }
 const client = { query: async (query, values, options) => {
@@ -129,6 +130,11 @@ async function main() {
   as('a');
   assert.deepEqual((await (await inventory.GET()).json()).properties.map(p => p.id).sort(), ['hidden', 'pa']);
   assert.equal((await property.PATCH(json({ titleEs: 'Own' }, 'PATCH'), { params: Promise.resolve({ id: 'pa' }) })).status, 200);
+  assert.equal((await property.PATCH(json({ published: false }, 'PATCH'), { params: Promise.resolve({ id: 'pa' }) })).status, 403);
+  memory.prepare('UPDATE "User" SET "canPublishProperties" = 1 WHERE id = ?').run('a');
+  assert.equal((await property.PATCH(json({ published: false }, 'PATCH'), { params: Promise.resolve({ id: 'pa' }) })).status, 200);
+  assert.equal((await property.PATCH(json({ published: true }, 'PATCH'), { params: Promise.resolve({ id: 'pa' }) })).status, 200);
+  assert.equal((await property.PATCH(json({ published: false }, 'PATCH'), { params: Promise.resolve({ id: 'pb' }) })).status, 404);
   assert.equal((await property.PATCH(json({ titleEs: 'Foreign' }, 'PATCH'), { params: Promise.resolve({ id: 'pb' }) })).status, 404);
   assert.equal((await property.PATCH(json({ ownerId: 'a' }, 'PATCH'), { params: Promise.resolve({ id: 'pb' }) })).status, 404);
   assert.equal((await property.PATCH(json({ ownerId: 'b' }, 'PATCH'), { params: Promise.resolve({ id: 'pa' }) })).status, 400);

@@ -808,3 +808,7 @@ Validación actual del workspace: **58/58 scripts pasan** (incluida regresión d
 ## Video de home por arrastre — 5 Nov 2026
 
 **Estado: HECHO en código; PENDIENTE QA humana.** Contenido del sitio permite soltar o elegir MP4/WebM de hasta 4 MB para el video de home. Al confirmar la subida, actualiza la URL activa y borra el Blob anterior de `site/home-video/`; URLs externas se conservan por seguridad. Validado con mock de Blob/DB, incluyendo autorización, MIME, tamaño, persistencia y eliminación del video previo.
+
+## Permiso de publicación de colaboradores — 5 Nov 2026
+
+**Estado: HECHO en código; PENDIENTE SQL manual y QA humana.** ADMIN puede conceder o revocar desde Usuarios el permiso para que un colaborador publique y despublique solo sus propias propiedades. Servidor/API revalidan bandera, rol y propiedad; cambio de rol revoca el permiso y la auditoría registra la acción. La migración propuesta añade `User.canPublishProperties` y amplía el CHECK de auditoría; ejecutar Respaldo → QA → main antes de usarlo.

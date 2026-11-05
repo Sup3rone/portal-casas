@@ -39,7 +39,7 @@ async function main() {
   let writes = [];
   const execute = portal.db.execute;
   portal.db.execute = async statement => { writes.push(new PgDialect().sqlToQuery(statement)); return { rows: [{ id: 'audit' }] }; };
-  for (const body of [{ action: 'password' }, { action: 'password', confirmed: false }, { action: 'role', role: 'ADMIN', confirmed: true }, { action: 'role', role: 'COLLABORATOR', confirmed: true }]) {
+  for (const body of [{ action: 'password' }, { action: 'password', confirmed: false }, { action: 'role', role: 'ADMIN', confirmed: true }, { action: 'role', role: 'COLLABORATOR', confirmed: true }, { action: 'publication', allowed: true, confirmed: true }]) {
     const id = body.role === 'COLLABORATOR' ? 'a' : 'client';
     assert.equal((await detailRoute.PATCH(request(body), context(id))).status, 400);
   }
@@ -50,10 +50,12 @@ async function main() {
   assert.equal((await detailRoute.PATCH(request({ action: 'role', role: 'COLLABORATOR', confirmed: true }), context('client'))).status, 200);
   assert.ok(writes[0].sql.includes('with changed as')); assert.ok(writes[0].sql.includes('insert into "AdminUserAudit"'));
   assert.ok(writes[0].params.includes('ROLE_CHANGE')); assert.ok(writes[0].params.includes('admin'));
+  const permission = await detailRoute.PATCH(request({ action: 'publication', allowed: true, confirmed: true }), context('a'));
+  assert.equal(permission.status, 200); assert.ok(writes[1].params.includes('PUBLICATION_PERMISSION')); assert.ok(writes[1].params.includes(true));
   const response = await detailRoute.PATCH(request({ action: 'password', confirmed: true }), context('client'));
   assert.equal(response.status, 200); assert.equal(response.headers.get('cache-control'), 'no-store');
   const result = await response.json(); assert.match(result.temporaryPassword, /^[A-Za-z0-9_-]{24}$/);
-  const reset = writes[1], hash = reset.params.find(value => typeof value === 'string' && /^\$2[aby]\$10\$/.test(value));
+  const reset = writes[2], hash = reset.params.find(value => typeof value === 'string' && /^\$2[aby]\$10\$/.test(value));
   assert.ok(hash); assert.equal(await bcrypt.compare(result.temporaryPassword, hash), true);
   assert.ok(!reset.params.includes(result.temporaryPassword)); assert.ok(reset.params.includes('PASSWORD_RESET'));
   portal.db.execute = async () => ({ rows: [] });
@@ -74,6 +76,8 @@ async function main() {
     assert.ok(html.includes(messages.adminUsers.title)); assert.ok(!html.includes('never-return-this-hash'));
     const details = render(await detail({ params: Promise.resolve({ locale, id: 'client' }) }));
     assert.ok(details.includes(messages.adminUsers.sessionWarning)); assert.ok(details.includes(messages.adminUsers.promote));
+    const collaboratorDetails = render(await detail({ params: Promise.resolve({ locale, id: 'a' }) }));
+    assert.ok(collaboratorDetails.includes(messages.adminUsers.grantPublication));
     assert.ok(render(await layout({ params: Promise.resolve({ locale }), children: null })).includes('/panel/usuarios'));
     as('a'); assert.ok(!render(await layout({ params: Promise.resolve({ locale }), children: null })).includes('/panel/usuarios'));
   }

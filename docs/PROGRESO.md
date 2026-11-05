@@ -788,3 +788,7 @@ Validación actual del workspace: **58/58 scripts pasan** (incluida regresión d
 ## Acento de marca café — 4 Nov 2026
 
 **Estado: HECHO en código; PENDIENTE QA humana.** Se reemplazaron los acentos morados residuales por la escala café de Alia Forrent, centralizada en `--brand-brown: #654838` y variantes de hover, superficie y modo oscuro. Incluye autenticación, mensajes, tarifas, galería, footer, scrollbar, calendario manual, foco de inputs y plantillas de correo de reserva/recuperación. Estados semánticos rojo/azul/verde no cambiaron. El skin alternativo del panel también quedó café; la paleta papel activa continúa intacta.
+
+## Navbar y contacto — 4 Nov 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** El wordmark global del navbar se corrigió a `ALIA FOR RENT`; el correo del footer cambió a `lasmoras.residences@outlook.com` con enlace `mailto:`. El hero conserva su texto de marca independiente hasta que se solicite modificarlo explícitamente.

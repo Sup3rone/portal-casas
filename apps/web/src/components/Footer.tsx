@@ -31,7 +31,7 @@ export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}
           </div>
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-100 mb-4">{t('contacto')}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300">hola@portalcasas.com</p>
+            <a href="mailto:lasmoras.residences@outlook.com" className="text-sm text-gray-600 underline-offset-2 hover:underline dark:text-gray-300">lasmoras.residences@outlook.com</a>
             {(contacts.social_instagram || contacts.social_facebook || contacts.contact_whatsapp) && <div className="mt-4 flex min-w-0 flex-wrap items-center gap-4">
               {contacts.social_instagram && <a href={contacts.social_instagram} target="_blank" rel="noopener noreferrer" aria-label={social('instagramLink')} className="about-social-link flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-green-700 text-green-800 hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-950">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-6 w-6"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" /></svg>

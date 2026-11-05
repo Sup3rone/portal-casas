@@ -29,7 +29,7 @@ function AccountThemeOption() {
 }
 
 function AliaMonogram() {
-  return <svg role="img" aria-label="Logo Alia Forrent" viewBox="0 0 32 32"
+  return <svg role="img" aria-label="Logo Alia For Rent" viewBox="0 0 32 32"
     width="24" height="20" fill="none" stroke="var(--logo-color)" strokeWidth="1.25"
     strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
     <path d="M3 28 13 4l10 24M7 19h8m4 0h.25" />
@@ -127,7 +127,7 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
           {/* LOGO — izquierda */}
           <Link href="/" className={`${privatePage ? '' : 'home-brand inline-flex items-center gap-[9px] '}text-xl font-semibold tracking-widest text-gray-900 dark:text-gray-100`}>
             {!privatePage && <AliaMonogram />}
-            <span className={`brand-wordmark ${logoFont.variable}`}>ALIA<span className="ml-1 text-gray-500 dark:text-gray-400">FOR</span>RENT</span>
+            <span className={`brand-wordmark ${logoFont.variable}`}>ALIA <span className="text-gray-500 dark:text-gray-400">FOR</span> RENT</span>
           </Link>
 
           {/* NAV LINKS + ACTIONS — derecha */}

@@ -917,3 +917,7 @@ La versión actual ya contiene el ajuste documentado: PropertyGallery dialog con
 ### 2026-11-04 — Acento de marca café
 
 La escala morada se sustituyó por el café de referencia del logotipo Alia Forrent: `--brand-brown: #654838`, su variante de interacción `--brand-brown-strong: #4d3529`, superficie suave y una variante clara para fondo oscuro. Los usos de acción visibles —botones, enlaces, badges, foco de campos, scrollbar, estados manuales del calendario y correos transaccionales— consumen esta escala. También se actualizó la alternativa reversible del skin del panel, aunque las rutas vigentes siguen usando la variante papel. Rojo, azul y verde se conservan cuando representan estados u orígenes semánticos (error, iCal/Airbnb/Google), no acentos de marca. Para ajustar el café en el futuro, modificar los tokens en `apps/web/src/app/globals.css`.
+
+### 2026-11-04 — Datos visibles de marca y contacto
+
+El wordmark del Navbar se muestra como `ALIA FOR RENT`, con espacios visibles y la misma fuente Marcellus; el monograma conserva paths SVG y su etiqueta accesible usa el mismo nombre. El título de marca del hero conserva temporalmente su contenido independiente `ALIA FORRENT`, pues esta corrección se limitó al navbar. El correo fijo del footer es ahora `lasmoras.residences@outlook.com` y enlaza mediante `mailto:`.

@@ -38,7 +38,8 @@ async function main(){
       assert.ok(html.includes('public-footer'));
       for(const privatePath of ['/'+locale+'/panel','/'+locale+'/admin/tarifas']) assert.ok(!(await render(privatePath)).includes('public-footer'));
       pathname=path;
-      assert.ok(html.includes('hola@portalcasas.com'));
+      assert.ok(html.includes('lasmoras.residences@outlook.com'));
+      assert.ok(html.includes('mailto:lasmoras.residences@outlook.com'));
       assert.ok(html.includes('href="https://wa.me/5215512345678"'));
       assert.ok(html.includes('>+521 55 1234 5678</span>'));
       for(const url of [content.social_instagram,content.social_facebook]){

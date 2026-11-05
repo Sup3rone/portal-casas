@@ -669,3 +669,46 @@ El código es referencia del comportamiento actual; los documentos históricos p
 | [MIGRACION-FOTOS-BLOB.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/MIGRACION-FOTOS-BLOB.md) | Migración manual de fotos y dry-run. |
 | [GALERIA-COMPARTIR.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/GALERIA-COMPARTIR.md) | Galería y compartir. |
 | [FASE-C1-UPLOAD-IMAGENES.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/FASE-C1-UPLOAD-IMAGENES.md) | Flujo de subida inicial. |
+
+## 8. Actualización del mapa — 5 de noviembre de 2026
+
+Esta sección complementa el inventario anterior y refleja las piezas añadidas recientemente. Las secciones históricas se conservan para poder rastrear decisiones; cuando difieren, este anexo describe el código vigente.
+
+### 8.1 Cambios de identidad visual
+
+| Área | Ubicación | Funcionamiento actual |
+|---|---|---|
+| Emblema del sitio | [Navbar.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/Navbar.tsx) + [alia-spiral-emblem.png](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/public/brand/alia-spiral-emblem.png) | El navbar compartido muestra el emblema espiral como imagen optimizada de 24×24 y el wordmark `ALIA FOR RENT`; el SVG A–F anterior ya no se renderiza. |
+| Footer y contacto | [Footer.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/Footer.tsx) | Mantiene el correo `lasmoras.residences@outlook.com`, enlaces sociales/WhatsApp y la marca `ALIA FOR RENT`. |
+| Tokens de marca | [globals.css](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/globals.css), [EditorialPresentation.module.css](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/detail/EditorialPresentation.module.css), [PropertyGallery.module.css](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/detail/PropertyGallery.module.css) | Las acciones usan `--brand-action: #b5af94`; el acento del modo oscuro usa `--brand-dark-accent: #c78e43`. Las clases históricas verde/azul se compatibilizan mediante tokens sin cambiar colores semánticos de estados externos. |
+
+### 8.2 Video de fondo de la home gestionado desde el panel
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Editor | [SiteContentEditor.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/SiteContentEditor.tsx) | Permite arrastrar o seleccionar MP4/WebM, muestra previsualización y estado de subida, y conserva el resto de contenido de `SiteContent`. |
+| Endpoint | [site-content/upload/route.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/api/panel/site-content/upload/route.ts) | Valida el video (máximo 4 MB), lo guarda en `site/home-video/`, persiste `home_background_video`, revalida la home y elimina el video Blob anterior gestionado por el sitio. URLs externas anteriores no se eliminan. Si falla la persistencia, intenta limpiar el nuevo archivo y conserva el valor previo. |
+| Consumo | `SiteContent.home_background_video` y el layout/home público | El video configurado se reutiliza como fondo; si queda vacío o no carga, se mantiene el fallback visual existente. |
+| Textos | [es.json](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/messages/es.json), [en.json](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/messages/en.json), [fr.json](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/messages/fr.json) | Incluyen instrucciones de arrastrar/elegir, límite, progreso, éxito y reemplazo automático. |
+
+### 8.3 Publicación delegada para colaboradores
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Dato de usuario | [schema.ts](C:/Users/menib/Documents/GitHub/portal-casas/packages/db/src/schema.ts) | `User.canPublishProperties` es booleano, por defecto `false`; no cambia el rol ni el alcance de propiedad. |
+| Administración | [admin-users.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/admin-users.ts), [UserActions.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/UserActions.tsx), página de usuarios | Un ADMIN puede conceder/revocar la capacidad a colaboradores. La acción queda auditada como `PUBLICATION_PERMISSION`; cambiar el rol a ADMIN revoca el flag para evitar estado ambiguo. |
+| UI de propiedad | [PublicationButton.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/PublicationButton.tsx), páginas de panel de propiedades | El control solo aparece a ADMIN o a colaborador con `canPublishProperties`. |
+| Protección server-side | [property-access.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/property-access.ts), [properties/[id]/route.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/api/properties/[id]/route.ts) | El servidor vuelve a comprobar la capacidad antes de publicar/despublicar y conserva el scope de propiedad propia; una propiedad ajena no se expone y devuelve 404 según el patrón existente. |
+| SQL pendiente | [user-publication-permission.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/user-publication-permission.sql) | Script preparado, no ejecutado por el agente: amplía `User` y el CHECK de auditoría. Aplicar primero en Respaldo, verificar, y después en producción/main. |
+
+### 8.4 Verificación y estado operativo
+
+- Pruebas dirigidas vigentes: [test-site-visual-assets.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-site-visual-assets.cjs), [test-property-access.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-property-access.cjs) y [test-admin-users.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-admin-users.cjs).
+- TypeScript de `apps/web` pasa sin errores (`tsc --noEmit --incremental false`). El lint pasa sin errores nuevos; permanecen cinco advertencias preexistentes documentadas por Next/React.
+- No se hizo verificación visual automática ni despliegue desde esta actualización; la revisión final de UI corresponde a la checklist humana.
+
+### 8.5 Pendientes operativos
+
+1. Aplicar manualmente el SQL de permiso de publicación siguiendo el protocolo Respaldo → verificación → main.
+2. Probar en QA que un ADMIN concede/revoca la capacidad y que el colaborador solo publica sus propias propiedades.
+3. Probar la sustitución del video en el panel y confirmar en Blob que el archivo anterior gestionado se elimina.

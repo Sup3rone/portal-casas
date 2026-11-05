@@ -15,6 +15,15 @@
   --brand-brown-strong: #4d3529;
   --brand-brown-soft: #eee2d8;
   --brand-brown-light: #e8c9b4;
+  /* Sustituyen los acentos verdes de acción; la tinta asegura AA sobre el relleno claro. */
+  --brand-action: #b5af94;
+  --brand-action-hover: #9d967c;
+  --brand-action-ink: #302d25;
+  --brand-action-surface: #eeece5;
+  --brand-action-border: #77715e;
+  /* Acento antes azul para elementos equivalentes del tema oscuro. */
+  --brand-dark-accent: #c78e43;
+  --brand-dark-accent-ink: #302212;
   --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
 }
 html.dark {
@@ -22,6 +31,23 @@ html.dark {
   --paper-text: #F4F1EC;
   --brand-brown-light: #e8c9b4;
 }
+
+/* Compatibilidad centralizada de los acentos Tailwind históricos. */
+:is([class~="bg-green-700"], [class~="bg-green-600"], [class~="bg-green-800"]) { background-color: var(--brand-action); color: var(--brand-action-ink); }
+:is([class~="hover:bg-green-700"], [class~="hover:bg-green-600"], [class~="hover:bg-green-800"]):hover { background-color: var(--brand-action-hover); color: var(--brand-action-ink); }
+:is([class~="bg-green-50"], [class~="bg-green-100"]) { background-color: var(--brand-action-surface); }
+:is([class~="text-green-700"], [class~="text-green-800"]) { color: var(--brand-action-ink); }
+:is([class~="border-green-700"], [class~="ring-green-700"], [class~="ring-green-500"], [class~="ring-green-200"]) { border-color: var(--brand-action-border); --tw-ring-color: var(--brand-action-border); }
+:is([class~="outline-green-700"], [class~="focus-visible:outline-green-700"]):focus-visible { outline-color: var(--brand-action-border); }
+:is([class~="focus:border-green-700"], [class~="dark:focus:border-green-500"]):focus { border-color: var(--brand-action-border); }
+:is([class~="accent-green-700"]) { accent-color: var(--brand-action-border); }
+html.dark :is([class~="dark:bg-green-700"], [class~="dark:bg-green-600"]) { background-color: var(--brand-action); color: var(--brand-action-ink); }
+html.dark :is([class~="dark:hover:bg-green-600"], [class~="dark:hover:bg-green-950"]):hover { background-color: var(--brand-action-hover); color: var(--brand-action-ink); }
+html.dark :is([class~="dark:bg-green-950"], [class~="dark:bg-green-900/50"]) { background-color: color-mix(in srgb, var(--brand-action) 22%, var(--paper-bg)); }
+html.dark :is([class~="dark:text-green-400"], [class~="dark:text-green-300"]) { color: var(--brand-action); }
+html.dark :is([class~="dark:border-green-400"], [class~="dark:ring-green-800"]) { border-color: var(--brand-action); --tw-ring-color: var(--brand-action); }
+html.dark :is([class~="dark:bg-blue-900/50"]) { background-color: color-mix(in srgb, var(--brand-dark-accent) 22%, var(--paper-bg)); }
+html.dark :is([class~="dark:text-blue-400"]) { color: var(--brand-dark-accent); }
 .public-paper,
 .property-detail:has(.public-paper) {
   --background: var(--paper-bg);
@@ -135,10 +161,10 @@ html { scroll-behavior: smooth; }
 }
 .about-social-link {
   cursor: pointer;
-  --about-social-glow: color-mix(in srgb, var(--color-green-700) 35%, transparent);
+  --about-social-glow: color-mix(in srgb, var(--brand-action-border) 35%, transparent);
   transition: transform .3s ease-out, box-shadow .3s ease-out, background-color .3s ease-out, color .3s ease-out;
 }
-html.dark .about-social-link { --about-social-glow: color-mix(in srgb, var(--color-green-400) 35%, transparent); }
+html.dark .about-social-link { --about-social-glow: color-mix(in srgb, var(--brand-action) 35%, transparent); }
 @media (hover: hover) and (pointer: fine) {
   .about-social-link:hover { transform: scale(1.15); box-shadow: 0 6px 18px var(--about-social-glow); }
 }
@@ -151,8 +177,8 @@ html.dark .about-social-link { --about-social-glow: color-mix(in srgb, var(--col
   }
   .about-social-link { transition: background-color .3s ease-out, color .3s ease-out; }
   .about-social-link:hover, .about-social-link:active { transform: none; box-shadow: none; }
-  .about-social-link:active { background-color: var(--color-green-50); }
-  html.dark .about-social-link:active { background-color: var(--color-green-950); }
+  .about-social-link:active { background-color: var(--brand-action-surface); }
+  html.dark .about-social-link:active { background-color: color-mix(in srgb, var(--brand-action) 22%, var(--paper-bg)); }
 }
 
 /* El scroll y la navbar inteligente solo pertenecen al detalle público. */
@@ -243,13 +269,13 @@ html:has(.property-detail dialog[open]) { overflow: hidden; }
 .detail-snap-container .glass-panel button:not([aria-pressed]):hover { background-color: var(--glass-bg); }
 .detail-snap-container .glass-panel :is(input, textarea, select):focus { border-color: var(--glass-text); }
 .detail-snap-container .glass-panel .text-red-600 { color: var(--glass-error); }
-#reservar .glass-panel .bg-green-50 { background-color: var(--color-green-50); }
-#reservar .glass-panel .text-green-700 { color: var(--color-green-800); }
+#reservar .glass-panel .bg-green-50 { background-color: var(--brand-action-surface); }
+#reservar .glass-panel .text-green-700 { color: var(--brand-action-ink); }
 #reservar .glass-panel .bg-red-100 { background-color: var(--color-red-100); }
 #reservar .glass-panel button[aria-pressed]:disabled { color: var(--color-gray-600); }
 #reservar .glass-panel button[aria-pressed]:disabled:not(.line-through) { background-color: var(--color-gray-200); }
 #reservar .glass-panel button[aria-pressed].line-through { color: var(--color-red-800); }
-#reservar .glass-panel button[aria-pressed="true"] { background-color: var(--color-green-700); color: var(--color-white); }
+#reservar .glass-panel button[aria-pressed="true"] { background-color: var(--brand-action); color: var(--brand-action-ink); }
 .detail-snap-container [data-editorial-narrative].glass-panel {
   background: var(--glass-bg) !important;
   color: var(--glass-text) !important;
@@ -289,12 +315,12 @@ html:has(.property-detail dialog[open]) { overflow: hidden; }
   width: 44px;
   height: 44px;
   border-radius: 9999px;
-  background: var(--color-green-700);
-  color: var(--color-white);
+  background: var(--brand-action);
+  color: var(--brand-action-ink);
   font-size: 1.5rem;
   box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
 }
-.detail-back-top:focus-visible { outline: 3px solid var(--color-green-400); outline-offset: 3px; }
+.detail-back-top:focus-visible { outline: 3px solid var(--brand-action-border); outline-offset: 3px; }
 @media (width >= 48rem) { .detail-screen { padding-inline: 1.5rem; } }
 @media (width < 48rem) { .property-detail { --detail-nav-height: 160px; } }
 @media (prefers-reduced-motion: reduce) {

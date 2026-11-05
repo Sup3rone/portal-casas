@@ -20,7 +20,7 @@ export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}
       <Content className="mx-auto max-w-7xl px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Portal Casas</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">ALIA FOR RENT</h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">{t('descripcion')}</p>
           </div>
           <div>

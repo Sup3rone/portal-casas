@@ -800,3 +800,7 @@ Validación actual del workspace: **58/58 scripts pasan** (incluida regresión d
 ## Acentos arena y dorado — 4 Nov 2026
 
 **Estado: HECHO en código; PENDIENTE QA humana.** Los acentos verdes de acción se centralizaron en `#b5af94`, con tinta/borde derivados de contraste para reserva, carga y envío de consultas. En modo oscuro, el acento azul visual cambió a `#c78e43`. Colores de estado y fuentes externas siguen diferenciados.
+
+## Marca en footer — 4 Nov 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** El nombre visible y la línea de derechos del footer ahora usan `ALIA FOR RENT` en es/en/fr.

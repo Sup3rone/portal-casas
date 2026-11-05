@@ -921,3 +921,7 @@ La escala morada se sustituyó por el café de referencia del logotipo Alia Forr
 ### 2026-11-04 — Datos visibles de marca y contacto
 
 El wordmark del Navbar se muestra como `ALIA FOR RENT`, con espacios visibles y la misma fuente Marcellus; el monograma conserva paths SVG y su etiqueta accesible usa el mismo nombre. El título de marca del hero conserva temporalmente su contenido independiente `ALIA FORRENT`, pues esta corrección se limitó al navbar. El correo fijo del footer es ahora `lasmoras.residences@outlook.com` y enlaza mediante `mailto:`.
+
+### 2026-11-04 — Emblema espiral en navbar
+
+El monograma SVG A-F del navbar público fue sustituido por el activo proporcionado `public/brand/alia-spiral-emblem.png`. Es un PNG transparente de 1277×1231 px, servido con `next/image` a 24×24 px para conservar proporción, reserva de espacio y optimización. El wordmark `ALIA FOR RENT`, rutas y navegación no cambian. Para restaurar el monograma anterior habría que recuperar el SVG inline `AliaMonogram` en `Navbar.tsx`; no se borró de historial Git.

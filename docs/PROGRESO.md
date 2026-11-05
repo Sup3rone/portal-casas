@@ -792,3 +792,7 @@ Validación actual del workspace: **58/58 scripts pasan** (incluida regresión d
 ## Navbar y contacto — 4 Nov 2026
 
 **Estado: HECHO en código; PENDIENTE QA humana.** El wordmark global del navbar se corrigió a `ALIA FOR RENT`; el correo del footer cambió a `lasmoras.residences@outlook.com` con enlace `mailto:`. El hero conserva su texto de marca independiente hasta que se solicite modificarlo explícitamente.
+
+## Emblema de navbar — 4 Nov 2026
+
+**Estado: HECHO en código; PENDIENTE QA humana.** El icono SVG A-F del navbar público se reemplazó por el emblema espiral café proporcionado por la clienta, como PNG transparente local optimizado mediante `next/image`. Wordmark, menús y navegación permanecen intactos.

@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import Image from 'next/image';
 import { Link, usePathname } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
@@ -28,13 +29,15 @@ function AccountThemeOption() {
   </button>;
 }
 
-function AliaMonogram() {
-  return <svg role="img" aria-label="Logo Alia For Rent" viewBox="0 0 32 32"
-    width="24" height="20" fill="none" stroke="var(--logo-color)" strokeWidth="1.25"
-    strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-    <path d="M3 28 13 4l10 24M7 19h8m4 0h.25" />
-    <path d="M17 28V4h12M17 13h9" />
-  </svg>;
+function AliaBrandEmblem() {
+  return <Image
+    src="/brand/alia-spiral-emblem.png"
+    alt="Emblema Alia For Rent"
+    width={24}
+    height={24}
+    sizes="24px"
+    className="h-6 w-6 shrink-0 object-contain"
+  />;
 }
 
 export default function Navbar({ destinations = [] }: { destinations?: PublishedDestinationGroup[] } = {}) {
@@ -126,7 +129,7 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
         <div className="flex items-center justify-between max-md:flex-wrap max-md:gap-4">
           {/* LOGO — izquierda */}
           <Link href="/" className={`${privatePage ? '' : 'home-brand inline-flex items-center gap-[9px] '}text-xl font-semibold tracking-widest text-gray-900 dark:text-gray-100`}>
-            {!privatePage && <AliaMonogram />}
+            {!privatePage && <AliaBrandEmblem />}
             <span className={`brand-wordmark ${logoFont.variable}`}>ALIA <span className="text-gray-500 dark:text-gray-400">FOR</span> RENT</span>
           </Link>
 

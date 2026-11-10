@@ -712,3 +712,15 @@ Esta sección complementa el inventario anterior y refleja las piezas añadidas 
 1. Aplicar manualmente el SQL de permiso de publicación siguiendo el protocolo Respaldo → verificación → main.
 2. Probar en QA que un ADMIN concede/revoca la capacidad y que el colaborador solo publica sus propias propiedades.
 3. Probar la sustitución del video en el panel y confirmar en Blob que el archivo anterior gestionado se elimina.
+
+### 8.6 Varios videos en el hero (T-4679, 9 de noviembre de 2026)
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Reglas | [home-videos.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/home-videos.ts) | Parseo/validación de `home_background_videos`, lista efectiva, filtro por viewport, poster y fallback. |
+| Editor | [SiteContentEditor.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/SiteContentEditor.tsx) | Lista ordenada (subida o URL), dispositivo, orden, quitar sin borrar; muestra el video anterior. |
+| Reproductor | [HomeVideoMotion.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/HomeVideoMotion.tsx) + home `page.tsx` | Dos `<video>` alternados en `ended`, precarga a la mitad, loop, reduced-motion. |
+| SQL | [site-content-home-videos.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/site-content-home-videos.sql) | Amplía el CHECK; aplicar Respaldo → main antes del deploy. |
+| Test | [test-home-videos.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-home-videos.cjs) | Alternancia, loop, salto por error, reduced-motion y un solo video. |
+
+La subida del video de home ya no borra el Blob anterior: la sección 8.2 queda superada en ese punto.

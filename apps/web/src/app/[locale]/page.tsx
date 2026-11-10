@@ -7,6 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import Reveal from '@/components/Reveal';
 import { readSiteContent, readFeaturedProperties } from '@/lib/site-content';
 import HomeVideoMotion from '@/components/HomeVideoMotion';
+import { effectiveHomeVideos, homeVideoPoster, videosForViewport } from '@/lib/home-videos';
 import HomeHeroParallax from '@/components/HomeHeroParallax';
 import Image from 'next/image';
 import HomeFeaturedLink from '@/components/HomeFeaturedLink';
@@ -34,6 +35,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const common = await getTranslations({ locale, namespace: 'common' });
   const featured = await readFeaturedProperties(content.featured_property_id);
   const labels = await getTranslations({ locale, namespace: 'properties' });
+  // T-4679: lista ordenada; sin lista se usa el video anterior o el de respaldo.
+  const heroVideos = effectiveHomeVideos(content.home_background_videos, content.home_background_video);
+  const firstDesktop = videosForViewport(heroVideos, true)[0]?.url, firstMobile = videosForViewport(heroVideos, false)[0]?.url;
+  const heroPlaylist = videosForViewport(heroVideos, true).length > 1 || videosForViewport(heroVideos, false).length > 1;
   return (
     <main className={`public-paper home-composition ${loadingStyles.content}`}>
       {/* Una sola capa de video para el hero; Sobre nosotros fluye después de destacadas. */}
@@ -46,15 +51,23 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           muted
           playsInline
           preload="metadata"
+          poster={homeVideoPoster}
           className="home-background-video absolute inset-0 h-full w-full object-cover"
         >
-          <source src={content.home_background_video || '/videos/hero.mp4'} media="(prefers-reduced-motion: no-preference)" />
+          {firstDesktop === firstMobile
+            ? firstDesktop && <source src={firstDesktop} media="(prefers-reduced-motion: no-preference)" />
+            : <>
+              {firstDesktop && <source src={firstDesktop} media="(prefers-reduced-motion: no-preference) and (min-width: 768px)" />}
+              {firstMobile && <source src={firstMobile} media="(prefers-reduced-motion: no-preference) and (max-width: 767.98px)" />}
+            </>}
         </video>
+        {/* Segundo reproductor: solo con varios videos; carga cuando el actual pasa de la mitad. */}
+        {heroPlaylist && <video id="home-background-video-next" muted playsInline preload="none" className="home-background-video absolute inset-0 h-full w-full object-cover" style={{ opacity: 0 }} />}
 
         {/* Overlay oscuro para legibilidad */}
         <div className="absolute inset-0 bg-black/40 dark:bg-black/60" />
       </div>
-      <HomeVideoMotion /></>}
+      <HomeVideoMotion videos={heroVideos} /></>}
       <section data-home-hero className="relative h-screen min-h-[600px]">
         <HomeHeroParallax />
 

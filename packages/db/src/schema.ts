@@ -7,7 +7,7 @@ export const mediaTypeEnum = pgEnum('MediaType', ['PHOTO', 'VIDEO']);
 export const siteContent = pgTable('SiteContent', {
   key: text('key').primaryKey(),
   value: text('value').notNull().default(''),
-}, table => [check('SiteContent_key_check', sql`${table.key} in ('about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image', 'about_title_es', 'about_title_en', 'about_title_fr', 'about_image')`)]);
+}, table => [check('SiteContent_key_check', sql`${table.key} in ('about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image', 'about_title_es', 'about_title_en', 'about_title_fr', 'about_image', 'home_background_videos')`)]);
 
 export const users = pgTable("User", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),

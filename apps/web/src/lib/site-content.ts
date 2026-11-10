@@ -4,8 +4,9 @@ import { db, siteContent, properties, media } from '@portal/db';
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { requireAdmin, AccessError } from './property-access';
 import { objectBody, PanelValidationError } from './panel-validation';
+import { parseHomeVideos, serializeHomeVideos } from './home-videos';
 
-export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image', 'about_title_es', 'about_title_en', 'about_title_fr', 'about_image'] as const;
+export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image', 'about_title_es', 'about_title_en', 'about_title_fr', 'about_image', 'home_background_videos'] as const;
 export type SiteContentValues = Record<typeof siteContentKeys[number], string>;
 export class SiteContentError extends PanelValidationError {
   constructor(public code: string) { super('validation'); }
@@ -29,6 +30,11 @@ export function siteContentInput(input: unknown): SiteContentValues {
       if (value && !/^[0-9]{8,15}$/.test(value)) throw new SiteContentError('INVALID_CONTACT_WHATSAPP');
     } else if (key === 'featured_property_id') {
       if (parseFeaturedSelection(value) === null) throw new SiteContentError('INVALID_FEATURED_PROPERTY');
+    } else if (key === 'home_background_videos') {
+      const videos = parseHomeVideos(value);
+      if (videos === null) throw new SiteContentError('INVALID_HOME_VIDEOS');
+      values[key] = serializeHomeVideos(videos);
+      continue;
     } else if (value) {
       try {
         const url = new URL(value);

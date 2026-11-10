@@ -9,6 +9,7 @@ import type { SiteContentValues } from '@/lib/site-content';
 import { panelRequest, panelResponseError, panelErrorKey, inputClass, buttonClass } from './request';
 import { optimizePhoto, photoMetadata, photoTypes, photoCompression, PhotoUploadError, type PhotoType } from '@/lib/photo-upload';
 import { heroVideoMetadata } from '@/lib/hero-video-upload';
+import { parseHomeVideos, serializeHomeVideos, homeVideoDevices, maxHomeVideos, type HomeVideo, type HomeVideoDevice } from '@/lib/home-videos';
 
 export default function SiteContentEditor({ content, properties }: { content: SiteContentValues; properties: { id: string; label: string; city: string }[] }) {
   const t = useTranslations('siteContent'), panel = useTranslations('panel'), router = useRouter();
@@ -17,7 +18,10 @@ export default function SiteContentEditor({ content, properties }: { content: Si
   const uploader = useTranslations('photoUpload');
   const [imageUrl, setImageUrl] = useState(content.listing_background_image);
   const [aboutImageUrl, setAboutImageUrl] = useState(content.about_image);
-  const [videoUrl, setVideoUrl] = useState(content.home_background_video);
+  // Lista nueva (T-4679). home_background_video se conserva intacta como video anterior.
+  const [videos, setVideos] = useState<HomeVideo[]>(() => parseHomeVideos(content.home_background_videos ?? '') ?? []);
+  const [videoUrlDraft, setVideoUrlDraft] = useState('');
+  const previousVideo = content.home_background_video;
   const uploadTarget = useRef<'listing_background_image' | 'about_image'>('listing_background_image');
   const [uploading, setUploading] = useState(false), [uploadStatus, setUploadStatus] = useState('');
   const [videoUploading, setVideoUploading] = useState(false), [videoStatus, setVideoStatus] = useState('');
@@ -57,6 +61,7 @@ export default function SiteContentEditor({ content, properties }: { content: Si
   }
   async function uploadVideo(file?: File) {
     if (!file || busy || uploading || videoUploading) return;
+    if (videos.length >= maxHomeVideos) { setVideoStatus('videoListFull'); return; }
     setVideoUploading(true); setVideoStatus('');
     try {
       heroVideoMetadata(file.type, file.size);
@@ -65,18 +70,28 @@ export default function SiteContentEditor({ content, properties }: { content: Si
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw panelResponseError(response.status, payload);
       if (typeof payload.url !== 'string' || !payload.url.startsWith('https://')) throw new Error('error');
-      setVideoUrl(payload.url); setVideoStatus('videoUploaded'); router.refresh();
+      const uploadedUrl: string = payload.url;
+      setVideos(current => current.length >= maxHomeVideos ? current : [...current, { url: uploadedUrl, device: 'all' }]); setVideoStatus('videoUploaded');
     } catch (error) {
       setVideoStatus(error instanceof PhotoUploadError ? error.code === 'INVALID_VIDEO_SIZE' ? 'invalidVideoSize' : 'invalidVideoType' : panelErrorKey(error));
     } finally {
       setVideoUploading(false); if (videoFileRef.current) videoFileRef.current.value = '';
     }
   }
+  function addVideo(url: string) {
+    const value = url.trim();
+    if (videos.length >= maxHomeVideos) { setVideoStatus('videoListFull'); return; }
+    if (parseHomeVideos(JSON.stringify([{ url: value, device: 'all' }])) === null) { setVideoStatus('videoInvalidUrl'); return; }
+    setVideos(current => [...current, { url: value, device: 'all' }]); setVideoUrlDraft(''); setVideoStatus('');
+  }
+  function moveVideo(index: number, offset: -1 | 1) {
+    setVideos(current => { const next = [...current]; const [item] = next.splice(index, 1); next.splice(index + offset, 0, item); return next; });
+  }
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage('');
     const form = new FormData(event.currentTarget);
     try {
-      await panelRequest('/api/panel/site-content', 'PUT', { ...Object.fromEntries(Object.keys(content).map(key => [key, form.get(key)])), featured_property_id: serializeFeaturedSelection(featuredIds) });
+      await panelRequest('/api/panel/site-content', 'PUT', { ...Object.fromEntries(Object.keys(content).map(key => [key, form.get(key)])), home_background_videos: serializeHomeVideos(videos), featured_property_id: serializeFeaturedSelection(featuredIds) });
       setMessage('saved'); router.refresh();
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
@@ -113,7 +128,8 @@ export default function SiteContentEditor({ content, properties }: { content: Si
       </label>
       ))}
       <p className="text-sm text-gray-600 dark:text-gray-300">{t('featuredHint')}</p>
-      <input name="home_background_video" type="hidden" value={videoUrl} readOnly />
+      <input name="home_background_video" type="hidden" value={previousVideo} readOnly />
+      <input name="home_background_videos" type="hidden" value={serializeHomeVideos(videos)} readOnly />
       <div onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void uploadVideo(event.dataTransfer.files?.[0]); }} className="rounded-xl border border-dashed p-4 dark:border-gray-700" aria-busy={videoUploading}>
         <p className="font-medium">{t('videoLabel')}</p>
         <p className="text-sm text-gray-600 dark:text-gray-300">{t('videoDrop')}</p>
@@ -121,9 +137,36 @@ export default function SiteContentEditor({ content, properties }: { content: Si
         <input ref={videoFileRef} type="file" accept="video/mp4,video/webm" className="sr-only" disabled={busy || uploading || videoUploading} onChange={event => { void uploadVideo(event.currentTarget.files?.[0]); }} />
         <button type="button" className={`${buttonClass} mt-3`} disabled={busy || uploading || videoUploading} onClick={() => videoFileRef.current?.click()}>{t(videoUploading ? 'videoUploading' : 'videoChoose')}</button>
         {videoUploading && <progress className="mt-3 w-full accent-green-700" aria-label={t('videoUploading')} />}
-        {videoStatus && <p role={videoStatus === 'videoUploaded' ? 'status' : 'alert'} className="mt-3">{videoStatus === 'videoUploaded' ? t(videoStatus) : panel(videoStatus)}</p>}
+        {videoStatus && <p role={videoStatus === 'videoUploaded' ? 'status' : 'alert'} className="mt-3">{['videoUploaded', 'videoListFull', 'videoInvalidUrl'].includes(videoStatus) ? t(videoStatus) : panel(videoStatus)}</p>}
       </div>
-      {videoUrl && <video src={videoUrl} controls muted playsInline preload="metadata" className="max-h-64 w-full rounded-xl" />}
+      <div className="space-y-3">
+        <p className="font-medium">{t('videoListTitle')}</p>
+        {!videos.length && <p className="text-sm text-gray-600 dark:text-gray-300">{t('videoListEmpty')}</p>}
+        <ol className="space-y-3">
+          {videos.map((video, index) => <li key={video.url + index} className="space-y-2 rounded-xl border p-3 dark:border-gray-700">
+            <video src={video.url} controls muted playsInline preload="metadata" className="max-h-48 w-full rounded-lg" />
+            <p className="break-all text-xs text-gray-600 dark:text-gray-300">{index + 1}. {video.url}</p>
+            <label className="block text-sm">{t('videoDevice')}
+              <select value={video.device} className={inputClass} onChange={event => { const device = event.target.value as HomeVideoDevice; setVideos(current => current.map((item, slot) => slot === index ? { ...item, device } : item)); }}>
+                {homeVideoDevices.map(device => <option key={device} value={device}>{t(device === 'all' ? 'videoDeviceAll' : device === 'mobile' ? 'videoDeviceMobile' : 'videoDeviceDesktop')}</option>)}
+              </select>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className={buttonClass} disabled={index === 0} onClick={() => moveVideo(index, -1)}>{t('videoUp')}</button>
+              <button type="button" className={buttonClass} disabled={index === videos.length - 1} onClick={() => moveVideo(index, 1)}>{t('videoDown')}</button>
+              <button type="button" className={buttonClass} onClick={() => setVideos(current => current.filter((_, slot) => slot !== index))}>{t('videoRemove')}</button>
+            </div>
+          </li>)}
+        </ol>
+        <label className="block text-sm">{t('videoUrlLabel')}
+          <input type="url" value={videoUrlDraft} onChange={event => setVideoUrlDraft(event.target.value)} maxLength={2048} placeholder="https://" className={inputClass} />
+        </label>
+        <button type="button" className={buttonClass} disabled={!videoUrlDraft.trim() || videos.length >= maxHomeVideos} onClick={() => addVideo(videoUrlDraft)}>{t('videoAddUrl')}</button>
+        {previousVideo && <div className="space-y-2 text-sm">
+          <p className="text-gray-600 dark:text-gray-300">{t('videoPrevious')} <span className="break-all">{previousVideo}</span></p>
+          <button type="button" className={buttonClass} disabled={videos.length >= maxHomeVideos || videos.some(video => video.url === previousVideo)} onClick={() => addVideo(previousVideo)}>{t('videoAddPrevious')}</button>
+        </div>}
+      </div>
       <label className="block text-sm">{t('listingImageLabel')}
         <input name="listing_background_image" type="url" readOnly value={imageUrl} className={inputClass} />
       </label>

@@ -1,6 +1,6 @@
 # Mapa del código y funcionamiento de portal-casas
 
-**Revisión:** 29 de octubre de 2026. **Referencia Git:** `4dab447d`, rama `main` al revisar, más los archivos locales presentes.
+**Revisión:** 29 de octubre de 2026. **Referencia Git:** `4dab447d`, rama `main` al revisar, más los archivos locales presentes. **Última actualización:** 9 de noviembre de 2026 (sección 9).
 
 Esta guía permite localizar qué archivo controla cada parte del proyecto y cómo se conecta con las demás. Describe fuentes del repositorio; no certifica el despliegue, los datos de Neon ni el estado de migraciones aplicadas. No se consultó la BD ni se ejecutaron navegador, build o migraciones para crearla.
 
@@ -712,3 +712,54 @@ Esta sección complementa el inventario anterior y refleja las piezas añadidas 
 1. Aplicar manualmente el SQL de permiso de publicación siguiendo el protocolo Respaldo → verificación → main.
 2. Probar en QA que un ADMIN concede/revoca la capacidad y que el colaborador solo publica sus propias propiedades.
 3. Probar la sustitución del video en el panel y confirmar en Blob que el archivo anterior gestionado se elimina.
+
+## 9. Actualización del mapa — 9 de noviembre de 2026
+
+Cambios en `main` hasta `6277c34e` más la rama de T-4683. Como en la sección 8, este anexo describe el código vigente cuando difiere de secciones anteriores. Convención de ramas: `alia/T-<folio>_descripcion`.
+
+### 9.1 Sync iCal idempotente (T-4680, en `main`)
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Normalización | [ical-sync.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/ical-sync.ts) | `isCalendar` (sin `VCALENDAR` = feed caído), `feedEvents` (una entrada por UID+RECURRENCE-ID, sin `STATUS:CANCELLED`) e `icalDay` (día completo en fecha local). |
+| Sync | [route.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/api/ical/sync/route.ts) | Por feed: upsert por `(icalFeedId, icalUid)` y borrado de lo no vigente (canceladas, ausentes, filas antiguas sin UID). Feed caído = no se toca (`failedFeeds`); 502 si ninguno se lee. |
+| Datos | [schema.ts](C:/Users/menib/Documents/GitHub/portal-casas/packages/db/src/schema.ts) + [booking-ical-uid.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/booking-ical-uid.sql) | `Booking.icalUid` e índice único parcial `Booking_icalFeed_uid_unique`. |
+| Aviso | [CalendarBoard.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/CalendarBoard.tsx) | «Sincronizado, pero N calendarios no se pudieron leer». |
+| Diagnóstico | [DIAGNOSTICO-ICAL-SYNC.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/DIAGNOSTICO-ICAL-SYNC.md) | Causa raíz, efectos y **alta de feeds por SQL** (no hay UI para `IcalFeed`). |
+
+### 9.2 Parallax del hero y títulos de destacadas (T-4682, en `main`)
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Utilidad | [lerp.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/lerp.ts) | `lerp`, `frameFactor` (independiente de FPS) y `approach`. |
+| Efecto | [HomeHeroParallax.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/HomeHeroParallax.tsx) | Video y títulos del hero a distinta velocidad con inercia; reposo, tope en el hero, menor en móvil, apagado con reduced-motion. Se engancha al marcado existente (`#home-background-video`, `[data-home-hero] h1/h2`). Velocidades en `heroParallax`. |
+| Destacadas | `apps/web/src/app/globals.css` (`.home-featured-image`, `.home-featured-title`) | Título medido por el ancho de la tarjeta (container queries), palabras completas con guion, máximo 3 líneas. |
+
+### 9.3 Aviso a limpieza por WhatsApp — wa.me (T-4683)
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Dato | `Property.cleaningWhatsapp` + [property-cleaning-whatsapp.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/property-cleaning-whatsapp.sql) | 8–15 dígitos, solo panel. **Sin el SQL fallan las fichas y el panel.** |
+| Formulario | [PropertyForm.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/PropertyForm.tsx) + `panel-validation.ts` | Campo «WhatsApp de limpieza (opcional)». |
+| Reglas | [cleaning-notice.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/cleaning-notice.ts) | Enlace wa.me con texto codificado, solo reservas reales (no host-block ni BlockDate), fechas sin desfase. |
+| Confirmación | [route.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/api/bookings/create/route.ts) + [MessageModal.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/MessageModal.tsx) | La API devuelve `cleaningNotice` a quien gestiona la propiedad; el modal muestra «Avisar a limpieza por WhatsApp» tras confirmar. |
+| Calendario | `occupation-calendar.ts` + `CalendarBoard.tsx` | Mismo enlace en el detalle de cada reserva, fuera del tooltip. |
+
+No hay envío automático: la opción B (Cloud API de Meta) reutilizaría el mismo campo y disparador. Las vías no oficiales (Baileys, whatsapp-web.js…) se descartaron por riesgo de baneo.
+
+### 9.4 Pendiente de merge: varios videos en el hero (T-4679)
+
+La rama `alia/T-4679_hero-varios-videos` añade `SiteContent.home_background_videos` (lista ordenada con dispositivo), alternancia de dos `<video>` en `HomeVideoMotion`, poster y subida sin borrado del video anterior. Trae su propio anexo (§8.6) y SQL `site-content-home-videos.sql`. Su diagnóstico vive en la rama `alia/T-4677_diagnostico-hero-videos` (`docs/DIAGNOSTICO-HERO-VIDEOS.md`), aún sin subir.
+
+### 9.5 SQL que deben estar aplicados antes de desplegar
+
+| SQL | Tarea | Respaldo | main |
+|---|---|---|---|
+| `user-publication-permission.sql` | Publicación delegada | Sin confirmar | Sin confirmar |
+| `booking-ical-uid.sql` | T-4680 | ✅ Verificado | Sin confirmar |
+| `property-cleaning-whatsapp.sql` | T-4683 | ✅ Verificado | Pendiente |
+| `site-content-home-videos.sql` | T-4679 | ✅ Verificado | Pendiente (al mergear) |
+
+### 9.6 Verificación
+
+Suite offline: 61 `scripts/test-*.cjs`, 60 en verde; `test-panel.cjs` falla desde `21dd8412` (colaborador sin `canPublishProperties` recibe 403 al despublicar) y está pendiente. TypeScript limpio; ESLint sin errores (5 warnings previos). Verificaciones de navegador hechas con Chrome headless local contra Respaldo; la QA visual final sigue siendo humana.

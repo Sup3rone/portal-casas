@@ -4,6 +4,7 @@ import { db, properties, users } from "@portal/db";
 import { and, eq, sql } from "drizzle-orm";
 import { AccessError, accessFailure, managedProperties, requirePropertyManager } from '@/lib/property-access';
 import { sendEmail } from "@/lib/mailer";
+import { propertyLocation } from "@/lib/destinations";
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,6 +48,19 @@ export async function POST(req: NextRequest) {
       returning "id"
     `);
     if (!result.rows.length) throw new AccessError(404);
+
+    // T-4683: datos para el botón «Avisar a limpieza» (solo a quien gestiona la propiedad). Nunca rompe la reserva.
+    let cleaningNotice: { phone: string; property: string; location: string } | null = null;
+    try {
+      const [notice] = await db
+        .select({ phone: properties.cleaningWhatsapp, property: properties.titleEs, state: properties.state, destinationCity: properties.destinationCity, city: properties.city })
+        .from(properties)
+        .where(and(eq(properties.id, propertyId), managedProperties(manager)))
+        .limit(1);
+      if (notice?.phone) cleaningNotice = { phone: notice.phone, property: notice.property, location: propertyLocation(notice) };
+    } catch (noticeError) {
+      console.error('No se pudo leer el WhatsApp de limpieza (reserva OK):', noticeError);
+    }
 
     // 📧 Email de confirmación — NUNCA rompe la reserva si falla
     try {
@@ -103,7 +117,7 @@ export async function POST(req: NextRequest) {
       console.error('Fallo el email de confirmación (reserva OK):', emailError);
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, cleaningNotice });
   } catch (e) {
     const denied = accessFailure(e);
     if (denied) return NextResponse.json({ error: denied.message }, { status: denied.status });

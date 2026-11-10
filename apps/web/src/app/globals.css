@@ -130,6 +130,8 @@ html { scroll-behavior: smooth; }
   display: flex;
   align-items: flex-end;
   min-height: min-content;
+  /* T-4682: el título se mide por el ancho de la tarjeta, no de la ventana. */
+  container-type: inline-size;
 }
 .home-featured-veil { background: linear-gradient(to bottom, transparent, var(--featured-veil) 40%, var(--featured-text-scrim)); opacity: 0; pointer-events: none; transition: opacity var(--featured-reveal-duration) ease-out; }
 .home-featured-content {
@@ -138,7 +140,12 @@ html { scroll-behavior: smooth; }
   text-shadow: 0 1px 4px rgb(0 0 0 / 85%);
 }
 .home-featured-content p { color: var(--featured-text); }
-.home-featured-title { font-size: clamp(1.6875rem, 4vw, 2.625rem); }
+.home-featured-title {
+  font-size: clamp(1.125rem, 7cqi, 2.25rem);
+  /* Palabras completas o con guion; como máximo 3 líneas para no salirse por arriba de la tarjeta 4:3. */
+  overflow-wrap: normal; hyphens: auto;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+}
 .home-featured-subtitle { font-size: clamp(.9375rem, 1.07vw, .9625rem); }
 .home-featured-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: anywhere; margin-top: .75rem; font-size: .875rem; line-height: 1.5; }
 .home-featured-reveal { opacity: 0; visibility: hidden; max-height: 0; overflow: hidden; transform: translateY(6px); transition: opacity var(--featured-reveal-duration) ease-out, transform var(--featured-reveal-duration) ease-out, max-height var(--featured-reveal-duration) ease-out, visibility var(--featured-reveal-duration); }

@@ -33,7 +33,7 @@ async function main() {
   const base={id:'m',name:'Guest',email:'guest@test.invalid',phone:null,body:'Inquiry',propertyId:'pa',propertyName:'House',propertySlug:'pa',userId:null,startDate:'2027-01-01'};
   // SSR usa los estados iniciales reales y verifica el botón de confirmación.
   for (const endDate of ['2027-01-01','2027-01-02']) {
-    const html=renderToStaticMarkup(React.createElement(Modal,{message:{...base,endDate},onClose(){},onSuccess(){},onDelete:async()=>{}}));
+    const html=renderToStaticMarkup(React.createElement(req('next-intl').NextIntlClientProvider,{locale:'es',messages:JSON.parse(require('node:fs').readFileSync('apps/web/messages/es.json','utf8')),timeZone:'UTC'},React.createElement(Modal,{message:{...base,endDate},onClose(){},onSuccess(){},onDelete:async()=>{}})));
     const confirm = html.match(/<button[^>]*>[^<]*Confirmar[^<]*<\/button>/)?.[0];
     assert.ok(confirm); assert.equal(/\sdisabled(?:=|\s|>)/.test(confirm),endDate===base.startDate);
   }

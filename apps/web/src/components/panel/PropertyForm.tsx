@@ -30,6 +30,7 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
     body.contactName = form.get('contactName') || null;
     body.contactEmail = form.get('contactEmail') || null;
     body.whatsapp = form.get('whatsapp') || null;
+    body.cleaningWhatsapp = form.get('cleaningWhatsapp') || null;
     try {
       const result = await panelRequest(property ? `/api/properties/${property.id}` : '/api/properties', property ? 'PATCH' : 'POST', body);
       if (!property) router.push(`/panel/propiedades/${result.id}`);
@@ -54,6 +55,12 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
             title={t('whatsappHint')} defaultValue={property?.whatsapp ?? ''} className={inputClass}
             onInvalid={event => event.currentTarget.setCustomValidity(t('whatsappHint'))} onInput={event => event.currentTarget.setCustomValidity('')} />
           <span className="text-xs text-gray-600 dark:text-gray-300">{t('whatsappHint')}</span>
+        </label>
+        <label className="block text-sm">{t('fields.cleaningWhatsapp')}
+          <input key={`cleaningWhatsapp:${property?.cleaningWhatsapp ?? ''}`} name="cleaningWhatsapp" type="tel" inputMode="numeric" pattern="[0-9]{8,15}" minLength={8} maxLength={15}
+            title={t('whatsappHint')} defaultValue={property?.cleaningWhatsapp ?? ''} className={inputClass}
+            onInvalid={event => event.currentTarget.setCustomValidity(t('whatsappHint'))} onInput={event => event.currentTarget.setCustomValidity('')} />
+          <span className="text-xs text-gray-600 dark:text-gray-300">{t('cleaningWhatsappHint')}</span>
         </label>
         <label className="block text-sm">{t('fields.contactEmail')}
           <input key={`contactEmail:${property?.contactEmail ?? ''}`} name="contactEmail" type="email" maxLength={254} defaultValue={property?.contactEmail ?? ''} className={inputClass} />

@@ -8,6 +8,7 @@ import Reveal from '@/components/Reveal';
 import { readSiteContent, readFeaturedProperties } from '@/lib/site-content';
 import HomeVideoMotion from '@/components/HomeVideoMotion';
 import { effectiveHomeVideos, homeVideoPoster, videosForViewport } from '@/lib/home-videos';
+import HomeHeroParallax from '@/components/HomeHeroParallax';
 import Image from 'next/image';
 import HomeFeaturedLink from '@/components/HomeFeaturedLink';
 import { pageMetadata } from '@/lib/seo';
@@ -68,6 +69,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </div>
       <HomeVideoMotion videos={heroVideos} /></>}
       <section data-home-hero className="relative h-screen min-h-[600px]">
+        <HomeHeroParallax />
 
         {/* Contenido centrado */}
         <Reveal className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">

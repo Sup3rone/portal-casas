@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { cleaningNoticeHref, noticeDate, type CleaningNotice } from "@/lib/cleaning-notice";
 
 export type MessageData = {
   id: string;
@@ -52,6 +54,9 @@ export default function MessageModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [prevMessage, setPrevMessage] = useState(message);
+  // T-4683: tras confirmar, si la casa tiene WhatsApp de limpieza, ofrecer el aviso antes de cerrar.
+  const [notice, setNotice] = useState<(CleaningNotice & { start: string; end: string }) | null>(null);
+  const t = useTranslations("occupationCalendar"), locale = useLocale();
 
   // Resetear fechas si se abre otro mensaje
   if (message !== prevMessage) {
@@ -59,6 +64,7 @@ export default function MessageModal({
     setStartDate(toDateInput(message.startDate));
     setEndDate(toDateInput(message.endDate));
     setError(null);
+    setNotice(null);
   }
 
   const valid = Boolean(startDate && endDate && startDate < endDate);
@@ -82,6 +88,7 @@ export default function MessageModal({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al confirmar");
+      if (data.cleaningNotice?.phone) { setNotice({ ...data.cleaningNotice, start: startDate, end: endDate }); setSaving(false); return; }
       onSuccess();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error inesperado");
@@ -187,6 +194,14 @@ export default function MessageModal({
           </p>
         )}
 
+        {notice ? (() => {
+          const href = cleaningNoticeHref(notice.phone, t("cleaningNoticeMessage", { property: notice.property, location: notice.location || "—", start: noticeDate(notice.start, locale), end: noticeDate(notice.end, locale) }));
+          return <div className="mt-6 space-y-3" role="status">
+            <p className="rounded-lg bg-green-50 p-3 text-sm font-medium text-green-800 dark:bg-green-950 dark:text-green-300">{t("bookingConfirmed")}</p>
+            {href && <a href={href} target="_blank" rel="noopener noreferrer" className="flex min-h-11 w-full items-center justify-center rounded-lg bg-[#25D366] py-3 font-bold text-black">{t("cleaningNotice")}</a>}
+            <button onClick={onSuccess} className="w-full rounded-lg bg-gray-200 py-3 font-bold text-gray-800 transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">{t("cleaningNoticeDone")}</button>
+          </div>;
+        })() : <>
         <div className="mt-6 flex gap-3">
           <button
             onClick={handleConfirm}
@@ -210,6 +225,7 @@ export default function MessageModal({
         >
           🗑 Eliminar mensaje
         </button>
+        </>}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT", "COLLABORATOR"]);
@@ -54,12 +54,15 @@ export const properties = pgTable('Property', {
   contactName: text('contactName'),
   contactEmail: text('contactEmail'),
   whatsapp: text('whatsapp'),
+  // T-4683: WhatsApp de la persona de limpieza (solo panel; nunca se publica).
+  cleaningWhatsapp: text('cleaningWhatsapp'),
 }, table => [
   index('Property_ownerId_idx').on(table.ownerId),
   check('Property_section_titles_check', sql`${table.sectionTitles} is null or jsonb_typeof(${table.sectionTitles}) = 'object'`),
   check('Property_destination_pair_check', sql`(${table.state} is null and ${table.destinationCity} is null) or (${table.state} is not null and ${table.destinationCity} is not null and btrim(${table.state}) <> '' and btrim(${table.destinationCity}) <> '')`),
   check('Property_rentalType_check', sql`${table.rentalType} in ('nocturna', 'anual', 'ambas')`),
   check('Property_whatsapp_check', sql`${table.whatsapp} is null or ${table.whatsapp} ~ '^[0-9]{8,15}$'`),
+  check('Property_cleaningWhatsapp_check', sql`${table.cleaningWhatsapp} is null or ${table.cleaningWhatsapp} ~ '^[0-9]{8,15}$'`),
 ]);
 
 export const media = pgTable('Media', {
@@ -122,11 +125,13 @@ export const bookings = pgTable('Booking', {
   endDate: date('endDate').notNull(),
   source: text('source').notNull().default('manual'),
   guestUserId: text('guestUserId').references(() => users.id),
+  // T-4680: UID del VEVENT (+RECURRENCE-ID) para que el sync iCal sea idempotente.
+  icalUid: text('icalUid'),
 }, table => [foreignKey({
   name: 'Booking_icalFeed_property_fk',
   columns: [table.icalFeedId, table.propertyId],
   foreignColumns: [icalFeeds.id, icalFeeds.propertyId],
-})]);
+}), uniqueIndex('Booking_icalFeed_uid_unique').on(table.icalFeedId, table.icalUid).where(sql`${table.icalFeedId} is not null`)]);
 
 export const blockDates = pgTable('BlockDate', {
   id: text('id').primaryKey(),

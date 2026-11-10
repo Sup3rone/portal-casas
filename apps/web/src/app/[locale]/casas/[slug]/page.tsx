@@ -27,6 +27,7 @@ import Footer from '@/components/Footer';
 import DetailFooterFlow from '@/components/DetailFooterFlow';
 import { descriptionExcerpt, pageMetadata } from '@/lib/seo';
 import { propertySeoPhoto, readPublishedProperty } from '@/lib/seo-property';
+import { jsonLdScript, propertyJsonLd } from '@/lib/property-jsonld';
 import { publicFrenchText } from '@/i18n/public-french-text';
 
 // Experimento conservado, pero desactivado: rueda y touch usan scroll nativo.
@@ -217,8 +218,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
             {warningDescription && <p className="whitespace-pre-wrap break-words leading-relaxed">{warningDescription}</p>}
           </Reveal>}</div></SectionBackground>;
   moduleNodes.reserva = reservationBlock;
+  // T-4719: datos estructurados; solo llega aquí una propiedad publicada.
+  const structuredData = jsonLdScript(propertyJsonLd({
+    // Solo fotos que la ficha muestra en la galería principal (no portadas retiradas).
+    property, locale, title: title?.trim() || property.titleEs, description, mediaList: principal, rates: rateRows,
+    labels: { weekday: t('seo.jsonLd.weekday'), weekend: t('seo.jsonLd.weekend'), perNight: t('seo.jsonLd.perNight') },
+  }));
 
-  return (
+  return (<>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
     <PropertyDetailScroll key={property.id}>
       <DetailSectionTransitions className={`detail-editorial detail-independent detail-snap-container detail-fullpage public-paper detail-zigzag ${loadingStyles.content}`} tabIndex={0} data-detail-flow data-fullpage-enabled={String(DETAIL_FULLPAGE_ENABLED)}>
 {/* ===== GALERÍA PRINCIPAL: mosaico con lightbox ===== */}
@@ -265,5 +273,5 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       {editorial.length > 0 && <a href="#reservar" className="fixed bottom-6 left-6 z-40 hidden rounded-full bg-green-700 px-6 py-3 font-semibold text-white shadow-lg hover:bg-green-800 lg:flex">{isAnnual ? t('details.annualContactTitle') : t('details.reservar')}</a>}
       <DetailFooterFlow><Footer inDetail /></DetailFooterFlow>
     </PropertyDetailScroll>
-  );
+  </>);
 }

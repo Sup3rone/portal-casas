@@ -3,6 +3,7 @@ import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import { routing } from './i18n/routing';
 import { authConfig } from './auth.config';
+import { adminRouteAllowed } from './lib/admin-route-access';
 
 const intlMiddleware = createMiddleware(routing);
 const { auth } = NextAuth(authConfig);
@@ -15,10 +16,9 @@ export default auth(async (req) => {
   const pathname = req.nextUrl.pathname;
   const isAdmin = session?.user?.role === 'ADMIN';
 
-  // 🔒 Protección de /{locale}/admin/* — solo rol ADMIN
-  const adminMatch = pathname.match(/^\/(es|en|fr)\/admin(\/.*)?$/);
-  if (adminMatch && !isAdmin) {
-    const locale = adminMatch[1];
+  // 🔒 Protección de /{locale}/admin/* — ADMIN; COLLABORATOR solo en mensajes/tarifas (T-4719)
+  if (adminRouteAllowed(pathname, session?.user?.role) === false) {
+    const locale = pathname.split('/')[1];
     return NextResponse.redirect(new URL(`/${locale}/login?reason=admin`, req.url));
   }
 

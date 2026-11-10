@@ -1,5 +1,19 @@
 # Contexto — Portal Casas
 
+## Herramientas y habilidades
+
+### Skill `frontend-design` (instalada 2026-11-10)
+
+Plugin oficial de Anthropic `frontend-design@claude-plugins-official` v1.1.1, instalado a nivel de usuario (no vive en el repo). Eleva el criterio estético del código frontend: plan de diseño (paleta, tipografía, layout, principios) revisado contra el encargo antes de construir, evitar estéticas genéricas de IA, tipografía deliberada, motion escaso e intencional, calidad mínima de accesibilidad y textos claros desde el usuario.
+
+**Alcance en este proyecto: el design system vigente MANDA.** La skill eleva el criterio; NO autoriza rediseños no pedidos ni pisar convenciones. Se respetan siempre:
+
+- Tokens beige/mates existentes (aunque la skill catalogue el fondo crema como estética «por defecto», aquí es decisión del proyecto y no se cambia).
+- Componentes reutilizables existentes antes que piezas nuevas.
+- Textos solo en los diccionarios es/en/fr.
+- WCAG AA, área táctil mínima de 44 px, foco visible y `prefers-reduced-motion`.
+- Banderas reversibles y «nada se borra».
+
 ## Detalle: scroll nativo restaurado — 15 Oct 2026
 
 Fullpage ahora está desactivado en ejecución, no solo pausado documentalmente: `DETAIL_FULLPAGE_ENABLED = false` en casas/[slug]/page.tsx impide los listeners wheel/touchmove con preventDefault y el snap mandatory del documento. El motor permanece conservado en EditorialPresentation; para reactivarlo, cambiar el flag a true tras aprobación/QA. Se mantienen las clases visuales, fondos, alturas, contenido, galería, navbar y↑. Diagnóstico/origen6cc01d0ca y procedimiento en DETALLE-SCROLL-SNAP.md. La pausa del cierre13-Oct descrita abajo no apagaba código; esta actualización la sustituye en cuanto al comportamiento del scroll.
@@ -961,3 +975,21 @@ Sustituye la nota de 2026-10 de que el sync «no modifica la deduplicación pree
 ### 2026-11-09 — Aviso manual a limpieza por WhatsApp (T-4683)
 
 Opción A del informe de WhatsApp: sin API ni envío automático. `Property.cleaningWhatsapp` (CHECK `^[0-9]{8,15}$`, validado como `whatsapp` en `panel-validation.ts`, nunca se expone en páginas públicas). `POST /api/bookings/create` devuelve `cleaningNotice {phone, property, location}` solo a quien gestiona la propiedad (misma guarda que el insert); `MessageModal` lo usa para mostrar el botón tras confirmar en lugar de cerrar. `occupationCalendar` incluye el número y la ubicación; `CalendarBoard` pinta el enlace fuera del tooltip solo para reservas reales (`isCleaningNoticeBooking`: excluye host-block y BlockDate). Texto en `occupationCalendar.cleaningNoticeMessage` (es/en/fr, idioma del panel). Fechas con `noticeDate` sin desfase de zona horaria. La opción B (Cloud API de Meta) puede reutilizar el mismo campo y disparador.
+
+### 2026-11-10 — JSON-LD por ficha y 404 de marca (T-4719)
+
+robots y sitemap ya existían (13-oct) y cubren todas las rutas públicas: home, `/casas` y fichas publicadas en es/en/fr, con alternates hreflang es/en/fr + x-default. Las anuales publicadas entran; panel/API/auth/mi-cuenta siguen fuera. No hay páginas de contacto ni de política, así que no se añadieron rutas. Sin cambios en `robots.ts`/`sitemap.ts`.
+
+`lib/property-jsonld.ts` arma un `VacationRental` (schema.org, subtipo de LodgingBusiness) por ficha publicada: `@id`/`url` canónica del idioma, `inLanguage`, nombre (respaldo titleEs), descripción, hasta 10 fotos de la galería principal (portadas primero, sin VIDEO ni portadas retiradas), `PostalAddress` (calle; ciudad/estado/`MX` solo si el destino es del catálogo SECTUR), `GeoCoordinates`, `Accommodation` (capacidad, recámaras, baños solo si son enteros) y `makesOffer` con `UnitPriceSpecification` en MXN por noche: base entre semana/fin de semana sin periodo y temporadas con `validFrom`/`validThrough`. Dato ausente o ≤ 0 → propiedad omitida. Las anuales no publican tarifa (igual que la ficha). Textos de tarifa en `seo.jsonLd.*` (es/en/fr). Serializado con `jsonLdScript`, que escapa `<`, U+2028 y U+2029.
+
+404: `app/[locale]/not-found.tsx` (placa de número de casa «404» decorativa, h1 + texto, enlaces a `/casas` y `/`, tokens existentes, enlaces de 44 px, foco visible, sin animación) y `app/[locale]/[...rest]/page.tsx` que llama a `notFound()` para URLs sin ruta. Textos en `notFoundPage.*` (ya existía una clave anidada `notFound` en el panel; por eso otro nombre). Con `loading.tsx` en `[locale]` la respuesta puede ir en streaming: Next devuelve entonces 200 con `<meta name="robots" content="noindex">` en lugar de 404 HTTP (documentado en `next/dist/docs`, no medido aquí).
+
+Dominio: sigue saliendo solo de `PUBLIC_SITE_URL` (fallback `http://localhost:3000`). Para producción hay que configurar en Vercel el origen real (hoy `https://aliaforrent.vercel.app`, o el dominio propio cuando exista). Si no se configura, canonical/hreflang/sitemap/JSON-LD apuntarían a localhost.
+
+Menú del colaborador (incluido en T-4719): «Mensajes» y «Tarifas» del panel apuntan a `/admin/mensajes` y `/admin/tarifas`, pero el proxy solo dejaba pasar a ADMIN en `/admin/*`; el colaborador acababa en `/login?reason=admin` y de ahí, por tener sesión, en `/mi-cuenta`. Venía de `45b6024e` (menú por rol sin abrir el proxy). `lib/admin-route-access.ts` (`adminRouteAllowed`) deja entrar a COLLABORATOR solo en esas dos secciones; el resto de `/admin` (calendario incluido) sigue solo para ADMIN. Las páginas ya validaban en servidor con `requirePropertyManager` y filtran por propiedad gestionada, así que el colaborador solo ve lo suyo. Test: `test-admin-route-access.cjs`.
+
+#### URL base del SEO: variable `PUBLIC_SITE_URL` (corrección 2026-11-10)
+
+Nombre exacto: **`PUBLIC_SITE_URL`** (sin prefijo `NEXT_PUBLIC_`). Es la única fuente de la URL base: `lib/seo.ts` → `siteUrl()`, y de ahí salen `robots.ts`, `sitemap.ts`, canonical/hreflang (`pageMetadata`/`seoAlternates`), `metadataBase`, la imagen social y el JSON-LD (`property-jsonld.ts`). No hay dominio ni localhost escritos en ninguno de ellos; `http://localhost:3000` es solo el valor por defecto cuando la variable falta. `NEXT_PUBLIC_SITE_URL` es otra variable, solo para el enlace de recuperación de contraseña (`olvide-password/actions.ts`); configurarla no cambia el SEO.
+
+Configuración en Vercel (Emma): `PUBLIC_SITE_URL = https://aliaforrent.vercel.app` (origen, sin `/` final ni ruta), en **Production** y también en **Preview** si se quiere revisar el SEO en las previews. `robots.txt` se genera en el build y Vercel lo cachea: tras cambiar la variable hace falta **un deploy nuevo** (Redeploy) para que cambie. Estado observado el 2026-11-10 en `https://aliaforrent.vercel.app`: robots, sitemap y canonical usaban `https://portal-casas-web.vercel.app` (la variable existe en Production con ese valor); el localhost que vio Emma corresponde a un deployment sin la variable (probablemente la preview del PR #7). No se cambia código: la variable es el arreglo.

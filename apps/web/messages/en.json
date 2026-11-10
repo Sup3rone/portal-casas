@@ -3,7 +3,19 @@
     "homeTitle": "Houses and apartments for your next stay",
     "homeDescription": "Find houses and apartments for your stay. Browse photos, locations and availability, and contact Portal Casas to plan your booking.",
     "listingTitle": "Houses and apartments",
-    "listingDescription": "Explore properties from Portal Casas. Browse photos, guest capacity, locations and availability to find your next stay."
+    "listingDescription": "Explore properties from Portal Casas. Browse photos, guest capacity, locations and availability to find your next stay.",
+    "jsonLd": {
+      "weekday": "Weeknight rate",
+      "weekend": "Weekend night rate",
+      "perNight": "night"
+    }
+  },
+  "notFoundPage": {
+    "title": "Page not found",
+    "heading": "This address doesn't exist",
+    "body": "The home may no longer be listed, or the link may have a typo. You can keep looking from here.",
+    "listing": "Browse homes",
+    "home": "Go to the home page"
   },
   "sectionBackgrounds": {
     "title": "Section backgrounds",

@@ -3,7 +3,19 @@
     "homeTitle": "Casas y departamentos para tu próxima estancia",
     "homeDescription": "Encuentra casas y departamentos para tu estancia. Consulta fotos, ubicación y disponibilidad y contacta con Portal Casas para planear tu reserva.",
     "listingTitle": "Casas y departamentos",
-    "listingDescription": "Explora las propiedades de Portal Casas. Consulta fotos, capacidad, ubicación y disponibilidad para encontrar tu próxima estancia."
+    "listingDescription": "Explora las propiedades de Portal Casas. Consulta fotos, capacidad, ubicación y disponibilidad para encontrar tu próxima estancia.",
+    "jsonLd": {
+      "weekday": "Tarifa por noche entre semana",
+      "weekend": "Tarifa por noche en fin de semana",
+      "perNight": "noche"
+    }
+  },
+  "notFoundPage": {
+    "title": "Página no encontrada",
+    "heading": "Esta dirección no existe",
+    "body": "Puede que la casa ya no esté publicada o que el enlace tenga un error. Desde aquí puedes seguir buscando.",
+    "listing": "Ver casas",
+    "home": "Ir al inicio"
   },
   "sectionBackgrounds": {
     "title": "Fondos de las secciones",

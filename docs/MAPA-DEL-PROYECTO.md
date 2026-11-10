@@ -332,7 +332,7 @@ La suite se ejecuta recorriendo `scripts/test-*.cjs` y comprobando exit codes. H
 | Permisos | proxy, auth, property-access, página y endpoint | Visibilidad del menú. |
 | Errores del panel | panel/request + panel-response + code de API | Parsing de mensajes libres. |
 | Tema/espaciado | CSS específico y tokens | Cambios globales para arreglar una sola tarjeta. |
-| SEO/social | seo, seo-property, generateMetadata, sitemap y robots | Diseño de los componentes. |
+| SEO/social | seo, seo-property, property-jsonld, generateMetadata, sitemap y robots | Diseño de los componentes. |
 | Contenido del sitio | SiteContentEditor + site-content + su API | Datos particulares de Property. |
 
 ### Límites de la guía
@@ -375,6 +375,7 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | [apps/web/src/lib/reservationDates.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/reservationDates.ts) | Fechas/rangos disponibles y selección de llegada/salida; no calcula precios. |
 | [apps/web/src/lib/section-modules.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/section-modules.ts) | Claves/defaults/activación y orden completo con Reserva al final. |
 | [apps/web/src/lib/seo-property.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/seo-property.ts) | Lectura memoizada de propiedad publicada y selección de foto OG. |
+| [apps/web/src/lib/property-jsonld.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/property-jsonld.ts) | JSON-LD VacationRental de la ficha (omite datos ausentes; anuales sin tarifa) y serializador seguro para `<script>`. |
 | [apps/web/src/lib/seo.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/seo.ts) | Origen, metadata/alternates, extractos e imagen social fallback. |
 | [apps/web/src/lib/site-content.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/site-content.ts) | Claves globales, validación, lectura/escritura y propiedades destacadas. |
 | [apps/web/src/lib/theme.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/theme.ts) | Preferencias y sincronización del tema en DOM/almacenamiento cliente. |
@@ -524,6 +525,8 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | [apps/web/src/app/typography.css](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/typography.css) | Cinzel de títulos y variable aislada del logo. |
 | [apps/web/src/app/sitemap.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/sitemap.ts) | Sitemap de páginas públicas y propiedades publicadas localizadas. |
 | [apps/web/src/app/robots.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/robots.ts) | Reglas robots y referencia a sitemap. |
+| [apps/web/src/app/[locale]/not-found.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/not-found.tsx) | 404 de marca localizada (`notFoundPage.*`), dentro del layout con Navbar/Footer. |
+| [apps/web/src/app/[locale]/[...rest]/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/[...rest]/page.tsx) | Comodín: URL localizada sin ruta → `notFound()` → 404 de marca. |
 | [packages/db/src/schema.ts](C:/Users/menib/Documents/GitHub/portal-casas/packages/db/src/schema.ts) | Fuente del esquema: tablas, enums, índices, CHECK y relaciones. |
 | [packages/db/src/index.ts](C:/Users/menib/Documents/GitHub/portal-casas/packages/db/src/index.ts) | Conexión Neon/Drizzle y reexportación del esquema. |
 | [packages/db/drizzle.config.ts](C:/Users/menib/Documents/GitHub/portal-casas/packages/db/drizzle.config.ts) | Configuración de herramientas Drizzle CLI. |
@@ -641,6 +644,7 @@ No ejecutar SQL o mantenimiento por el solo hecho de aparecer en esta lista. Los
 | [scripts/test-section-order.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-section-order.cjs) | Regresión offline de section order |
 | [scripts/test-sections-reactivation.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-sections-reactivation.cjs) | Regresión offline de sections reactivation |
 | [scripts/test-seo.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-seo.cjs) | Regresión offline de seo |
+| [scripts/test-seo-jsonld-404.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-seo-jsonld-404.cjs) | Sitemap solo publicadas, hreflang triple, JSON-LD parseable por ficha renderizada y 404 localizada |
 | [scripts/test-site-content.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-site-content.cjs) | Regresión offline de site content |
 | [scripts/test-site-video-fallback.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-site-video-fallback.cjs) | Regresión offline de site video fallback |
 | [scripts/test-site-visual-assets.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-site-visual-assets.cjs) | Regresión offline de site visual assets |

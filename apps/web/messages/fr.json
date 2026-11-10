@@ -3,7 +3,19 @@
     "homeTitle": "Maisons et appartements pour votre prochain séjour",
     "homeDescription": "Trouvez une maison ou un appartement pour votre séjour. Consultez photos, emplacement et disponibilités, puis contactez Portal Casas pour réserver.",
     "listingTitle": "Maisons et appartements",
-    "listingDescription": "Découvrez les propriétés de Portal Casas : photos, capacité, emplacement et disponibilités pour votre prochain séjour."
+    "listingDescription": "Découvrez les propriétés de Portal Casas : photos, capacité, emplacement et disponibilités pour votre prochain séjour.",
+    "jsonLd": {
+      "weekday": "Tarif par nuit en semaine",
+      "weekend": "Tarif par nuit le week-end",
+      "perNight": "nuit"
+    }
+  },
+  "notFoundPage": {
+    "title": "Page introuvable",
+    "heading": "Cette adresse n'existe pas",
+    "body": "La maison n'est peut-être plus publiée ou le lien contient une erreur. Vous pouvez poursuivre votre recherche ici.",
+    "listing": "Voir les maisons",
+    "home": "Aller à l'accueil"
   },
   "sectionBackgrounds": {
     "title": "Arrière-plans des sections",

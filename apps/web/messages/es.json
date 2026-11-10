@@ -455,6 +455,7 @@
     "sync": "Sincronizar Airbnb (iCal)",
     "syncing": "Sincronizando…",
     "synced": "Sincronizado",
+    "syncedPartial": "Sincronizado, pero {count, plural, one {# calendario externo no se pudo leer} other {# calendarios externos no se pudieron leer}}: sus fechas se conservaron. Revisa el enlace iCal.",
     "previous": "Mes anterior",
     "next": "Mes siguiente",
     "manual": "Manual (portal)",

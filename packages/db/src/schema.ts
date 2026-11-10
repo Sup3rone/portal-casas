@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT", "COLLABORATOR"]);
@@ -122,11 +122,13 @@ export const bookings = pgTable('Booking', {
   endDate: date('endDate').notNull(),
   source: text('source').notNull().default('manual'),
   guestUserId: text('guestUserId').references(() => users.id),
+  // T-4680: UID del VEVENT (+RECURRENCE-ID) para que el sync iCal sea idempotente.
+  icalUid: text('icalUid'),
 }, table => [foreignKey({
   name: 'Booking_icalFeed_property_fk',
   columns: [table.icalFeedId, table.propertyId],
   foreignColumns: [icalFeeds.id, icalFeeds.propertyId],
-})]);
+}), uniqueIndex('Booking_icalFeed_uid_unique').on(table.icalFeedId, table.icalUid).where(sql`${table.icalFeedId} is not null`)]);
 
 export const blockDates = pgTable('BlockDate', {
   id: text('id').primaryKey(),

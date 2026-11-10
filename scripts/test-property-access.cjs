@@ -57,7 +57,7 @@ function load(file, source) {
     };
     if (name === 'node-ical') return { fromURL: async url => {
       readFeeds.push(url);
-      return { test: { type: 'VEVENT', start: new Date('2027-02-01'), end: new Date('2027-02-03'), uid: 'test' } };
+      return { vcalendar: { type: 'VCALENDAR' }, test: { type: 'VEVENT', start: new Date('2027-02-01'), end: new Date('2027-02-03'), uid: 'test' } };
     } };
     if (name.startsWith('@/') || name.startsWith('.')) {
       const target = name.startsWith('@/') ? path.join(root, 'apps/web/src', name.slice(2)) : path.resolve(path.dirname(file), name);
@@ -77,6 +77,8 @@ for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates'
     return `"${column.name}" ${numeric ? 'REAL' : 'TEXT'}${defaultValue}${column.primary ? ' PRIMARY KEY' : ''}`;
   }).join(', ')}${config.primaryKeys.map(key => `, PRIMARY KEY (${key.columns.map(column => `"${column.name}"`).join(', ')})`).join('')})`);
 }
+// T-4680: índice único parcial del sync iCal (SQLite admite ON CONFLICT sobre índices parciales).
+memory.exec('CREATE UNIQUE INDEX "Booking_icalFeed_uid_unique" ON "Booking" ("icalFeedId", "icalUid") WHERE "icalFeedId" IS NOT NULL');
 const client = { query: async (query, values, options) => {
   queryLog.push(query);
   const bindings = [];

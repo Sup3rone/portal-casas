@@ -51,7 +51,7 @@ export default function CalendarBoard({ propiedades, bookings, canSync = false, 
   }
   async function sync() {
     setBusy(true);setMessage('');
-    try{const response=await fetch('/api/ical/sync',{method:'POST'});if(!response.ok)throw new Error(t('error'));setMessage(t('synced'));router.refresh();}
+    try{const response=await fetch('/api/ical/sync',{method:'POST'});if(!response.ok)throw new Error(t('error'));const payload=await response.json().catch(()=>({}));setMessage(payload.failedFeeds>0?t('syncedPartial',{count:payload.failedFeeds}):t('synced'));router.refresh();}
     catch(error){setMessage(error instanceof Error?error.message:t('error'));}finally{setBusy(false);}
   }
   async function unlock(booking:Booking) {

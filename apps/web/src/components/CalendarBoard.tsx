@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { propertyLocation } from '@/lib/destinations';
+import { cleaningNoticeHref, isCleaningNoticeBooking, noticeDate } from '@/lib/cleaning-notice';
 
-type Prop = { id: string; slug: string; title: string | null };
+type Prop = { id: string; slug: string; title: string | null; cleaningWhatsapp?: string | null; state?: string | null; destinationCity?: string | null; city?: string | null };
 type Booking = { id?: string; propertyId: string; start: string; end: string; source: string; guestName: string | null; manualBlock: boolean; ownBlock: boolean };
 const SOURCE_STYLE: Record<string, string> = {
   manual: 'bg-[var(--brand-brown)] text-white', airbnb: 'bg-rose-500 text-white', google: 'bg-blue-500 text-white',
@@ -98,6 +100,11 @@ export default function CalendarBoard({ propiedades, bookings, canSync = false, 
         <div role="tooltip" id={'calendar-info-'+p.id} className="space-y-2 break-words">
           {visibleBookings.filter(b=>b.propertyId===p.id&&detail.day>=b.start&&detail.day<b.end).map((b,i)=><p key={b.id||i}>{description(b)}</p>)}
         </div>
+        {/* T-4683: aviso manual a limpieza (wa.me) solo en reservas reales y si la casa tiene número; fuera del tooltip. */}
+        {p.cleaningWhatsapp&&visibleBookings.filter(b=>b.propertyId===p.id&&detail.day>=b.start&&detail.day<b.end&&isCleaningNoticeBooking(b)).map((b,i)=>{
+          const href=cleaningNoticeHref(p.cleaningWhatsapp!,t('cleaningNoticeMessage',{property:p.title||p.slug,location:propertyLocation(p)||'—',start:noticeDate(b.start,locale),end:noticeDate(b.end,locale)}));
+          return href&&<a key={'notice-'+(b.id||i)} href={href} target="_blank" rel="noopener noreferrer" aria-label={t('cleaningNotice')+' · '+formatDate(b.start)+' – '+formatDate(b.end)} className="mt-2 mr-2 inline-flex min-h-11 items-center rounded-full bg-[#25D366] px-4 font-bold text-black">{t('cleaningNotice')}</a>;
+        })}
         <div className="mt-3 flex flex-wrap gap-3">
           {visibleBookings.filter(b=>b.propertyId===p.id&&detail.day>=b.start&&detail.day<b.end&&isUnlockableBlock(b)).map(b=><button key={b.id} type="button" disabled={busy} onClick={()=>unlock(b)} className="min-h-11 rounded-full border border-green-700 px-4 text-green-800 disabled:opacity-50 dark:border-green-400 dark:text-green-300">{t(busy?'unlocking':'unlock')} · {formatDate(b.start)} → {formatDate(b.end)}</button>)}
           <button type="button" onClick={()=>setDetail(null)} className="min-h-11 px-3 underline">{t('closeDetails')}</button>

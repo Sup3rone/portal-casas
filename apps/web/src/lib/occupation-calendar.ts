@@ -7,7 +7,7 @@ import { dateRange, objectBody, PanelValidationError } from './panel-validation'
 export async function occupationCalendar(manager: PropertyManager, locale: string) {
   const title = locale === 'en' ? properties.titleEn : locale === 'fr' ? properties.titleFr : properties.titleEs;
   const [propiedades, reservations, blocks] = await Promise.all([
-    db.select({ id: properties.id, slug: properties.slug, title }).from(properties).where(managedProperties(manager)).orderBy(asc(properties.slug)),
+    db.select({ id: properties.id, slug: properties.slug, title, cleaningWhatsapp: properties.cleaningWhatsapp, state: properties.state, destinationCity: properties.destinationCity, city: properties.city }).from(properties).where(managedProperties(manager)).orderBy(asc(properties.slug)),
     db.select({ id: bookings.id, propertyId: bookings.propertyId, start: bookings.startDate, end: bookings.endDate, source: bookings.source, guestName: users.name })
       .from(bookings).leftJoin(users, eq(bookings.guestUserId, users.id)).where(managedResource(bookings.propertyId, manager)),
     db.select().from(blockDates).where(managedResource(blockDates.propertyId, manager)),

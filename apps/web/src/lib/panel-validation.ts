@@ -31,7 +31,7 @@ const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'a
 const integers = ['maxGuests', 'bedrooms'] as const;
 const prices = ['baseWeekdayPrice', 'baseWeekendPrice'] as const;
 const backgroundFields = ['sectionBgInicio', 'sectionBgMapa', 'sectionBgReserva'] as const;
-const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'contactEmail', 'whatsapp', 'state', 'destinationCity', 'sectionTitles', 'sectionsEnabled', 'sectionsOrder']);
+const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'contactEmail', 'whatsapp', 'cleaningWhatsapp', 'state', 'destinationCity', 'sectionTitles', 'sectionsEnabled', 'sectionsOrder']);
 export function propertyInput(value: unknown, creating = false) {
   const body = objectBody(value);
   if (!Object.keys(body).length || Object.keys(body).some(key => !allowed.has(key))) throw new PanelValidationError('validation');
@@ -98,7 +98,7 @@ export function propertyInput(value: unknown, creating = false) {
     if (value !== null && (value.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))) throw new PanelValidationError('invalidContactEmail');
     changes.contactEmail = value;
   }
-  for (const key of ['contactName', 'whatsapp'] as const) {
+  for (const key of ['contactName', 'whatsapp', 'cleaningWhatsapp'] as const) {
     if (!(key in body)) continue;
     if (body[key] !== null && typeof body[key] !== 'string') throw new PanelValidationError('validation');
     const value = typeof body[key] === 'string' ? body[key].trim() || null : null;

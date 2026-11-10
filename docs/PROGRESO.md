@@ -812,3 +812,7 @@ Validación actual del workspace: **58/58 scripts pasan** (incluida regresión d
 ## Permiso de publicación de colaboradores — 5 Nov 2026
 
 **Estado: HECHO en código; PENDIENTE SQL manual y QA humana.** ADMIN puede conceder o revocar desde Usuarios el permiso para que un colaborador publique y despublique solo sus propias propiedades. Servidor/API revalidan bandera, rol y propiedad; cambio de rol revoca el permiso y la auditoría registra la acción. La migración propuesta añade `User.canPublishProperties` y amplía el CHECK de auditoría; ejecutar Respaldo → QA → main antes de usarlo.
+
+## Sync iCal idempotente (T-4680) — 9 Nov 2026
+
+**Estado: HECHO en código; PENDIENTE SQL manual y prueba con feed real de Airbnb.** `api/ical/sync` dejó de insertar en cada sincronización: reconcilia cada feed por `(icalFeedId, icalUid)` con índice único parcial, actualiza reservas movidas, retira canceladas/ausentes y filas antiguas sin UID, y no toca feeds caídos (`failedFeeds`, aviso en el calendario). SQL `scripts/sql/booking-ical-uid.sql`: **Respaldo → verificar → main ANTES del deploy** (sin la columna, el sync falla). Informe y alta de feeds por SQL en `docs/DIAGNOSTICO-ICAL-SYNC.md`. Validación: TypeScript limpio, ESLint 0 errores/5 warnings previos, suite 58/59 con `test-ical-idempotent.cjs` nuevo (falla contra el código anterior); `test-panel.cjs` es el fallo previo de `main`.

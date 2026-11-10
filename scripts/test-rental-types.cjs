@@ -48,7 +48,7 @@ async function main() {
   const downloads = [];
   mockModule('node-ical', { fromURL: async url => {
     downloads.push(url);
-    return { event: { type: 'VEVENT', start: new Date('2027-10-01'), end: new Date('2027-10-03'), uid: 'test' } };
+    return { vcalendar: { type: 'VCALENDAR' }, event: { type: 'VEVENT', start: new Date('2027-10-01'), end: new Date('2027-10-03'), uid: 'test' } };
   } });
   // El handler ya cargado mantiene su import; cargar una copia con el mock del proveedor.
   const syncMock = load('apps/web/src/app/api/ical/sync/rental-types-test.ts', fs.readFileSync('apps/web/src/app/api/ical/sync/route.ts', 'utf8'));

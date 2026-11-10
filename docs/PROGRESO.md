@@ -813,6 +813,10 @@ Validación actual del workspace: **58/58 scripts pasan** (incluida regresión d
 
 **Estado: HECHO en código; PENDIENTE SQL manual y QA humana.** ADMIN puede conceder o revocar desde Usuarios el permiso para que un colaborador publique y despublique solo sus propias propiedades. Servidor/API revalidan bandera, rol y propiedad; cambio de rol revoca el permiso y la auditoría registra la acción. La migración propuesta añade `User.canPublishProperties` y amplía el CHECK de auditoría; ejecutar Respaldo → QA → main antes de usarlo.
 
+## Diagnóstico video del hero (T-4677) — 9 Nov 2026
+
+**Estado: DIAGNÓSTICO HECHO; implementación pendiente en tarea aparte.** Informe en `docs/DIAGNOSTICO-HERO-VIDEOS.md`. El video vigente en producción (852×480, 6.7 s, H.264) no tiene faststart; la playa (`public/videos/hero.mp4`, 720×1280, 7.7 MB) excede el límite de 4 MB del panel. El fallo en un Chrome de escritorio apunta a reduced-motion del sistema (sin confirmar en el equipo). Sin cambios de código.
+
 ## Varios videos en el hero de la home (T-4679) — 9 Nov 2026
 
 **Estado: HECHO en código; PENDIENTE SQL manual y QA humana.** `/panel/contenido` gestiona una lista ordenada de hasta 6 videos (subida MP4/WebM ≤ 4 MB o URL HTTPS) con dispositivo móvil/escritorio/ambos, subir/bajar y quitar. La subida ya no persiste ni borra: añade el video a la lista y se publica al guardar; ningún Blob anterior se elimina. La home alterna dos `<video>` en `ended`, precarga el siguiente al pasar la mitad del actual, repite en loop, salta videos que fallan, respeta reduced-motion y usa `/og-default.jpg` como poster. Sin lista se usa `home_background_video` (intacto) o `/videos/hero.mp4`. SQL `scripts/sql/site-content-home-videos.sql`: **aplicar Respaldo → verificar → main ANTES del deploy** (sin él, guardar Contenido del sitio falla por el CHECK). Validación: TypeScript limpio, ESLint 0 errores/5 warnings previos, suite 58/59 con test nuevo `test-home-videos.cjs`; el fallo es `test-panel.cjs`, previo en `main` (colaborador sin `canPublishProperties` recibe 403 al despublicar desde `21dd8412`).

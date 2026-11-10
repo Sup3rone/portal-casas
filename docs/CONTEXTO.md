@@ -941,3 +941,7 @@ El encabezado y los derechos del footer muestran `ALIA FOR RENT` en los tres idi
 ### 2026-11-05 — Permiso de publicación para colaboradores
 
 El nuevo booleano `User.canPublishProperties` queda en `false` por defecto y se activa solo desde el detalle de `/panel/usuarios` por un ADMIN. Un colaborador autorizado puede publicar y despublicar exclusivamente sus propias propiedades; ADMIN conserva control total. La API valida el permiso tanto antes como dentro del `UPDATE`, por lo que el botón no puede saltarse con una llamada directa. Cambiar un rol restablece el permiso a `false`; la auditoría registra `PUBLICATION_PERMISSION`. SQL pendiente `scripts/sql/user-publication-permission.sql`: aplicar manualmente Respaldo → QA → main antes de desplegar; no fue ejecutado por el agente.
+
+### 2026-11-09 — Diagnóstico de varios videos en el hero (T-4677)
+
+El límite de 4 MB del video de home no puede elevarse sin volver a subida cliente (tope de 4.5 MB de Vercel Functions). Para varios videos se recomienda una clave nueva `home_background_videos` (lista ordenada con dispositivo) que deja intacta `home_background_video` como valor recuperable; requiere SQL del CHECK Respaldo → main. Reproductor propuesto: dos `<video>` alternados en `ended` con precarga diferida del siguiente, `poster` y reduced-motion vigente. Los videos deben subirse sin audio y con faststart. Detalle en `docs/DIAGNOSTICO-HERO-VIDEOS.md`.

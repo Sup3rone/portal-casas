@@ -812,3 +812,7 @@ Validación actual del workspace: **58/58 scripts pasan** (incluida regresión d
 ## Permiso de publicación de colaboradores — 5 Nov 2026
 
 **Estado: HECHO en código; PENDIENTE SQL manual y QA humana.** ADMIN puede conceder o revocar desde Usuarios el permiso para que un colaborador publique y despublique solo sus propias propiedades. Servidor/API revalidan bandera, rol y propiedad; cambio de rol revoca el permiso y la auditoría registra la acción. La migración propuesta añade `User.canPublishProperties` y amplía el CHECK de auditoría; ejecutar Respaldo → QA → main antes de usarlo.
+
+## Diagnóstico video del hero (T-4677) — 9 Nov 2026
+
+**Estado: DIAGNÓSTICO HECHO; implementación pendiente en tarea aparte.** Informe en `docs/DIAGNOSTICO-HERO-VIDEOS.md`. El video vigente en producción (852×480, 6.7 s, H.264) no tiene faststart; la playa (`public/videos/hero.mp4`, 720×1280, 7.7 MB) excede el límite de 4 MB del panel. El fallo en un Chrome de escritorio apunta a reduced-motion del sistema (sin confirmar en el equipo). Sin cambios de código.

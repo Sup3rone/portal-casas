@@ -6,8 +6,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Fase producción: EMAIL_FROM="Portal Casas <noreply@tudominio.com>"
 const REMITENTE = process.env.EMAIL_FROM || 'Portal Casas <onboarding@resend.dev>';
 
-export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-  const { error } = await resend.emails.send({ from: REMITENTE, to, subject, html });
+// T-4739: `to` admite varios destinatarios y `attachments` (p. ej. el Excel del reporte mensual).
+export async function sendEmail({ to, subject, html, attachments }: {
+  to: string | string[]; subject: string; html: string; attachments?: { filename: string; content: Buffer }[];
+}) {
+  const { error } = await resend.emails.send({ from: REMITENTE, to, subject, html, ...(attachments?.length ? { attachments } : {}) });
   if (error) {
     console.error('Error enviando email:', error);
     throw new Error('No se pudo enviar el email');

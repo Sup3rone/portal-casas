@@ -17,11 +17,15 @@ export const users = pgTable("User", {
   canPublishProperties: boolean('canPublishProperties').notNull().default(false),
   // T-4736: el ADMIN permite que un COLLABORATOR cree sus propios enlaces de referido.
   canCreateReferralLinks: boolean('canCreateReferralLinks').notNull().default(false),
+  // T-4739: hasta 2 correos a los que se envía el reporte mensual del colaborador.
+  reportEmails: jsonb('reportEmails').$type<string[]>().notNull().default([]),
   passwordHash: text("passwordHash"),
   emailVerifiedAt: timestamp("emailVerifiedAt"),
   role: userRoleEnum("role").notNull().default("CLIENT"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
-});
+}, table => [
+  check('User_reportEmails_check', sql`jsonb_typeof(${table.reportEmails}) = 'array' and jsonb_array_length(${table.reportEmails}) <= 2`),
+]);
 
 export const properties = pgTable('Property', {
   sectionsOrder: jsonb('sectionsOrder').$type<('destino' | 'amenidades' | 'habitaciones' | 'lugar' | 'advertencias' | 'mapa' | 'reserva')[]>(),
@@ -209,6 +213,26 @@ export const seasonRates = pgTable('SeasonRate', {
   priority: integer('priority').notNull().default(0), // mayor = gana si se solapan temporadas
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// T-4739: bitácora de envíos del reporte mensual (automático o manual). Los fallos se muestran en /panel/reporte.
+export const reportDeliveries = pgTable('ReportDelivery', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'restrict' }),
+  month: text('month').notNull(),
+  trigger: text('trigger').$type<'cron' | 'manual'>().notNull(),
+  status: text('status').$type<'pending' | 'sent' | 'failed'>().notNull(),
+  recipients: jsonb('recipients').$type<string[]>().notNull().default([]),
+  bookingCount: integer('bookingCount').notNull().default(0),
+  error: text('error'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  index('ReportDelivery_user_month_idx').on(table.userId, table.month, table.createdAt),
+  check('ReportDelivery_month_check', sql`${table.month} ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'`),
+  check('ReportDelivery_trigger_check', sql`${table.trigger} in ('cron', 'manual')`),
+  check('ReportDelivery_status_check', sql`${table.status} in ('pending', 'sent', 'failed')`),
+  // Un solo envío automático vivo (pending/sent) por colaborador y mes: el cron no duplica aunque corra dos veces.
+  uniqueIndex('ReportDelivery_cron_once').on(table.userId, table.month).where(sql`${table.trigger} = 'cron' and ${table.status} in ('pending', 'sent')`),
+]);
 
 export const passwordResetTokens = pgTable('PasswordResetToken', {
   id: text('id').primaryKey(),

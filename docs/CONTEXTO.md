@@ -1051,3 +1051,18 @@ Autollenado (pedido del usuario, 11-11-2026): con sesión iniciada, «Nombre» y
 **Causa común probable de que no lleguen:** `EMAIL_FROM` sin dominio verificado en Resend → `onboarding@resend.dev` solo entrega al dueño de la cuenta Resend. En el `.env` local no están `EMAIL_FROM` ni `PUBLIC_SITE_URL`. En Vercel no se pudo comprobar (sin acceso). Tarea de Emma: verificar el dominio en Resend y poner `EMAIL_FROM` y `PUBLIC_SITE_URL` en Vercel.
 
 **Arreglo:** el enlace del correo usaba `NEXT_PUBLIC_SITE_URL` y, si faltaba, `http://localhost:3000`; el resto del sitio usa `PUBLIC_SITE_URL`. Ahora `lib/password-reset-url.ts` usa `siteUrl()` (`PUBLIC_SITE_URL`), con `NEXT_PUBLIC_SITE_URL` solo como respaldo, sanea el idioma (es/en/fr) y codifica el token. `test-password-reset-url.cjs` cubre las variables, el idioma y el flujo real con el correo simulado. Con el código anterior, el test falla («Enlace público, no localhost»). `.env.example` documenta `RESEND_API_KEY` y `EMAIL_FROM`.
+
+### 2026-11-11 — Confirmación de correo al registrarse y tokens con hash (T-4783)
+
+**Registro:** tras crear la cuenta se manda «Confirma tu correo — ALIA FOR RENT» con el enlace `/{locale}/confirmar-correo?token=…` (mismo origen público que la recuperación: `PUBLIC_SITE_URL`, respaldo `NEXT_PUBLIC_SITE_URL`). Si la base o Resend fallan, la cuenta queda creada y entra a Mi cuenta con `?correo=error`.
+
+**Tokens** (`lib/auth-tokens.ts`, compartido con «olvidé mi contraseña»): 32 bytes al azar en el enlace; la base guarda solo su SHA-256. Pedir uno nuevo invalida los vivos del mismo usuario. Consumir es un único UPDATE condicionado (no usado, no vencido) con RETURNING: dos clics simultáneos no lo usan dos veces. Confirmación: 24 h. Recuperación: 1 h, y ahora se consume antes de cambiar la contraseña.
+
+**Por qué dos tablas y no una con `purpose`:** `PasswordResetToken` conserva su columna `token` (ahora con el hash), sin SQL ni migración de datos en producción; la nueva `EmailVerificationToken` es aditiva. Efecto: los enlaces de recuperación emitidos antes del deploy dejan de servir (duraban 1 h).
+
+**Política decidida con el dueño:** las cuentas sin confirmar **entran**; Mi cuenta muestra «Confirma tu correo» con «Reenviar». No se bloquea nada (un CLIENT hoy no reserva solo). Las cuentas existentes se dan por confirmadas con `emailVerifiedAt = createdAt` (sentencia opcional del SQL, la aplica una persona).
+
+**Reenviar** (`confirmar-correo/actions.ts`): con sesión usa la cuenta de la sesión; sin sesión, el correo escrito. Respuesta genérica, límite `verify` 3/h por IP. `/confirmar-correo` marca a quien pertenece el token, no a la sesión abierta.
+
+Base: rama desde T-4771 (usa `password-reset-url.ts`). SQL: `scripts/sql/email-verification.sql`, **no ejecutado**.
+

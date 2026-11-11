@@ -81,6 +81,7 @@ flowchart TD
 | Ficha | `/[locale]/casas/[slug]` | `app/[locale]/casas/[slug]/page.tsx` |
 | Acceso/registro | `/[locale]/login`, `/registro` | Sus page.tsx + actions.ts |
 | Recuperación | `/[locale]/olvide-password`, `/reset-password` | Sus page.tsx + actions.ts |
+| Confirmar correo (T-4783) | `/[locale]/confirmar-correo` | page.tsx (consume el token) + actions.ts (reenviar) |
 | Cuenta | `/[locale]/mi-cuenta` | page.tsx + actions.ts |
 | Propiedades gestionadas | `/[locale]/panel` | `app/[locale]/panel/page.tsx` |
 | Crear/editar propiedad | `/panel/nueva`, `/panel/propiedades/[id]` | Composición de editores |
@@ -221,6 +222,7 @@ erDiagram
   User o|--o{ Message : consulta
   User o|--o{ Booking : huesped
   User ||--o{ PasswordResetToken : recupera
+  User ||--o{ EmailVerificationToken : confirma
 ```
 
 Diagrama resumido; no enumera cada FK, CHECK o auditoría.
@@ -237,7 +239,8 @@ Diagrama resumido; no enumera cada FK, CHECK o auditoría.
 | SeasonRate | Tarifas por intervalo, prioridad, weekday/weekend. |
 | IcalFeed | URL/origen de calendario externo por propiedad. |
 | SiteContent | Configuración global clave/valor con CHECK de claves permitidas. |
-| PasswordResetToken | Recuperación de contraseña y caducidad. |
+| PasswordResetToken | Recuperación de contraseña y caducidad. Desde T-4783 la columna `token` guarda el SHA-256, no el token del enlace. |
+| EmailVerificationToken | T-4783: confirmación de correo (SHA-256, 24 h, un solo uso). SQL manual `scripts/sql/email-verification.sql`. |
 | AdminUserAudit | Auditoría de gestión de usuarios. |
 | OwnershipMigration / OwnershipMigrationAudit | Trazabilidad de migración de ownership; no guardado ordinario de propiedades. |
 
@@ -348,7 +351,9 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | Archivo | Función |
 |---|---|
 | [apps/web/src/lib/admin-users.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/admin-users.ts) | Lecturas y mutaciones administrativas de usuarios; auditoría y propiedades asociadas. |
-| [apps/web/src/lib/auth.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/auth.ts) | Auth.js Credentials, bcrypt, JWT/sesión y redirección localizada. |
+| [apps/web/src/lib/auth.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/auth.ts) | Auth.js Credentials, bcrypt, JWT/sesión y redirección localizada. No mira `emailVerifiedAt` (las cuentas sin confirmar entran). |
+| [apps/web/src/lib/auth-tokens.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/auth-tokens.ts) | T-4783: tokens de un solo uso (confirmar correo y recuperación): hash SHA-256, emitir invalida los anteriores, consumir en un UPDATE condicionado. |
+| [apps/web/src/lib/email-verification.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/email-verification.ts) | T-4783: plantilla «Confirma tu correo — ALIA FOR RENT», `escapeHtml` y envío que nunca rompe el registro. |
 | [apps/web/src/lib/destinations.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/destinations.ts) | Catálogo SECTUR, normalización, pares válidos y formato nuevo→legacy. |
 | [apps/web/src/lib/editorial-presentation.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/editorial-presentation.ts) | Prepara slides editoriales a partir de narrativas y medios reales. |
 | [apps/web/src/lib/featured-selection.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/featured-selection.ts) | Interpreta/valida selección de destacadas y formato compatible del valor. |
@@ -471,12 +476,14 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | /[locale]/panel/usuarios | [apps/web/src/app/[locale]/panel/usuarios/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/panel/usuarios/page.tsx) | Listado administrativo de usuarios. |
 | /[locale]/registro | [apps/web/src/app/[locale]/registro/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/registro/page.tsx) | Página de registro. |
 | /[locale]/reset-password | [apps/web/src/app/[locale]/reset-password/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/reset-password/page.tsx) | Página de nueva contraseña con token. |
+| /[locale]/confirmar-correo | [apps/web/src/app/[locale]/confirmar-correo/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/confirmar-correo/page.tsx) | T-4783: confirma el correo del dueño del token; vencido/usado/inválido con «Reenviar». |
 | /[locale]/admin/tarifas | [apps/web/src/app/[locale]/admin/tarifas/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/admin/tarifas/actions.ts) | Alta/eliminación de tarifas con ámbito de propiedad. |
 | /[locale]/login | [apps/web/src/app/[locale]/login/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/login/actions.ts) | Acción de credenciales y limitador de login. |
 | /[locale]/mi-cuenta | [apps/web/src/app/[locale]/mi-cuenta/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/mi-cuenta/actions.ts) | Cerrar sesión. |
 | /[locale]/olvide-password | [apps/web/src/app/[locale]/olvide-password/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/olvide-password/actions.ts) | Token/correo de recuperación y limitador. |
-| /[locale]/registro | [apps/web/src/app/[locale]/registro/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/registro/actions.ts) | Alta con validación/hash y limitador. |
-| /[locale]/reset-password | [apps/web/src/app/[locale]/reset-password/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/reset-password/actions.ts) | Valida token y cambia hash de contraseña. |
+| /[locale]/registro | [apps/web/src/app/[locale]/registro/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/registro/actions.ts) | Alta con validación/hash y limitador; manda «Confirma tu correo» (si falla: Mi cuenta `?correo=error`). |
+| /[locale]/confirmar-correo | [apps/web/src/app/[locale]/confirmar-correo/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/confirmar-correo/actions.ts) | T-4783: reenviar con límite `verify` (3/h por IP) y respuesta genérica. |
+| /[locale]/reset-password | [apps/web/src/app/[locale]/reset-password/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/reset-password/actions.ts) | Consume el token (hash, un solo uso, T-4783) y cambia el hash de contraseña. |
 
 ### 7.4 APIs
 
@@ -636,6 +643,7 @@ No ejecutar SQL o mantenimiento por el solo hecho de aparecer en esta lista. Los
 | [scripts/test-public-french-text.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-public-french-text.cjs) | Regresión offline de public french text |
 | [scripts/test-published-destinations.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-published-destinations.cjs) | Regresión offline de published destinations |
 | [scripts/test-rate-limit.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-rate-limit.cjs) | Regresión offline de rate limit |
+| [scripts/test-email-verification.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-email-verification.cjs) | T-4783: tokens (hash, 24 h, un solo uso, ajeno), registro, confirmar, reenviar y recuperación endurecida |
 | [scripts/test-rental-contact.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-rental-contact.cjs) | Regresión offline de rental contact |
 | [scripts/test-rental-types.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-rental-types.cjs) | Regresión offline de rental types |
 | [scripts/test-reveal.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-reveal.cjs) | Regresión offline de reveal |

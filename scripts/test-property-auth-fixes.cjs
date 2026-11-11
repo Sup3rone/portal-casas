@@ -12,13 +12,17 @@ mockModule('next/headers', { headers: async () => new Headers({ 'x-forwarded-for
 class AuthError extends Error {}
 // SQLite no admite DEFAULT en VALUES como PostgreSQL: adaptar únicamente el INSERT de User.
 mockModule('@portal/db', { ...portal, db: new Proxy(portal.db, { get(target, key) {
-  if (key === 'insert') return table => table === portal.users ? { values: async values => {
+  if (key === 'insert') return table => table === portal.users ? { values: values => {
+    const id = crypto.randomUUID();
     memory.prepare('INSERT INTO "User" (id,email,name,phone,passwordHash,role) VALUES (?,?,?,?,?,?)')
-      .run(crypto.randomUUID(), values.email, values.name, values.phone, values.passwordHash, values.role);
+      .run(id, values.email, values.name, values.phone, values.passwordHash, values.role);
+    return { returning: async () => [{ id }] }; // T-4783: el registro usa el id para el token de confirmación
   } } : target.insert(table);
   return Reflect.get(target, key);
 } }) });
 mockModule('next-auth', { AuthError });
+// T-4783: el registro emite el token de «Confirma tu correo» (el correo es el simulado del harness).
+memory.exec('CREATE TABLE "EmailVerificationToken" (id text primary key, "userId" text not null, "tokenHash" text not null unique, "expiresAt" text not null, "usedAt" text, "createdAt" text)');
 mockModule('@/lib/auth', {
   auth: async () => ({ user: { id: 'a' } }),
   signIn: async (provider, options) => { if (authFailure) throw new AuthError(); signedIn.push(options); }

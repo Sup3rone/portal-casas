@@ -8,11 +8,13 @@ import { getLocale } from "next-intl/server";
 import { privateMetadata } from '@/lib/seo';
 import { referrerSummary } from '@/lib/referrals';
 import ReferrerCodes from '@/components/ReferrerCodes';
+import VerifyEmailBanner from '@/components/VerifyEmailBanner';
 
 export const metadata = privateMetadata;
 
-export default async function MyAccountPage() {
+export default async function MyAccountPage({ searchParams }: { searchParams?: Promise<{ correo?: string }> } = {}) {
   const session = await auth();
+  const { correo } = (await searchParams) ?? {};
   const locale = await getLocale();
 
   if (!session?.user?.email) {
@@ -86,6 +88,9 @@ export default async function MyAccountPage() {
             </button>
           </form>
         </header>
+
+        {/* T-4783: sin confirmar → aviso con «Reenviar». No bloquea nada. */}
+        {!userData.emailVerifiedAt && <VerifyEmailBanner email={userData.email} locale={locale} note={correo} />}
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Consultas enviadas */}

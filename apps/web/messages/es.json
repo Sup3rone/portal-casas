@@ -390,7 +390,16 @@
     "resetButton": "Guardar contraseña",
     "resetInvalid": "El enlace es inválido o ya expiró (dura 1 hora). Pide uno nuevo.",
     "resetTooShort": "La contraseña debe tener al menos 8 caracteres.",
-    "resetTryAgain": "Pedir un nuevo enlace"
+    "resetTryAgain": "Pedir un nuevo enlace",
+    "verifyTitle": "Confirmar correo",
+    "verifyDone": "¡Listo! Tu correo quedó confirmado.",
+    "verifyUsed": "Este enlace ya se usó. Si ya confirmaste tu correo no tienes que hacer nada; si no, pide uno nuevo.",
+    "verifyExpired": "Este enlace venció (dura 24 horas). Pide uno nuevo.",
+    "verifyInvalid": "El enlace no es válido. Pide uno nuevo.",
+    "verifyResend": "Reenviar enlace de confirmación",
+    "verifyResent": "Si tu cuenta existe y falta confirmarla, te enviamos un nuevo enlace. Revisa también spam.",
+    "verifyLimited": "Demasiados intentos. Espera unos minutos antes de volver a pedir el enlace.",
+    "verifyGoAccount": "Ir a Mi cuenta"
   },
   "adminUsers": {
     "title": "Usuarios",

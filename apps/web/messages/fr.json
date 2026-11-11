@@ -391,7 +391,16 @@
     "resetButton": "Enregistrer le mot de passe",
     "resetInvalid": "Le lien est invalide ou a expiré (valable 1 heure). Demandez-en un nouveau.",
     "resetTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
-    "resetTryAgain": "Demander un nouveau lien"
+    "resetTryAgain": "Demander un nouveau lien",
+    "verifyTitle": "Confirmer l’e-mail",
+    "verifyDone": "C’est fait ! Votre e-mail est confirmé.",
+    "verifyUsed": "Ce lien a déjà été utilisé. Si vous avez déjà confirmé votre e-mail, vous n’avez rien à faire ; sinon, demandez-en un nouveau.",
+    "verifyExpired": "Ce lien a expiré (il est valable 24 heures). Demandez-en un nouveau.",
+    "verifyInvalid": "Ce lien n’est pas valide. Demandez-en un nouveau.",
+    "verifyResend": "Renvoyer le lien de confirmation",
+    "verifyResent": "Si votre compte existe et n’est pas encore confirmé, nous vous avons envoyé un nouveau lien. Vérifiez aussi vos spams.",
+    "verifyLimited": "Trop de tentatives. Veuillez patienter quelques minutes avant de redemander le lien.",
+    "verifyGoAccount": "Aller à Mon compte"
   },
   "adminUsers": {
     "title": "Utilisateurs",

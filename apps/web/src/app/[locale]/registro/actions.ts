@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { db, users } from "@portal/db";
 import { headers } from 'next/headers';
 import { consumeRateLimit } from '@/lib/rate-limit';
+import { sendVerificationEmail } from '@/lib/email-verification';
 
 export async function registerAction(formData: FormData) {
   const retryAfter = consumeRateLimit('register', await headers());
@@ -28,18 +29,21 @@ export async function registerAction(formData: FormData) {
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  await db.insert(users).values({
+  const [created] = await db.insert(users).values({
     name,
     email,
     phone,
     passwordHash,
     role: "CLIENT",
-  });
+  }).returning({ id: users.id });
+
+  // T-4783: «Confirma tu correo». Si falla (base o Resend), la cuenta queda creada y Mi cuenta ofrece reenviar.
+  const sent = await sendVerificationEmail({ id: created.id, email, name }, locale);
 
   // signIn exitoso lanza su propia redirección — dejarla propasar
   await signIn("credentials", {
     email,
     password,
-    redirectTo: `/${locale}/mi-cuenta`,
+    redirectTo: `/${locale}/mi-cuenta${sent ? "" : "?correo=error"}`,
   });
 }

@@ -1,6 +1,6 @@
 # Mapa del código y funcionamiento de portal-casas
 
-**Revisión:** 29 de octubre de 2026. **Referencia Git:** `4dab447d`, rama `main` al revisar, más los archivos locales presentes. **Última actualización:** 9 de noviembre de 2026 (sección 9).
+**Revisión:** 29 de octubre de 2026. **Referencia Git:** `4dab447d`, rama `main` al revisar, más los archivos locales presentes. **Última actualización:** 11 de noviembre de 2026 (§2.3 y §4: consulta, T-4770; §13: el dueño administra sus referidores, T-4767).
 
 Esta guía permite localizar qué archivo controla cada parte del proyecto y cómo se conecta con las demás. Describe fuentes del repositorio; no certifica el despliegue, los datos de Neon ni el estado de migraciones aplicadas. No se consultó la BD ni se ejecutaron navegador, build o migraciones para crearla.
 
@@ -146,6 +146,9 @@ sequenceDiagram
 - La cotización pública se calcula en `MessageForm.tsx` con precios base/temporadas; `Inquiries.tsx` tiene una estimación más limitada y omite total si no puede calcularlo de forma fiable. `reservationDates.ts` valida fechas y rangos, no tarifas.
 - `Inquiries` y `MensajesList` abren MessageModal. Sus ajustes temporales de fechas no significan editar la consulta original.
 - Analytics registra `query_submitted` tras éxito y `whatsapp_clicked`; no envía nombre/email/teléfono como propiedades del evento.
+- **Envío y avisos (T-4770, 11-11-2026):** el botón solo se deshabilita mientras envía. Con errores no llama a la API: muestra el aviso `details.form.incompleto` (`role="alert"`), el error de cada campo y lleva el foco al primero. Antes se deshabilitaba con errores ocultos y «no reaccionaba».
+- **Éxito:** reserva → `details.form.exitoReserva` («Su petición ha sido recibida…»); anual → `exito`. Se queda en pantalla, sin temporizador, con el botón `otraConsulta`, que vuelve al formulario.
+- **Autollenado:** con sesión, nombre y correo salen de `useContext(SessionContext)` (next-auth) en el cliente; la ficha sigue estática. Lo editado gana y el teléfono no se llena. Sin `SessionProvider` no lanza: solo no llena.
 
 ### 2.4 Editor de propiedad
 
@@ -255,7 +258,7 @@ Diagrama resumido; no enumera cada FK, CHECK o auditoría.
 
 | Archivo o zona | Alcance |
 |---|---|
-| app/globals.css | Importa Tailwind y hojas específicas; reveal, papel y reglas históricas de ficha. |
+| app/globals.css | Importa Tailwind y hojas específicas; reveal, papel y reglas históricas de ficha. Token `--glass-error` de la ficha = `red-700` (T-4770: antes `red-100`, invisible sobre el vidrio claro). |
 | app/public-chrome.css | Header/footer mate, tokens y popover compacto. |
 | app/home-composition.css | Home, navbar transparente, carrusel y About. |
 | app/property-presentation.css | Zig-zag, espaciado compacto, hero y entradas laterales de ficha. |
@@ -404,7 +407,7 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | [apps/web/src/components/LocationMap.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/LocationMap.tsx) | Iframe Google Maps, compartir ubicación y dirección. |
 | [apps/web/src/components/MarkAsReadButton.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/MarkAsReadButton.tsx) | Marcar mensaje como leído y feedback de error. |
 | [apps/web/src/components/MensajesList.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/MensajesList.tsx) | Lista de Mensajes con selección y apertura de MessageModal. |
-| [apps/web/src/components/MessageForm.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/MessageForm.tsx) | Consulta pública: contacto anual o fechas/huéspedes; cotización por tarifas, envío y validación. |
+| [apps/web/src/components/MessageForm.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/MessageForm.tsx) | Consulta pública: contacto anual o fechas/huéspedes; cotización por tarifas, envío y validación. Aviso de datos faltantes, éxito persistente con «Enviar otra consulta» y autollenado con la sesión (T-4770). |
 | [apps/web/src/components/MessageModal.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/MessageModal.tsx) | Gestión/confirmación/eliminación de consulta, fechas temporales y foco. |
 | [apps/web/src/components/Navbar.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/Navbar.tsx) | Logo, monograma, lupa, idiomas, cuenta/tema y destinos publicados. |
 | [apps/web/src/components/PageLoading.module.css](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/PageLoading.module.css) | CSS local del componente homónimo; mantiene alcance aislado. |

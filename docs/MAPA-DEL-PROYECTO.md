@@ -777,7 +777,8 @@ Detalle de piezas en la sección 8.6. Añade `SiteContent.home_background_videos
 | `site-content-home-videos.sql` | T-4679 | ✅ Verificado | Pendiente (al mergear) |
 | `referral-program.sql` | T-4736 | ✅ Aplicado (10-11, verificado por lectura) | Pendiente |
 | `referral-collaborator-permission.sql` | T-4736 (permiso colaborador) | ✅ Aplicado | Pendiente |
-| `booking-price-breakdown.sql` | T-4738 | Pendiente | Pendiente |
+| `booking-price-breakdown.sql` | T-4738 | ✅ Aplicado | Pendiente |
+| `monthly-commission-report.sql` | T-4739 | Pendiente | Pendiente |
 
 ### 9.6 Verificación
 
@@ -809,3 +810,17 @@ Detalle y diagnóstico de reservas/correo en [REFERIDOS.md](C:/Users/menib/Docum
 | Test | [test-booking-breakdown.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-booking-breakdown.cjs) | Comisión calculada a mano, validación, permisos, legacy y nada público. |
 
 Detalle en [DESGLOSE-RESERVA.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/DESGLOSE-RESERVA.md).
+
+## 12. Reporte mensual de comisiones (T-4739, 10 de noviembre de 2026)
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Reglas | [monthly-report.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/monthly-report.ts) | Mes de entrada, cruces/continuaciones, agrupación por propiedad y totales (puro). |
+| Servicio | [monthly-report-service.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/monthly-report-service.ts) | Datos (solo COLLABORATOR, `managedResource`), Excel, destinatarios, bitácora, envío y cron idempotente. |
+| Excel | [xlsx.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/xlsx.ts) | Generador .xlsx sin dependencias. |
+| Rutas | `api/panel/reports/{monthly,recipients,send}` + `api/cron/monthly-report` + `apps/web/vercel.json` (`crons`) | Descarga, correos, envío manual, cron con `CRON_SECRET`. |
+| Vista | `app/[locale]/panel/reporte/page.tsx` + `components/panel/MonthlyReportControls.tsx` | Tabla, filtros, descarga, destinatarios y bitácora. Menú solo del colaborador. |
+| Datos | `User.reportEmails`, `ReportDelivery` + [monthly-commission-report.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/monthly-commission-report.sql) | **Sin el SQL fallan el registro y la recuperación de contraseña.** |
+| Test | [test-monthly-report.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-monthly-report.cjs) | Agregados a mano, cruces, zona MX, ZIP/CRC/celdas, acceso, destinatarios, cron y bitácora. |
+
+Detalle en [REPORTE-MENSUAL.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/REPORTE-MENSUAL.md).

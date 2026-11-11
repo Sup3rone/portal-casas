@@ -16,6 +16,7 @@ export default async function PanelLayout({ children, params }: { children: Reac
   const content = await getTranslations({ locale, namespace: 'siteContent' });
   const referrals = await getTranslations({ locale, namespace: 'referrals' });
   const ownReferrals = await collaboratorPartner(manager); // T-4736: solo COLLABORATOR con permiso
+  const report = await getTranslations({ locale, namespace: 'monthlyReport' });
   return <main data-panel-palette="paper" className="panel-skin mx-auto max-w-6xl space-y-8 px-4 py-10">
     <nav aria-label={t('title')} className="flex flex-wrap gap-6 border-b pb-4 dark:border-gray-700">
       {manager.role === 'COLLABORATOR' && <>
@@ -28,6 +29,8 @@ export default async function PanelLayout({ children, params }: { children: Reac
       {manager.role === 'COLLABORATOR' && <Link href="/panel/calendario" className="text-green-700 dark:text-green-400">{nav('calendario')}</Link>}
       {/* T-4738: reservas con desglose de precio (ADMIN todas; colaborador las suyas). */}
       <Link href="/panel/reservas" className="text-green-700 dark:text-green-400">{t('bookings')}</Link>
+      {/* T-4739: reporte mensual de comisiones, solo para el colaborador (el ADMIN administra funcionalidades). */}
+      {manager.role === 'COLLABORATOR' && <Link href="/panel/reporte" className="text-green-700 dark:text-green-400">{report('navTitle')}</Link>}
       {ownReferrals && <Link href="/panel/mis-referidos" className="text-green-700 dark:text-green-400">{referrals('myTitle')}</Link>}
       {manager.role === 'ADMIN' && <Link href="/panel/usuarios" className="text-green-700 dark:text-green-400">{admin('title')}</Link>}
       {manager.role === 'ADMIN' && <Link href="/panel/contenido" className="text-green-700 dark:text-green-400">{content('title')}</Link>}

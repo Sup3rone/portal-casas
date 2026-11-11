@@ -79,8 +79,9 @@ const text = node => !node || typeof node !== 'object' ? String(node ?? '') : Ar
     // A las 23:30 del 30-nov en CDMX ya es 1-dic en UTC: el cron debe reportar OCTUBRE todavía, no noviembre.
     assert.equal(lib.previousMonth(inquiryToday(new Date('2026-12-01T05:30:00Z'))), '2026-10', 'Hora MX, no UTC');
     assert.equal(lib.previousMonth(inquiryToday(new Date('2026-12-01T13:00:00Z'))), '2026-11', 'Cron 13:00 UTC = 07:00 MX del día 1');
-    assert.equal(fs.readFileSync('apps/web/vercel.json', 'utf8').includes('"schedule": "0 13 1 * *"'), true);
-    assert.equal(JSON.parse(fs.readFileSync('apps/web/vercel.json', 'utf8')).crons[0].path, '/api/cron/monthly-report');
+    // Un solo cron diario (plan Hobby) a las 12:00 UTC = 06:00 MX; el día 1 MX dispara además el reporte mensual.
+    assert.deepEqual(JSON.parse(fs.readFileSync('apps/web/vercel.json', 'utf8')).crons, [{ path: '/api/cron/daily', schedule: '0 12 * * *' }]);
+    assert.equal(lib.previousMonth(inquiryToday(new Date('2026-12-01T12:00:00Z'))), '2026-11', '12:00 UTC del día 1 = 06:00 MX: ya es día 1');
 
     // 2. Agregados del mes (calculados a mano).
     const base = { guestName: null, referredBy: null, cleaningCost: null, taxes: null, commissionPercent: null };

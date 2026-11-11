@@ -718,7 +718,7 @@
     "subtotal": "Subtotal {property}",
     "grandTotal": "Month total ({count} bookings)",
     "autoTitle": "Automatic delivery",
-    "autoIntro": "On the 1st of each month (07:00, central Mexico time) the previous month’s Excel is sent to these addresses.",
+    "autoIntro": "On the 1st of each month (06:00, central Mexico time) the previous month’s Excel is sent to these addresses.",
     "recipient": "Email {number}",
     "recipientsHelp": "Up to 2 addresses. Leave empty to stop the automatic delivery.",
     "saveRecipients": "Save emails",
@@ -785,6 +785,16 @@
       "synced": "Calendar connected and synced when the property was created.",
       "syncFailed": "The property and its calendar were saved, but syncing could not read the link. Check the link and press “Sync now”.",
       "feedFailed": "The property was created, but the calendar could not be saved. Add it below."
+    },
+    "autoSync": "It syncs automatically once a day (06:00, central Mexico time) and also right before a guest sends an inquiry. You can force it with “Sync now”.",
+    "lastSynced": "Last synced: {when}",
+    "neverSynced": "Not synced yet",
+    "lastFailed": "The last attempt ({when}) failed: {error}. Previous dates are kept.",
+    "stale": "It has not synced successfully for more than 36 hours. Check the link.",
+    "errors": {
+      "TIMEOUT": "the platform took too long to respond",
+      "NOT_A_CALENDAR": "the link did not return a calendar",
+      "FETCH_FAILED": "the link could not be downloaded"
     }
   }
 }

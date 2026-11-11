@@ -49,9 +49,11 @@ async function assertManaged(propertyId: string, manager: PropertyManager) {
 export async function listIcalFeeds(propertyId: string, manager: PropertyManager) {
   await assertManaged(propertyId, manager);
   const rows = await db.select({ id: icalFeeds.id, url: icalFeeds.url, source: icalFeeds.source,
+    lastSyncedAt: icalFeeds.lastSyncedAt, lastAttemptAt: icalFeeds.lastAttemptAt, lastError: icalFeeds.lastError,
     imported: sql<number>`(select count(*) from "Booking" b where b."icalFeedId" = "IcalFeed"."id")` })
     .from(icalFeeds).where(eq(icalFeeds.propertyId, propertyId)).orderBy(icalFeeds.id);
-  return rows.map(row => ({ ...row, imported: Number(row.imported) }));
+  return rows.map(row => ({ ...row, imported: Number(row.imported),
+    lastSyncedAt: row.lastSyncedAt ? new Date(row.lastSyncedAt).toISOString() : null, lastAttemptAt: row.lastAttemptAt ? new Date(row.lastAttemptAt).toISOString() : null }));
 }
 
 export async function addIcalFeed(propertyId: string, input: unknown, manager: PropertyManager) {
@@ -59,13 +61,13 @@ export async function addIcalFeed(propertyId: string, input: unknown, manager: P
   const feeds = await listIcalFeeds(propertyId, manager); // también valida dueño
   if (feeds.length >= MAX_FEEDS_PER_PROPERTY) throw new PanelValidationError('validation');
   if (feeds.some(feed => feed.url === value.url)) throw Object.assign(new Error('duplicate'), { cause: { code: '23505' } });
-  const [row] = await db.insert(icalFeeds).values({ id: crypto.randomUUID(), propertyId, ...value }).returning({ id: icalFeeds.id });
+  const [row] = await db.insert(icalFeeds).values({ id: crypto.randomUUID(), propertyId, ...value, lastAttemptAt: null, lastSyncedAt: null, lastError: null }).returning({ id: icalFeeds.id });
   return row;
 }
 
 /** Al crear una propiedad: inserta su primer calendario (ya validado con validateFeedInput, sin chequeo de dueño). */
 export async function insertFirstIcalFeed(propertyId: string, value: { url: string; source: IcalSource }) {
-  const [row] = await db.insert(icalFeeds).values({ id: crypto.randomUUID(), propertyId, ...value }).returning({ id: icalFeeds.id });
+  const [row] = await db.insert(icalFeeds).values({ id: crypto.randomUUID(), propertyId, ...value, lastAttemptAt: null, lastSyncedAt: null, lastError: null }).returning({ id: icalFeeds.id });
   return row;
 }
 

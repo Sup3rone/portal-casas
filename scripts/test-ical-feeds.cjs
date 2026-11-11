@@ -84,7 +84,7 @@ const feedsOf = propertyId => memory.prepare('SELECT * FROM "IcalFeed" WHERE "pr
     // 7. La ficha de la propiedad monta el editor (dentro de los recursos que se ocultan en renta anual).
     const pageSource = fs.readFileSync('apps/web/src/app/[locale]/panel/propiedades/[id]/page.tsx', 'utf8');
     assert.match(pageSource, /<AvailabilityEditor[^\n]*\r?\n\s*<IcalFeedsEditor propertyId=\{id\} feeds=\{feeds\} notice=\{icalNotice\} \/>\r?\n\s*<\/RentalTypeResources>/);
-    assert.match(fs.readFileSync('apps/web/src/app/api/ical/sync/route.ts', 'utf8'), /const source = bookingSourceFor\(feed\.source\)/);
+    assert.match(fs.readFileSync('apps/web/src/lib/ical-sync-runner.ts', 'utf8'), /const source = bookingSourceFor\(feed\.source\)/);
     const es = JSON.parse(fs.readFileSync('apps/web/messages/es.json', 'utf8'));
     for (const lang of ['en', 'fr']) {
       const other = JSON.parse(fs.readFileSync(`apps/web/messages/${lang}.json`, 'utf8'));

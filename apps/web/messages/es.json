@@ -718,7 +718,7 @@
     "subtotal": "Subtotal {property}",
     "grandTotal": "Total del mes ({count} reservas)",
     "autoTitle": "Envío automático",
-    "autoIntro": "El día 1 de cada mes (07:00, hora del centro de México) se envía el Excel del mes anterior a estos correos.",
+    "autoIntro": "El día 1 de cada mes (06:00, hora del centro de México) se envía el Excel del mes anterior a estos correos.",
     "recipient": "Correo {number}",
     "recipientsHelp": "Hasta 2 correos. Déjalos vacíos para no recibir el envío automático.",
     "saveRecipients": "Guardar correos",
@@ -785,6 +785,16 @@
       "synced": "Calendario conectado y sincronizado al crear la propiedad.",
       "syncFailed": "La propiedad y su calendario se guardaron, pero la sincronización no pudo leer el enlace. Revisa el enlace y pulsa «Sincronizar ahora».",
       "feedFailed": "La propiedad se creó, pero el calendario no se pudo guardar. Agrégalo aquí abajo."
+    },
+    "autoSync": "Se sincroniza solo una vez al día (06:00, hora del centro de México) y además justo antes de que un huésped envíe una consulta. Puedes forzarlo con «Sincronizar ahora».",
+    "lastSynced": "Última sincronización: {when}",
+    "neverSynced": "Aún no se ha sincronizado",
+    "lastFailed": "El último intento ({when}) falló: {error}. Se conservan las fechas anteriores.",
+    "stale": "Lleva más de 36 horas sin sincronizarse con éxito. Revisa el enlace.",
+    "errors": {
+      "TIMEOUT": "la plataforma tardó demasiado en responder",
+      "NOT_A_CALENDAR": "el enlace no devolvió un calendario",
+      "FETCH_FAILED": "no se pudo descargar el enlace"
     }
   }
 }

@@ -105,6 +105,9 @@ export default function CalendarBoard({ propiedades, bookings, canSync = false, 
           const href=cleaningNoticeHref(p.cleaningWhatsapp!,t('cleaningNoticeMessage',{property:p.title||p.slug,location:propertyLocation(p)||'—',start:noticeDate(b.start,locale),end:noticeDate(b.end,locale)}));
           return href&&<a key={'notice-'+(b.id||i)} href={href} target="_blank" rel="noopener noreferrer" aria-label={t('cleaningNotice')+' · '+formatDate(b.start)+' – '+formatDate(b.end)} className="mt-2 mr-2 inline-flex min-h-11 items-center rounded-full bg-[#25D366] px-4 font-bold text-black">{t('cleaningNotice')}</a>;
         })}
+        {/* T-4738: enlace a la vista privada de la reserva (desglose de precio); solo reservas reales. */}
+        {visibleBookings.filter(b=>b.propertyId===p.id&&detail.day>=b.start&&detail.day<b.end&&isCleaningNoticeBooking(b)&&b.id).map(b=>
+          <a key={'detail-'+b.id} href={`/${locale}/panel/reservas/${encodeURIComponent(b.id!)}`} className="mt-2 mr-2 inline-flex min-h-11 items-center underline text-green-800 dark:text-green-300">{t('bookingDetail')} · {formatDate(b.start)} – {formatDate(b.end)}</a>)}
         <div className="mt-3 flex flex-wrap gap-3">
           {visibleBookings.filter(b=>b.propertyId===p.id&&detail.day>=b.start&&detail.day<b.end&&isUnlockableBlock(b)).map(b=><button key={b.id} type="button" disabled={busy} onClick={()=>unlock(b)} className="min-h-11 rounded-full border border-green-700 px-4 text-green-800 disabled:opacity-50 dark:border-green-400 dark:text-green-300">{t(busy?'unlocking':'unlock')} · {formatDate(b.start)} → {formatDate(b.end)}</button>)}
           <button type="button" onClick={()=>setDetail(null)} className="min-h-11 px-3 underline">{t('closeDetails')}</button>

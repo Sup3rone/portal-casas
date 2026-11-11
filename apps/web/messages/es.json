@@ -496,7 +496,8 @@
     "reservedBy": "Reservado por {name}",
     "unknownGuest": "huésped sin nombre registrado",
     "free": "Libre",
-    "empty": "No hay propiedades"
+    "empty": "No hay propiedades",
+    "bookingDetail": "Ver reserva y desglose"
   },
   "photoUpload": {
     "queueProgress": "Archivo {current} de {total}: {name}",
@@ -650,5 +651,39 @@
     "myIntro": "Genera enlaces al sitio o a tus propiedades y compártelos. Las reservas que lleguen por ellos se te atribuyen con el % de comisión que fijó el administrador.",
     "myInactive": "Tu acceso de referidos está desactivado: no puedes crear enlaces nuevos. Lo ya registrado se conserva.",
     "linkedUser": "Usuario del panel"
+  },
+  "bookingDetail": {
+    "title": "Reserva",
+    "back": "Volver a reservas",
+    "property": "Propiedad",
+    "dates": "Fechas",
+    "source": "Origen",
+    "guest": "Huésped",
+    "referral": "Referido",
+    "noReferral": "Sin colaborador",
+    "breakdown": "Desglose para facturar",
+    "rentAmount": "Renta (hospedaje)",
+    "cleaningCost": "Costo de aseo",
+    "taxes": "Impuestos",
+    "amountHelp": "MXN, número ≥ 0 con hasta 2 decimales (punto). Vacío = sin dato.",
+    "invalidAmount": "Importe no válido: usa solo números, sin signo negativo ni comas, y hasta 2 decimales (ej. 1500.50).",
+    "commissionPercent": "% del colaborador (congelado al confirmar)",
+    "commissionAmount": "Comisión del colaborador",
+    "commissionHelp": "Comisión = renta × % congelado, redondeada a centavos (mitad hacia arriba). El aseo y los impuestos no generan comisión. Se calcula sola; no se edita.",
+    "total": "Total (renta + aseo + impuestos)",
+    "save": "Guardar desglose",
+    "saved": "Desglose guardado.",
+    "legacyNotice": "Esta reserva aún no tiene desglose capturado.",
+    "open": "Ver reserva",
+    "listTitle": "Reservas",
+    "listIntro": "Reservas confirmadas con su desglose para facturar. Abre una para capturar renta, aseo e impuestos.",
+    "listEmpty": "Aún no hay reservas.",
+    "edit": "Desglose",
+    "rentPrefilled": "Renta precargada con la tarifa de la propiedad para estas fechas. Revísala y pulsa «Guardar desglose» para confirmarla.",
+    "noSuggestedRent": "La propiedad no tiene tarifa para todas las noches: captura la renta a mano.",
+    "useSuggestedRent": "Usar tarifa de la propiedad ({amount})",
+    "taxesAuto": "Automático: IVA 16 % de renta + aseo. Escribe otro importe para cambiarlo.",
+    "taxesManual": "Importe manual (no se recalcula).",
+    "applyTaxes": "Calcular 16 % (IVA)"
   }
 }

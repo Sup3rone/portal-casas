@@ -26,6 +26,8 @@ export default async function PanelLayout({ children, params }: { children: Reac
       <Link href="/admin/tarifas" className="text-green-700 dark:text-green-400">{nav('tarifas')}</Link>
       </>}
       {manager.role === 'COLLABORATOR' && <Link href="/panel/calendario" className="text-green-700 dark:text-green-400">{nav('calendario')}</Link>}
+      {/* T-4738: reservas con desglose de precio (ADMIN todas; colaborador las suyas). */}
+      <Link href="/panel/reservas" className="text-green-700 dark:text-green-400">{t('bookings')}</Link>
       {ownReferrals && <Link href="/panel/mis-referidos" className="text-green-700 dark:text-green-400">{referrals('myTitle')}</Link>}
       {manager.role === 'ADMIN' && <Link href="/panel/usuarios" className="text-green-700 dark:text-green-400">{admin('title')}</Link>}
       {manager.role === 'ADMIN' && <Link href="/panel/contenido" className="text-green-700 dark:text-green-400">{content('title')}</Link>}

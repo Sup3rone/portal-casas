@@ -497,7 +497,8 @@
     "reservedBy": "Réservé par {name}",
     "unknownGuest": "voyageur sans nom enregistré",
     "free": "Disponible",
-    "empty": "Aucune propriété"
+    "empty": "Aucune propriété",
+    "bookingDetail": "Voir la réservation et le détail"
   },
   "photoUpload": {
     "queueProgress": "Fichier {current} sur {total} : {name}",
@@ -651,5 +652,39 @@
     "myIntro": "Générez des liens vers le site ou vers vos logements et partagez-les. Les réservations arrivées par ces liens vous sont attribuées au % de commission fixé par l’administrateur.",
     "myInactive": "Votre accès au parrainage est désactivé : vous ne pouvez pas créer de nouveaux liens. L’historique est conservé.",
     "linkedUser": "Utilisateur du panneau"
+  },
+  "bookingDetail": {
+    "title": "Réservation",
+    "back": "Retour aux réservations",
+    "property": "Logement",
+    "dates": "Dates",
+    "source": "Origine",
+    "guest": "Voyageur",
+    "referral": "Parrainage",
+    "noReferral": "Sans partenaire",
+    "breakdown": "Détail pour la facturation",
+    "rentAmount": "Loyer (hébergement)",
+    "cleaningCost": "Frais de ménage",
+    "taxes": "Taxes",
+    "amountHelp": "MXN, nombre ≥ 0 avec jusqu’à 2 décimales (point). Vide = aucune donnée.",
+    "invalidAmount": "Montant invalide : chiffres uniquement, sans signe moins ni virgule, jusqu’à 2 décimales (ex. 1500.50).",
+    "commissionPercent": "% du partenaire (figé à la confirmation)",
+    "commissionAmount": "Commission du partenaire",
+    "commissionHelp": "Commission = loyer × % figé, arrondie au centime (demi supérieur). Le ménage et les taxes ne génèrent pas de commission. Calculée automatiquement ; non modifiable.",
+    "total": "Total (loyer + ménage + taxes)",
+    "save": "Enregistrer le détail",
+    "saved": "Détail enregistré.",
+    "legacyNotice": "Cette réservation n’a pas encore de détail saisi.",
+    "open": "Voir la réservation",
+    "listTitle": "Réservations",
+    "listIntro": "Réservations confirmées avec leur détail de facturation. Ouvrez-en une pour saisir loyer, ménage et taxes.",
+    "listEmpty": "Aucune réservation pour le moment.",
+    "edit": "Détail",
+    "rentPrefilled": "Loyer prérempli avec le tarif du logement pour ces dates. Vérifiez-le et cliquez sur « Enregistrer le détail » pour le confirmer.",
+    "noSuggestedRent": "Le logement n’a pas de tarif pour toutes les nuits : saisissez le loyer manuellement.",
+    "useSuggestedRent": "Utiliser le tarif du logement ({amount})",
+    "taxesAuto": "Automatique : TVA 16 % sur loyer + ménage. Saisissez un autre montant pour le modifier.",
+    "taxesManual": "Montant manuel (non recalculé).",
+    "applyTaxes": "Calculer 16 % (TVA)"
   }
 }

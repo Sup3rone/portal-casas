@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check, jsonb, uniqueIndex, numeric } from "drizzle-orm/pg-core";
 import { sql } from 'drizzle-orm';
 
 export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT", "COLLABORATOR"]);
@@ -15,6 +15,8 @@ export const users = pgTable("User", {
   name: text("name").notNull(),
   phone: text("phone"),
   canPublishProperties: boolean('canPublishProperties').notNull().default(false),
+  // T-4736: el ADMIN permite que un COLLABORATOR cree sus propios enlaces de referido.
+  canCreateReferralLinks: boolean('canCreateReferralLinks').notNull().default(false),
   passwordHash: text("passwordHash"),
   emailVerifiedAt: timestamp("emailVerifiedAt"),
   role: userRoleEnum("role").notNull().default("CLIENT"),
@@ -95,6 +97,39 @@ export const propertySections = pgTable('PropertySection', {
   foreignKey({ name: 'PropertySection_hero_property_fk', columns: [table.heroMediaId, table.propertyId], foreignColumns: [media.id, media.propertyId] }).onDelete('no action'),
 ]);
 
+// T-4736: programa de referidos. Nada se borra: "active" = false desactiva al colaborador y sus enlaces.
+export const partners = pgTable('Partner', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text('name').notNull(),
+  email: text('email'),
+  phone: text('phone'),
+  commissionPercent: numeric('commissionPercent', { precision: 5, scale: 2 }).notNull().default('0'),
+  active: boolean('active').notNull().default(true),
+  // Usuario COLLABORATOR ligado (al conceder el permiso); null = colaborador externo sin cuenta.
+  userId: text('userId').references(() => users.id, { onDelete: 'restrict' }),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+}, table => [
+  unique('Partner_userId_unique').on(table.userId),
+  check('Partner_name_check', sql`btrim(${table.name}) <> ''`),
+  check('Partner_commission_check', sql`${table.commissionPercent} >= 0 and ${table.commissionPercent} <= 100`),
+]);
+
+// propertyId null = enlace general; con valor = enlace a esa ficha.
+export const referralLinks = pgTable('ReferralLink', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  partnerId: text('partnerId').notNull().references(() => partners.id, { onDelete: 'restrict' }),
+  propertyId: text('propertyId').references(() => properties.id, { onDelete: 'restrict' }),
+  code: text('code').notNull(),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+}, table => [
+  unique('ReferralLink_code_unique').on(table.code),
+  check('ReferralLink_code_check', sql`${table.code} ~ '^[A-Z0-9-]{4,32}$'`),
+  index('ReferralLink_partnerId_idx').on(table.partnerId),
+  index('ReferralLink_propertyId_idx').on(table.propertyId),
+]);
+
 export const messages = pgTable('Message', {
   id: text('id').primaryKey(),
   propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
@@ -108,7 +143,10 @@ export const messages = pgTable('Message', {
   read: boolean('read').notNull().default(false),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   userId: text('userId').references(() => users.id),
-});
+  // T-4736: atribución leída de la cookie de referido al enviar la consulta.
+  referredByPartnerId: text('referredByPartnerId').references(() => partners.id, { onDelete: 'restrict' }),
+  referralLinkId: text('referralLinkId').references(() => referralLinks.id, { onDelete: 'restrict' }),
+}, table => [index('Message_referredByPartnerId_idx').on(table.referredByPartnerId)]);
 
 export const icalFeeds = pgTable('IcalFeed', {
   id: text('id').primaryKey(),
@@ -127,7 +165,15 @@ export const bookings = pgTable('Booking', {
   guestUserId: text('guestUserId').references(() => users.id),
   // T-4680: UID del VEVENT (+RECURRENCE-ID) para que el sync iCal sea idempotente.
   icalUid: text('icalUid'),
-}, table => [foreignKey({
+  // T-4736: copiada de la consulta al confirmar la reserva; null = sin atribución.
+  referredByPartnerId: text('referredByPartnerId').references(() => partners.id, { onDelete: 'restrict' }),
+  referralLinkId: text('referralLinkId').references(() => referralLinks.id, { onDelete: 'restrict' }),
+  // Consulta de la que salió la atribución: una consulta atribuye como mucho UNA reserva. Sin FK: las consultas se pueden borrar.
+  referralMessageId: text('referralMessageId'),
+  // % de comisión congelado al confirmar; editar el colaborador no cambia lo ya atribuido.
+  commissionPercent: numeric('commissionPercent', { precision: 5, scale: 2 }),
+}, table => [index('Booking_referredByPartnerId_idx').on(table.referredByPartnerId),
+  uniqueIndex('Booking_referralMessageId_unique').on(table.referralMessageId).where(sql`${table.referralMessageId} is not null`), foreignKey({
   name: 'Booking_icalFeed_property_fk',
   columns: [table.icalFeedId, table.propertyId],
   foreignColumns: [icalFeeds.id, icalFeeds.propertyId],
@@ -178,7 +224,7 @@ export const adminUserAudit = pgTable('AdminUserAudit', {
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 }, table => [
   index('AdminUserAudit_target_created_idx').on(table.targetUserId, table.createdAt),
-  check('AdminUserAudit_action_check', sql`${table.action} in ('ROLE_CHANGE', 'PASSWORD_RESET', 'PUBLICATION_PERMISSION')`),
+  check('AdminUserAudit_action_check', sql`${table.action} in ('ROLE_CHANGE', 'PASSWORD_RESET', 'PUBLICATION_PERMISSION', 'REFERRAL_PERMISSION')`),
 ]);
 
 // Historial sin FK: debe sobrevivir a la eliminación de recursos de negocio.

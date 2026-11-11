@@ -1,4 +1,4 @@
-import { db, messages, properties } from '@portal/db';
+import { db, messages, properties, partners } from '@portal/db';
 import { desc, eq } from 'drizzle-orm';
 import MensajesList from '@/components/MensajesList';
 import { managedResource, requirePropertyManager } from '@/lib/property-access';
@@ -23,9 +23,11 @@ export default async function AdminMensajesPage() {
       propiedad: properties.slug,
       propertyId: messages.propertyId,
       propertyTitle: properties.titleEs,
+      referredBy: partners.name, // T-4736
     })
     .from(messages)
     .leftJoin(properties, eq(messages.propertyId, properties.id))
+    .leftJoin(partners, eq(partners.id, messages.referredByPartnerId))
     .where(managedResource(messages.propertyId, manager))
     .orderBy(desc(messages.createdAt));
 

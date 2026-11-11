@@ -775,7 +775,24 @@ Detalle de piezas en la sección 8.6. Añade `SiteContent.home_background_videos
 | `booking-ical-uid.sql` | T-4680 | ✅ Verificado | Sin confirmar |
 | `property-cleaning-whatsapp.sql` | T-4683 | ✅ Verificado | Pendiente |
 | `site-content-home-videos.sql` | T-4679 | ✅ Verificado | Pendiente (al mergear) |
+| `referral-program.sql` | T-4736 | ✅ Aplicado (10-11, verificado por lectura) | Pendiente |
+| `referral-collaborator-permission.sql` | T-4736 (permiso colaborador) | Pendiente | Pendiente |
 
 ### 9.6 Verificación
 
 Suite offline: 61 `scripts/test-*.cjs`, 60 en verde; `test-panel.cjs` falla desde `21dd8412` (colaborador sin `canPublishProperties` recibe 403 al despublicar) y está pendiente. TypeScript limpio; ESLint sin errores (5 warnings previos). Verificaciones de navegador hechas con Chrome headless local contra Respaldo; la QA visual final sigue siendo humana.
+
+## 10. Programa de referidos (T-4736, 10 de noviembre de 2026)
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Datos | [schema.ts](C:/Users/menib/Documents/GitHub/portal-casas/packages/db/src/schema.ts) + [referral-program.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/referral-program.sql) | `Partner`, `ReferralLink`; `referredByPartnerId`/`referralLinkId` en `Message` y `Booking`. **Sin el SQL fallan consultas y reservas.** |
+| Utilidades | [referral.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/referral.ts) | Cookie `alia_ref` (30 días), normalización y generación de código, URL para compartir. Sin BD; la usa el proxy. |
+| Servicio | [referrals.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/referrals.ts) | CRUD solo ADMIN, enlaces únicos, `referralAttribution` (nunca lanza). |
+| Captura | `proxy.ts` → `api/messages/route.ts` → `api/bookings/create/route.ts` (+ `MessageModal` envía `messageId`) | `?ref=` → cookie → consulta → reserva de la misma propiedad. |
+| Panel | `app/[locale]/panel/referidos/` + [Referrals.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/Referrals.tsx) + `api/panel/partners/` | Lista, ficha, activar/desactivar, generar y copiar enlaces, reservas atribuidas. Sin DELETE. |
+| Colaborador | `app/[locale]/panel/mis-referidos/` + `api/panel/my-referrals/links/` + `components/panel/ReferralSections.tsx` | Permiso `User.canCreateReferralLinks` (Usuarios → `admin-users.ts`, auditoría `REFERRAL_PERMISSION`); Partner ligado por `userId`; solo enlaces generales o de sus casas. |
+| Consultas | `panel/consultas/page.tsx` + `Inquiries.tsx`, `admin/mensajes/page.tsx` + `MensajesList.tsx` | «Referido por {nombre}» (left join a `Partner`). |
+| Test | [test-referrals.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-referrals.cjs) | Alta de partner, código único, atribución con cookie, sin ref intacto, permisos, permiso del colaborador, nombre en consultas. |
+
+Detalle y diagnóstico de reservas/correo en [REFERIDOS.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/REFERIDOS.md). «Partner» ≠ rol `COLLABORATOR` (usuario del panel que gestiona sus casas).

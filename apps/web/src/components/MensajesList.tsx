@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import MessageModal, { MessageData } from "@/components/MessageModal";
 import MarkAsReadButton from "@/components/MarkAsReadButton";
 
@@ -19,10 +20,12 @@ type Row = {
   propiedad: string | null;
   propertyId: string;
   propertyTitle: string | null;
+  referredBy?: string | null;
 };
 
 export default function MensajesList({ rows }: { rows: Row[] }) {
   const [selected, setSelected] = useState<MessageData | null>(null);
+  const referrals = useTranslations("referrals");
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -73,6 +76,7 @@ export default function MensajesList({ rows }: { rows: Row[] }) {
                     {m.email}
                   </a>
                   {m.phone && <> · {m.phone}</>} · 🌐 {m.lang.toUpperCase()}
+                  {m.referredBy && <> · {referrals("referredBy", { name: m.referredBy })}</>}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-2">

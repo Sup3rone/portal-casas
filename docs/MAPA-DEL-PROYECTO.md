@@ -1,6 +1,6 @@
 # Mapa del código y funcionamiento de portal-casas
 
-**Revisión:** 29 de octubre de 2026. **Referencia Git:** `4dab447d`, rama `main` al revisar, más los archivos locales presentes. **Última actualización:** 9 de noviembre de 2026 (sección 9).
+**Revisión:** 29 de octubre de 2026. **Referencia Git:** `4dab447d`, rama `main` al revisar, más los archivos locales presentes. **Última actualización:** 11 de noviembre de 2026 (§2.3 y §4: consulta, T-4770; §13: el dueño administra sus referidores, T-4767).
 
 Esta guía permite localizar qué archivo controla cada parte del proyecto y cómo se conecta con las demás. Describe fuentes del repositorio; no certifica el despliegue, los datos de Neon ni el estado de migraciones aplicadas. No se consultó la BD ni se ejecutaron navegador, build o migraciones para crearla.
 
@@ -200,6 +200,8 @@ CalendarBoard/AvailabilityEditor trabajan con endpoints de recursos/bloques. Coe
 - `property-access.ts`: vuelve a leer rol de BD, verifica ownership y ámbito de recursos.
 - `panel-server.ts`: adapta esos controles a páginas, redirecciones y notFound.
 - `panel-response.ts` y `components/panel/request.ts`: códigos de servidor y mensajes accionables cliente.
+
+- **Roles (11-11-2026):** ADMIN = técnico (usuarios, permisos, contenido). El dueño de las casas entra como COLLABORATOR. El referidor es un `Partner` con cuenta de huésped (CLIENT/VIEWER) y no entra al panel. VIEWER ya no lo asigna ningún flujo (descontinuado en UI, vivo en BD). CLIENT es la cuenta del huésped (registro). Ver §13.
 
 **Diferencia que debe conocerse al investigar acceso:** proxy.ts mantiene un guard ADMIN para `/[locale]/admin`, mientras Mensajes/Tarifas y sus acciones usan guard de gestor con scoping. Este mapa no modifica esa diferencia: revisar ambas capas ante rechazos de navegación.
 
@@ -457,7 +459,7 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | /[locale] | [apps/web/src/app/[locale]/layout.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/layout.tsx) | HTML, idioma, CSS, Analytics, sesión, contactos, Navbar/Footer y destinos. |
 | /[locale] | [apps/web/src/app/[locale]/loading.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/loading.tsx) | Fallback PageLoading home. |
 | /[locale]/login | [apps/web/src/app/[locale]/login/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/login/page.tsx) | Página de acceso. |
-| /[locale]/mi-cuenta | [apps/web/src/app/[locale]/mi-cuenta/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/mi-cuenta/page.tsx) | Área autenticada del cliente. |
+| /[locale]/mi-cuenta | [apps/web/src/app/[locale]/mi-cuenta/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/mi-cuenta/page.tsx) | Área autenticada del cliente. Si su cuenta está ligada a un referidor, muestra «Mis códigos de referido» (T-4767). |
 | /[locale]/olvide-password | [apps/web/src/app/[locale]/olvide-password/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/olvide-password/page.tsx) | Página de solicitud de recuperación. |
 | /[locale] | [apps/web/src/app/[locale]/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/page.tsx) | Home: contenido global, hero y destacadas. |
 | /[locale]/panel/calendario | [apps/web/src/app/[locale]/panel/calendario/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/panel/calendario/page.tsx) | Calendario del gestor con ámbito de propiedad. |
@@ -780,6 +782,7 @@ Detalle de piezas en la sección 8.6. Añade `SiteContent.home_background_videos
 | `booking-price-breakdown.sql` | T-4738 | ✅ Aplicado | Pendiente |
 | `monthly-commission-report.sql` | T-4739 | Pendiente | Pendiente |
 | `ical-feed-sync-status.sql` | T-4739 (sync iCal automático) | Pendiente | Pendiente |
+| `partner-owner.sql` | T-4767 (`Partner.ownerId`) | ✅ Aplicado (inferido: alta de referidor con `ownerId` respondió 201 en local contra Respaldo, 11-11; no consultado por SQL) | Pendiente: **sin él no carga el panel del colaborador** |
 
 ### 9.6 Verificación
 
@@ -791,10 +794,10 @@ Suite offline: 61 `scripts/test-*.cjs`, 60 en verde; `test-panel.cjs` falla desd
 |---|---|---|
 | Datos | [schema.ts](C:/Users/menib/Documents/GitHub/portal-casas/packages/db/src/schema.ts) + [referral-program.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/referral-program.sql) | `Partner`, `ReferralLink`; `referredByPartnerId`/`referralLinkId` en `Message` y `Booking`. **Sin el SQL fallan consultas y reservas.** |
 | Utilidades | [referral.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/referral.ts) | Cookie `alia_ref` (30 días), normalización y generación de código, URL para compartir. Sin BD; la usa el proxy. |
-| Servicio | [referrals.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/referrals.ts) | CRUD solo ADMIN, enlaces únicos, `referralAttribution` (nunca lanza). |
+| Servicio | [referrals.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/referrals.ts) | CRUD (ADMIN todos; desde T-4767 también el dueño, acotado: §13), enlaces únicos, `referralAttribution` (nunca lanza). |
 | Captura | `proxy.ts` → `api/messages/route.ts` → `api/bookings/create/route.ts` (+ `MessageModal` envía `messageId`) | `?ref=` → cookie → consulta → reserva de la misma propiedad. |
 | Panel | `app/[locale]/panel/referidos/` + [Referrals.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/Referrals.tsx) + `api/panel/partners/` | Lista, ficha, activar/desactivar, generar y copiar enlaces, reservas atribuidas. Sin DELETE. |
-| Colaborador | `app/[locale]/panel/mis-referidos/` + `api/panel/my-referrals/links/` + `components/panel/ReferralSections.tsx` | Permiso `User.canCreateReferralLinks` (Usuarios → `admin-users.ts`, auditoría `REFERRAL_PERMISSION`); Partner ligado por `userId`; solo enlaces generales o de sus casas. |
+| Colaborador | `app/[locale]/panel/mis-referidos/` + `api/panel/my-referrals/links/` + `components/panel/ReferralSections.tsx` | **Descontinuado en UI (T-4767):** página 404, API 403 (`MY_REFERRALS_DISCONTINUED`) y sin botón de conceder. Vivo en BD: `User.canCreateReferralLinks`, Partner ligado por `userId` y sus enlaces siguen atribuyendo. |
 | Consultas | `panel/consultas/page.tsx` + `Inquiries.tsx`, `admin/mensajes/page.tsx` + `MensajesList.tsx` | «Referido por {nombre}» (left join a `Partner`). |
 | Test | [test-referrals.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-referrals.cjs) | Alta de partner, código único, atribución con cookie, sin ref intacto, permisos, permiso del colaborador, nombre en consultas. |
 
@@ -825,3 +828,17 @@ Detalle en [DESGLOSE-RESERVA.md](C:/Users/menib/Documents/GitHub/portal-casas/do
 | Test | [test-monthly-report.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-monthly-report.cjs) | Agregados a mano, cruces, zona MX, ZIP/CRC/celdas, acceso, destinatarios, cron y bitácora. |
 
 Detalle en [REPORTE-MENSUAL.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/REPORTE-MENSUAL.md).
+
+## 13. El dueño administra sus referidores (T-4767, 11 de noviembre de 2026)
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Datos | `Partner.ownerId` en [schema.ts](C:/Users/menib/Documents/GitHub/portal-casas/packages/db/src/schema.ts) + [partner-owner.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/partner-owner.sql) | Dueño (COLLABORATOR) del referidor; `NULL` = alta del ADMIN. FK RESTRICT + índice. **Sin el SQL no carga el panel del colaborador.** |
+| Acotación | `managedPartners` / `ownerBookingScope` en [referrals.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/referrals.ts) | ADMIN: todos. Dueño: `Partner.ownerId = actor` (rol revalidado en SQL); reservas y conteos solo de sus casas. Ajeno = 404. |
+| Panel | `app/[locale]/panel/referidos/` + `api/panel/partners/` (+ `[id]`, `[id]/links`) + [Referrals.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/Referrals.tsx) | «Mis referidores» para el dueño: alta, % por referidor, activar/desactivar, enlaces generales o de **sus** casas, cuenta ligada por correo. |
+| Cuenta del referidor | `referrerUserId` en `referrals.ts`; error `INVALID_REFERRER_ACCOUNT` (`panel-response.ts`, `panel/request.ts`) | Debe ser una cuenta ya registrada CLIENT/VIEWER, no el propio actor; una cuenta = un referidor (409). Vacío = desligar. |
+| Vista del referidor | `referrerSummary` + [ReferrerCodes.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/ReferrerCodes.tsx) en `/[locale]/mi-cuenta` | Sus códigos, URL y Copiar, consultas y reservas por código, totales y %. Sin importes ni huéspedes; título solo de casas publicadas. |
+| Menú | `app/[locale]/panel/layout.tsx` | «Referidos» (ADMIN) / «Mis referidores» (dueño). Sin «Mis referidos». |
+| Test | [test-referrals.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-referrals.cjs) §9–§10 | Acotación por dueño (3 mutaciones detectadas), cuenta ligada, vista del referidor y «Mis referidos» descontinuado. |
+
+Límite: el enlace general del referidor de un dueño también atribuye en casas de otro dueño, con el % del primero; se resuelve en la fase multi-dueño. Detalle en [REFERIDOS.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/REFERIDOS.md) §2.6.

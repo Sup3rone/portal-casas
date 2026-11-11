@@ -7,6 +7,7 @@ import { randomUUID, randomBytes } from 'crypto';
 import { sendEmail } from '@/lib/mailer';
 import { headers } from 'next/headers';
 import { consumeRateLimit } from '@/lib/rate-limit';
+import { passwordResetUrl } from '@/lib/password-reset-url';
 
 export async function requestPasswordReset(formData: FormData) {
   const retryAfter = consumeRateLimit('recovery', await headers());
@@ -29,8 +30,7 @@ export async function requestPasswordReset(formData: FormData) {
         expiresAt,
       });
 
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-      const resetUrl = `${baseUrl}/${locale}/reset-password?token=${token}`;
+      const resetUrl = passwordResetUrl(locale, token); // T-4771: PUBLIC_SITE_URL, como el resto del sitio
 
       await sendEmail({
         to: user.email,

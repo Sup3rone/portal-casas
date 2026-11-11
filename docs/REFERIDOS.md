@@ -24,7 +24,7 @@ Colaboradores externos («partners», no confundir con el rol `COLLABORATOR` de 
 
 - **Servicio:** Resend (`resend@^6`), en `apps/web/src/lib/mailer.ts` → `sendEmail({ to, subject, html })`. No hay SMTP.
 - **Variables:** `RESEND_API_KEY` y `EMAIL_FROM`. Sin `EMAIL_FROM`, el remitente es `onboarding@resend.dev`, que solo entrega al correo del dueño de la cuenta Resend.
-- **Quién envía correo:** solo la confirmación de reserva (`/api/bookings/create`) y la recuperación de contraseña (`olvide-password/actions.ts`, enlace con `NEXT_PUBLIC_SITE_URL`).
+- **Quién envía correo:** solo la confirmación de reserva (`/api/bookings/create`) la recuperación de contraseña (`olvide-password/actions.ts`; desde T-4771 el enlace usa `PUBLIC_SITE_URL`) y el reporte mensual en Excel (T-4739).
 - **Formulario de contacto/consulta:** **no envía correo** a nadie, ni al huésped ni al dueño. Solo guarda `Message`; el gestor la ve en el panel.
 - Plantillas: HTML en línea, solo en español y sin i18n.
 

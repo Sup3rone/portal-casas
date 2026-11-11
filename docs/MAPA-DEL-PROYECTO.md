@@ -282,9 +282,9 @@ Diagrama resumido; no enumera cada FK, CHECK o auditoría.
 | DATABASE_URL | packages/db/src/index.ts y herramientas BD. Confirmar Respaldo/main. |
 | AUTH_SECRET | Auth.js; secreto de sesión. |
 | BLOB_READ_WRITE_TOKEN | APIs de upload y herramienta de migración. Solo servidor. |
-| PUBLIC_SITE_URL | SEO/canonical/OG/sitemap/robots; fallback localhost. |
-| NEXT_PUBLIC_SITE_URL | Enlace de recuperación en olvide-password/actions.ts; nombre distinto al de SEO. |
-| RESEND_API_KEY / EMAIL_FROM | Adaptador de correo y remitente. |
+| PUBLIC_SITE_URL | SEO/canonical/OG/sitemap/robots y, desde T-4771, el enlace del correo de recuperación (`lib/password-reset-url.ts`); fallback localhost. **Obligatoria en Vercel.** |
+| NEXT_PUBLIC_SITE_URL | Solo respaldo heredado del enlace de recuperación si falta `PUBLIC_SITE_URL` (T-4771). |
+| RESEND_API_KEY / EMAIL_FROM | Adaptador de correo y remitente. Sin `EMAIL_FROM` con dominio verificado en Resend, el remitente `onboarding@resend.dev` solo entrega al dueño de la cuenta Resend: **no llegan** recuperación, confirmación de reserva ni reporte en Excel. |
 | ADMIN_PASSWORD | Acceso alternativo api/admin/login; no es la contraseña de User/Auth.js. |
 | DB_PASSWORD / MINIO_USER / MINIO_PASSWORD | Servicios opcionales de docker-compose.yml. |
 

@@ -45,7 +45,6 @@
     "invalidHeroVideo": "Introduce una URL HTTPS válida para el video, sin credenciales, o deja el campo vacío.",
     "invalidVideoType": "Elige un video MP4 o WebM.",
     "invalidVideoSize": "El video debe pesar entre 1 byte y 4 MB. Para uno mayor utiliza una URL HTTPS.",
-
     "destinationEmpty": "Sin seleccionar",
     "destinationUnavailable": "¿Tu ciudad no está disponible? Contacta al administrador.",
     "invalidDestination": "Selecciona un estado y una ciudad del catálogo que correspondan entre sí, o deja ambos vacíos.",
@@ -172,7 +171,8 @@
       "baseWeekdayPrice": "Precio entre semana (MXN)",
       "baseWeekendPrice": "Precio fin de semana (MXN)"
     },
-    "invalidIcalUrl": "Enlace iCal no válido: usa un enlace https público de Airbnb, Booking, VRBO o Google (.ics)."
+    "invalidIcalUrl": "Enlace iCal no válido: usa un enlace https público de Airbnb, Booking, VRBO o Google (.ics).",
+    "invalidReferrerAccount": "No hay una cuenta de huésped registrada con ese correo, o ya está ligada a otro referidor. Pídele que se registre en el sitio y vuelve a intentar."
   },
   "nav": {
     "menu": "Menú",
@@ -532,7 +532,6 @@
     "about_title_fr": "Título de Sobre nosotros (francés)",
     "aboutImageLabel": "Imagen de Sobre nosotros",
     "aboutImageHint": "Sube una imagen vertical. Se mostrará con proporción 2:3. La sección aparece cuando hay imagen y texto en el idioma activo.",
-
     "imageLimits": "JPEG, PNG o WebP · máximo 4 MB por foto después de optimizar. La imagen elegida se aplica al guardar.",
     "videoLabel": "Video de fondo de la home",
     "videoDrop": "Arrastra aquí un video MP4 o WebM.",
@@ -651,7 +650,11 @@
     "myTitle": "Mis referidos",
     "myIntro": "Genera enlaces al sitio o a tus propiedades y compártelos. Las reservas que lleguen por ellos se te atribuyen con el % de comisión que fijó el administrador.",
     "myInactive": "Tu acceso de referidos está desactivado: no puedes crear enlaces nuevos. Lo ya registrado se conserva.",
-    "linkedUser": "Usuario del panel"
+    "linkedUser": "Usuario del panel",
+    "ownerTitle": "Mis referidores",
+    "ownerIntro": "Tus referidores promueven tus casas con su enlace o código. Fija el % de comisión de cada uno, genera sus enlaces (generales o de tus casas) y liga su cuenta para que vea sus resultados en «Mi cuenta». Solo ves las reservas de tus casas.",
+    "referrerAccount": "Cuenta del referidor (correo registrado, opcional)",
+    "referrerAccountHelp": "Debe ser una cuenta ya registrada en el sitio. Verá en «Mi cuenta» sus códigos, cuántas consultas y reservas generó cada uno y su %; no entra al panel. Vacío = sin cuenta ligada."
   },
   "bookingDetail": {
     "title": "Reserva",

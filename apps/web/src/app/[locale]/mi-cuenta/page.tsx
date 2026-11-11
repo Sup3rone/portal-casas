@@ -6,6 +6,8 @@ import { logoutAction } from "./actions";
 import Link from "next/link";
 import { getLocale } from "next-intl/server";
 import { privateMetadata } from '@/lib/seo';
+import { referrerSummary } from '@/lib/referrals';
+import ReferrerCodes from '@/components/ReferrerCodes';
 
 export const metadata = privateMetadata;
 
@@ -61,6 +63,9 @@ export default async function MyAccountPage() {
     .where(eq(bookings.guestUserId, userData.id))
     .orderBy(desc(bookings.startDate))
     .limit(10);
+
+  // T-4767: solo si un dueño (o el ADMIN) ligó esta cuenta a un referidor.
+  const referrer = await referrerSummary(userData.id);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
@@ -150,6 +155,7 @@ export default async function MyAccountPage() {
             )}
           </section>
         </div>
+        {referrer && <ReferrerCodes summary={referrer} locale={locale} />}
       </div>
     </div>
   );

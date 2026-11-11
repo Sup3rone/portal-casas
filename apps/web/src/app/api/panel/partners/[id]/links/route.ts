@@ -1,7 +1,6 @@
-// T-4736: generar enlace de referido (general o por propiedad) — solo ADMIN.
+// T-4736/T-4767: generar enlace de referido — ADMIN (cualquier casa) o el dueño del referidor (general o SUS casas).
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { requireAdmin } from '@/lib/property-access';
 import { createReferralLink } from '@/lib/referrals';
 import { panelError } from '@/lib/panel-response';
 
@@ -10,7 +9,6 @@ type Context = { params: Promise<{ id: string }> };
 
 export async function POST(req: NextRequest, { params }: Context) {
   try {
-    await requireAdmin();
     const { id } = await params;
     const link = await createReferralLink(id, await req.json().catch(() => null));
     revalidatePath('/[locale]/panel/referidos', 'layout');

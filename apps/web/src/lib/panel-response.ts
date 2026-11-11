@@ -5,6 +5,8 @@ import { PanelValidationError } from './panel-validation';
 export function panelError(error: unknown) {
   if (error instanceof PanelValidationError && error.message === 'invalidSectionsOrder') return NextResponse.json({ error: 'invalidSectionsOrder', code: 'INVALID_SECTIONS_ORDER' }, { status: 400 });
   if (error instanceof PanelValidationError && error.message === 'invalidIcalUrl') return NextResponse.json({ error: 'invalidIcalUrl', code: 'INVALID_ICAL_URL' }, { status: 400 });
+  // T-4767: la cuenta del referidor no existe o no es de huésped.
+  if (error instanceof PanelValidationError && error.message === 'invalidReferrerAccount') return NextResponse.json({ error: 'invalidReferrerAccount', code: 'INVALID_REFERRER_ACCOUNT' }, { status: 400 });
   if (error instanceof PanelValidationError && error.message === 'invalidContactEmail') return NextResponse.json({ error: 'invalidContactEmail', code: 'INVALID_CONTACT_EMAIL' }, { status: 400 });
   if (error instanceof PanelValidationError && ['invalidHeroVideo', 'invalidSectionTitles'].includes(error.message)) return NextResponse.json({ error: error.message, code: error.message === 'invalidHeroVideo' ? 'INVALID_HERO_VIDEO' : 'INVALID_SECTION_TITLES' }, { status: 400 });
   const denied = accessFailure(error);

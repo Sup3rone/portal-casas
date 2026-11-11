@@ -45,7 +45,6 @@
     "invalidHeroVideo": "Enter a valid HTTPS video URL without credentials, or leave it empty.",
     "invalidVideoType": "Choose an MP4 or WebM video.",
     "invalidVideoSize": "The video must be between 1 byte and 4 MB. Use an HTTPS URL for a larger video.",
-
     "destinationEmpty": "Not selected",
     "destinationUnavailable": "City not available? Contact the administrator.",
     "invalidDestination": "Select a matching state and city from the catalog, or leave both empty.",
@@ -172,7 +171,8 @@
       "baseWeekdayPrice": "Weekday price (MXN)",
       "baseWeekendPrice": "Weekend price (MXN)"
     },
-    "invalidIcalUrl": "Invalid iCal link: use a public https link from Airbnb, Booking, VRBO or Google (.ics)."
+    "invalidIcalUrl": "Invalid iCal link: use a public https link from Airbnb, Booking, VRBO or Google (.ics).",
+    "invalidReferrerAccount": "There is no registered guest account with that email, or it is already linked to another referrer. Ask them to sign up on the site and try again."
   },
   "nav": {
     "menu": "Menu",
@@ -532,7 +532,6 @@
     "about_title_fr": "About us title (French)",
     "aboutImageLabel": "About us image",
     "aboutImageHint": "Upload a portrait image. It will use a 2:3 ratio. The section appears when an image and text in the active language are available.",
-
     "imageLimits": "JPEG, PNG or WebP · up to 4 MB per photo after optimization. The selected image is applied when saved.",
     "videoLabel": "Home background video",
     "videoDrop": "Drag an MP4 or WebM video here.",
@@ -651,7 +650,11 @@
     "myTitle": "My referrals",
     "myIntro": "Generate links to the site or to your properties and share them. Bookings that come through them are attributed to you at the commission % set by the administrator.",
     "myInactive": "Your referral access is deactivated: you cannot create new links. Existing records are kept.",
-    "linkedUser": "Panel user"
+    "linkedUser": "Panel user",
+    "ownerTitle": "My referrers",
+    "ownerIntro": "Your referrers promote your homes with their own link or code. Set each one's commission %, create their links (site-wide or for your homes) and link their account so they can see their results in “My account”. You only see bookings for your homes.",
+    "referrerAccount": "Referrer account (registered email, optional)",
+    "referrerAccountHelp": "Must be an account already registered on the site. In “My account” they will see their codes, how many inquiries and bookings each one generated and their %; they do not get panel access. Empty = no linked account."
   },
   "bookingDetail": {
     "title": "Booking",

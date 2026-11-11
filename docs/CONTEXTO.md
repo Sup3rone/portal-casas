@@ -1013,3 +1013,26 @@ La ficha de la propiedad tiene «Calendarios externos (iCal)»: pegar el enlace 
 ### 2026-11-10 — Sincronización iCal automática (dentro de T-4739)
 
 Plan Hobby, así que hay un **solo cron diario**: `/api/cron/daily` (`0 12 * * *` = 06:00 CDMX). Sincroniza todos los calendarios iCal y el día 1 (hora MX) envía además el reporte mensual, que ya no tiene cron propio; `/api/cron/monthly-report` queda para ejecutarlo a mano. Además, **antes de guardar una consulta pública** se refrescan los calendarios de esa casa si llevan más de 10 min sin sincronizar (tope ~4 s; si falla, se usan las fechas guardadas). El botón «Sincronizar ahora» se mantiene. Estado por calendario en `IcalFeed.lastAttemptAt/lastSyncedAt/lastError`, visible en el panel (aviso a las 36 h). Lógica compartida en `lib/ical-sync-runner.ts`; autorización de cron en `lib/cron-auth.ts`. SQL `scripts/sql/ical-feed-sync-status.sql` **antes del deploy** (sin él fallan la ficha de la propiedad en el panel y agregar calendarios; el sync y las consultas no fallan).
+
+### 2026-11-11 — Roles, versión ligera + el dueño administra sus referidores (T-4767)
+
+**Decisión de negocio:** ADMIN = solo lo técnico del sitio, usuarios y permisos (Emma). El **dueño** de las casas entra como **COLLABORATOR** (`propietario@delcanto.mx`, dato del usuario; no verificado en BD). Ve y publica sus casas y administra **sus** referidores. El **referidor** («colaborador» en lenguaje de negocio) es un `Partner`, no el rol COLLABORATOR. Ve sus códigos y lo que generan. La reestructuración multi-dueño queda para la fase de pagos en línea.
+
+**Roles en código** (`UserRole`: ADMIN, VIEWER, CLIENT, COLLABORATOR; UI: Administrador, Lector, Cliente, Colaborador). No existe un rol «usuario». El panel (`requirePropertyManager`) solo admite ADMIN y COLLABORATOR. Un COLLABORATOR no ve Usuarios, Contenido ni `/admin/calendario`. VIEWER no lo asigna ningún flujo: **descontinuado en UI, vivo en BD**. CLIENT sí se asigna (registro de huésped, valor por defecto, «Revertir a cliente»): no se congeló porque rompería el registro.
+
+**T-4767 — qué cambió:**
+- `Partner.ownerId` (nullable, FK `User`, índice). SQL `scripts/sql/partner-owner.sql` **antes del deploy, no ejecutado**. Los Partner existentes quedan `NULL`: son altas del ADMIN y solo las ve el ADMIN.
+- `/panel/referidos` y `/api/panel/partners*` pasan de `requireAdmin` a `requirePropertyManager` + `managedPartners(manager)`. ADMIN ve todos; COLLABORATOR solo `ownerId = actor`, con el rol revalidado en SQL. Ajeno = 404. El menú dice «Mis referidores» para el dueño.
+- El alta del dueño fija `ownerId = actor`. Enlaces: generales o de casas con `ownerId = actor` (ajena = 400).
+- Cuenta del referidor: campo «correo registrado». Debe existir y ser CLIENT/VIEWER, no el propio actor. Una cuenta = un referidor (409). Vacío = desligar. Si el correo ya ligado no cambia, no se revalida (así el ADMIN puede guardar el Partner del permiso, ligado a un COLLABORATOR). Error `INVALID_REFERRER_ACCOUNT`.
+- `collaboratorPartner` exige `ownerId IS NULL`: un referidor de un dueño nunca se vuelve «Mis referidos» de la cuenta ligada.
+- `/mi-cuenta` → «Mis códigos de referido» (`referrerSummary` + `components/ReferrerCodes.tsx`), solo con `Partner.userId = sesión`. Muestra código, URL, consultas y reservas por código, totales y %. Sin importes ni huéspedes; el título de la casa solo si está publicada. Texto en español fijo, como el resto de `/mi-cuenta`.
+
+**Criterio de acotación (verificado en `test-referrals.cjs` §10, con 3 mutaciones que el test detecta):**
+- Referidores: `managedPartners` → ADMIN todos, dueño `Partner.ownerId = actor`.
+- Reservas y conteos en la vista del dueño: solo de casas con `Property.ownerId = actor` (`managedResource` / `ownerBookingScope`). Una reserva que el enlace general de su referidor trajo a la casa de otro dueño no se le muestra ni se le cuenta.
+- Comisiones del dueño: `/panel/reporte` sigue filtrando por sus casas (T-4739).
+- Referidor: solo su propio Partner (`userId`). Sí ve los conteos de todas las reservas de sus códigos, aunque sean de otra casa: es su atribución.
+- Límite: el enlace general de un referidor del dueño A atribuye también en casas del dueño B, con el % que fijó A. Hoy hay un solo dueño; se resuelve en la fase multi-dueño.
+
+**Añadido a T-4767 — «Mis referidos» descontinuado en UI:** el dueño tenía dos menús, «Mis referidores» (los suyos) y «Mis referidos» (él como referidor, con permiso y % del ADMIN). Por decisión del usuario se quita el segundo: no aparece en el menú, la página da 404 y la API 403 (`MY_REFERRALS_DISCONTINUED`). En Usuarios desaparece el botón de conceder; queda solo retirar un permiso ya dado. Nada se borra de la BD: esos enlaces siguen atribuyendo y el ADMIN los ve en Referidos. Los códigos viejos del dueño se quedan así (no se pasan a «Mis referidores»).

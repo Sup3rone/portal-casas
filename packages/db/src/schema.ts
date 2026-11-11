@@ -111,10 +111,13 @@ export const partners = pgTable('Partner', {
   active: boolean('active').notNull().default(true),
   // Usuario COLLABORATOR ligado (al conceder el permiso); null = colaborador externo sin cuenta.
   userId: text('userId').references(() => users.id, { onDelete: 'restrict' }),
+  // T-4767: dueño (COLLABORATOR) que administra a este referidor; null = alta del ADMIN (solo lo ve el ADMIN).
+  ownerId: text('ownerId').references(() => users.id, { onDelete: 'restrict' }),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 }, table => [
   unique('Partner_userId_unique').on(table.userId),
+  index('Partner_ownerId_idx').on(table.ownerId),
   check('Partner_name_check', sql`btrim(${table.name}) <> ''`),
   check('Partner_commission_check', sql`${table.commissionPercent} >= 0 and ${table.commissionPercent} <= 100`),
 ]);

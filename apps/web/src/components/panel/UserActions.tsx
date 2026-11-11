@@ -29,8 +29,9 @@ export default function UserActions({ id, role, self, canPublishProperties, canC
       {t(role === 'COLLABORATOR' ? 'demote' : 'promote')}</button>}
     {role === 'COLLABORATOR' && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('publication', !canPublishProperties)}>
       {t(canPublishProperties ? 'revokePublication' : 'grantPublication')}</button>}
-    {role === 'COLLABORATOR' && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('referrals', !canCreateReferralLinks)}>
-      {t(canCreateReferralLinks ? 'revokeReferrals' : 'grantReferrals')}</button>}
+    {/* T-4767: «Mis referidos» descontinuado; el dueño administra sus referidores. Solo se ofrece retirar un permiso ya dado. */}
+    {role === 'COLLABORATOR' && canCreateReferralLinks && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('referrals', false)}>
+      {t('revokeReferrals')}</button>}
     <p className="text-sm text-gray-600 dark:text-gray-300">{t('sessionWarning')}</p>
     <button type="button" disabled={busy || password !== null} className={buttonClass} onClick={() => change('password')}>{t('reset')}</button>
     {password !== null && <div role="status" className="space-y-2 rounded-lg border border-green-700 p-4">

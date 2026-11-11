@@ -2,7 +2,6 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { panelManager } from '@/lib/panel-server';
 import { privateMetadata } from '@/lib/seo';
-import { collaboratorPartner } from '@/lib/referrals';
 
 export const metadata = privateMetadata;
 
@@ -15,7 +14,6 @@ export default async function PanelLayout({ children, params }: { children: Reac
   const nav = await getTranslations({ locale, namespace: 'nav' });
   const content = await getTranslations({ locale, namespace: 'siteContent' });
   const referrals = await getTranslations({ locale, namespace: 'referrals' });
-  const ownReferrals = await collaboratorPartner(manager); // T-4736: solo COLLABORATOR con permiso
   const report = await getTranslations({ locale, namespace: 'monthlyReport' });
   return <main data-panel-palette="paper" className="panel-skin mx-auto max-w-6xl space-y-8 px-4 py-10">
     <nav aria-label={t('title')} className="flex flex-wrap gap-6 border-b pb-4 dark:border-gray-700">
@@ -31,10 +29,11 @@ export default async function PanelLayout({ children, params }: { children: Reac
       <Link href="/panel/reservas" className="text-green-700 dark:text-green-400">{t('bookings')}</Link>
       {/* T-4739: reporte mensual de comisiones, solo para el colaborador (el ADMIN administra funcionalidades). */}
       {manager.role === 'COLLABORATOR' && <Link href="/panel/reporte" className="text-green-700 dark:text-green-400">{report('navTitle')}</Link>}
-      {ownReferrals && <Link href="/panel/mis-referidos" className="text-green-700 dark:text-green-400">{referrals('myTitle')}</Link>}
+      {/* T-4767: «Mis referidos» (T-4736) descontinuado en UI; el dueño usa «Mis referidores». */}
       {manager.role === 'ADMIN' && <Link href="/panel/usuarios" className="text-green-700 dark:text-green-400">{admin('title')}</Link>}
       {manager.role === 'ADMIN' && <Link href="/panel/contenido" className="text-green-700 dark:text-green-400">{content('title')}</Link>}
-      {manager.role === 'ADMIN' && <Link href="/panel/referidos" className="text-green-700 dark:text-green-400">{referrals('title')}</Link>}
+      {/* T-4767: el ADMIN ve todos los referidores; el dueño (COLLABORATOR) administra los suyos. */}
+      <Link href="/panel/referidos" className="text-green-700 dark:text-green-400">{referrals(manager.role === 'ADMIN' ? 'title' : 'ownerTitle')}</Link>
       {manager.role === 'ADMIN' && <>
         <Link href="/admin/calendario" className="text-green-700 dark:text-green-400">{nav('calendario')}</Link>
       </>}

@@ -1,11 +1,11 @@
 'use client';
-// T-4736: piezas cliente del panel de referidos (solo ADMIN; las APIs vuelven a validar).
+// T-4736/T-4767: piezas cliente del panel de referidos (ADMIN o dueño; las APIs vuelven a validar y acotar).
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { panelRequest, inputClass, buttonClass } from './request';
 
-type PartnerValues = { id?: string; name: string; email: string | null; phone: string | null; commissionPercent: string };
+type PartnerValues = { id?: string; name: string; email: string | null; phone: string | null; commissionPercent: string; userEmail?: string | null };
 
 function useAction() {
   const errors = useTranslations('panel');
@@ -21,7 +21,7 @@ function useAction() {
 
 export function PartnerForm({ partner }: { partner?: PartnerValues }) {
   const t = useTranslations('referrals'), router = useRouter(), { busy, saved, run, errorText } = useAction();
-  const [values, setValues] = useState({ name: partner?.name ?? '', email: partner?.email ?? '', phone: partner?.phone ?? '', commissionPercent: partner?.commissionPercent ?? '' });
+  const [values, setValues] = useState({ name: partner?.name ?? '', email: partner?.email ?? '', phone: partner?.phone ?? '', commissionPercent: partner?.commissionPercent ?? '', userEmail: partner?.userEmail ?? '' });
   const field = (key: keyof typeof values, label: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => <label className="block space-y-1">
     <span>{label}</span>
     <input {...props} name={key} value={values[key]} className={inputClass} onChange={event => setValues(current => ({ ...current, [key]: event.target.value }))} />
@@ -37,6 +37,9 @@ export function PartnerForm({ partner }: { partner?: PartnerValues }) {
     {field('commissionPercent', t('commission'), { required: true, inputMode: 'decimal', pattern: '\\d{1,3}(\\.\\d{1,2})?' })}
     {field('email', t('email'), { type: 'email', maxLength: 254 })}
     {field('phone', t('phone'), { type: 'tel', maxLength: 40 })}
+    {/* T-4767: cuenta YA registrada que verá sus códigos en «Mi cuenta». Vacío = sin cuenta ligada. */}
+    <div className="sm:col-span-2">{field('userEmail', t('referrerAccount'), { type: 'email', maxLength: 254, 'aria-describedby': 'referrer-account-help' })}
+      <p id="referrer-account-help" className="mt-1 text-sm text-gray-600 dark:text-gray-300">{t('referrerAccountHelp')}</p></div>
     <div className="space-y-2 sm:col-span-2">
       <button type="submit" disabled={busy} className={buttonClass}>{t(partner?.id ? 'save' : 'create')}</button>
       {saved && partner?.id && <p role="status">{t('saved')}</p>}

@@ -1,20 +1,22 @@
 // T-4736: enlaces (con copiado) y reservas atribuidas de un colaborador. Server component compartido por
-// la ficha del ADMIN (/panel/referidos/[id]) y la vista del colaborador (/panel/mis-referidos).
+// la ficha de Referidos (/panel/referidos/[id], ADMIN o dueño) y la vista del colaborador (/panel/mis-referidos).
 import { getTranslations } from 'next-intl/server';
 import { siteUrl } from '@/lib/seo';
 import { referralUrl } from '@/lib/referral';
 import { partnerBookings, partnerLinks } from '@/lib/referrals';
+import type { PropertyManager } from '@/lib/property-access';
 import { CopyLinkButton, ReferralLinkCreator } from './Referrals';
 
 type Titled = { titleEs: string | null; titleEn: string | null; titleFr: string | null };
 export const referralTitle = (row: Titled, locale: string) => (locale === 'en' ? row.titleEn : locale === 'fr' ? row.titleFr : row.titleEs) ?? '';
 type PropertyOption = Titled & { id: string; slug: string; published: boolean };
 
-export default async function ReferralSections({ locale, partnerId, propertyOptions, endpoint, canCreate = true }: {
-  locale: string; partnerId: string; propertyOptions: PropertyOption[]; endpoint?: string; canCreate?: boolean;
+/** scope (T-4767): gestor que mira la ficha; con un COLLABORATOR solo se ven reservas de sus casas. */
+export default async function ReferralSections({ locale, partnerId, propertyOptions, endpoint, canCreate = true, scope }: {
+  locale: string; partnerId: string; propertyOptions: PropertyOption[]; endpoint?: string; canCreate?: boolean; scope?: PropertyManager;
 }) {
   const t = await getTranslations({ locale, namespace: 'referrals' });
-  const [links, bookings] = await Promise.all([partnerLinks(partnerId), partnerBookings(partnerId)]);
+  const [links, bookings] = await Promise.all([partnerLinks(partnerId, scope), partnerBookings(partnerId, scope)]);
   const origin = siteUrl(), date = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' });
   const day = (value: string) => date.format(new Date(`${value}T00:00:00Z`));
   return <>

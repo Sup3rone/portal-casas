@@ -45,7 +45,6 @@
     "invalidHeroVideo": "Saisissez une URL HTTPS valide sans identifiants pour la vidéo, ou laissez le champ vide.",
     "invalidVideoType": "Choisissez une vidéo MP4 ou WebM.",
     "invalidVideoSize": "La vidéo doit peser entre 1 octet et 4 Mo. Pour une vidéo plus volumineuse, utilisez une URL HTTPS.",
-
     "destinationEmpty": "Non sélectionné",
     "destinationUnavailable": "Votre ville n’est pas disponible ? Contactez l’administrateur.",
     "invalidDestination": "Sélectionnez un État et une ville correspondants dans le catalogue, ou laissez les deux champs vides.",
@@ -172,7 +171,8 @@
       "baseWeekdayPrice": "Prix en semaine (MXN)",
       "baseWeekendPrice": "Prix le week-end (MXN)"
     },
-    "invalidIcalUrl": "Lien iCal invalide : utilisez un lien https public d’Airbnb, Booking, VRBO ou Google (.ics)."
+    "invalidIcalUrl": "Lien iCal invalide : utilisez un lien https public d’Airbnb, Booking, VRBO ou Google (.ics).",
+    "invalidReferrerAccount": "Aucun compte client inscrit avec cet e-mail, ou il est déjà associé à un autre apporteur. Demandez-lui de s’inscrire sur le site puis réessayez."
   },
   "nav": {
     "menu": "Menu",
@@ -533,7 +533,6 @@
     "about_title_fr": "Titre À propos (français)",
     "aboutImageLabel": "Image À propos",
     "aboutImageHint": "Ajoutez une image verticale, affichée au format 2:3. La section apparaît si une image et un texte dans la langue active sont disponibles.",
-
     "imageLimits": "JPEG, PNG ou WebP · 4 Mo maximum par photo après optimisation. L’image sélectionnée est appliquée à l’enregistrement.",
     "videoLabel": "Vidéo de fond de l’accueil",
     "videoDrop": "Déposez ici une vidéo MP4 ou WebM.",
@@ -652,7 +651,11 @@
     "myTitle": "Mes parrainages",
     "myIntro": "Générez des liens vers le site ou vers vos logements et partagez-les. Les réservations arrivées par ces liens vous sont attribuées au % de commission fixé par l’administrateur.",
     "myInactive": "Votre accès au parrainage est désactivé : vous ne pouvez pas créer de nouveaux liens. L’historique est conservé.",
-    "linkedUser": "Utilisateur du panneau"
+    "linkedUser": "Utilisateur du panneau",
+    "ownerTitle": "Mes apporteurs",
+    "ownerIntro": "Vos apporteurs font la promotion de vos logements avec leur lien ou code. Fixez le % de commission de chacun, créez leurs liens (tout le site ou vos logements) et associez leur compte pour qu’ils voient leurs résultats dans « Mon compte ». Vous ne voyez que les réservations de vos logements.",
+    "referrerAccount": "Compte de l’apporteur (e-mail inscrit, facultatif)",
+    "referrerAccountHelp": "Doit être un compte déjà inscrit sur le site. Dans « Mon compte », il verra ses codes, le nombre de demandes et de réservations générées par chacun et son % ; il n’a pas accès au panneau. Vide = aucun compte associé."
   },
   "bookingDetail": {
     "title": "Réservation",

@@ -49,7 +49,7 @@ Todos los FKs son `ON DELETE RESTRICT`: nada se borra. Hoy no hay borrado de `Pr
 
 **Cookie** (`lib/referral.ts`): `alia_ref`, valor = código normalizado, `Max-Age` 30 días, `HttpOnly`, `SameSite=Lax`, `Secure` en producción, `Path=/`. **Último clic gana:** un `?ref=` nuevo reemplaza al anterior. Un enlace por propiedad también atribuye si el visitante termina consultando otra casa (cuenta el colaborador, y el enlace queda registrado).
 
-### 2.3 Panel `/panel/referidos` (solo ADMIN)
+### 2.3 Panel `/panel/referidos` (ADMIN; desde T-4767 también el dueño, acotado: §2.6)
 
 - Lista: nombre, comisión, estado, n.º de enlaces y n.º de reservas atribuidas, más el formulario de alta.
 - Ficha `/panel/referidos/[id]`: edición, activar/desactivar (con confirmación), generar enlace (general o por propiedad; código propio opcional o generado de 8 caracteres sin 0/O/1/I/L), lista de enlaces con URL y botón **Copiar**, y tabla de reservas atribuidas.
@@ -57,7 +57,7 @@ Todos los FKs son `ON DELETE RESTRICT`: nada se borra. Hoy no hay borrado de `Pr
 - API: `GET/POST /api/panel/partners`, `GET/PATCH /api/panel/partners/[id]`, `POST /api/panel/partners/[id]/links`. **No hay DELETE.** Un código repetido devuelve 409.
 - Otros roles: 404 en las páginas y 401/403 en las APIs. El sitio público no muestra datos de colaboradores.
 
-### 2.4 Colaborador del panel con permiso de referidos
+### 2.4 Colaborador del panel con permiso de referidos (descontinuado en UI por T-4767, ver §2.6)
 
 SQL aparte: `scripts/sql/referral-collaborator-permission.sql` (va después de `referral-program.sql`).
 
@@ -79,7 +79,23 @@ SQL aparte: `scripts/sql/referral-collaborator-permission.sql` (va después de `
 
 `/panel/consultas` (tarjeta de consulta y lista de reservas) y `/admin/mensajes` muestran «Referido por {nombre}» cuando la consulta o la reserva tiene atribución. Lo ven el ADMIN y el colaborador dueño de la propiedad. El sitio público no lo muestra.
 
+### 2.6 El dueño administra sus referidores (T-4767)
+
+SQL: `scripts/sql/partner-owner.sql` (después de los dos anteriores). Agrega `Partner.ownerId`.
+
+- **Quién:** el dueño de las casas entra como COLLABORATOR. `/panel/referidos` («Mis referidores») y `/api/panel/partners*` ya no son solo ADMIN: el ADMIN ve todos y el dueño solo los Partner con `ownerId = él` (`managedPartners`, rol revalidado en SQL). Un referidor ajeno da 404 en página y API.
+- **Alta y edición:** nombre, contacto, % de comisión (0–100, dos decimales), activar/desactivar. El dueño no cambia `ownerId`. Los Partner anteriores (`ownerId` NULL) son del ADMIN.
+- **Enlaces:** generales o de **sus** casas; una ajena da 400. Código único global, igual que antes.
+- **Cuenta del referidor:** el dueño escribe el correo de una cuenta **ya registrada** (CLIENT o VIEWER). No se cambia su rol ni entra al panel. Errores: no existe, es ADMIN/COLLABORATOR o es el propio dueño → 400 `INVALID_REFERRER_ACCOUNT` (mismo mensaje para no distinguir); ya ligada a otro referidor → 409. Vacío = desligar.
+- **Lo que ve el dueño:** en la lista, la ficha y los conteos por enlace, solo reservas de sus casas. El reporte mensual (T-4739) ya iba acotado así.
+- **Lo que ve el referidor** (`/mi-cuenta`, «Mis códigos de referido»): su %, sus códigos con URL y botón Copiar, y cuántas consultas (`Message.referralLinkId`) y reservas (`Booking.referralLinkId`) generó cada código, con totales. Sin importes ni huéspedes; el título de la casa solo si está publicada. Si está desactivado, se le avisa.
+- **§2.4 descontinuado en UI (11-11-2026, decisión del usuario):** «Mis referidos» duplicaba esto y dejaba al ADMIN fijando el % del dueño. Ya no aparece en el menú; `/panel/mis-referidos` da 404 y `POST /api/panel/my-referrals/links` da 403 para todos (`MY_REFERRALS_DISCONTINUED` en `lib/referrals.ts`). En Usuarios ya no existe «Permitir crear sus propios enlaces»; solo queda retirar un permiso ya dado. **Vivo en BD:** `User.canCreateReferralLinks`, los Partner ligados y sus enlaces no se borran, siguen atribuyendo y el ADMIN los ve en Referidos.
+- **Separación con §2.4:** `collaboratorPartner` exige `ownerId IS NULL`. Un referidor de un dueño no se vuelve «Mis referidos» de la cuenta ligada aunque luego la promuevan a COLLABORATOR.
+
 ## 3. Límites conocidos
+
+- (T-4767) El enlace general de un referidor del dueño A también atribuye reservas en casas del dueño B, con el % que fijó A. El dueño A no ve esa reserva; el referidor sí la cuenta. Hoy hay un solo dueño; se resuelve en la fase multi-dueño.
+- (T-4767) El campo de cuenta permite saber si un correo tiene cuenta de huésped registrada. Solo lo usa un gestor del panel.
 
 - La atribución nace en la consulta. Una reserva creada sin consulta (iCal, o confirmada desde otra vía) no se atribuye.
 - No hay cálculo de importe de comisión: la reserva no guarda precio. Comisión = `commissionPercent` del colaborador; el importe se calcula fuera.

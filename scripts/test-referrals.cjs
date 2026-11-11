@@ -48,8 +48,8 @@ const row = (table, id) => memory.prepare(`SELECT * FROM "${table}" WHERE id = ?
     assert.match(proxy, /normalizeReferralCode\(req\.nextUrl\.searchParams\.get\('ref'\)\)/);
     assert.match(proxy, /if \(ref\) response\.cookies\.set\(REFERRAL_COOKIE, ref, referralCookieOptions\(\)\)/);
 
-    // 2. Solo ADMIN gestiona colaboradores; no existe DELETE.
-    for (const [id, status] of [[null, 401], ['a', 403], ['client', 403]]) {
+    // 2. Solo gestores del panel (ADMIN o dueño COLLABORATOR, T-4767) gestionan referidores; no existe DELETE.
+    for (const [id, status] of [[null, 401], ['client', 403], ['viewer', 403]]) {
       setSession(id ? { user: { id } } : null);
       assert.equal((await partnersRoute.GET()).status, status);
       assert.equal((await partnersRoute.POST(json({ name: 'X', commissionPercent: '10' }))).status, status);
@@ -170,7 +170,7 @@ const row = (table, id) => memory.prepare(`SELECT * FROM "${table}" WHERE id = ?
     }
     await assert.rejects(() => detailPage({ params: Promise.resolve({ locale: 'es', id: 'missing' }) }), e => e.status === 404);
     const layout = fs.readFileSync('apps/web/src/app/[locale]/panel/layout.tsx', 'utf8');
-    assert.match(layout, /manager\.role === 'ADMIN' && <Link href="\/panel\/referidos"/, 'Menú solo para ADMIN');
+    assert.match(layout, /<Link href="\/panel\/referidos" className="[^"]+">\{referrals\(manager\.role === 'ADMIN' \? 'title' : 'ownerTitle'\)\}<\/Link>/, 'Menú para ADMIN y dueño');
     for (const locale of ['es', 'en', 'fr']) {
       const keys = Object.keys(JSON.parse(fs.readFileSync(`apps/web/messages/${locale}.json`, 'utf8')).referrals);
       assert.deepEqual(keys.sort(), Object.keys(JSON.parse(fs.readFileSync('apps/web/messages/es.json', 'utf8')).referrals).sort(), locale);
@@ -233,33 +233,124 @@ const row = (table, id) => memory.prepare(`SELECT * FROM "${table}" WHERE id = ?
     // Estado tras conceder (el CTE de PostgreSQL no corre en SQLite: se siembra igual que lo dejaría).
     memory.prepare('INSERT INTO "Partner" (id, name, email, commissionPercent, active, userId, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?)')
       .run('partner-a', 'a', 'a@test.invalid', '0.00', 1, 'a', '2026-11-10', '2026-11-10');
+    // T-4767: «Mis referidos» descontinuado en UI. Aun con permiso y Partner ligado: página 404 y API 403.
     setSession({ user: { id: 'a' } });
-    assert.equal((await myPost({})).status, 403, 'Partner ligado pero sin permiso');
     memory.prepare('UPDATE "User" SET "canCreateReferralLinks" = 1 WHERE id = ?').run('a');
-    res = await myPost({}); assert.equal(res.status, 201, 'Enlace general');
-    const ownGeneral = await res.json(); assert.equal(row('ReferralLink', ownGeneral.id).partnerId, 'partner-a');
-    assert.equal((await myPost({ propertyId: 'pa', code: 'MI-CASA' })).status, 201, 'Su propiedad');
-    assert.equal((await myPost({ propertyId: 'pb' })).status, 400, 'Propiedad ajena');
-    assert.equal((await myPost({ code: 'CASA-AZUL' })).status, 409, 'Código ya usado');
-    const mine = flat(await expand(await myPage({ params: Promise.resolve({ locale: 'es' }) })));
-    assert.ok(mine.includes('/casas/pa?ref=MI-CASA') && mine.includes(`/?ref=${ownGeneral.code}`), 'Ve sus enlaces');
-    assert.ok(!mine.includes('CASA-AZUL'), 'No ve enlaces de otros colaboradores');
+    const before = memory.prepare('SELECT count(*) n FROM "ReferralLink"').get().n;
+    for (const body of [{}, { propertyId: 'pa', code: 'MI-CASA' }]) assert.equal((await myPost(body)).status, 403, 'Descontinuado: no crea enlaces');
+    await assert.rejects(() => myPage({ params: Promise.resolve({ locale: 'es' }) }), e => e.status === 404, 'Descontinuado: 404');
+    assert.equal(memory.prepare('SELECT count(*) n FROM "ReferralLink"').get().n, before);
+    // Nada se borra: el Partner sigue vivo (BD) y el ADMIN lo administra en Referidos.
+    assert.equal((await load('apps/web/src/lib/referrals.ts').collaboratorPartner({ id: 'a', role: 'COLLABORATOR' })).id, 'partner-a');
     const ownOptions = await load('apps/web/src/lib/referrals.ts').ownReferralPropertyOptions({ id: 'a', role: 'COLLABORATOR' });
     assert.deepEqual(ownOptions.map(p => p.id).sort(), ['hidden', 'pa'], 'Solo sus propiedades');
-    setSession({ user: { id: 'b' } });
-    assert.equal((await myPost({})).status, 403, 'Otra colaboradora sin permiso');
     setSession({ user: { id: 'admin' } });
     assert.equal((await partnerRoute.PATCH(json({ active: false }, 'PATCH'), ctx('partner-a'))).status, 200);
-    setSession({ user: { id: 'a' } });
-    assert.equal((await myPost({})).status, 403, 'Partner desactivado no crea enlaces');
-    const inactive = flat(await expand(await myPage({ params: Promise.resolve({ locale: 'es' }) })));
-    assert.ok(inactive.includes('MI-CASA'), 'Pero sigue viendo lo suyo');
-    assert.match(fs.readFileSync('apps/web/src/app/[locale]/panel/layout.tsx', 'utf8'), /\{ownReferrals && <Link href="\/panel\/mis-referidos"/);
-    assert.match(fs.readFileSync('apps/web/src/components/panel/UserActions.tsx', 'utf8'), /role === 'COLLABORATOR' && <button type=\"button\" disabled=\{busy\} className=\{buttonClass\} onClick=\{\(\) => change\('referrals', !canCreateReferralLinks\)\}/);
+    const layoutNow = fs.readFileSync('apps/web/src/app/[locale]/panel/layout.tsx', 'utf8');
+    assert.ok(!layoutNow.includes('href="/panel/mis-referidos"'), 'Sin enlace en el menú');
+    const actions = fs.readFileSync('apps/web/src/components/panel/UserActions.tsx', 'utf8');
+    assert.ok(!actions.includes("'grantReferrals'"), 'El ADMIN ya no concede el permiso');
+    assert.match(actions, /role === 'COLLABORATOR' && canCreateReferralLinks && <button[^>]+onClick=\{\(\) => change\('referrals', false\)\}>/, 'Solo puede retirar uno ya dado');
     for (const locale of ['es', 'en', 'fr']) {
       const admin = JSON.parse(fs.readFileSync(`apps/web/messages/${locale}.json`, 'utf8')).adminUsers;
       for (const key of ['grantReferrals', 'revokeReferrals', 'confirmReferralsGrant', 'confirmReferralsRevoke']) assert.ok(admin[key], `${locale}.${key}`);
     }
-    console.log('OK referidos: CRUD solo ADMIN, código único, cookie → consulta → reserva, sin ref intacto.');
+    // 10. T-4767: el dueño (COLLABORATOR) administra SUS referidores; el referidor ve sus códigos en /mi-cuenta.
+    const referralsLib = load('apps/web/src/lib/referrals.ts');
+    memory.prepare('UPDATE "User" SET "canCreateReferralLinks" = 0 WHERE id = ?').run('a');
+    // Lo del ADMIN (Ana, Beto, partner-a) queda con ownerId null: el dueño no lo ve ni lo toca.
+    setSession({ user: { id: 'a' } });
+    assert.deepEqual((await (await partnersRoute.GET()).json()).partners, [], 'Dueño sin referidores propios: lista vacía');
+    for (const foreign of [ana, beto, 'partner-a']) {
+      assert.equal((await partnerRoute.GET(new Request('http://localhost/test'), ctx(foreign))).status, 404, `GET ajeno ${foreign}`);
+      assert.equal((await partnerRoute.PATCH(json({ commissionPercent: '50' }, 'PATCH'), ctx(foreign))).status, 404, `PATCH ajeno ${foreign}`);
+      assert.equal((await linksRoute.POST(json({}), ctx(foreign))).status, 404, `enlace ajeno ${foreign}`);
+      await assert.rejects(() => detailPage({ params: Promise.resolve({ locale: 'es', id: foreign }) }), e => e.status === 404);
+    }
+    assert.equal(row('Partner', ana).commissionPercent, '20.00', 'El % del ADMIN no cambió');
+    // Alta propia: ownerId = dueño; % y cuenta ligada por correo (solo cuentas de huésped ya registradas).
+    for (const userEmail of ['nadie@test.invalid', 'admin@test.invalid', 'b@test.invalid', 'a@test.invalid', 'no-es-correo']) {
+      assert.equal((await partnersRoute.POST(json({ name: 'Caro', commissionPercent: '8', userEmail }))).status, 400, userEmail);
+    }
+    assert.equal(memory.prepare('SELECT count(*) n FROM "Partner" WHERE "ownerId" = ?').get('a').n, 0, 'Sin altas a medias');
+    res = await partnersRoute.POST(json({ name: 'Caro', commissionPercent: '8', userEmail: ' CLIENT@test.invalid ' }));
+    assert.equal(res.status, 201);
+    const caro = (await res.json()).id;
+    assert.deepEqual([row('Partner', caro).ownerId, row('Partner', caro).userId, row('Partner', caro).commissionPercent], ['a', 'client', '8.00']);
+    assert.equal((await partnersRoute.POST(json({ name: 'Dup', commissionPercent: '1', userEmail: 'client@test.invalid' }))).status, 409, 'Una cuenta = un referidor');
+    assert.equal((await partnerRoute.PATCH(json({ commissionPercent: '9.5' }, 'PATCH'), ctx(caro))).status, 200);
+    assert.equal(row('Partner', caro).commissionPercent, '9.50');
+    // Enlaces: generales o de SUS casas; una ajena da 400.
+    assert.equal((await linksRoute.POST(json({ propertyId: 'pb' }), ctx(caro))).status, 400, 'Casa ajena');
+    res = await linksRoute.POST(json({ propertyId: 'pa', code: 'CARO-PA' }), ctx(caro)); assert.equal(res.status, 201);
+    res = await linksRoute.POST(json({}), ctx(caro)); assert.equal(res.status, 201);
+    const caroGeneral = await res.json();
+    const ownerOptions = await referralsLib.referralPropertyOptions({ id: 'a', role: 'COLLABORATOR' });
+    assert.ok(ownerOptions.length && ownerOptions.every(p => ['pa', 'hidden'].includes(p.id)), 'Destinos: solo sus casas');
+    // Atribución: una reserva en su casa (pa) y otra, por el enlace general, en una casa ajena (pb).
+    res = await sendInquiry('alia_ref=CARO-PA', 'pa', '2028-03-01', '2028-03-03');
+    const caroMsg = (await res.json()).message.id;
+    assert.equal((await booking.POST(json({ propertyId: 'pa', messageId: caroMsg, startDate: '2028-03-01', endDate: '2028-03-03' }))).status, 200);
+    res = await sendInquiry(`alia_ref=${caroGeneral.code}`, 'pb', '2028-04-01', '2028-04-03');
+    const foreignMsg = (await res.json()).message.id;
+    setSession({ user: { id: 'admin' } });
+    assert.equal((await booking.POST(json({ propertyId: 'pb', messageId: foreignMsg, startDate: '2028-04-01', endDate: '2028-04-03' }))).status, 200);
+    assert.equal(memory.prepare('SELECT count(*) n FROM "Booking" WHERE "referredByPartnerId" = ?').get(caro).n, 2);
+    // El dueño solo ve las reservas de SUS casas (no la de pb); el ADMIN ve las dos.
+    setSession({ user: { id: 'a' } });
+    const ownList = (await (await partnersRoute.GET()).json()).partners;
+    assert.deepEqual(ownList.map(p => [p.id, p.bookingCount]), [[caro, 1]], 'Solo sus referidores y solo reservas de sus casas');
+    const ownDetail = await (await partnerRoute.GET(new Request('http://localhost/test'), ctx(caro))).json();
+    assert.equal(ownDetail.bookings.length, 1); assert.equal(ownDetail.bookings[0].code, 'CARO-PA');
+    assert.equal(ownDetail.links.find(l => l.code === caroGeneral.code).bookingCount, 0, 'La reserva en casa ajena no se cuenta');
+    assert.equal(ownDetail.partner.userEmail, 'client@test.invalid');
+    const ownerList = flat(await listPage({ params: Promise.resolve({ locale: 'es' }) }));
+    assert.ok(ownerList.includes('Mis referidores') && ownerList.includes('Caro') && !ownerList.includes('Ana Promotora'), 'Lista del dueño');
+    const ownerDetail = flat(await expand(await detailPage({ params: Promise.resolve({ locale: 'es', id: caro }) })));
+    assert.ok(ownerDetail.includes('CARO-PA') && !ownerDetail.includes('CASA-AZUL'), 'Ficha del dueño');
+    setSession({ user: { id: 'admin' } });
+    const adminDetail = await (await partnerRoute.GET(new Request('http://localhost/test'), ctx(caro))).json();
+    assert.equal(adminDetail.bookings.length, 2, 'ADMIN: vista global');
+    assert.ok((await (await partnersRoute.GET()).json()).partners.some(p => p.id === caro));
+    // Otra dueña no ve ni toca a Caro.
+    setSession({ user: { id: 'b' } });
+    assert.equal((await partnerRoute.GET(new Request('http://localhost/test'), ctx(caro))).status, 404);
+    assert.equal((await partnerRoute.PATCH(json({ commissionPercent: '99' }, 'PATCH'), ctx(caro))).status, 404);
+    assert.ok(!(await (await partnersRoute.GET()).json()).partners.some(p => p.id === caro));
+    // Un Partner con dueño no se convierte en «Mis referidos» de la cuenta ligada.
+    memory.prepare('UPDATE "User" SET role = ?, "canCreateReferralLinks" = 1 WHERE id = ?').run('COLLABORATOR', 'client');
+    assert.equal(await referralsLib.collaboratorPartner({ id: 'client', role: 'COLLABORATOR' }), null);
+    memory.prepare('UPDATE "User" SET role = ?, "canCreateReferralLinks" = 0 WHERE id = ?').run('CLIENT', 'client');
+    // Lo que ve el referidor: sus códigos, consultas y reservas por código y su %; nada de otros.
+    const summary = await referralsLib.referrerSummary('client');
+    assert.equal(summary.partner.commissionPercent, '9.50');
+    const byCode = Object.fromEntries(summary.links.map(l => [l.code, l]));
+    assert.deepEqual(Object.keys(byCode).sort(), ['CARO-PA', caroGeneral.code].sort());
+    assert.deepEqual([byCode['CARO-PA'].inquiryCount, byCode['CARO-PA'].bookingCount], [1, 1]);
+    assert.deepEqual([byCode[caroGeneral.code].inquiryCount, byCode[caroGeneral.code].bookingCount, byCode[caroGeneral.code].titles], [1, 1, null]);
+    assert.equal(JSON.stringify(summary).match(/guest|email|rentAmount/i), null, 'Sin datos de huésped ni importes');
+    assert.equal(await referralsLib.referrerSummary('viewer'), null, 'Sin referidor ligado: nada');
+    const ReferrerCodes = load('apps/web/src/components/ReferrerCodes.tsx').default;
+    const codesHtml = flat(ReferrerCodes({ summary, locale: 'es' }));
+    assert.ok(codesHtml.includes('9.50%') && codesHtml.includes('/casas/pa?ref=CARO-PA') && codesHtml.includes('Todo el sitio'), 'Sección de /mi-cuenta');
+    assert.match(fs.readFileSync('apps/web/src/app/[locale]/mi-cuenta/page.tsx', 'utf8'), /referrer && <ReferrerCodes summary=\{referrer\} locale=\{locale\} \/>/);
+    // Desligar (correo vacío) y volver a ligar otra cuenta.
+    setSession({ user: { id: 'a' } });
+    assert.equal((await partnerRoute.PATCH(json({ userEmail: '' }, 'PATCH'), ctx(caro))).status, 200);
+    assert.equal(row('Partner', caro).userId, null); assert.equal(await referralsLib.referrerSummary('client'), null);
+    assert.equal((await partnerRoute.PATCH(json({ userEmail: 'viewer@test.invalid', name: 'Caro' }, 'PATCH'), ctx(caro))).status, 200);
+    assert.equal(row('Partner', caro).userId, 'viewer');
+    // Mismo correo ya ligado (Partner del permiso, ligado a un COLLABORATOR): el ADMIN guarda sin error.
+    setSession({ user: { id: 'admin' } });
+    assert.equal((await partnerRoute.PATCH(json({ name: 'a', userEmail: 'A@test.invalid' }, 'PATCH'), ctx('partner-a'))).status, 200);
+    assert.equal(row('Partner', 'partner-a').userId, 'a');
+    const sqlFile = fs.readFileSync('scripts/sql/partner-owner.sql', 'utf8');
+    assert.match(sqlFile, /ADD COLUMN "ownerId" text REFERENCES "User"\("id"\) ON DELETE RESTRICT/);
+    assert.match(sqlFile, /PROPUESTA NO EJECUTADA/);
+    for (const locale of ['es', 'en', 'fr']) {
+      const messages = JSON.parse(fs.readFileSync(`apps/web/messages/${locale}.json`, 'utf8'));
+      assert.ok(messages.panel.invalidReferrerAccount, `${locale}.panel.invalidReferrerAccount`);
+    }
+    console.log('OK referidos: CRUD ADMIN y dueño acotado (T-4767), código único, cookie → consulta → reserva, sin ref intacto, vista del referidor en /mi-cuenta.');
   } catch (error) { console.error(error); process.exit(1); }
 })();

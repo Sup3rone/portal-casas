@@ -19,9 +19,13 @@ function resetOrigin() {
   return new URL('http://localhost:3000');
 }
 
-/** URL absoluta de /{locale}/reset-password?token=…; un idioma desconocido cae en «es». */
-export function passwordResetUrl(locale: string, token: string) {
-  const url = new URL(`/${LOCALES.has(locale) ? locale : 'es'}/reset-password`, resetOrigin());
+/** URL absoluta de /{locale}/{page}?token=…; un idioma desconocido cae en «es». */
+function tokenPageUrl(page: 'reset-password' | 'confirmar-correo', locale: string, token: string) {
+  const url = new URL(`/${LOCALES.has(locale) ? locale : 'es'}/${page}`, resetOrigin());
   url.searchParams.set('token', token);
   return url.toString();
 }
+
+export const passwordResetUrl = (locale: string, token: string) => tokenPageUrl('reset-password', locale, token);
+// T-4783: enlace de «Confirma tu correo», con el mismo origen público.
+export const emailVerificationUrl = (locale: string, token: string) => tokenPageUrl('confirmar-correo', locale, token);

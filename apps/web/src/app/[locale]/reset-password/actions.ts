@@ -1,7 +1,8 @@
 'use server';
 
-import { db, users, passwordResetTokens } from '@portal/db';
-import { eq, and, gt, isNull } from 'drizzle-orm';
+import { db, users } from '@portal/db';
+import { eq } from 'drizzle-orm';
+import { consumeToken, resetTokens } from '@/lib/auth-tokens';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 
@@ -14,18 +15,10 @@ export async function resetPassword(formData: FormData) {
     redirect(`/${locale}/reset-password?token=${encodeURIComponent(token)}&error=corta`);
   }
 
-  // Token válido: existe, no usado, no expirado
-  const [reset] = await db
-    .select()
-    .from(passwordResetTokens)
-    .where(and(
-      eq(passwordResetTokens.token, token),
-      isNull(passwordResetTokens.usedAt),
-      gt(passwordResetTokens.expiresAt, new Date())
-    ))
-    .limit(1);
-
-  if (!reset) {
+  // T-4783: se consume ANTES de cambiar la contraseña, en un solo UPDATE (existe, no usado, no vencido):
+  // dos envíos simultáneos del mismo enlace no pueden usarlo dos veces.
+  const reset = await consumeToken(resetTokens, token);
+  if (reset.status !== 'valid') {
     redirect(`/${locale}/reset-password?error=invalido`);
   }
 
@@ -34,10 +27,6 @@ export async function resetPassword(formData: FormData) {
   await db.update(users)
     .set({ passwordHash })
     .where(eq(users.id, reset.userId));
-
-  await db.update(passwordResetTokens)
-    .set({ usedAt: new Date() })
-    .where(eq(passwordResetTokens.id, reset.id));
 
   redirect(`/${locale}/login?reset=1`);
 }

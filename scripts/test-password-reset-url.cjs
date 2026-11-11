@@ -1,7 +1,7 @@
 // T-4771: el enlace del correo «olvidé mi contraseña» usa PUBLIC_SITE_URL (como el resto del sitio),
 // NEXT_PUBLIC_SITE_URL solo como respaldo, y nunca localhost si hay URL pública. Offline: sin Resend ni Neon.
 const assert = require('node:assert/strict');
-const { load, mockModule, portal } = require('./test-property-access.cjs');
+const { load, mockModule, memory } = require('./test-property-access.cjs');
 
 const sent = [];
 mockModule('@/lib/mailer', { sendEmail: async message => { sent.push(message); } });
@@ -36,9 +36,9 @@ const setEnv = (pub, legacy) => {
     assert.equal(passwordResetUrl('es', 'a&b=c'), 'https://aliaforrent.example/es/reset-password?token=a%26b%3Dc');
 
     // 4. Flujo real: el correo lleva el enlace público; correo inexistente no envía y redirige igual.
-    // SQLite no admite `default` en VALUES: se captura solo el INSERT del token (el SELECT del usuario es real).
-    const tokens = [], insert = portal.db.insert.bind(portal.db);
-    portal.db.insert = table => table === portal.passwordResetTokens ? { values: async value => { tokens.push(value); } } : insert(table);
+    // T-4783: token real en SQLite; la tabla guarda su SHA-256, no el token del enlace.
+    memory.exec('CREATE TABLE IF NOT EXISTS "PasswordResetToken" (id text primary key, "userId" text not null, token text not null unique, "expiresAt" text not null, "usedAt" text, "createdAt" text)');
+    const tokens = () => memory.prepare('SELECT "userId", token FROM "PasswordResetToken"').all();
     const { requestPasswordReset } = load('apps/web/src/app/[locale]/olvide-password/actions.ts');
     const form = (email, locale = 'en') => { const data = new FormData(); data.set('email', email); data.set('locale', locale); return data; };
     await assert.rejects(() => requestPasswordReset(form(' CLIENT@test.invalid ')), e => e.url === '/en/olvide-password?sent=1');
@@ -47,11 +47,12 @@ const setEnv = (pub, legacy) => {
     const link = sent[0].html.match(/href="([^"]+)"/)[1];
     assert.match(link, /^https:\/\/aliaforrent\.example\/en\/reset-password\?token=[0-9a-f]{64}$/, 'Enlace público, no localhost');
     assert.ok(!sent[0].html.includes('localhost'));
-    assert.equal(tokens.length, 1); assert.equal(tokens[0].userId, 'client'); assert.ok(link.endsWith(tokens[0].token), 'El enlace lleva el token guardado');
+    const sha = value => require('node:crypto').createHash('sha256').update(value).digest('hex');
+    assert.equal(tokens().length, 1); assert.equal(tokens()[0].userId, 'client');
+    assert.equal(tokens()[0].token, sha(new URL(link).searchParams.get('token')), 'Se guarda el hash del token del enlace');
     await assert.rejects(() => requestPasswordReset(form('nadie@test.invalid')), e => e.url === '/en/olvide-password?sent=1');
     assert.equal(sent.length, 1, 'Correo inexistente: no se envía nada (y no se revela)');
-    assert.equal(tokens.length, 1);
-    portal.db.insert = insert;
+    assert.equal(tokens().length, 1);
     console.log('OK enlace de recuperación: PUBLIC_SITE_URL, respaldo NEXT_PUBLIC_SITE_URL, idioma saneado y correo real sin localhost.');
   } catch (error) { console.error = errors; console.error(error); process.exitCode = 1; }
   finally { console.error = errors; setEnv(env.PUBLIC_SITE_URL, env.NEXT_PUBLIC_SITE_URL); }

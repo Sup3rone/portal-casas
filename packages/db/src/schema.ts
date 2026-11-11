@@ -244,11 +244,22 @@ export const reportDeliveries = pgTable('ReportDelivery', {
 export const passwordResetTokens = pgTable('PasswordResetToken', {
   id: text('id').primaryKey(),
   userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  // T-4783: guarda el SHA-256 del token (hex), nunca el token del enlace. Mismo nombre de columna: sin SQL.
   token: text('token').notNull().unique(),
   expiresAt: timestamp('expiresAt', { withTimezone: true }).notNull(),
   usedAt: timestamp('usedAt', { withTimezone: true }),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// T-4783: confirmación de correo al registrarse. Migración manual en scripts/sql/email-verification.sql.
+export const emailVerificationTokens = pgTable('EmailVerificationToken', {
+  id: text('id').primaryKey(),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('tokenHash').notNull().unique(),
+  expiresAt: timestamp('expiresAt', { withTimezone: true }).notNull(),
+  usedAt: timestamp('usedAt', { withTimezone: true }),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [index('EmailVerificationToken_userId_idx').on(table.userId)]);
 
 // Migración propuesta en scripts/sql/admin-user-audit.sql; aplicación manual.
 // Sin FK: preservar el historial aunque se eliminen usuarios. Nunca guardar secretos.

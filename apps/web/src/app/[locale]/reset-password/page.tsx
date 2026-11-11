@@ -1,5 +1,4 @@
-import { db, passwordResetTokens } from '@portal/db';
-import { eq, and, gt, isNull } from 'drizzle-orm';
+import { peekToken, resetTokens } from '@/lib/auth-tokens';
 import { getTranslations } from 'next-intl/server';
 import { resetPassword } from './actions';
 import { privateMetadata } from '@/lib/seo';
@@ -17,19 +16,8 @@ export default async function ResetPasswordPage({
 
   // Validar el token ANTES de mostrar el formulario (se puede mostrar sin miedo:
   // solo confirma validez, no expone datos del usuario)
-  let tokenValido = false;
-  if (token) {
-    const [reset] = await db
-      .select({ id: passwordResetTokens.id })
-      .from(passwordResetTokens)
-      .where(and(
-        eq(passwordResetTokens.token, token),
-        isNull(passwordResetTokens.usedAt),
-        gt(passwordResetTokens.expiresAt, new Date())
-      ))
-      .limit(1);
-    tokenValido = !!reset;
-  }
+  // T-4783: se compara el hash; mirar no consume el enlace.
+  const tokenValido = !!token && (await peekToken(resetTokens, token)) === 'valid';
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">

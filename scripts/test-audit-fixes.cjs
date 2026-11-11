@@ -9,7 +9,7 @@ const Account = load('apps/web/src/app/[locale]/mi-cuenta/page.tsx').default;
 const Modal = load('apps/web/src/components/MessageModal.tsx').default;
 const booking = load('apps/web/src/app/api/bookings/create/route.ts');
 memory.exec('CREATE TABLE PasswordResetToken (id TEXT PRIMARY KEY, userId TEXT, token TEXT, expiresAt TEXT, usedAt TEXT, createdAt TEXT)');
-memory.prepare('INSERT INTO PasswordResetToken (id,userId,token,expiresAt) VALUES (?,?,?,?)').run('reset-a','a','valid-token','2099-01-01T00:00:00.000Z');
+memory.prepare('INSERT INTO PasswordResetToken (id,userId,token,expiresAt) VALUES (?,?,?,?)').run('reset-a','a',require('node:crypto').createHash('sha256').update('valid-token').digest('hex'),'2099-01-01T00:00:00.000Z'); // T-4783: la base guarda el hash
 async function main() {
   for (const locale of ['es','en','fr']) {
     setLocale(locale); setSession(null);

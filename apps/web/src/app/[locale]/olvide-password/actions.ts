@@ -1,13 +1,14 @@
 'use server';
 
-import { db, users, passwordResetTokens } from '@portal/db';
+import { db, users } from '@portal/db';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
-import { randomUUID, randomBytes } from 'crypto';
 import { sendEmail } from '@/lib/mailer';
 import { headers } from 'next/headers';
 import { consumeRateLimit } from '@/lib/rate-limit';
 import { passwordResetUrl } from '@/lib/password-reset-url';
+import { issueToken, resetTokens, RESET_TTL_MS } from '@/lib/auth-tokens';
+import { escapeHtml } from '@/lib/email-verification';
 
 export async function requestPasswordReset(formData: FormData) {
   const retryAfter = consumeRateLimit('recovery', await headers());
@@ -20,15 +21,8 @@ export async function requestPasswordReset(formData: FormData) {
 
     // ⚠️ Mensaje genérico SIEMPRE: no revelamos si el correo existe
     if (user) {
-      const token = randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
-
-      await db.insert(passwordResetTokens).values({
-        id: randomUUID(),
-        userId: user.id,
-        token,
-        expiresAt,
-      });
+      // T-4783: la base guarda solo el hash; pedir otro enlace invalida los anteriores. Dura 1 hora.
+      const token = await issueToken(resetTokens, user.id, RESET_TTL_MS);
 
       const resetUrl = passwordResetUrl(locale, token); // T-4771: PUBLIC_SITE_URL, como el resto del sitio
 
@@ -38,10 +32,10 @@ export async function requestPasswordReset(formData: FormData) {
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
             <h2 style="color: #654838;">Recuperación de contraseña</h2>
-            <p>Hola ${user.name ?? ''},</p>
+            <p>Hola ${escapeHtml(user.name ?? '')},</p>
             <p>Recibimos una solicitud para cambiar la contraseña de tu cuenta. Este enlace expira en <strong>1 hora</strong>:</p>
             <p style="margin: 24px 0;">
-              <a href="${resetUrl}" style="background: #654838; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+              <a href="${escapeHtml(resetUrl)}" style="background: #654838; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                 Cambiar mi contraseña
               </a>
             </p>

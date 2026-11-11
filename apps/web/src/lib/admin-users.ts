@@ -17,7 +17,8 @@ export async function adminUsersPage() {
 
 // Nunca seleccionar passwordHash: el estado solo indica si hay contraseña.
 export const userFields = {
-  id: users.id, email: users.email, role: users.role, canPublishProperties: users.canPublishProperties, createdAt: users.createdAt,
+  id: users.id, email: users.email, role: users.role, canPublishProperties: users.canPublishProperties,
+  canCreateReferralLinks: users.canCreateReferralLinks, createdAt: users.createdAt,
   hasPassword: sql<boolean>`${users.passwordHash} is not null and ${users.passwordHash} <> ''`,
 };
 
@@ -48,24 +49,36 @@ export async function mutateAdminUser(id: string, input: unknown) {
   const actor = await requireAdmin();
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new PanelValidationError('validation');
   const value = input as Record<string, unknown>;
-  if (value.confirmed !== true || !['role', 'password', 'publication'].includes(String(value.action))) throw new PanelValidationError('validation');
+  if (value.confirmed !== true || !['role', 'password', 'publication', 'referrals'].includes(String(value.action))) throw new PanelValidationError('validation');
   const target = await getAdminUser(id);
   const roleChange = value.action === 'role';
   const publicationChange = value.action === 'publication';
+  const referralChange = value.action === 'referrals'; // T-4736
   if (roleChange && (actor.id === id || target.role === 'ADMIN')) throw new AccessError(403);
   if (roleChange && (!['CLIENT', 'COLLABORATOR'].includes(String(value.role)) || !['CLIENT', 'COLLABORATOR', 'VIEWER'].includes(target.role))) {
     throw new PanelValidationError('validation');
   }
   if (roleChange && value.role === target.role) throw new PanelValidationError('validation');
   if (publicationChange && (target.role !== 'COLLABORATOR' || typeof value.allowed !== 'boolean' || value.allowed === target.canPublishProperties)) throw new PanelValidationError('validation');
-  const temporaryPassword = roleChange || publicationChange ? null : randomBytes(18).toString('base64url');
+  if (referralChange && (target.role !== 'COLLABORATOR' || typeof value.allowed !== 'boolean' || value.allowed === Boolean(target.canCreateReferralLinks))) throw new PanelValidationError('validation');
+  const temporaryPassword = roleChange || publicationChange || referralChange ? null : randomBytes(18).toString('base64url');
   const hash = temporaryPassword ? await bcrypt.hash(temporaryPassword, 10) : null;
   // Un único statement PostgreSQL: si el log falla, también se revierte el UPDATE.
   // Revalidar ADMIN y rol anterior dentro de la mutación para cambios concurrentes.
-  const changes = roleChange ? sql`"role" = ${value.role as string}::"UserRole", "canPublishProperties" = false`
-    : publicationChange ? sql`"canPublishProperties" = ${value.allowed as boolean}` : sql`"passwordHash" = ${hash}`;
+  const changes = roleChange ? sql`"role" = ${value.role as string}::"UserRole", "canPublishProperties" = false, "canCreateReferralLinks" = false`
+    : publicationChange ? sql`"canPublishProperties" = ${value.allowed as boolean}`
+    : referralChange ? sql`"canCreateReferralLinks" = ${value.allowed as boolean}` : sql`"passwordHash" = ${hash}`;
   const restriction = roleChange ? sql`and target."id" <> ${actor.id} and target."role"::text in ('CLIENT', 'COLLABORATOR', 'VIEWER')`
-    : publicationChange ? sql`and target."role"::text = 'COLLABORATOR' and target."canPublishProperties" = ${target.canPublishProperties}` : sql``;
+    : publicationChange ? sql`and target."role"::text = 'COLLABORATOR' and target."canPublishProperties" = ${target.canPublishProperties}`
+    : referralChange ? sql`and target."role"::text = 'COLLABORATOR' and target."canCreateReferralLinks" = ${Boolean(target.canCreateReferralLinks)}` : sql``;
+  // T-4736: al conceder, el usuario queda ligado a un Partner (comisión 0 % hasta que el ADMIN la fije en Referidos).
+  // Al revocar no se toca el Partner: deja de crear enlaces, y lo atribuido se conserva.
+  const partner = referralChange && value.allowed === true ? sql`, partner as (
+      insert into "Partner" ("id", "name", "email", "phone", "commissionPercent", "active", "userId", "createdAt", "updatedAt")
+      select ${randomUUID()}, coalesce(nullif(btrim(u."name"), ''), u."email"), u."email", u."phone", 0, true, u."id", now(), now()
+      from changed join "User" u on u."id" = changed."id"
+      where not exists (select 1 from "Partner" p where p."userId" = changed."id") returning "id"
+    )` : sql``;
   const result = await db.execute(sql`
     with changed as (
       update "User" target set ${changes}
@@ -73,13 +86,14 @@ export async function mutateAdminUser(id: string, input: unknown) {
         and exists (select 1 from "User" actor where actor."id" = ${actor.id} and actor."role"::text = 'ADMIN')
         ${restriction}
       returning target."id"
-    ), logged as (
+    )${partner}, logged as (
       insert into "AdminUserAudit" ("id", "actorId", "targetUserId", "action", "previousRole", "newRole")
-      select ${randomUUID()}, ${actor.id}, changed."id", ${roleChange ? 'ROLE_CHANGE' : publicationChange ? 'PUBLICATION_PERMISSION' : 'PASSWORD_RESET'},
+      select ${randomUUID()}, ${actor.id}, changed."id", ${roleChange ? 'ROLE_CHANGE' : publicationChange ? 'PUBLICATION_PERMISSION' : referralChange ? 'REFERRAL_PERMISSION' : 'PASSWORD_RESET'},
         ${target.role}, ${roleChange ? value.role as string : target.role} from changed returning "id"
     ) select "id" from logged
   `);
   if (!result.rows.length) throw new AccessError(403);
   // El secreto existe solo en memoria y en esta respuesta; nunca en el log/BD.
-  return temporaryPassword ? { temporaryPassword } : { success: true, canPublishProperties: publicationChange ? value.allowed : undefined };
+  return temporaryPassword ? { temporaryPassword } : { success: true, canPublishProperties: publicationChange ? value.allowed : undefined,
+    canCreateReferralLinks: referralChange ? value.allowed : undefined };
 }

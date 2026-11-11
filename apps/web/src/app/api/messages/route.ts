@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import { auth } from '@/lib/auth';
 import { consumeRateLimit, rateLimitLocale, rateLimitResponse } from '@/lib/rate-limit';
 import { propertyBlocks } from '@/lib/occupation-calendar';
+import { referralAttribution } from '@/lib/referrals';
 import { inquiryFromFormData, inquiryToday, normalizeInquiry, validateInquiry, type InquiryErrors } from '@/lib/inquiry-validation';
 
 const invalid = (fields: InquiryErrors, maxGuests?: number) =>
@@ -46,6 +47,8 @@ export async function POST(req: NextRequest) {
 
     const value = normalizeInquiry(input);
     const session = await auth();
+    // T-4736: atribución silenciosa desde la cookie ?ref=; null si no hay o no aplica (nunca rompe la consulta).
+    const attribution = await referralAttribution(req.headers.get('cookie'));
     const eligibility = contactOnly ? eq(properties.rentalType, 'anual') : sql`
       ${properties.rentalType} in ('nocturna', 'ambas')
       and ${properties.maxGuests} >= ${value.guests}
@@ -56,10 +59,11 @@ export async function POST(req: NextRequest) {
     // Revalidar publicación, capacidad y ocupación en el INSERT por cambios concurrentes.
     // La salida también debe ser seleccionable, como exige rangoDisponible.
     const result = await db.execute(sql`
-      insert into "Message" ("id", "propertyId", "name", "email", "phone", "lang", "body", "startDate", "endDate", "userId")
+      insert into "Message" ("id", "propertyId", "name", "email", "phone", "lang", "body", "startDate", "endDate", "userId", "referredByPartnerId", "referralLinkId")
       select ${randomUUID()}, ${properties.id}, ${value.name}, ${value.email}, ${value.phone || null},
         ${lang}, ${value.body},
-        ${contactOnly ? null : value.startDate}::date, ${contactOnly ? null : value.endDate}::date, ${session?.user?.id ?? null}
+        ${contactOnly ? null : value.startDate}::date, ${contactOnly ? null : value.endDate}::date, ${session?.user?.id ?? null},
+        ${attribution?.partnerId ?? null}, ${attribution?.linkId ?? null}
       from ${properties} where ${and(eq(properties.id, propertyId), eq(properties.published, true))}
         and ${eligibility}
       returning *
@@ -68,7 +72,10 @@ export async function POST(req: NextRequest) {
     if (!newMessage) {
       return NextResponse.json({ code: 'INQUIRY_CHANGED', ...(contactOnly ? {} : { fields: { endDate: 'availabilityChanged' } }) }, { status: 400 });
     }
-    return NextResponse.json({ success: true, message: newMessage }, { status: 201 });
+    // T-4736: la atribución es interna; no se devuelve al visitante.
+    const publicMessage = { ...newMessage };
+    delete publicMessage.referredByPartnerId; delete publicMessage.referralLinkId;
+    return NextResponse.json({ success: true, message: publicMessage }, { status: 201 });
   } catch (error) {
     console.error('Error saving message:', error);
     return NextResponse.json({ code: 'INTERNAL_ERROR' }, { status: 500 });

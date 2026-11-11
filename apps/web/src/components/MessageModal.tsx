@@ -79,6 +79,7 @@ export default function MessageModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: message.propertyId,
+          messageId: message.id,
           startDate,
           endDate,
           guestUserId: message.userId ?? undefined,

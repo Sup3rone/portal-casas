@@ -4,13 +4,14 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { panelRequest, buttonClass } from './request';
 
-export default function UserActions({ id, role, self, canPublishProperties }: { id: string; role: string; self: boolean; canPublishProperties: boolean }) {
+export default function UserActions({ id, role, self, canPublishProperties, canCreateReferralLinks = false }: { id: string; role: string; self: boolean; canPublishProperties: boolean; canCreateReferralLinks?: boolean }) {
   const t = useTranslations('adminUsers'), errors = useTranslations('panel'), router = useRouter();
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [saved, setSaved] = useState(false);
   const [password, setPassword] = useState<string | null>(null);
   const nextRole = role === 'COLLABORATOR' ? 'CLIENT' : 'COLLABORATOR';
-  async function change(action: 'role' | 'password' | 'publication', allowed?: boolean) {
-    const confirmation = action === 'role' ? 'confirmRole' : action === 'publication' ? allowed ? 'confirmPublicationGrant' : 'confirmPublicationRevoke' : 'confirmReset';
+  async function change(action: 'role' | 'password' | 'publication' | 'referrals', allowed?: boolean) {
+    const confirmation = action === 'role' ? 'confirmRole' : action === 'publication' ? allowed ? 'confirmPublicationGrant' : 'confirmPublicationRevoke'
+      : action === 'referrals' ? allowed ? 'confirmReferralsGrant' : 'confirmReferralsRevoke' : 'confirmReset';
     if (!window.confirm(t(confirmation))) return;
     setBusy(true); setError(''); setSaved(false); setPassword(null);
     try {
@@ -28,6 +29,8 @@ export default function UserActions({ id, role, self, canPublishProperties }: { 
       {t(role === 'COLLABORATOR' ? 'demote' : 'promote')}</button>}
     {role === 'COLLABORATOR' && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('publication', !canPublishProperties)}>
       {t(canPublishProperties ? 'revokePublication' : 'grantPublication')}</button>}
+    {role === 'COLLABORATOR' && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('referrals', !canCreateReferralLinks)}>
+      {t(canCreateReferralLinks ? 'revokeReferrals' : 'grantReferrals')}</button>}
     <p className="text-sm text-gray-600 dark:text-gray-300">{t('sessionWarning')}</p>
     <button type="button" disabled={busy || password !== null} className={buttonClass} onClick={() => change('password')}>{t('reset')}</button>
     {password !== null && <div role="status" className="space-y-2 rounded-lg border border-green-700 p-4">

@@ -9,9 +9,9 @@ import { propertyLocation } from "@/lib/destinations";
 export async function POST(req: NextRequest) {
   try {
     const manager = await requirePropertyManager();
-    const { propertyId, startDate, endDate, guestUserId, guestName, guestEmail } = await req.json();
+    const { propertyId, startDate, endDate, guestUserId, guestName, guestEmail, messageId } = await req.json();
 
-    if (typeof propertyId !== 'string' || !propertyId || typeof startDate !== 'string' || typeof endDate !== 'string' || !startDate || !endDate || (guestUserId != null && typeof guestUserId !== 'string')) {
+    if (typeof propertyId !== 'string' || !propertyId || typeof startDate !== 'string' || typeof endDate !== 'string' || !startDate || !endDate || (guestUserId != null && typeof guestUserId !== 'string') || (messageId != null && typeof messageId !== 'string')) {
       return NextResponse.json(
         { error: 'Faltan datos (propertyId, startDate, endDate)' },
         { status: 400 }
@@ -39,9 +39,18 @@ export async function POST(req: NextRequest) {
         )
       )
     )` : sql`true`;
+    // T-4736: la reserva hereda la atribución de la consulta que se confirma: misma propiedad, consulta con
+    // referido y que aún no haya atribuido otra reserva (una consulta = como mucho una comisión). El % se congela.
+    // Sin messageId, consulta sin referido o ya usada: queda null y la reserva se guarda igual que siempre.
+    const source = sql`from "Message" m where m."id" = ${messageId || null} and m."propertyId" = ${properties.id}
+      and m."referredByPartnerId" is not null
+      and not exists (select 1 from "Booking" prior where prior."referralMessageId" = m."id")`;
     const result = await db.execute(sql`
-      insert into "Booking" ("id", "propertyId", "startDate", "endDate", "source", "guestUserId")
-      select ${crypto.randomUUID()}, ${properties.id}, ${startDate}::date, ${endDate}::date, 'manual', ${guestUserId || null}
+      insert into "Booking" ("id", "propertyId", "startDate", "endDate", "source", "guestUserId",
+        "referredByPartnerId", "referralLinkId", "referralMessageId", "commissionPercent")
+      select ${crypto.randomUUID()}, ${properties.id}, ${startDate}::date, ${endDate}::date, 'manual', ${guestUserId || null},
+        (select m."referredByPartnerId" ${source}), (select m."referralLinkId" ${source}), (select m."id" ${source}),
+        (select p."commissionPercent" from "Partner" p where p."id" = (select m."referredByPartnerId" ${source}))
       from ${properties} where ${and(eq(properties.id, propertyId), managedProperties(manager), guestAccess)}
         and not exists (select 1 from "BlockDate" b where b."propertyId" = ${properties.id}
           and b."startDate" < ${endDate}::date and b."endDate" > ${startDate}::date)

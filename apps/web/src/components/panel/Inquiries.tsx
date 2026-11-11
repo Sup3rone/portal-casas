@@ -7,7 +7,7 @@ import MessageModal, { type MessageData } from '@/components/MessageModal';
 import { panelRequest, panelErrorKey, inputClass } from './request';
 
 export type Inquiry = { id: string; name: string; email: string; phone: string | null; body: string; read: boolean; createdAt: string; propertyId: string; title: string; startDate: string | null; endDate: string | null;
-  isPast?: boolean; userId?: string | null; slug?: string; photoUrl?: string | null; rentalType?: string; weekdayPrice?: number | null; weekendPrice?: number | null; seasonalPrice?: boolean };
+  isPast?: boolean; userId?: string | null; slug?: string; photoUrl?: string | null; rentalType?: string; weekdayPrice?: number | null; weekendPrice?: number | null; seasonalPrice?: boolean; referredBy?: string | null };
 
 function dateOnly(value: string | null) {
   const day = value?.match(/^(\d{4}-\d{2}-\d{2})(?:$|T| )/)?.[1];
@@ -27,6 +27,7 @@ export function inquiryEstimate(row: Inquiry) {
 }
 export default function Inquiries({ rows }: { rows: Inquiry[] }) {
   const t = useTranslations('panel'), locale = useLocale(), router = useRouter();
+  const referrals = useTranslations('referrals');
   const [property, setProperty] = useState(''), [status, setStatus] = useState(''), [error, setError] = useState(''), [busy, setBusy] = useState<string | null>(null);
   const [selected, setSelected] = useState<MessageData | null>(null);
   useEffect(() => {
@@ -76,7 +77,8 @@ export default function Inquiries({ rows }: { rows: Inquiry[] }) {
         </div>
         <div className="min-w-0 flex-1"><div className="flex flex-wrap justify-between gap-3"><h2 className="break-words font-semibold">
           {row.slug ? <Link href={`/casas/${row.slug}`} target="_blank" rel="noopener noreferrer" onClick={event => event.stopPropagation()} className="text-green-700 underline dark:text-green-400">{row.title}</Link> : row.title}
-        </h2><span>{t(row.read ? 'read' : 'unread')}</span></div><p className="break-words">{row.name}</p></div>
+        </h2><span>{t(row.read ? 'read' : 'unread')}</span></div><p className="break-words">{row.name}</p>
+          {row.referredBy && <p className="break-words text-sm font-medium text-green-700 dark:text-green-400">{referrals('referredBy', { name: row.referredBy })}</p>}</div>
       </div>
       <p><a href={`mailto:${row.email}`} onClick={event => event.stopPropagation()} className="underline">{row.email}</a>{row.phone && ` · ${row.phone}`}</p>
       <p className="whitespace-pre-wrap">{row.body}</p>

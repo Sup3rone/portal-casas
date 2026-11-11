@@ -69,16 +69,19 @@ function load(file, source) {
   return module.exports;
 }
 const schema = load('packages/db/src/schema.ts');
-for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds', 'media', 'propertySections', 'blockDates', 'siteContent']) {
+for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds', 'media', 'propertySections', 'blockDates', 'siteContent', 'partners', 'referralLinks']) {
   const config = getTableConfig(schema[name]);
   memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => {
     const numeric = /integer|boolean|double/.test(column.getSQLType());
-    const defaultValue = column.name === 'canPublishProperties' ? ' DEFAULT 0' : '';
+    const defaultValue = ['canPublishProperties', 'canCreateReferralLinks'].includes(column.name) ? ' DEFAULT 0' : '';
     return `"${column.name}" ${numeric ? 'REAL' : 'TEXT'}${defaultValue}${column.primary ? ' PRIMARY KEY' : ''}`;
   }).join(', ')}${config.primaryKeys.map(key => `, PRIMARY KEY (${key.columns.map(column => `"${column.name}"`).join(', ')})`).join('')})`);
 }
 // T-4680: índice único parcial del sync iCal (SQLite admite ON CONFLICT sobre índices parciales).
 memory.exec('CREATE UNIQUE INDEX "Booking_icalFeed_uid_unique" ON "Booking" ("icalFeedId", "icalUid") WHERE "icalFeedId" IS NOT NULL');
+// T-4736: UNIQUE del código de referido.
+memory.exec('CREATE UNIQUE INDEX "ReferralLink_code_unique" ON "ReferralLink" ("code")');
+memory.exec('CREATE UNIQUE INDEX "Booking_referralMessageId_unique" ON "Booking" ("referralMessageId") WHERE "referralMessageId" IS NOT NULL');
 const client = { query: async (query, values, options) => {
   queryLog.push(query);
   const bindings = [];

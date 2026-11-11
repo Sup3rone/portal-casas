@@ -2,6 +2,7 @@ import { db, messages, properties, bookings, partners } from '@portal/db';
 import { desc, eq, sql } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
 import { panelManager } from '@/lib/panel-server';
+import { Link } from '@/i18n/navigation';
 import { managedProperties } from '@/lib/property-access';
 import Inquiries from '@/components/panel/Inquiries';
 import { inquiryToday } from '@/lib/inquiry-validation';
@@ -11,6 +12,7 @@ export default async function PanelInquiriesPage({ params }: { params: Promise<{
   const title = locale === 'en' ? properties.titleEn : locale === 'fr' ? properties.titleFr : properties.titleEs;
   const t = await getTranslations({ locale, namespace: 'panel' });
   const r = await getTranslations({ locale, namespace: 'referrals' });
+  const detail = await getTranslations({ locale, namespace: 'bookingDetail' });
   const [rows, reservations] = await Promise.all([
     db.select({ id: messages.id, name: messages.name, email: messages.email, phone: messages.phone, body: messages.body,
       read: messages.read, createdAt: messages.createdAt, propertyId: messages.propertyId, userId: messages.userId, title,
@@ -35,6 +37,8 @@ export default async function PanelInquiriesPage({ params }: { params: Promise<{
       {reservations.map(reservation => <article key={reservation.id} className="rounded-2xl border bg-white dark:bg-gray-900 p-4 dark:border-gray-700">
         {reservation.title} · {reservation.startDate} → {reservation.endDate} · {reservation.source === 'host-block' ? t('blockSource') : t('bookingSource', { source: reservation.source })}
         {reservation.referredBy && <> · {r('referredBy', { name: reservation.referredBy })}</>}
+        {/* T-4738: desglose de precio (solo reservas, no bloqueos) */}
+        {reservation.source !== 'host-block' && <> · <Link href={`/panel/reservas/${reservation.id}`} className="text-green-700 underline dark:text-green-400">{detail('open')}</Link></>}
       </article>)}
     </section></div>;
 }

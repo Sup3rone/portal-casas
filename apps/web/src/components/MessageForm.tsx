@@ -6,6 +6,7 @@ import { useFormStatus } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { track } from '@vercel/analytics';
 import { useReservationDates } from './ReservationDatesProvider';
+import { quoteStay } from '@/lib/stay-quote';
 import { inquiryFields, inquiryFromFormData, inquiryToday, validateInquiry, type InquiryErrors, type InquiryField } from '@/lib/inquiry-validation';
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
@@ -32,50 +33,12 @@ export type PricingInfo = {
   booked: { start: string; end: string }[];
 };
 
-// --- Fecha -> "YYYY-MM-DD" en local (sin desfases UTC) ---
-function iso(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function addDays(d: Date, n: number): Date {
-  const c = new Date(d);
-  c.setDate(c.getDate() + n);
-  return c;
-}
 
 
-// Cuenta noche por noche (checkout no se cobra)
+// Cuenta noche por noche (checkout no se cobra). Regla compartida con la renta automática del panel (T-4738).
 function calcularCotizacion(startStr: string, endStr: string, pricing: PricingInfo) {
-  const start = new Date(startStr + 'T12:00:00');
-  const end = new Date(endStr + 'T12:00:00');
-  if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) return null;
-
-  let total = 0;
-  let noches = 0;
-  let sinPrecio = false;
-  let choque = false;
-
-  for (let d = new Date(start); d < end; d = addDays(d, 1)) {
-    noches++;
-    const day = d.getDay();
-    const esFinde = day === 0 || day === 6;
-    const hoy = iso(d);
-
-    if (pricing.booked.some(b => hoy >= b.start && hoy < b.end)) choque = true;
-
-    const season = pricing.seasons
-      .filter(s => hoy >= s.start && hoy <= s.end)
-      .sort((a, b) => b.priority - a.priority)[0];
-
-    const precio = season
-      ? (esFinde ? season.weekend : season.weekday)
-      : (esFinde ? pricing.base.weekend : pricing.base.weekday);
-
-    if (precio == null) sinPrecio = true;
-    else total += precio;
-  }
-
-  return { total: sinPrecio ? null : total, noches, choque };
+  const quote = quoteStay(startStr, endStr, pricing);
+  return quote && { total: quote.total, noches: quote.nights, choque: quote.overlap };
 }
 
 export default function MessageForm({

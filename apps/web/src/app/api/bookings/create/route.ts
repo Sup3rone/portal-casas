@@ -1,10 +1,11 @@
 // src/app/api/bookings/create/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db, properties, users } from "@portal/db";
+import { db, bookings, properties, users } from "@portal/db";
 import { and, eq, sql } from "drizzle-orm";
 import { AccessError, accessFailure, managedProperties, requirePropertyManager } from '@/lib/property-access';
 import { sendEmail } from "@/lib/mailer";
 import { propertyLocation } from "@/lib/destinations";
+import { initialBreakdown } from "@/lib/booking-quote";
 
 export async function POST(req: NextRequest) {
   try {
@@ -57,6 +58,15 @@ export async function POST(req: NextRequest) {
       returning "id"
     `);
     if (!result.rows.length) throw new AccessError(404);
+
+    // T-4738: desglose inicial = renta cotizada con las tarifas vigentes + IVA 16 % (ambos editables en
+    // /panel/reservas/[id]). Si la propiedad no tiene precio para todas las noches, queda vacío. Nunca rompe la reserva.
+    try {
+      const values = await initialBreakdown(propertyId, startDate, endDate);
+      if (values.rentAmount) await db.update(bookings).set(values).where(eq(bookings.id, String(result.rows[0].id)));
+    } catch (breakdownError) {
+      console.error('No se pudo precargar el desglose (reserva OK):', breakdownError);
+    }
 
     // T-4683: datos para el botón «Avisar a limpieza» (solo a quien gestiona la propiedad). Nunca rompe la reserva.
     let cleaningNotice: { phone: string; property: string; location: string } | null = null;

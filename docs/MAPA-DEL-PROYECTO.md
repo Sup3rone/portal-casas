@@ -776,7 +776,8 @@ Detalle de piezas en la sección 8.6. Añade `SiteContent.home_background_videos
 | `property-cleaning-whatsapp.sql` | T-4683 | ✅ Verificado | Pendiente |
 | `site-content-home-videos.sql` | T-4679 | ✅ Verificado | Pendiente (al mergear) |
 | `referral-program.sql` | T-4736 | ✅ Aplicado (10-11, verificado por lectura) | Pendiente |
-| `referral-collaborator-permission.sql` | T-4736 (permiso colaborador) | Pendiente | Pendiente |
+| `referral-collaborator-permission.sql` | T-4736 (permiso colaborador) | ✅ Aplicado | Pendiente |
+| `booking-price-breakdown.sql` | T-4738 | Pendiente | Pendiente |
 
 ### 9.6 Verificación
 
@@ -796,3 +797,15 @@ Suite offline: 61 `scripts/test-*.cjs`, 60 en verde; `test-panel.cjs` falla desd
 | Test | [test-referrals.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-referrals.cjs) | Alta de partner, código único, atribución con cookie, sin ref intacto, permisos, permiso del colaborador, nombre en consultas. |
 
 Detalle y diagnóstico de reservas/correo en [REFERIDOS.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/REFERIDOS.md). «Partner» ≠ rol `COLLABORATOR` (usuario del panel que gestiona sus casas).
+
+## 11. Desglose de precio por reserva (T-4738, 10 de noviembre de 2026)
+
+| Pieza | Ubicación | Responsabilidad |
+|---|---|---|
+| Datos | `Booking.rentAmount/cleaningCost/taxes` + [booking-price-breakdown.sql](C:/Users/menib/Documents/GitHub/portal-casas/scripts/sql/booking-price-breakdown.sql) | numeric(12,2) nullable ≥ 0. El % es `Booking.commissionPercent` (T-4736). |
+| Cálculo | [booking-breakdown.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/booking-breakdown.ts) | Validación de importes, comisión (BigInt, a centavos, mitad hacia arriba), total y formato MXN. Compartido por servidor y cliente. |
+| Servicio/API | `lib/booking-details.ts` + `api/panel/bookings/[id]/route.ts` | Lectura/PATCH con `managedResource`; excluye `host-block`; el % no se edita. |
+| Vista | `app/[locale]/panel/reservas/[id]/page.tsx` + `components/panel/BookingBreakdownForm.tsx` | Desglose editable; % y comisión de solo lectura en vivo. Enlaces desde `panel/consultas` y `CalendarBoard`. |
+| Test | [test-booking-breakdown.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-booking-breakdown.cjs) | Comisión calculada a mano, validación, permisos, legacy y nada público. |
+
+Detalle en [DESGLOSE-RESERVA.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/DESGLOSE-RESERVA.md).

@@ -172,7 +172,14 @@ export const bookings = pgTable('Booking', {
   referralMessageId: text('referralMessageId'),
   // % de comisión congelado al confirmar; editar el colaborador no cambia lo ya atribuido.
   commissionPercent: numeric('commissionPercent', { precision: 5, scale: 2 }),
+  // T-4738: desglose para facturar (MXN, nullable = sin capturar). Comisión = rentAmount × commissionPercent.
+  rentAmount: numeric('rentAmount', { precision: 12, scale: 2 }),
+  cleaningCost: numeric('cleaningCost', { precision: 12, scale: 2 }),
+  taxes: numeric('taxes', { precision: 12, scale: 2 }),
 }, table => [index('Booking_referredByPartnerId_idx').on(table.referredByPartnerId),
+  check('Booking_rentAmount_check', sql`${table.rentAmount} is null or ${table.rentAmount} >= 0`),
+  check('Booking_cleaningCost_check', sql`${table.cleaningCost} is null or ${table.cleaningCost} >= 0`),
+  check('Booking_taxes_check', sql`${table.taxes} is null or ${table.taxes} >= 0`),
   uniqueIndex('Booking_referralMessageId_unique').on(table.referralMessageId).where(sql`${table.referralMessageId} is not null`), foreignKey({
   name: 'Booking_icalFeed_property_fk',
   columns: [table.icalFeedId, table.propertyId],

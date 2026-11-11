@@ -496,7 +496,8 @@
     "reservedBy": "Reserved by {name}",
     "unknownGuest": "guest without a recorded name",
     "free": "Available",
-    "empty": "No properties"
+    "empty": "No properties",
+    "bookingDetail": "View booking and breakdown"
   },
   "photoUpload": {
     "queueProgress": "File {current} of {total}: {name}",
@@ -650,5 +651,39 @@
     "myIntro": "Generate links to the site or to your properties and share them. Bookings that come through them are attributed to you at the commission % set by the administrator.",
     "myInactive": "Your referral access is deactivated: you cannot create new links. Existing records are kept.",
     "linkedUser": "Panel user"
+  },
+  "bookingDetail": {
+    "title": "Booking",
+    "back": "Back to bookings",
+    "property": "Property",
+    "dates": "Dates",
+    "source": "Source",
+    "guest": "Guest",
+    "referral": "Referral",
+    "noReferral": "No partner",
+    "breakdown": "Breakdown for invoicing",
+    "rentAmount": "Rent (lodging)",
+    "cleaningCost": "Cleaning cost",
+    "taxes": "Taxes",
+    "amountHelp": "MXN, number ≥ 0 with up to 2 decimals (dot). Empty = no data.",
+    "invalidAmount": "Invalid amount: use numbers only, no minus sign or commas, up to 2 decimals (e.g. 1500.50).",
+    "commissionPercent": "Partner % (frozen at confirmation)",
+    "commissionAmount": "Partner commission",
+    "commissionHelp": "Commission = rent × frozen %, rounded to cents (half up). Cleaning and taxes earn no commission. Calculated automatically; not editable.",
+    "total": "Total (rent + cleaning + taxes)",
+    "save": "Save breakdown",
+    "saved": "Breakdown saved.",
+    "legacyNotice": "This booking has no breakdown yet.",
+    "open": "View booking",
+    "listTitle": "Bookings",
+    "listIntro": "Confirmed bookings with their invoicing breakdown. Open one to enter rent, cleaning and taxes.",
+    "listEmpty": "No bookings yet.",
+    "edit": "Breakdown",
+    "rentPrefilled": "Rent prefilled with the property rate for these dates. Review it and press “Save breakdown” to confirm.",
+    "noSuggestedRent": "The property has no rate for every night: enter the rent manually.",
+    "useSuggestedRent": "Use property rate ({amount})",
+    "taxesAuto": "Automatic: 16% VAT on rent + cleaning. Type another amount to change it.",
+    "taxesManual": "Manual amount (not recalculated).",
+    "applyTaxes": "Calculate 16% (VAT)"
   }
 }

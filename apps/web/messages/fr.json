@@ -264,7 +264,10 @@
       "exito": "Message envoyé. Nous vous contacterons bientôt.",
       "fechasOcupadas": "Certaines dates sont indisponibles — consultez le calendrier.",
       "fechasInvalidas": "La date de départ doit être postérieure à la date d’arrivée.",
-      "error": "Impossible d’envoyer votre message. Réessayez."
+      "error": "Impossible d’envoyer votre message. Réessayez.",
+      "incompleto": "Il manque des informations pour envoyer votre demande. Vérifiez les champs indiqués en rouge.",
+      "exitoReserva": "Votre demande a bien été reçue. Une fois votre réservation confirmée, vous recevrez un e-mail de confirmation.",
+      "otraConsulta": "Envoyer une autre demande"
     },
     "gallery": {
       "foto": "Photo {number}",

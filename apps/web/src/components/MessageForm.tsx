@@ -1,21 +1,23 @@
 // apps/web/src/components/MessageForm.tsx
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useTranslations } from 'next-intl';
+import { SessionContext } from 'next-auth/react';
 import { track } from '@vercel/analytics';
 import { useReservationDates } from './ReservationDatesProvider';
 import { quoteStay } from '@/lib/stay-quote';
 import { inquiryFields, inquiryFromFormData, inquiryToday, validateInquiry, type InquiryErrors, type InquiryField } from '@/lib/inquiry-validation';
 
-function SubmitButton({ disabled }: { disabled: boolean }) {
+// T-4770: solo se deshabilita mientras envía. Con datos incompletos se puede pulsar y el formulario explica qué falta.
+function SubmitButton() {
   const t = useTranslations('details.form');
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
-      disabled={pending || disabled}
+      disabled={pending}
       className="w-full bg-gray-900 dark:bg-green-700 hover:bg-gray-700 dark:hover:bg-green-600 text-white dark:text-gray-100 font-light tracking-[0.25em] py-4 px-4 transition-colors disabled:opacity-50 uppercase"
     >
       {pending ? t('enviando') : t('enviar')}
@@ -61,7 +63,13 @@ export default function MessageForm({
   const [rateError, setRateError] = useState('');
   const { dates: { startDate, endDate }, setDates } = useReservationDates();
   const [guests, setGuests] = useState<number>(1);
-  const [fields, setFields] = useState({ name: '', email: '', phone: '', body: '' });
+  // T-4770: con sesión iniciada, nombre y correo salen de la cuenta mientras el visitante no los edite
+  // (null = sin editar). Se lee en el cliente para no volver dinámica la ficha (generateStaticParams).
+  // useContext y no useSession: sin SessionProvider (vistas aisladas, tests) no lanza; solo no autollena.
+  const session = useContext(SessionContext)?.data;
+  const emptyFields = { name: null as string | null, email: null as string | null, phone: '', body: '' };
+  const [rawFields, setFields] = useState(emptyFields);
+  const fields = { ...rawFields, name: rawFields.name ?? session?.user?.name ?? '', email: rawFields.email ?? session?.user?.email ?? '' };
   const [touched, setTouched] = useState<Partial<Record<InquiryField, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
   const [serverValidation, setServerValidation] = useState<{ signature: string; errors: InquiryErrors; maxGuests?: number } | null>(null);
@@ -97,7 +105,12 @@ export default function MessageForm({
     setSubmitted(true);
     const submitted = inquiryFromFormData(formData);
     const checked = validateInquiry(submitted, { ...validationContext, today: inquiryToday() });
-    if (Object.keys(checked).length) return;
+    if (Object.keys(checked).length) {
+      // T-4770: lleva al primer campo con error (el aviso general y los errores en rojo ya se muestran con submitted).
+      const first = inquiryFields.find(field => checked[field]);
+      if (first && typeof document !== 'undefined') document.getElementById(first)?.focus();
+      return;
+    }
     try {
       const res = await fetch('/api/messages', { method: 'POST', body: formData });
       if (res.status === 429) {
@@ -118,11 +131,11 @@ export default function MessageForm({
       if (propertySlug) {
         try { track('query_submitted', { property: propertySlug }); } catch { /* No alterar el envío confirmado. */ }
       }
-      setFields({ name: '', email: '', phone: '', body: '' });
+      setFields(emptyFields); // Vuelven los datos de la cuenta, si hay sesión.
       setTouched({}); setSubmitted(false);
       setServerValidation(null);
+      // T-4770: el aviso de recibido se queda hasta que el visitante pulse «Enviar otra consulta».
       setStatus('success');
-      setTimeout(() => setStatus('idle'), 3000);
     } catch (err) {
       setStatus('error');
       console.error(err);
@@ -131,8 +144,16 @@ export default function MessageForm({
 
   if (status === 'success') {
     return (
-      <div className="text-center text-gray-500 dark:text-gray-400 font-light tracking-wide p-8">
-        {t('exito')}
+      <div role="status" className="space-y-6 text-center text-gray-700 dark:text-gray-200 font-light tracking-wide p-8">
+        {/* La consulta anual no genera reserva: conserva su mensaje de contacto. */}
+        <p>{t(contactOnly ? 'exito' : 'exitoReserva')}</p>
+        <button
+          type="button"
+          onClick={() => setStatus('idle')}
+          className="w-full border border-gray-900 dark:border-green-500 text-gray-900 dark:text-gray-100 font-light tracking-[0.25em] py-4 px-4 uppercase transition-colors hover:bg-gray-900 hover:text-white dark:hover:bg-green-700"
+        >
+          {t('otraConsulta')}
+        </button>
       </div>
     );
   }
@@ -306,11 +327,16 @@ export default function MessageForm({
         {fieldError('body')}
       </div>
 
+      {/* T-4770: aviso general si se intentó enviar con datos faltantes o por corregir. */}
+      {submitted && Object.keys(validationErrors).length > 0 && (
+        <p id="inquiry-incomplete" role="alert" className="text-red-600 dark:text-red-400 text-xs tracking-wide">{t('incompleto')}</p>
+      )}
+
       {status === 'error' && (
         <p className="text-red-600 dark:text-red-400 text-xs tracking-wide">{rateError || t('error')}</p>
       )}
 
-      <SubmitButton disabled={Object.keys(validationErrors).length > 0} />
+      <SubmitButton />
     </form>
   );
 }

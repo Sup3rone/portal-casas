@@ -264,7 +264,10 @@
       "exito": "Message sent. We will contact you soon.",
       "fechasOcupadas": "Some dates are unavailable — check the calendar.",
       "fechasInvalidas": "The check-out date must be after the check-in date.",
-      "error": "Could not send your message. Please try again."
+      "error": "Could not send your message. Please try again.",
+      "incompleto": "Some details are missing to send your inquiry. Please check the fields marked in red.",
+      "exitoReserva": "Your request has been received. Once your booking is confirmed, you will receive a confirmation email.",
+      "otraConsulta": "Send another inquiry"
     },
     "gallery": {
       "foto": "Photo {number}",

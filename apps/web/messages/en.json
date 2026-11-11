@@ -171,7 +171,8 @@
       "bathrooms": "Bathrooms",
       "baseWeekdayPrice": "Weekday price (MXN)",
       "baseWeekendPrice": "Weekend price (MXN)"
-    }
+    },
+    "invalidIcalUrl": "Invalid iCal link: use a public https link from Airbnb, Booking, VRBO or Google (.ics)."
   },
   "nav": {
     "menu": "Menu",
@@ -746,5 +747,44 @@
       "pending": "In progress"
     },
     "rateLimited": "You reached the limit of 3 manual sends in 24 hours. Try again later."
+  },
+  "icalFeeds": {
+    "title": "External calendars (iCal)",
+    "intro": "Paste the iCal (.ics) export link of this property’s calendar on Airbnb, Booking.com, VRBO or Google. When syncing, its booked dates are blocked here. Syncing only reads: nothing changes on the other platform.",
+    "empty": "No calendars connected yet.",
+    "url": "iCal link (.ics)",
+    "source": "Platform",
+    "urlHelp": "https links only (webcal:// is also accepted). On Airbnb: Calendar → Availability → Connect calendars → Export calendar. The link is private: do not share it.",
+    "add": "Add calendar",
+    "added": "Calendar added. Press “Sync now” to bring its dates.",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "Calendar updated.",
+    "remove": "Remove",
+    "confirmRemove": "Remove this calendar? Its {count} imported dates will be deleted from this panel (the other platform is not touched).",
+    "removed": "Calendar removed ({count} imported dates withdrawn).",
+    "imported": "{count, plural, =0 {No imported dates yet} one {# imported date} other {# imported dates}}",
+    "syncNow": "Sync now",
+    "synced": "Synced: {count} current dates.",
+    "syncedPartial": "Synced, but {count} calendar(s) could not be read. Check the link.",
+    "syncFailed": "No calendar could be read. Check that the link is correct and public.",
+    "conflict": "That link is already added, or the calendar has bookings with a breakdown or referral captured and cannot be removed (edit the link instead).",
+    "sources": {
+      "airbnb": "Airbnb",
+      "booking": "Booking.com",
+      "vrbo": "VRBO",
+      "google": "Google Calendar",
+      "other": "Other"
+    },
+    "newTitle": "External calendar (optional)",
+    "newIntro": "Paste this home’s iCal (.ics) link from Airbnb or another platform: when the property is created it gets connected and its booked dates are synced. The calendar has no name, photos or description: enter those in this form.",
+    "noNameInFeed": "The Airbnb calendar does not include the listing name (only its number: {id}).",
+    "useProvisionalTitle": "Use provisional title “{title}”",
+    "created": {
+      "synced": "Calendar connected and synced when the property was created.",
+      "syncFailed": "The property and its calendar were saved, but syncing could not read the link. Check the link and press “Sync now”.",
+      "feedFailed": "The property was created, but the calendar could not be saved. Add it below."
+    }
   }
 }

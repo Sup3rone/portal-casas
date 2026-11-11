@@ -90,7 +90,9 @@ Se recomienda **A**: la base garantiza la unicidad aunque luego se añada un cro
 
 ## 8. Dar de alta el feed de Airbnb (cuando tengan el enlace)
 
-No hay pantalla para hacerlo. En **Respaldo**, y después en main:
+> **Actualización 10-11-2026 (T-4739):** ya hay pantalla. En `/panel/propiedades/[id]` → «Calendarios externos (iCal)» se pega el enlace `.ics`, se elige la plataforma (Airbnb, Booking.com, VRBO, Google u otra) y se pulsa «Sincronizar ahora». Lo pueden hacer el ADMIN o el colaborador dueño. El SQL de abajo queda solo como respaldo manual.
+
+Antes no había pantalla para hacerlo. En **Respaldo**, y después en main:
 
 ```sql
 -- 1) Buscar la propiedad
@@ -101,3 +103,28 @@ VALUES (gen_random_uuid()::text, '<id-de-la-propiedad>', '<url .ics de Airbnb>',
 ```
 
 La propiedad tiene que ser `nocturna` o `ambas`: las `anual` se omiten.
+
+## 9. Alta desde el panel (T-4739, 10-11-2026)
+
+| Pieza | Ubicación |
+|---|---|
+| Servicio | `apps/web/src/lib/ical-feeds.ts`: validación del enlace, alta, edición, quitar y `bookingSourceFor` |
+| API | `POST/GET /api/properties/[id]/ical-feeds`, `PATCH/DELETE /api/properties/[id]/ical-feeds/[feedId]` (ADMIN o dueño; `managedProperties`) |
+| UI | `components/panel/IcalFeedsEditor.tsx`, en la ficha de la propiedad junto a tarifas y disponibilidad (se oculta en renta anual, como ellas) |
+| Test | `scripts/test-ical-feeds.cjs` |
+
+- **Enlace:** solo `https` (`webcal://` se convierte en `https://`), máximo 2000 caracteres. Se rechazan `localhost`, IPs literales, `.local`/`.internal`, hosts sin punto, puertos distintos de 443 y credenciales en la URL: el servidor descarga el enlace y no debe poder sondear la red interna. **Límite:** no se resuelve el DNS, así que un dominio público que apunte a una IP privada no se detecta; el riesgo es bajo porque solo lo usan ADMIN y dueños autenticados.
+- **Tope y duplicados:** hasta 5 calendarios por propiedad y sin enlaces repetidos (409).
+- **El token es privado:** en la lista se muestra recortado (host + final); completo solo al editar.
+- **Origen al sincronizar:** `Booking.source` ahora es `airbnb`, `booking`, `vrbo` u `other` según el feed. Los feeds antiguos (`MANUAL` o `google`) siguen como `google`. El calendario muestra Airbnb y Google con su nombre y los demás como externos.
+- **Quitar:** borra el feed y sus fechas importadas, que son espejo del calendario externo, **salvo** que alguna tenga desglose (renta, aseo, impuestos) o atribución de referido capturados. En ese caso responde 409 y no toca nada; se puede editar el enlace en su lugar.
+- **Sin SQL:** `IcalFeed` ya existía.
+
+### 9.1 Crear la propiedad con su calendario (T-4739)
+
+- **El `.ics` de Airbnb NO trae datos del anuncio.** Comprobado el 10-11-2026 con un enlace real: cabecera `PRODID:-//Airbnb Inc//Hosting Calendar 1.0//EN`, sin `X-WR-CALNAME`, y solo eventos «Airbnb (Not available)» con fechas y UID. No hay título, descripción, fotos, dirección ni capacidad. Por eso no se puede crear una ficha «desde el enlace». Leer la página del anuncio (*scraping*) se descartó: va contra los términos de Airbnb, se rompe sin aviso y no hay API pública.
+- **Lo que sí hay:** en «Nueva propiedad», un campo opcional «Calendario externo». El enlace viaja en el mismo `POST /api/properties`; sus claves (`icalUrl`, `icalSource`) se separan antes de `propertyInput`, que rechaza claves desconocidas.
+  - El enlace se valida **antes** de crear la ficha: si es inválido, responde 400 `INVALID_ICAL_URL` y no se crea nada.
+  - Después se crea el feed, el cliente sincroniza y se abre la ficha con `?ical=synced|syncFailed|feedFailed`, que el editor de calendarios muestra como aviso.
+  - En renta anual el campo se oculta y el servidor lo ignora.
+- **Título provisional:** si el enlace es de Airbnb, el formulario ofrece rellenar los títulos vacíos con «Airbnb · anuncio {número}», sacado de la URL (`lib/ical-link.ts`), para editarlo antes de guardar.

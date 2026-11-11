@@ -4,6 +4,7 @@ import * as ical from 'node-ical';
 import { and, eq, sql } from 'drizzle-orm';
 import { AccessError, accessFailure, managedProperties, requirePropertyManager } from '@/lib/property-access';
 import { feedEvents, isCalendar } from '@/lib/ical-sync';
+import { bookingSourceFor } from '@/lib/ical-feeds';
 
 // T-4680: sync idempotente. Cada feed se reconcilia por (icalFeedId, icalUid):
 // 1) upsert de los eventos vigentes; 2) borrar los que ya no vienen (cancelados,
@@ -36,7 +37,7 @@ export async function POST() {
         console.warn(`iCal: feed ${feed.id} no se pudo leer; se conservan sus fechas`);
         continue;
       }
-      const source = feed.source === 'airbnb' ? 'airbnb' : 'google';
+      const source = bookingSourceFor(feed.source); // T-4739: airbnb/booking/vrbo/other; antiguos → google
       const guard = and(eq(properties.id, feed.propertyId), eq(icalFeeds.id, feed.id), managedProperties(manager));
 
       for (const event of events) {

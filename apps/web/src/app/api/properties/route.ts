@@ -5,11 +5,18 @@ import { revalidatePath } from 'next/cache';
 import { accessFailure, managedProperties, requirePropertyManager } from '@/lib/property-access';
 import { propertyInput } from '@/lib/panel-validation';
 import { panelError } from '@/lib/panel-response';
+import { insertFirstIcalFeed, validateFeedInput } from '@/lib/ical-feeds';
 
 export async function POST(req: NextRequest) {
   try {
     const manager = await requirePropertyManager();
-    const values = propertyInput(await req.json().catch(() => null), true);
+    const body = await req.json().catch(() => null);
+    // T-4739: calendario iCal opcional en el alta. Sus campos se separan ANTES de propertyInput (que rechaza claves
+    // desconocidas) y el enlace se valida ANTES de escribir: si es inválido no se crea la propiedad (no queda una
+    // ficha a medias). Solo para renta nocturna/ambas (el sync omite las anuales).
+    const { icalUrl, icalSource, ...propertyBody } = body && typeof body === 'object' && !Array.isArray(body) ? body as Record<string, unknown> : {} as Record<string, unknown>;
+    const values = propertyInput(body && typeof body === 'object' && !Array.isArray(body) ? propertyBody : body, true);
+    const ical = icalUrl == null || icalUrl === '' || values.rentalType === 'anual' ? null : validateFeedInput({ url: icalUrl, source: icalSource });
     const id = crypto.randomUUID();
     const slug = `${values.titleEs!.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'property'}-${id.slice(0, 8)}`;
     const result = await db.execute(sql`
@@ -23,8 +30,13 @@ export async function POST(req: NextRequest) {
       returning "id"
     `);
     if (!result.rows.length) return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    let icalFeedId: string | null = null;
+    if (ical) {
+      try { icalFeedId = (await insertFirstIcalFeed(id, ical)).id; }
+      catch (feedError) { console.error('Propiedad creada; no se pudo guardar su calendario iCal:', feedError); }
+    }
     revalidatePath('/[locale]/panel', 'layout');
-    return NextResponse.json({ id }, { status: 201 });
+    return NextResponse.json({ id, icalFeedId, icalRequested: Boolean(ical) }, { status: 201 });
   } catch (error) { return panelError(error); }
 }
 

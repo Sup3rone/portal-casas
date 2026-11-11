@@ -157,6 +157,10 @@ export const icalFeeds = pgTable('IcalFeed', {
   propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
   url: text('url').notNull(),
   source: text('source').notNull().default('MANUAL'),
+  // T-4739: estado de la última sincronización (botón, cron diario o refresco antes de una consulta).
+  lastAttemptAt: timestamp('lastAttemptAt', { withTimezone: true }),
+  lastSyncedAt: timestamp('lastSyncedAt', { withTimezone: true }),
+  lastError: text('lastError'),
 }, table => [unique('IcalFeed_id_propertyId_unique').on(table.id, table.propertyId)]);
 
 export const bookings = pgTable('Booking', {

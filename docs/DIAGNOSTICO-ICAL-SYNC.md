@@ -128,3 +128,12 @@ La propiedad tiene que ser `nocturna` o `ambas`: las `anual` se omiten.
   - Después se crea el feed, el cliente sincroniza y se abre la ficha con `?ical=synced|syncFailed|feedFailed`, que el editor de calendarios muestra como aviso.
   - En renta anual el campo se oculta y el servidor lo ignora.
 - **Título provisional:** si el enlace es de Airbnb, el formulario ofrece rellenar los títulos vacíos con «Airbnb · anuncio {número}», sacado de la URL (`lib/ical-link.ts`), para editarlo antes de guardar.
+
+### 9.2 Sincronización automática (T-4739, plan Hobby)
+
+- **Cron diario único:** `vercel.json` → `0 12 * * *` → `/api/cron/daily` (06:00 CDMX; en Hobby Vercel lo puede correr dentro de esa hora). Sincroniza todos los feeds de propiedades no anuales, con 4 en paralelo y 8 s como máximo por feed. El día 1 (hora MX) envía además el reporte mensual. Hobby permite pocos cron jobs y como mucho uno al día, por eso es uno solo.
+- **Antes de cada consulta pública** (`/api/messages`, solo renta nocturna/ambas): si los calendarios de **esa** casa no se sincronizaron en los últimos **10 minutos**, se refrescan antes de comprobar disponibilidad. Se espera como máximo **~4 s** en total. Si Airbnb tarda o falla, la consulta sigue con las fechas guardadas y el fallo queda registrado. Así, una fecha recién reservada en Airbnb no se puede consultar. Es una descarga saliente por petición pública, acotada por el rate limit de consultas (5 cada 15 min por IP) y por la ventana de 10 min por casa.
+- **El botón «Sincronizar ahora»** se mantiene, con la misma respuesta que antes.
+- **Estado por calendario** (`IcalFeed.lastAttemptAt`, `lastSyncedAt`, `lastError`, SQL `scripts/sql/ical-feed-sync-status.sql`): el panel muestra «Última sincronización», el error del último intento (`TIMEOUT`, `NOT_A_CALENDAR`, `FETCH_FAILED`) y un aviso si pasan más de 36 h sin sincronizar con éxito.
+- **La lógica vive en `lib/ical-sync-runner.ts`** (upsert por UID y luego retiro, sin cambios respecto a T-4680), compartida por el botón, el cron y la consulta. `node-ical` se carga en cada sync, así que los tests pueden sustituirlo; los tests que ya existían pasan sin cambios.
+- ⚠️ **SQL antes del deploy:** sin las columnas nuevas fallan **la ficha de la propiedad en el panel** y agregar calendarios. La sincronización y las consultas siguen funcionando, porque esos pasos atrapan el error, pero sin estado ni refresco por antigüedad.

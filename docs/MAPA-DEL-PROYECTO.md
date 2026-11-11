@@ -779,6 +779,7 @@ Detalle de piezas en la sección 8.6. Añade `SiteContent.home_background_videos
 | `referral-collaborator-permission.sql` | T-4736 (permiso colaborador) | ✅ Aplicado | Pendiente |
 | `booking-price-breakdown.sql` | T-4738 | ✅ Aplicado | Pendiente |
 | `monthly-commission-report.sql` | T-4739 | Pendiente | Pendiente |
+| `ical-feed-sync-status.sql` | T-4739 (sync iCal automático) | Pendiente | Pendiente |
 
 ### 9.6 Verificación
 

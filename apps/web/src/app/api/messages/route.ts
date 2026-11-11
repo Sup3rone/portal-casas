@@ -7,6 +7,7 @@ import { auth } from '@/lib/auth';
 import { consumeRateLimit, rateLimitLocale, rateLimitResponse } from '@/lib/rate-limit';
 import { propertyBlocks } from '@/lib/occupation-calendar';
 import { referralAttribution } from '@/lib/referrals';
+import { refreshPropertyCalendars } from '@/lib/ical-sync-runner';
 import { inquiryFromFormData, inquiryToday, normalizeInquiry, validateInquiry, type InquiryErrors } from '@/lib/inquiry-validation';
 
 const invalid = (fields: InquiryErrors, maxGuests?: number) =>
@@ -39,6 +40,9 @@ export async function POST(req: NextRequest) {
     const contactOnly = property.rentalType === 'anual';
     const syntaxErrors = validateInquiry(input, { today: inquiryToday(), contactOnly, maxGuests: property.maxGuests });
     if (Object.keys(syntaxErrors).length) return invalid(syntaxErrors, property.maxGuests);
+    // T-4739: si la casa tiene calendario externo (Airbnb…) y no se sincronizó en los últimos 10 min, se refresca
+    // ANTES de comprobar disponibilidad (máx. ~4 s; si falla, se usan las fechas guardadas). Nunca rompe la consulta.
+    if (!contactOnly) await refreshPropertyCalendars(propertyId);
     const occupied = contactOnly ? [] : await db.select({ startDate: bookings.startDate, endDate: bookings.endDate })
       .from(bookings).where(eq(bookings.propertyId, propertyId));
     if (!contactOnly) occupied.push(...await propertyBlocks(propertyId));

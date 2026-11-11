@@ -7,7 +7,7 @@ Reporte del **colaborador** (dueño de sus propiedades): reservas del mes con su
 | Pieza | Estado previo | Decisión |
 |---|---|---|
 | Correo | Resend (`lib/mailer.ts`), solo HTML, un destinatario, sin adjuntos | `sendEmail` acepta varios destinatarios y `attachments` (la API de Resend ya los soporta) |
-| Cron | Nada: `vercel.json` solo tenía headers y `docker-compose.yml` es Postgres + MinIO para desarrollo | **Vercel Cron** en `apps/web/vercel.json`: `0 13 1 * *` (día 1, 13:00 UTC = 07:00 CDMX). Vercel manda `Authorization: Bearer $CRON_SECRET` |
+| Cron | Nada: `vercel.json` solo tenía headers y `docker-compose.yml` es Postgres + MinIO para desarrollo | **Un solo Vercel Cron diario** (plan Hobby): `0 12 * * *` → `/api/cron/daily` (06:00 CDMX). Todos los días sincroniza los calendarios iCal y, si en MX es día 1, envía además el reporte mensual. Vercel manda `Authorization: Bearer $CRON_SECRET` |
 | Excel | Sin librería | Generador propio `lib/xlsx.ts`, sin dependencias (ver §3) |
 | Fechas | Reservas en columnas `date` («YYYY-MM-DD», sin zona). La fecha de hoy en MX ya existía: `inquiryToday()` (`America/Mexico_City`). En el panel se muestran con `Intl` `dateStyle: 'medium'` | El Excel usa ISO `YYYY-MM-DD` (sin ambigüedad entre es/en/fr ni de zona) |
 
@@ -22,7 +22,7 @@ Reporte del **colaborador** (dueño de sus propiedades): reservas del mes con su
 - **Columnas:** fechas, huésped, referido por, renta, aseo, impuestos, total, % colaborador, comisión. En el Excel también propiedad, salida, noches (mes/total) y cruce de mes.
 - **Datos del huésped:** **solo el nombre**, sin correo ni teléfono, igual en pantalla, Excel y correo.
 - **Filtros:** mes (`?month=YYYY-MM`; por defecto el mes anterior) y colaborador referidor (solo los que aparecen en sus reservas). No hay paginación: la consulta ya está acotada a un mes y a sus propiedades.
-- **Zona horaria:** el contenido no depende de ninguna zona, porque las fechas son civiles. Solo «qué mes es el anterior» se decide con la fecha de hoy en **America/Mexico_City** (UTC−6 fijo; México no tiene horario de verano desde 2022). Ejemplo: el 30-nov a las 23:30 en CDMX ya es 1-dic en UTC; con la hora UTC el cron reportaría noviembre por error, con la de MX reporta octubre.
+- **Zona horaria:** el contenido no depende de ninguna zona, porque las fechas son civiles. Solo «qué mes es el anterior» se decide con la fecha de hoy en **America/Mexico_City** (UTC−6 fijo; México no tiene horario de verano desde 2022). Ejemplo: el 30-nov a las 23:30 en CDMX ya es 1-dic en UTC; con la hora UTC el cron reportaría noviembre por error, con la de MX reporta octubre. El cron corre a las 12:00 UTC = 06:00 CDMX, cuando el día 1 ya empezó en México.
 
 ## 3. Excel sin dependencias (`lib/xlsx.ts`)
 
@@ -45,7 +45,7 @@ Verificado con `openpyxl`, un lector independiente: abre sin advertencias, los n
 ## 4. Envío automático y bitácora
 
 - **Destinatarios:** hasta 2 correos por colaborador (`User.reportEmails`, jsonb), capturados por él mismo en `/panel/reporte`. Se guardan en minúsculas y sin duplicados. Sin correos no se le envía nada.
-- **Cron** (`/api/cron/monthly-report`):
+- **Cron:** lo dispara `/api/cron/daily` el día 1 (hora MX). `/api/cron/monthly-report?month=` queda para ejecutarlo a mano. Comportamiento:
   - si falta `CRON_SECRET` o tiene menos de 16 caracteres, responde 401 y lo registra en el log (falla cerrado);
   - compara el secreto con `timingSafeEqual`;
   - toma como mes el anterior a hoy en MX;

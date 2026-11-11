@@ -3,7 +3,7 @@ const codes: Record<string, string> = {
   INVALID_CONTACT_EMAIL: 'invalidContactEmail',
   INVALID_HERO_VIDEO: 'invalidHeroVideo', INVALID_SECTION_TITLES: 'invalidSectionTitles',
   INVALID_VIDEO_TYPE: 'invalidVideoType', INVALID_VIDEO_SIZE: 'invalidVideoSize',
-  INVALID_DESTINATION: 'invalidDestination',
+  INVALID_DESTINATION: 'invalidDestination', INVALID_ICAL_URL: 'invalidIcalUrl',
   UNAUTHENTICATED: 'sessionExpired', SESSION_USER_NOT_FOUND: 'sessionExpired',
   FORBIDDEN: 'forbidden', ROLE_NOT_ALLOWED: 'forbidden', PROPERTY_NOT_FOUND: 'notFound',
   INVALID_COVER_SELECTION: 'invalidCoverSelection', INVALID_COVER_PHOTO: 'invalidCoverPhoto',

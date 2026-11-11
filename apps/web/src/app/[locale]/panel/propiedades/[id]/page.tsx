@@ -10,14 +10,18 @@ import ResourceEditor from '@/components/panel/ResourceEditor';
 // Descontinuado en UI, vivo en BD: restaurar import y render para reactivar.
 // import SectionBackgroundEditor from '@/components/panel/SectionBackgroundEditor';
 import AvailabilityEditor from '@/components/panel/AvailabilityEditor';
+import IcalFeedsEditor from '@/components/panel/IcalFeedsEditor';
+import { listIcalFeeds } from '@/lib/ical-feeds';
 import SectionSlider from '@/components/SectionSlider';
 import PropertySectionsEditor from '@/components/panel/PropertySectionsEditor';
 import { sectionsForProperty } from '@/lib/property-sections';
 import { sectionModules } from '@/lib/section-modules';
 
-export default async function EditPropertyPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
+export default async function EditPropertyPage({ params, searchParams }: { params: Promise<{ locale: string; id: string }>; searchParams?: Promise<{ ical?: string }> }) {
   const { locale, id } = await params, { manager, property } = await panelProperty(id, locale);
+  const icalNotice = (await searchParams)?.ical; // T-4739: resultado del calendario conectado en el alta
   const resources = await propertyResources(id, manager);
+  const feeds = await listIcalFeeds(id, manager); // T-4739: calendarios externos (iCal)
   const sections = await sectionsForProperty(id, manager);
   const modules = sectionModules(property, sections, resources.media);
   const t = await getTranslations({ locale, namespace: 'panel' });
@@ -31,6 +35,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ l
     <RentalTypeResources>
     <ResourceEditor propertyId={id} resource="rates" items={resources.rates} />
     <AvailabilityEditor propertyId={id} bookings={resources.bookings} />
+    <IcalFeedsEditor propertyId={id} feeds={feeds} notice={icalNotice} />
     </RentalTypeResources>
     </PropertyRentalType>
     {resources.media.length > 0 && <SectionSlider slides={resources.media} />}

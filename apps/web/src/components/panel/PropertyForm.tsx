@@ -8,11 +8,15 @@ import MapsLocationInput from './MapsLocationInput';
 import TranslationDraftButton from './TranslationDraftButton';
 import { usePropertyRentalType } from './PropertyRentalType';
 import { DESTINATION_STATES, citiesByState, isDestinationValue, type DestinationState } from '@/lib/destinations';
+import { airbnbListingId, provisionalTitle } from '@/lib/ical-link';
 
 export default function PropertyForm({ property }: { property?: PanelProperty }) {
   const t = useTranslations('panel'), router = useRouter();
   const rental = usePropertyRentalType();
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
+  const ical = useTranslations('icalFeeds');
+  const [icalUrl, setIcalUrl] = useState(''), [icalSource, setIcalSource] = useState('airbnb'); // T-4739: solo en el alta
+  const listingId = airbnbListingId(icalUrl);
   const validDestination = property && isDestinationValue(property);
   const [state, setState] = useState<DestinationState | ''>(validDestination ? property.state as DestinationState : '');
   const [destinationCity, setDestinationCity] = useState(validDestination ? property.destinationCity! : '');
@@ -31,9 +35,18 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
     body.contactEmail = form.get('contactEmail') || null;
     body.whatsapp = form.get('whatsapp') || null;
     body.cleaningWhatsapp = form.get('cleaningWhatsapp') || null;
+    if (!property && icalUrl.trim()) { body.icalUrl = icalUrl.trim(); body.icalSource = icalSource; }
     try {
       const result = await panelRequest(property ? `/api/properties/${property.id}` : '/api/properties', property ? 'PATCH' : 'POST', body);
-      if (!property) router.push(`/panel/propiedades/${result.id}`);
+      if (!property) {
+        // Con calendario: sincronizar ya y abrir la ficha con el resultado (la ficha permite reintentar).
+        let ical = '';
+        if (result.icalRequested) {
+          if (!result.icalFeedId) ical = 'feedFailed';
+          else { const sync = await fetch('/api/ical/sync', { method: 'POST' }).catch(() => null); ical = sync?.ok ? 'synced' : 'syncFailed'; }
+        }
+        router.push(`/panel/propiedades/${result.id}${ical ? `?ical=${ical}` : ''}`);
+      }
       else { setMessage('saved'); router.refresh(); }
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
@@ -46,6 +59,24 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
           </select>
         </label>
       <p className="text-sm text-gray-600 dark:text-gray-300">{t('approvalHint')}</p>
+      {!property && rental?.rentalType !== 'anual' && <fieldset className="space-y-3 rounded-lg border p-4 dark:border-gray-700">
+        <legend className="px-1 font-semibold">{ical('newTitle')}</legend>
+        <p className="text-sm text-gray-600 dark:text-gray-300">{ical('newIntro')}</p>
+        <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
+          <label className="block text-sm">{ical('url')}<input type="url" name="icalUrl" value={icalUrl} onChange={event => setIcalUrl(event.target.value)}
+            placeholder="https://www.airbnb.mx/calendar/ical/….ics" className={inputClass} /></label>
+          <label className="block text-sm">{ical('source')}<select value={icalSource} onChange={event => setIcalSource(event.target.value)} className={inputClass}>
+            {(['airbnb', 'booking', 'vrbo', 'google', 'other'] as const).map(option => <option key={option} value={option}>{ical(`sources.${option}`)}</option>)}</select></label>
+        </div>
+        {listingId && <div className="space-y-2 text-sm"><p>{ical('noNameInFeed', { id: listingId })}</p>
+          <button type="button" className="min-h-11 rounded-lg border border-green-700 px-3 text-green-800 dark:border-green-400 dark:text-green-300" onClick={event => {
+            const form = event.currentTarget.form;
+            for (const name of ['titleEs', 'titleEn', 'titleFr']) {
+              const input = form?.elements.namedItem(name);
+              if (input instanceof HTMLInputElement && !input.value.trim()) input.value = provisionalTitle(listingId);
+            }
+          }}>{ical('useProvisionalTitle', { title: provisionalTitle(listingId) })}</button></div>}
+      </fieldset>}
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block text-sm">{t('fields.contactName')}
           <input key={`contactName:${property?.contactName ?? ''}`} name="contactName" maxLength={100} defaultValue={property?.contactName ?? ''} className={inputClass} />

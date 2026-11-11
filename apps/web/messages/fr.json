@@ -171,7 +171,8 @@
       "bathrooms": "Salles de bains",
       "baseWeekdayPrice": "Prix en semaine (MXN)",
       "baseWeekendPrice": "Prix le week-end (MXN)"
-    }
+    },
+    "invalidIcalUrl": "Lien iCal invalide : utilisez un lien https public d’Airbnb, Booking, VRBO ou Google (.ics)."
   },
   "nav": {
     "menu": "Menu",
@@ -747,5 +748,44 @@
       "pending": "En cours"
     },
     "rateLimited": "Limite de 3 envois manuels en 24 heures atteinte. Réessayez plus tard."
+  },
+  "icalFeeds": {
+    "title": "Calendriers externes (iCal)",
+    "intro": "Collez le lien d’export iCal (.ics) du calendrier de ce logement sur Airbnb, Booking.com, VRBO ou Google. À la synchronisation, ses dates occupées sont bloquées ici. La synchronisation ne fait que lire : rien ne change sur l’autre plateforme.",
+    "empty": "Aucun calendrier connecté pour le moment.",
+    "url": "Lien iCal (.ics)",
+    "source": "Plateforme",
+    "urlHelp": "Liens https uniquement (webcal:// est aussi accepté). Sur Airbnb : Calendrier → Disponibilités → Connecter des calendriers → Exporter le calendrier. Le lien est privé : ne le partagez pas.",
+    "add": "Ajouter un calendrier",
+    "added": "Calendrier ajouté. Cliquez sur « Synchroniser » pour importer ses dates.",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "saved": "Calendrier mis à jour.",
+    "remove": "Retirer",
+    "confirmRemove": "Retirer ce calendrier ? Ses {count} dates importées seront supprimées de ce panneau (l’autre plateforme n’est pas modifiée).",
+    "removed": "Calendrier retiré ({count} dates importées supprimées).",
+    "imported": "{count, plural, =0 {Aucune date importée pour le moment} one {# date importée} other {# dates importées}}",
+    "syncNow": "Synchroniser",
+    "synced": "Synchronisé : {count} dates en cours.",
+    "syncedPartial": "Synchronisé, mais {count} calendrier(s) illisible(s). Vérifiez le lien.",
+    "syncFailed": "Aucun calendrier n’a pu être lu. Vérifiez que le lien est correct et public.",
+    "conflict": "Ce lien est déjà ajouté, ou le calendrier a des réservations avec détail ou parrainage saisis et ne peut pas être retiré (modifiez plutôt le lien).",
+    "sources": {
+      "airbnb": "Airbnb",
+      "booking": "Booking.com",
+      "vrbo": "VRBO",
+      "google": "Google Calendar",
+      "other": "Autre"
+    },
+    "newTitle": "Calendrier externe (facultatif)",
+    "newIntro": "Collez le lien iCal (.ics) de ce logement sur Airbnb ou une autre plateforme : à la création, il est connecté et ses dates occupées sont synchronisées. Le calendrier ne contient ni nom, ni photos, ni description : saisissez-les dans ce formulaire.",
+    "noNameInFeed": "Le calendrier Airbnb n’inclut pas le nom de l’annonce (seulement son numéro : {id}).",
+    "useProvisionalTitle": "Utiliser le titre provisoire « {title} »",
+    "created": {
+      "synced": "Calendrier connecté et synchronisé à la création du logement.",
+      "syncFailed": "Le logement et son calendrier sont enregistrés, mais la synchronisation n’a pas pu lire le lien. Vérifiez-le et cliquez sur « Synchroniser ».",
+      "feedFailed": "Le logement a été créé, mais le calendrier n’a pas pu être enregistré. Ajoutez-le ci-dessous."
+    }
   }
 }

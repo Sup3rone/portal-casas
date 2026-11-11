@@ -114,7 +114,7 @@ async function main() {
 
   // Envío de la variante cliente con errores/red/cuota: conserva campos hasta éxito confirmado.
   let index = 0; const states = [], events = [];
-  mockModule('react', { ...React, useMemo: fn => fn(), useState: initial => { const key = index++; if (!(key in states)) states[key] = initial; return [states[key], value => { states[key] = typeof value === 'function' ? value(states[key]) : value; }]; } });
+  mockModule('react', { ...React, useContext: () => undefined, useMemo: fn => fn(), useState: initial => { const key = index++; if (!(key in states)) states[key] = initial; return [states[key], value => { states[key] = typeof value === 'function' ? value(states[key]) : value; }]; } });
   mockModule('next-intl', { useTranslations: () => key => key });
   mockModule('./ReservationDatesProvider', { useReservationDates: () => ({ dates: { startDate: '', endDate: '' }, setDates() {} }) });
   mockModule('@vercel/analytics', { track: (...args) => events.push(args) });

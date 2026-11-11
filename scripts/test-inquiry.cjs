@@ -74,7 +74,7 @@ async function main() {
       React.createElement(Provider, null, React.createElement(Form, { propertyId: 'pa', locale, maxGuests: 4, pricing: { base: { weekday: 100, weekend: 200 }, seasons: [], booked: [] } }))));
     for (const key of ['nameLength', 'emailFormat', 'startRequired', 'endRequired', 'messageRequired']) assert.ok(!html.includes(messages.details.form.validation[key]));
     for (const field of ['name', 'email', 'startDate', 'endDate', 'body']) assert.ok(!html.includes(`id="${field}-error"`));
-    assert.ok(/type="submit"[^>]*disabled/.test(html)); assert.ok(html.includes('max="4"'));
+    assert.ok(!/type="submit"[^>]*disabled=""/.test(html), 'T-4770: botón activo'); assert.ok(!html.includes('id="inquiry-incomplete"')); assert.ok(messages.details.form.incompleto); assert.ok(html.includes('max="4"'));
     assert.ok(html.includes(`name="lang" value="${locale}"`));
     const wrap = child => React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } }, child);
     assert.ok(renderToStaticMarkup(wrap(React.createElement(Footer))).includes(`href="/${locale}/casas"`));

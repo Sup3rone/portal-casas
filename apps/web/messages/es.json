@@ -264,7 +264,10 @@
       "exito": "Mensaje enviado. Te contactaremos pronto.",
       "fechasOcupadas": "Algunas fechas están ocupadas — revisa el calendario.",
       "fechasInvalidas": "La fecha de salida debe ser posterior a la llegada.",
-      "error": "Error al enviar. Intenta de nuevo."
+      "error": "Error al enviar. Intenta de nuevo.",
+      "incompleto": "Faltan datos para enviar tu consulta. Revisa los campos marcados en rojo.",
+      "exitoReserva": "Su petición ha sido recibida. Al confirmarse su reserva, recibirá un correo de confirmación.",
+      "otraConsulta": "Enviar otra consulta"
     },
     "gallery": {
       "foto": "Foto {number}",

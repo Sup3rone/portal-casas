@@ -249,7 +249,8 @@ html:has(.property-detail dialog[open]) { overflow: hidden; }
   --glass-bg: rgba(255, 255, 255, 0.35);
   --glass-text: #1a1a1a;
   --glass-blur: 10px;
-  --glass-error: var(--color-red-100);
+  /* T-4770: el vidrio del detalle es claro (texto #1a1a1a); red-100 no se leía. red-700 ≈ 5.2:1 sobre el papel (AA). */
+  --glass-error: var(--color-red-700);
   --glass-color-scheme: dark;
 }
 /* Remates del detalle: mosaico original, vidrio y fondos estáticos. */

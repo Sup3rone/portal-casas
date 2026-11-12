@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type ReactNode, type HTMLAttributes } from
 import Image from 'next/image';
 import DeferredDetailImage from './DeferredDetailImage';
 import { useTranslations } from 'next-intl';
+import { unoptimizedFor } from '@/lib/image-src';
 import { sceneGeometry, sceneProgress, type EditorialSlide } from '@/lib/editorial-presentation';
 import styles from './EditorialPresentation.module.css';
 
@@ -229,7 +230,7 @@ export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide
   function move(delta: number) { setIndex(value => (value + delta + count) % count); }
 
   return <section className={styles.screen} data-editorial-slide={flow ? slide.section : undefined} aria-label={title}>
-    {PUBLIC_PHOTO_BACKGROUNDS && !flow && slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" /></div>}
+    {PUBLIC_PHOTO_BACKGROUNDS && !flow && slide.hero && <div className={styles.backdrop} aria-hidden="true"><Image src={slide.hero.url} alt="" fill unoptimized={unoptimizedFor(slide.hero.url)} sizes="100vw" className="object-cover" /></div>}
     <div className={styles.floating} style={!count || !slide.description.trim() ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}>
     {count > 0 && <Reveal className={`detail-lateral-reveal detail-editorial-image ${reverse ? 'detail-from-right' : 'detail-from-left'}`}><div className={`${styles.images} glass-panel rounded-2xl p-4 shadow-xl ring-1 ring-white/40 dark:ring-gray-700/50 text-gray-900 dark:text-gray-100`} role="region" aria-label={t('presentation.slideshow', { section: title })}
       ref={carousel} tabIndex={count > 1 ? 0 : undefined} data-editorial-carousel
@@ -246,7 +247,7 @@ export function EditorialScreen({ slide, flow = false }: { slide: EditorialSlide
         {slide.photos.map((photo, number) => {
           return <div key={photo.id} data-carousel-photo={number} className={styles.photo}
             style={{ opacity: number === active ? 1 : 0 }} aria-hidden={number !== active}>
-            <DeferredDetailImage key={photo.url} src={photo.url} alt={gallery('foto', { number: number + 1 })} fill unoptimized sizes="(max-width: 1023px) 45vw, 25vw" className="object-cover" />
+            <DeferredDetailImage key={photo.url} src={photo.url} alt={gallery('foto', { number: number + 1 })} fill unoptimized={unoptimizedFor(photo.url)} sizes="(max-width: 1023px) 45vw, 25vw" className="object-cover" />
           </div>;
         })}
       </div>
@@ -314,7 +315,7 @@ function EditorialFlow({ slides }: { slides: EditorialSlide[] }) {
   return <div ref={root} className={styles.flow} data-editorial-flow>
     {PUBLIC_PHOTO_BACKGROUNDS && <div className={styles.flowBackdrop} aria-hidden="true"><div className={styles.flowBackgroundStage}>
       {slides.map((slide,index)=><div key={slide.section} data-flow-background={slide.section} className={styles.backdrop} style={{ opacity: index === 0 ? 1 : 0 }}>
-        {slide.hero && <DeferredDetailImage key={slide.hero.url} src={slide.hero.url} alt="" fill unoptimized sizes="100vw" className="object-cover" />}
+        {slide.hero && <DeferredDetailImage key={slide.hero.url} src={slide.hero.url} alt="" fill unoptimized={unoptimizedFor(slide.hero.url)} sizes="100vw" className="object-cover" />}
       </div>)}
     </div></div>}
     {slides.map(slide=><EditorialScreen key={slide.section} slide={slide} flow />)}

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import Reveal from './Reveal';
+import { unoptimizedFor } from '@/lib/image-src';
 import styles from './PropertyGallery.module.css';
 
 type Slide = { url: string; type: 'PHOTO' | 'VIDEO' };
@@ -48,7 +48,8 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
 
   return (
     <>
-      <Reveal className={styles.gallery}>
+      {/* T-4829: sin Reveal — la foto principal es el LCP del detalle; entra con CSS (globals.css .enter-on-paint). */}
+      <div className={`${styles.gallery} enter-on-paint`}>
         <button type="button" aria-haspopup="dialog"
           aria-label={t(slides[selected].type === 'VIDEO' ? 'abrirVideo' : 'abrirFoto', { number: selected + 1 })}
           onClick={event => { openerRef.current = event.currentTarget; setIndex(selected); }}
@@ -57,7 +58,7 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
             <><video src={slides[selected].url} preload="metadata" muted playsInline aria-hidden="true" className={styles.photo} />
               <span aria-hidden="true" className={styles.play}>▶</span></>
           ) : (
-            <Image src={slides[selected].url} alt={t('foto', { number: selected + 1 })} fill unoptimized
+            <Image src={slides[selected].url} alt={t('foto', { number: selected + 1 })} fill unoptimized={unoptimizedFor(slides[selected].url)}
               loading="eager" fetchPriority={selected === 0 ? 'high' : 'auto'}
               sizes="(max-width: 1024px) 100vw, 1024px" className={styles.photo} />
           )}
@@ -72,7 +73,7 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
                   <><video src={slide.url} preload="metadata" muted playsInline aria-hidden="true" className={styles.photo} />
                     <span aria-hidden="true" className={styles.play}>▶</span></>
                 ) : (
-                  <Image src={slide.url} alt={t('foto', { number: i + 1 })} fill unoptimized loading="lazy"
+                  <Image src={slide.url} alt={t('foto', { number: i + 1 })} fill unoptimized={unoptimizedFor(slide.url)} loading="lazy"
                     sizes="(max-width: 1024px) 33vw, 336px" className={styles.photo} />
                 )}
               </button>
@@ -85,7 +86,7 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
               onClick={() => stripRef.current?.scrollBy({ left: stripRef.current.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })}><svg aria-hidden="true" width="36" height="28" viewBox="0 0 32 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12h24m-8-8 8 8-8 8" /></svg></button>
           </div>}
         </>}
-      </Reveal>
+      </div>
 
       <dialog ref={dialogRef} aria-label={t('lightbox')} aria-modal="true"
         onCancel={event => { event.preventDefault(); close(); }}
@@ -116,7 +117,7 @@ export default function PropertyGallery({ slides: allSlides, fullCollection = fa
             {current.type === 'VIDEO' ? (
               <video key={current.url} src={current.url} controls playsInline aria-label={t('abrirVideo', { number: index! + 1 })} className="max-h-full max-w-full" />
             ) : (
-              <Image key={current.url} src={current.url} alt={t('foto', { number: index! + 1 })} width={1600} height={1200} unoptimized sizes="100vw" className="h-auto max-h-full w-auto max-w-full object-contain" />
+              <Image key={current.url} src={current.url} alt={t('foto', { number: index! + 1 })} width={1600} height={1200} unoptimized={unoptimizedFor(current.url)} sizes="100vw" className="h-auto max-h-full w-auto max-w-full object-contain" />
             )}
           </div>
           {slides.length > 1 && <div className="flex shrink-0 justify-between gap-4 px-4 py-3">

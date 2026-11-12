@@ -8,6 +8,13 @@ const { DatabaseSync } = require('node:sqlite');
 const root = path.resolve(__dirname, '..');
 const req = createRequire(path.join(root, 'apps/web/package.json'));
 const ts = req('typescript');
+// T-4829: fuera del build, next/image usa su configuración por defecto (sin hosts remotos). Se replica aquí la
+// de next.config.ts para que el SSR de los tests optimice las fotos de Blob como en producción
+// (test-image-src.cjs comprueba que next.config.ts siga declarando lo mismo).
+Object.assign(req('next/dist/shared/lib/image-config').imageConfigDefault, {
+  remotePatterns: [{ protocol: 'https', hostname: '*.public.blob.vercel-storage.com', pathname: '/**', search: '' }],
+  qualities: [75],
+});
 const { drizzle } = req('drizzle-orm/neon-http');
 const { getTableConfig } = req('drizzle-orm/pg-core');
 const memory = new DatabaseSync(':memory:');

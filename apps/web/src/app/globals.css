@@ -104,6 +104,12 @@ html { scroll-behavior: smooth; }
 }
 .reveal.reveal-visible { opacity: 1; transform: none; }
 
+/* T-4829: hero de la home — misma entrada que Reveal (sube 48px y aparece en .7s), pero en CSS: corre desde
+   el primer pintado, sin JavaScript, y no retrasa el LCP. Con reduced-motion aparece sin animación. */
+@keyframes home-hero-enter { from { opacity: 0; transform: translateY(48px); } }
+.home-hero-enter { animation: home-hero-enter .7s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .home-hero-enter { animation: none; } }
+
 /* Una sola superficie de video en home, con fallback estático y cierre al tema. */
 .home-video-scene { background-color: var(--color-gray-900); }
 .home-about-video { background: linear-gradient(to bottom, transparent, rgb(0 0 0 / 18%) 35%, rgb(0 0 0 / 28%)); }

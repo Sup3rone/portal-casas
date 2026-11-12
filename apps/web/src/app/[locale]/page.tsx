@@ -72,7 +72,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <HomeHeroParallax />
 
         {/* Contenido centrado */}
-        <Reveal className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+        {/* T-4829: entrada solo con CSS (sin esperar a la hidratación de Reveal): el h1 es el LCP de la home. */}
+        <div className="home-hero-enter relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
           <h1 className="mb-4 text-4xl font-light tracking-[0.3em] text-white dark:text-gray-100 md:text-6xl">
             {t('bienvenida')}
           </h1>
@@ -82,7 +83,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
           {/* Widget de búsqueda flotante */}
           {HOME_SEARCH_IN_HERO && <PropertySearchForm />}
-        </Reveal>
+        </div>
       </section>
       {HOME_HERO_MEDIA_ENABLED && <div className="home-video-closing pointer-events-none absolute inset-x-0 bottom-0 h-24" aria-hidden="true" />}
       </div>

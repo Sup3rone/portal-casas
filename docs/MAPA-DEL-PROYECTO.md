@@ -142,7 +142,7 @@ sequenceDiagram
 - `MessageForm` no es un checkout de pago. Crear Message no crea automáticamente Booking.
 - Anual: formulario de contacto sin fechas/huéspedes; el servidor verifica `rentalType`.
 - Nocturna/ambas: `AvailabilityCalendar` y MessageForm comparten fechas mediante `ReservationDatesProvider`.
-- `/api/messages` actual escribe Message: no asumir correo por cada consulta. El correo de confirmación vive en `/api/bookings/create`.
+- `/api/messages` actual escribe Message: no asumir correo por cada consulta. El correo de confirmación vive en `/api/bookings/create` → `lib/booking-emails.ts` (T-4772): al huésped (casa, dirección, llegada/salida, noches, renta/aseo/impuestos/total del desglose y folio) y copia al dueño de la casa con el contacto del huésped. Fechas civiles en UTC (antes, en hora MX salían un día antes) y datos escapados. Si un envío falla, la reserva sigue.
 - La cotización pública se calcula en `MessageForm.tsx` con precios base/temporadas; `Inquiries.tsx` tiene una estimación más limitada y omite total si no puede calcularlo de forma fiable. `reservationDates.ts` valida fechas y rangos, no tarifas.
 - `Inquiries` y `MensajesList` abren MessageModal. Sus ajustes temporales de fechas no significan editar la consulta original.
 - Analytics registra `query_submitted` tras éxito y `whatsapp_clicked`; no envía nombre/email/teléfono como propiedades del evento.
@@ -462,7 +462,7 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | /[locale] | [apps/web/src/app/[locale]/layout.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/layout.tsx) | HTML, idioma, CSS, Analytics, sesión, contactos, Navbar/Footer y destinos. |
 | /[locale] | [apps/web/src/app/[locale]/loading.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/loading.tsx) | Fallback PageLoading home. |
 | /[locale]/login | [apps/web/src/app/[locale]/login/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/login/page.tsx) | Página de acceso. |
-| /[locale]/mi-cuenta | [apps/web/src/app/[locale]/mi-cuenta/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/mi-cuenta/page.tsx) | Área autenticada del cliente. Si su cuenta está ligada a un referidor, muestra «Mis códigos de referido» (T-4767). |
+| /[locale]/mi-cuenta | [apps/web/src/app/[locale]/mi-cuenta/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/mi-cuenta/page.tsx) | Área autenticada del cliente. Si su cuenta está ligada a un referidor, muestra «Mis códigos de referido» (T-4767). Botón «Cambiar contraseña» (`components/ChangePasswordForm.tsx`, T-4772). |
 | /[locale]/olvide-password | [apps/web/src/app/[locale]/olvide-password/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/olvide-password/page.tsx) | Página de solicitud de recuperación. |
 | /[locale] | [apps/web/src/app/[locale]/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/page.tsx) | Home: contenido global, hero y destacadas. |
 | /[locale]/panel/calendario | [apps/web/src/app/[locale]/panel/calendario/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/panel/calendario/page.tsx) | Calendario del gestor con ámbito de propiedad. |
@@ -478,7 +478,7 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | /[locale]/reset-password | [apps/web/src/app/[locale]/reset-password/page.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/reset-password/page.tsx) | Página de nueva contraseña con token. |
 | /[locale]/admin/tarifas | [apps/web/src/app/[locale]/admin/tarifas/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/admin/tarifas/actions.ts) | Alta/eliminación de tarifas con ámbito de propiedad. |
 | /[locale]/login | [apps/web/src/app/[locale]/login/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/login/actions.ts) | Acción de credenciales y limitador de login. |
-| /[locale]/mi-cuenta | [apps/web/src/app/[locale]/mi-cuenta/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/mi-cuenta/actions.ts) | Cerrar sesión. |
+| /[locale]/mi-cuenta | [apps/web/src/app/[locale]/mi-cuenta/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/mi-cuenta/actions.ts) | Cerrar sesión y `changePasswordAction` (T-4772: contraseña actual + nueva ×2, mínimo 8, límite 5/15 min por IP, aviso por correo). |
 | /[locale]/olvide-password | [apps/web/src/app/[locale]/olvide-password/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/olvide-password/actions.ts) | Token/correo de recuperación y limitador. |
 | /[locale]/registro | [apps/web/src/app/[locale]/registro/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/registro/actions.ts) | Alta con validación/hash y limitador. |
 | /[locale]/reset-password | [apps/web/src/app/[locale]/reset-password/actions.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/[locale]/reset-password/actions.ts) | Valida token y cambia hash de contraseña. |

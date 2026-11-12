@@ -4,6 +4,7 @@ import { db, users, passwordResetTokens } from '@portal/db';
 import { eq, and, gt, isNull } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
+import { sendPasswordChangedEmail } from '@/lib/account-emails';
 
 export async function resetPassword(formData: FormData) {
   const locale = String(formData.get('locale') || 'es');
@@ -38,6 +39,14 @@ export async function resetPassword(formData: FormData) {
   await db.update(passwordResetTokens)
     .set({ usedAt: new Date() })
     .where(eq(passwordResetTokens.id, reset.id));
+
+  // T-4772: aviso «tu contraseña cambió» (no rompe el restablecimiento si falla).
+  try {
+    const [user] = await db.select({ email: users.email, name: users.name }).from(users).where(eq(users.id, reset.userId)).limit(1);
+    if (user) await sendPasswordChangedEmail(user, 'recovery');
+  } catch (error) {
+    console.error('No se pudo enviar el aviso de cambio de contraseña (restablecimiento OK):', error);
+  }
 
   redirect(`/${locale}/login?reset=1`);
 }

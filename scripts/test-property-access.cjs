@@ -43,7 +43,8 @@ function load(file, source) {
     if (name === '@/lib/auth' || (name === './auth' && file.endsWith('property-access.ts'))) {
       return { auth: async () => session };
     }
-    if (name === '@/lib/mailer') return { sendEmail: async () => {} };
+    // T-4772: un test puede capturar correos con globalThis.__testMailer (los módulos cargados al inicio quedan en caché).
+    if (name === '@/lib/mailer') return { sendEmail: async message => globalThis.__testMailer?.(message) };
     if (name === 'next/cache') return { revalidatePath: (...args) => revalidated.push(args) };
     if (name === 'next/navigation') return {
       redirect: url => { throw new Error('redirect: ' + url); },

@@ -8,6 +8,7 @@ import { getLocale } from "next-intl/server";
 import { privateMetadata } from '@/lib/seo';
 import { referrerSummary } from '@/lib/referrals';
 import ReferrerCodes from '@/components/ReferrerCodes';
+import ChangePasswordForm from '@/components/ChangePasswordForm';
 
 export const metadata = privateMetadata;
 
@@ -156,6 +157,8 @@ export default async function MyAccountPage() {
           </section>
         </div>
         {referrer && <ReferrerCodes summary={referrer} locale={locale} />}
+        {/* T-4772: cambiar la contraseña desde la cuenta (pide la actual; avisa por correo). */}
+        <ChangePasswordForm />
       </div>
     </div>
   );

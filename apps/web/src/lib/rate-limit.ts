@@ -1,9 +1,10 @@
-type Flow = 'login' | 'register' | 'recovery' | 'inquiry';
+type Flow = 'login' | 'register' | 'recovery' | 'inquiry' | 'password';
 const policies: Record<Flow, { limit: number; window: number }> = {
   login: { limit: 10, window: 15 * 60_000 },
   register: { limit: 5, window: 60 * 60_000 },
   recovery: { limit: 3, window: 60 * 60_000 },
   inquiry: { limit: 5, window: 15 * 60_000 },
+  password: { limit: 5, window: 15 * 60_000 }, // T-4772: cambiar contraseña en Mi cuenta
 };
 const entries = new Map<string, { count: number; expires: number }>();
 let lastCleanup = 0;

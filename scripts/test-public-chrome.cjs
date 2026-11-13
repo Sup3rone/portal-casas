@@ -62,3 +62,9 @@ const paperBody = globals.nodes.find(node => node.type === 'rule' && node.select
 assert.ok(paperBody, 'El body de las páginas públicas también es papel');
 assert.ok(paperBody.nodes.some(decl => decl.prop === 'background-color' && decl.value === 'var(--paper-bg)'));
 console.log('OK: body papel en páginas públicas (sin franja antes del footer).');
+// T-4835: sin línea antes del footer en el detalle: el cierre de reserva no pinta beige liso sobre el grano;
+// solo la foto de fondo (si hay) se desvanece con una máscara.
+assert.ok(!globals.toString().includes('#reservar::after'), 'Sin degradado liso al final de la reserva');
+const reservaFade = globals.nodes.find(node => node.type === 'rule' && node.selector === '.detail-fullpage #reservar [data-section-background="reservation"]');
+assert.ok(reservaFade && reservaFade.nodes.some(decl => decl.prop === 'mask-image' && decl.value.includes('transparent')), 'La foto de reserva se desvanece');
+console.log('OK: detalle sin franja lisa antes del footer; la foto de reserva se desvanece con máscara.');

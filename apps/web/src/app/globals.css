@@ -499,7 +499,14 @@ html.detail-free-scroll .detail-fullpage #reservar { scroll-snap-align: none; }
 /* Cierre propio de reserva: respiro dentro de su fondo, antes del footer normal. */
 .detail-fullpage #reservar { background-color: var(--background); padding-bottom: clamp(4rem, 8vh, 6rem); }
 .detail-fullpage #reservar [data-section-background="reservation"] img { object-fit: cover; object-position: center; }
-.detail-fullpage #reservar::after { content: ''; position: absolute; inset: auto 0 0; height: clamp(3rem, 6vh, 5rem); background: linear-gradient(to bottom, transparent, var(--background)); pointer-events: none; }
+/* T-4835: antes era un ::after con degradado a var(--background) liso, siempre. Sin foto de reserva (hoy, con
+ * PUBLIC_PHOTO_BACKGROUNDS apagado) solo pintaba una franja lisa sobre el papel con grano y su borde se veía como
+ * una línea antes del footer, en todas las casas. Ahora es la foto la que se desvanece (máscara) y deja ver el
+ * papel con su grano; sin foto no se pinta nada. */
+.detail-fullpage #reservar [data-section-background="reservation"] {
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - clamp(3rem, 6vh, 5rem)), transparent);
+          mask-image: linear-gradient(to bottom, black calc(100% - clamp(3rem, 6vh, 5rem)), transparent);
+}
 
 .detail-fullpage [data-section-active] { animation: none; }
 .detail-fullpage [data-flow-background] { opacity: 1 !important; transition: none; }

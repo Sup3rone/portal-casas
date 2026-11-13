@@ -242,7 +242,9 @@ async function main() {
     assert.match(detailCss,/\.detail-fullpage #reservar \{[^}]*height: auto !important;[^}]*min-height: 0 !important;[^}]*scroll-snap-align: start;/);
     assert.match(detailCss,/scroll-margin-top: 0; padding-top: max\(24px, calc\(var\(--detail-nav-height, 88px\) \+ 12px\)\);/);
     assert.match(detailCss,/background-color: var\(--background\); padding-bottom: clamp\(4rem, 8vh, 6rem\);/);
-    assert.match(detailCss,/background: linear-gradient\(to bottom, transparent, var\(--background\)\); pointer-events: none;/);
+    // T-4835: el cierre de reserva desvanece la foto (máscara) en vez de pintar beige liso sobre el grano.
+    assert.match(detailCss,/#reservar \[data-section-background="reservation"\] \{[^}]*mask-image: linear-gradient\(to bottom, black calc\(100% - clamp\(3rem, 6vh, 5rem\)\), transparent\);/);
+    assert.ok(!detailCss.includes('#reservar::after'),'Sin franja lisa antes del footer');
     assert.match(detailCss,/detail-free-scroll \{ scroll-snap-type: none;/);
     assert.match(detailCss,/html:has\(\.detail-fullpage\[data-fullpage-enabled="true"\]\) \{ scroll-snap-type: y mandatory;/);
     assert.match(detailCss,/html:has\(\.detail-fullpage\[data-fullpage-enabled="false"\]\) \{ scroll-snap-type: none;/);

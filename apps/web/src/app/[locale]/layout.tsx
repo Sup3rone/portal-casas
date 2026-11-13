@@ -6,6 +6,8 @@ import Footer from '@/components/Footer';
 import AuthProvider from '@/components/AuthProvider';
 import SiteAnalytics from '@/components/SiteAnalytics';
 import FooterContactsProvider from '@/components/FooterContactsProvider';
+import SiteIntro from '@/components/SiteIntro';
+import { SITE_INTRO_SKIP } from '@/lib/site-intro';
 import { readSiteContent } from '@/lib/site-content';
 import { readPublishedDestinations } from '@/lib/published-destinations';
 import type { Metadata } from 'next';
@@ -38,6 +40,9 @@ export default async function LocaleLayout({
             <script src="/theme-init.js" async fetchPriority="high" />
           </head>
           <body>
+            {/* T-4835: antes de pintar la animación de carga; si ya se vio en esta pestaña, no aparece. */}
+            <script dangerouslySetInnerHTML={{ __html: SITE_INTRO_SKIP }} />
+            <SiteIntro />
             <SiteAnalytics />
             <NextIntlClientProvider>
               <AuthProvider>

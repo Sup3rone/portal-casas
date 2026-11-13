@@ -56,3 +56,9 @@ const background='#'+channels.map(v=>Math.round((alpha*v+1-alpha)*255).toString(
 const heroRatio=1.05/(luminance(background)+.05);
 assert.ok(heroRatio>=4.5,'Wordmark blanco sobre el modelo conservador del scrim');
 console.log('Hero blanco bajo scrim (modelo 80/224px): '+heroRatio.toFixed(2)+':1; confirmar geometría real en QA humana.');
+// T-4829: sin franja clara entre la página pública y el footer (el mt-20 del footer muestra el body).
+const globals = postcss.parse(fs.readFileSync(path.resolve(__dirname, '../apps/web/src/app/globals.css'), 'utf8'));
+const paperBody = globals.nodes.find(node => node.type === 'rule' && node.selector === 'body:has(.public-paper)');
+assert.ok(paperBody, 'El body de las páginas públicas también es papel');
+assert.ok(paperBody.nodes.some(decl => decl.prop === 'background-color' && decl.value === 'var(--paper-bg)'));
+console.log('OK: body papel en páginas públicas (sin franja antes del footer).');

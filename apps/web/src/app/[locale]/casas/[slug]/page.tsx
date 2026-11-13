@@ -233,7 +233,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
       <SectionBackground url={null} name="gallery" className="detail-screen px-3 py-8 md:px-6">
         <div className="property-detail-hero" data-hero-video={property.sectionTitles?.heroVideoUrl ? 'true' : undefined}>
         {property.sectionTitles?.heroVideoUrl && <PropertyHeroVideo src={property.sectionTitles?.heroVideoUrl} poster={principal.find(item => item.type === 'PHOTO')?.url} />}
-        <Reveal className="relative mb-6 rounded-2xl p-6 pr-16 text-center">
+        {/* T-4829: entrada solo con CSS; título y galería están sin scroll y no deben esperar a la hidratación. */}
+        <div className="enter-on-paint relative mb-6 rounded-2xl p-6 pr-16 text-center">
           <PropertyShareButton title={title} lat={property.lat} lng={property.lng} address={property.address} city={destination} />
           <h1 className="break-words text-3xl font-bold tracking-[0.3em] text-white dark:text-gray-100 max-md:text-2xl max-md:tracking-[0.15em] md:text-5xl">
             {title.toUpperCase()}
@@ -242,7 +243,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ local
           <p className="mt-4 text-[0.65rem] tracking-[0.25em] text-white/80 dark:text-gray-200">
             {destination} · {property.maxGuests} {t('details.guests')} · {property.bedrooms} {t('details.bedrooms')} · {property.bathrooms} {t('details.bathrooms')}
           </p>
-        </Reveal>
+        </div>
         </div>
         <PropertyGallery slides={principal} />
       {/* ===== PEQUEÑA DESCRIPCIÓN ===== */}

@@ -13,6 +13,7 @@ import Image from 'next/image';
 import HomeFeaturedLink from '@/components/HomeFeaturedLink';
 import { pageMetadata } from '@/lib/seo';
 import { publicFrenchText } from '@/i18n/public-french-text';
+import { unoptimizedFor } from '@/lib/image-src';
 
 // Reversible: true devuelve el formulario compartido al hero.
 const HOME_SEARCH_IN_HERO = false;
@@ -72,7 +73,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <HomeHeroParallax />
 
         {/* Contenido centrado */}
-        <Reveal className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+        {/* T-4829: entrada solo con CSS (sin esperar a la hidratación de Reveal): el h1 es el LCP de la home. */}
+        <div className="enter-on-paint relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
           <h1 className="mb-4 text-4xl font-light tracking-[0.3em] text-white dark:text-gray-100 md:text-6xl">
             {t('bienvenida')}
           </h1>
@@ -82,7 +84,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
           {/* Widget de búsqueda flotante */}
           {HOME_SEARCH_IN_HERO && <PropertySearchForm />}
-        </Reveal>
+        </div>
       </section>
       {HOME_HERO_MEDIA_ENABLED && <div className="home-video-closing pointer-events-none absolute inset-x-0 bottom-0 h-24" aria-hidden="true" />}
       </div>
@@ -93,7 +95,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             const title = (locale === 'en' ? property.titleEn : locale === 'fr' ? property.titleFr : property.titleEs).trim() || property.titleEs;
             const description = locale === 'fr' ? publicFrenchText(property.descFr) : ((locale === 'en' ? property.descEn : property.descEs) || '').trim();
             return <HomeFeaturedLink aria-label={title + ' — ' + common('verMas')} key={property.id} href={`/casas/${property.slug}`} className="home-featured-image relative block aspect-[4/3] overflow-hidden rounded-2xl border border-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-700">
-              <Image src={photo.url} alt="" fill unoptimized loading="lazy" sizes="(max-width: 1023px) 100vw, 360px" className="home-featured-photo object-cover" />
+              <Image src={photo.url} alt="" fill unoptimized={unoptimizedFor(photo.url)} loading="lazy" sizes="(max-width: 1023px) 100vw, 360px" className="home-featured-photo object-cover" />
               <div aria-hidden="true" className="home-featured-veil absolute inset-0" />
               <div className="home-featured-content relative w-full p-6 md:p-8">
                 <h3 className="home-featured-title break-words font-serif leading-tight">{title}</h3>
@@ -110,7 +112,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {(about && content.about_image) && <div className="home-about-section relative">
       <Reveal as="section" delay={100} className="about-reveal relative z-10 mx-auto max-w-6xl px-4 py-16" >
         <div className="home-about-card rounded-2xl p-6 md:p-10">
-          <div className="home-about-photo relative aspect-[2/3] overflow-hidden rounded-xl"><Image src={content.about_image} alt={aboutTitle || social('aboutTitle')} fill unoptimized loading="lazy" sizes="(max-width: 767px) 100vw, 360px" className="object-cover" /></div>
+          <div className="home-about-photo relative aspect-[2/3] overflow-hidden rounded-xl"><Image src={content.about_image} alt={aboutTitle || social('aboutTitle')} fill unoptimized={unoptimizedFor(content.about_image)} loading="lazy" sizes="(max-width: 767px) 100vw, 360px" className="object-cover" /></div>
           <div className="min-w-0">
           {about && <><h2 className="mb-6 text-center text-2xl font-light tracking-widest">{aboutTitle || social('aboutTitle')}</h2>
             <p className="whitespace-pre-wrap break-words leading-relaxed">{about}</p></>}

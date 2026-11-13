@@ -4,6 +4,8 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { propertyLocation } from '@/lib/destinations';
+import Image from 'next/image';
+import { unoptimizedFor } from '@/lib/image-src';
 
 type DbProperty = {
   id: string;
@@ -39,12 +41,16 @@ export default function PropertyCard({ property, eager = false }: { property: Db
         <div className="overflow-hidden rounded-lg border border-white/30 dark:border-gray-700 bg-white/5 dark:bg-white/5">
           {photos.length > 0 ? (
             <div className={`aspect-[4/3] overflow-hidden grid gap-1 ${photos.length === 1 ? 'grid-cols-1 grid-rows-1' : photos.length === 2 ? 'grid-cols-2 grid-rows-1' : photos.length === 5 ? 'grid-cols-2 grid-rows-3' : 'grid-cols-2 grid-rows-2'}`}>
-              {photos.map((photo, index) => <img key={photo.url + index}
-                src={photo.url}
-                alt={title}
-                width={400} height={300} loading={eager ? 'eager' : 'lazy'} decoding="async"
-                className={`min-h-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 ${index === 0 && (photos.length === 3 || photos.length === 5) ? 'col-span-2' : ''}`}
-              />)}
+              {photos.map((photo, index) => {
+                // T-4829: next/image con srcset; las fotos de la rejilla 2×N piden la mitad del ancho de la tarjeta.
+                const wide = photos.length === 1 || (index === 0 && (photos.length === 3 || photos.length === 5));
+                return <div key={photo.url + index} className={`relative min-h-0 overflow-hidden ${wide && photos.length > 1 ? 'col-span-2' : ''}`}>
+                  <Image src={photo.url} alt={title} fill unoptimized={unoptimizedFor(photo.url)}
+                    loading={eager ? 'eager' : 'lazy'} fetchPriority={eager && index === 0 ? 'high' : 'auto'}
+                    sizes={wide ? '(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 400px' : '(max-width: 639px) 50vw, (max-width: 1023px) 25vw, 200px'}
+                    className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                </div>;
+              })}
             </div>
           ) : (
             <div className="aspect-[4/3] bg-white/10 dark:bg-white/10" />

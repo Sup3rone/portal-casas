@@ -1,5 +1,6 @@
 import { parseFeaturedSelection } from './featured-selection';
 import 'server-only';
+import { cache } from 'react';
 import { db, siteContent, properties, media } from '@portal/db';
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { requireAdmin, AccessError } from './property-access';
@@ -45,13 +46,14 @@ export function siteContentInput(input: unknown): SiteContentValues {
   }
   return values;
 }
-export async function readSiteContent(): Promise<SiteContentValues> {
+// T-4829: cache() de React — layout y página lo piden en la misma petición; una sola consulta.
+export const readSiteContent = cache(async (): Promise<SiteContentValues> => {
   const values = Object.fromEntries(siteContentKeys.map(key => [key, ''])) as SiteContentValues;
   for (const row of await db.select().from(siteContent)) {
     if (siteContentKeys.includes(row.key as typeof siteContentKeys[number])) values[row.key as keyof SiteContentValues] = row.value;
   }
   return values;
-}
+});
 export async function saveSiteContent(input: unknown) {
   const actor = await requireAdmin();
   const values = siteContentInput(input);

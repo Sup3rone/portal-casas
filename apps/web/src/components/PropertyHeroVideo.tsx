@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { unoptimizedFor } from '@/lib/image-src';
 
 export default function PropertyHeroVideo({ src, poster }: { src: string; poster?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -18,7 +19,7 @@ export default function PropertyHeroVideo({ src, poster }: { src: string; poster
     return () => { disposed = true; motion.removeEventListener('change', update); video.pause(); };
   }, [src]);
   return <div className="property-hero-media" aria-hidden="true">
-    {poster && <Image src={poster} alt="" fill unoptimized priority sizes="100vw" className="object-cover" />}
+    {poster && <Image src={poster} alt="" fill unoptimized={unoptimizedFor(poster)} preload sizes="100vw" className="object-cover" />}
     <video ref={ref} autoPlay loop muted playsInline preload="metadata" poster={poster}
       onPlaying={event => event.currentTarget.setAttribute('data-playing', '')}
       onError={event => event.currentTarget.removeAttribute('data-playing')}>

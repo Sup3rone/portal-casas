@@ -27,7 +27,8 @@ async function main(){
   for(const locale of ['es','en','fr']){
     const html=await renderHome(locale);assert.ok(html.includes(content['about_'+locale]));
     assert.ok(html.includes(content['about_title_'+locale]));
-    assert.ok(html.includes(content.about_image));
+    // T-4829: la foto de Blob pasa por /_next/image (URL codificada en el srcset).
+    assert.ok(html.includes('/_next/image?url=' + encodeURIComponent(content.about_image)));
     assert.ok(html.includes('target="_blank"'));assert.ok(html.includes('rel="noopener noreferrer"'));assert.ok(html.includes('--reveal-delay:100ms'));
     const messages=require('../apps/web/messages/'+locale+'.json');
     const page=await ContentPage({params:Promise.resolve({locale})});

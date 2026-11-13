@@ -53,10 +53,12 @@ export default function LocaleSwitcher() {
       <button
         onClick={() => setOpen(!open)}
         className="flex min-h-11 items-center gap-1.5 rounded-full border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm font-medium tracking-wide text-gray-900 dark:text-gray-100 transition-colors hover:border-gray-400 dark:hover:border-gray-600"
-        aria-label={t('cambiarIdioma')}
+        // T-4829: el nombre accesible empieza con el texto visible (ES/EN/FR), como pide WCAG 2.5.3.
+        aria-label={`${actual.code.toUpperCase()} — ${t('cambiarIdioma')}`}
+        aria-expanded={open}
       >
         <span>{actual.code.toUpperCase()}</span>
-        <span className={`text-xs transition-transform ${open ? 'rotate-180' : ''}`}>▼</span>
+        <span aria-hidden="true" className={`text-xs transition-transform ${open ? 'rotate-180' : ''}`}>▼</span>
       </button>
 
       {open && (

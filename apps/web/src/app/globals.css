@@ -55,6 +55,12 @@ html.dark :is([class~="dark:text-blue-400"]) { color: var(--brand-dark-accent); 
   background-image: var(--paper-grain);
   color: var(--paper-text);
 }
+/* T-4829: el margen mt-20 del footer queda fuera de <main> y dejaba ver el body claro (franja blanca entre
+ * la página y el footer). Mismo arreglo que el panel (panel-skin.css): el body también es papel. */
+body:has(.public-paper) {
+  background-color: var(--paper-bg);
+  background-image: var(--paper-grain);
+}
 .public-paper .home-video-scene,
 .public-paper .home-about-video,
 .public-paper > .detail-screen,
@@ -103,6 +109,13 @@ html { scroll-behavior: smooth; }
   transition-delay: var(--reveal-delay, 0ms);
 }
 .reveal.reveal-visible { opacity: 1; transform: none; }
+
+/* T-4829: lo visible sin scroll (hero de la home; título y galería del detalle) — misma entrada que Reveal
+   (sube 48px y aparece en .7s), pero en CSS: corre desde el primer pintado, sin JavaScript, y no retrasa el
+   LCP. Reveal sigue para lo que está más abajo. Con reduced-motion aparece sin animación. */
+@keyframes enter-on-paint { from { opacity: 0; transform: translateY(48px); } }
+.enter-on-paint { animation: enter-on-paint .7s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .enter-on-paint { animation: none; } }
 
 /* Una sola superficie de video en home, con fallback estático y cierre al tema. */
 .home-video-scene { background-color: var(--color-gray-900); }

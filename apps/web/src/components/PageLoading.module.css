@@ -1,29 +1,29 @@
-.block {
-  position: relative;
-  overflow: hidden;
-}
+/* T-4835: cambio de página — el emblema (forma y color en app/site-loader.css, .loading-emblem) aparece
+   a los 150 ms con un cuarto de vuelta; si la página llega antes, nunca se ve. */
+.screen { min-height: 100dvh; }
+.emblem { opacity: 0; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .block::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(110deg, transparent 20%, color-mix(in srgb, var(--color-gray-50) 45%, transparent) 50%, transparent 80%);
-    animation: shimmer 1.8s linear infinite;
+  .emblem {
+    animation: emblem-arrival 300ms cubic-bezier(.2, .8, .2, 1) 150ms both;
   }
 
   .content {
     animation: content-arrival 200ms ease-out;
   }
 
-  @keyframes shimmer {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(100%); }
+  @keyframes emblem-arrival {
+    from { opacity: 0; transform: rotate(-90deg) scale(.8); }
+    to { opacity: 1; transform: none; }
   }
 
   @keyframes content-arrival {
     from { opacity: 0; }
     to { opacity: 1; }
   }
+}
+
+/* Movimiento reducido: sin animación; el emblema se muestra quieto. */
+@media (prefers-reduced-motion: reduce) {
+  .emblem { opacity: 1; }
 }

@@ -8,6 +8,7 @@ mockModule('next-intl',{...intl,NextIntlClientProvider:props=>React.createElemen
 mockModule('next-intl/server',{getMessages:async()=>require('../apps/web/messages/'+locale+'.json')});
 mockModule('@/i18n/navigation',{usePathname:()=>pathname,Link:({href,children,...props})=>React.createElement('a',{...props,href:`/${locale}${href}`},children)});
 mockModule('@/components/Navbar',()=>null);
+mockModule('@/components/SiteIntro',()=>null); // T-4835: su propio test (test-page-loading.cjs)
 mockModule('@/components/AuthProvider',({children})=>children);
 const api=load('apps/web/src/app/api/panel/site-content/route.ts');
 const Layout=load('apps/web/src/app/[locale]/layout.tsx').default;

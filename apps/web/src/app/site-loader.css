@@ -1,0 +1,63 @@
+/* T-4835: animación de carga con el emblema. Diseño aprobado en la vista previa (12-11-2026).
+ * Primera carga (.site-intro, una vez por visita): 0–450 ms aparece el emblema con un cuarto de vuelta;
+ * 250–900 ms sube «ALIA FOR RENT»; se lee hasta 1100 ms; 1100–1750 ms el papel se abre en círculo desde la espiral.
+ * Cambio de página (.loading-emblem en PageLoading): solo el emblema, visible si la carga pasa de 150 ms.
+ * Con reduced-motion: sin giro ni círculo; el papel se desvanece en 200 ms. */
+
+.site-intro-emblem,
+.loading-emblem {
+  display: block;
+  width: clamp(64px, 11vw, 112px);
+  aspect-ratio: 256 / 247;
+  background-color: var(--brand-brown);
+  -webkit-mask: url('/brand/alia-spiral-emblem-mask.webp') center / contain no-repeat;
+          mask: url('/brand/alia-spiral-emblem-mask.webp') center / contain no-repeat;
+}
+html.dark :is(.site-intro-emblem, .loading-emblem) { background-color: var(--brand-brown-light); }
+
+@property --site-intro-hole { syntax: '<length>'; inherits: false; initial-value: -32px; }
+
+.site-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background-color: var(--paper-bg);
+  /* El borde difuminado (28 px) empieza fuera del centro: con radio 0 el emblema no deja ver la página. */
+  --site-intro-hole: -32px;
+  -webkit-mask: radial-gradient(circle at 50% 46%, transparent var(--site-intro-hole), black calc(var(--site-intro-hole) + 28px));
+          mask: radial-gradient(circle at 50% 46%, transparent var(--site-intro-hole), black calc(var(--site-intro-hole) + 28px));
+  /* site-intro-gone garantiza que desaparezca aunque el navegador no anime --site-intro-hole. */
+  animation: site-intro-open 650ms cubic-bezier(.65, 0, .35, 1) 1100ms forwards, site-intro-gone 150ms linear 1650ms forwards;
+}
+html.alia-intro-seen .site-intro { display: none; }
+
+.site-intro-mark { display: grid; justify-items: center; gap: 14px; transform: translateY(-4%); }
+.site-intro-emblem {
+  animation: site-intro-emblem-in 450ms cubic-bezier(.2, .8, .2, 1) both,
+             site-intro-emblem-out 520ms cubic-bezier(.5, 0, .75, 0) 1100ms forwards;
+}
+.site-intro-word {
+  color: var(--paper-text);
+  font-size: clamp(12px, 1.7vw, 17px);
+  letter-spacing: .32em;
+  white-space: nowrap;
+  animation: site-intro-word-out 260ms ease-in 1100ms forwards;
+}
+.site-intro-word > span { display: inline-block; animation: site-intro-letter 320ms ease-out calc(250ms + var(--i, 0) * 32ms) both; }
+.site-intro-word > .site-intro-space { width: .6em; animation: none; }
+.site-intro-word > .site-intro-for { color: var(--chrome-muted); }
+
+@keyframes site-intro-emblem-in { from { opacity: 0; transform: rotate(-90deg) scale(.8); } }
+@keyframes site-intro-emblem-out { to { opacity: 0; transform: rotate(40deg) scale(1.7); } }
+@keyframes site-intro-letter { from { opacity: 0; transform: translateY(10px); } }
+@keyframes site-intro-word-out { to { opacity: 0; transform: translateY(6px); } }
+@keyframes site-intro-open { to { --site-intro-hole: 150vmax; } }
+@keyframes site-intro-gone { to { opacity: 0; visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .site-intro { -webkit-mask: none; mask: none; animation: site-intro-gone 200ms linear 400ms forwards; }
+  .site-intro-emblem, .site-intro-word, .site-intro-word > span { animation: none; }
+}

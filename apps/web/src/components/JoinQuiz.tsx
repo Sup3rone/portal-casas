@@ -15,6 +15,9 @@ import styles from './JoinQuiz.module.css';
 
 type Props = { states: string[]; whatsapp: string; signedIn: boolean; image?: string; texts?: Record<string, string> };
 const benefitKeys = ['one', 'two', 'three'] as const;
+// Oculto a pedido: ni «Pregunta 2 de 4» ni barra de avance a la vista. El texto sigue para lectores de pantalla.
+// true = volver a mostrarlos.
+export const SHOW_QUIZ_PROGRESS = false;
 const primaryClass = 'inline-flex min-h-11 items-center justify-center rounded-full bg-green-700 px-6 py-3 text-sm font-medium tracking-wide text-white hover:bg-green-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:bg-green-600 dark:hover:bg-green-500';
 
 export default function JoinQuiz({ states, whatsapp, signedIn, image, texts = {} }: Props) {
@@ -91,15 +94,15 @@ export default function JoinQuiz({ states, whatsapp, signedIn, image, texts = {}
             className={`${styles.back} -ml-3 inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-sm text-gray-600 hover:text-[var(--brand-brown)] focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-300 dark:hover:text-[var(--brand-brown-light)]${answers.length === 0 ? ' invisible' : ''}`}>
             <span aria-hidden="true">←</span>{t('back')}
           </button>
-          <p aria-live="polite" className="text-xs uppercase tracking-[0.25em] text-gray-600 dark:text-gray-300">
+          <p aria-live="polite" className={SHOW_QUIZ_PROGRESS ? 'text-xs uppercase tracking-[0.25em] text-gray-600 dark:text-gray-300' : 'sr-only'}>
             {complete ? t('doneLabel') : t('progress', { current, total })}
           </p>
         </div>
-        <div className="mx-auto w-full max-w-3xl px-4 pt-3 sm:px-8">
+        {SHOW_QUIZ_PROGRESS && <div className="mx-auto w-full max-w-3xl px-4 pt-3 sm:px-8">
           <div className="h-0.5 overflow-hidden rounded-full bg-gray-200 dark:bg-white/15">
             <div data-progress={current + '/' + total} className={`h-full bg-[var(--brand-brown)] dark:bg-[var(--brand-brown-light)] ${styles.bar}`} style={{ width: `${(complete ? 1 : answers.length / total) * 100}%` }} />
           </div>
-        </div>
+        </div>}
         {/* Sin scroll de página; solo en pantallas muy bajas este bloque se desplaza por dentro. */}
         <div className="flex min-h-0 flex-1 overflow-y-auto">
           <div key={answers.join('/') || 'start'} className={`m-auto w-full max-w-3xl px-4 py-6 sm:px-8 [@media(max-height:720px)]:py-3 ${styles.step}`}>

@@ -127,6 +127,9 @@ async function main() {
     assert.ok(html.includes(messages.join.owners.cardTitle.replace(/'/g, '&#x27;')) && html.includes(messages.join.referrers.cardTitle.replace(/'/g, '&#x27;')));
     assert.equal(waLinks(html).length, 0, 'La acción aparece hasta el final');
     assert.ok(html.includes('aria-live="polite"') && html.includes('about.jpg'), 'Progreso anunciado y foto del panel en el costado');
+    // Progreso oculto a pedido: sin barra y «Pregunta 1 de 4» solo para lectores de pantalla.
+    assert.ok(!html.includes('data-progress'), 'Sin barra de avance');
+    assert.match(html, /<p aria-live="polite" class="sr-only">[^<]*1[^<]*4[^<]*<\/p>/, 'Texto de avance solo para lectores de pantalla');
     // --- Footer: no enlaza las páginas mientras sean esqueleto. ---
     const footer = render(locale, React.createElement(Footer));
     assert.ok(footer.includes(`href="/${locale}/casas"`), 'El footer sí se renderizó');

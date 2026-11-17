@@ -848,7 +848,7 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 
 ## 14. Páginas «Sobre nosotros» y «Únete» (T-4944, 17 de noviembre de 2026)
 
-**Estado: esqueleto oculto.** Las rutas existen y se pueden abrir por URL, pero con `PUBLIC_PAGES_LIVE = false` (`apps/web/src/lib/public-pages-live.ts`) no aparecen en el Navbar ni en el Footer, llevan `noindex` y no van a `sitemap.ts`. Publicarlas = poner la bandera en `true` cuando esté el contenido de abajo; el test `scripts/test-public-pages.cjs` falla a propósito al cambiarla y hay que actualizar su primera aserción.
+**Estado: esqueleto oculto, enlazado solo en el footer.** Desde el 17-11-2026 `PUBLIC_PAGES_IN_FOOTER = true` (mismo archivo) muestra Nosotros y Únete en el footer; el menú, el `noindex` y el sitemap siguen esperando a `PUBLIC_PAGES_LIVE`. Las rutas existen y se pueden abrir por URL, pero con `PUBLIC_PAGES_LIVE = false` (`apps/web/src/lib/public-pages-live.ts`) no aparecen en el Navbar ni en el Footer, llevan `noindex` y no van a `sitemap.ts`. Publicarlas = poner la bandera en `true` cuando esté el contenido de abajo; el test `scripts/test-public-pages.cjs` falla a propósito al cambiarla y hay que actualizar su primera aserción.
 
 | Ruta | Archivo | Qué muestra |
 |---|---|---|

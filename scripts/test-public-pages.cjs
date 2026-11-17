@@ -15,6 +15,7 @@ const empty = { about_es: '', about_en: '', about_fr: '', social_instagram: '', 
 const filled = { ...empty, about_es: 'Somos ALIA', about_en: 'We are ALIA', about_fr: 'Nous sommes ALIA', about_title_es: 'Quiénes somos', about_title_en: 'Who we are', about_title_fr: 'Qui sommes-nous', about_image: 'https://qa.public.blob.vercel-storage.com/about.jpg', contact_whatsapp: '5213312345678', social_instagram: 'https://instagram.com/alia' };
 const put = async body => { setSession({ user: { id: 'admin' } }); const res = await api.PUT(new Request('http://localhost/test', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })); assert.equal(res.status, 200); setSession(null); };
 const messagesFor = locale => JSON.parse(fs.readFileSync(`apps/web/messages/${locale}.json`, 'utf8'));
+const esc = text => text.replace(/&/g, '&amp;').replace(/'/g, '&#x27;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const render = (locale, tree) => renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages: messagesFor(locale), timeZone: 'America/Mexico_City' }, tree));
 const waLinks = html => [...html.matchAll(/href="(https:\/\/wa\.me\/[^"]+)"/g)].map(m => m[1].replace(/&#x27;/g, "'").replace(/&amp;/g, '&'));
 
@@ -130,22 +131,23 @@ async function main() {
     // Progreso oculto a pedido: sin barra y «Pregunta 1 de 4» solo para lectores de pantalla.
     assert.ok(!html.includes('data-progress'), 'Sin barra de avance');
     assert.match(html, /<p aria-live="polite" class="sr-only">[^<]*1[^<]*4[^<]*<\/p>/, 'Texto de avance solo para lectores de pantalla');
-    // --- Footer: no enlaza las páginas mientras sean esqueleto. ---
+    // --- Footer: ya enlaza las dos páginas, después de Casas, con su texto en cada idioma (17-11-2026). ---
     const footer = render(locale, React.createElement(Footer));
-    assert.ok(footer.includes(`href="/${locale}/casas"`), 'El footer sí se renderizó');
-    assert.ok(!footer.includes('/nosotros') && !footer.includes('/unete'));
+    const links = [...footer.matchAll(/<a [^>]*href="\/(?:es|en|fr)\/(casas|nosotros|unete)"[^>]*>([^<]*)<\/a>/g)].map(m => [m[1], m[2]]);
+    assert.deepEqual(links, [['casas', esc(messages.nav.casas)], ['nosotros', esc(messages.nav.nosotros)], ['unete', esc(messages.nav.unete)]], `${locale}: enlaces del footer`);
   }
 
-  // --- Navbar y Footer: los enlaces existen, pero solo detrás de la bandera. ---
-  for (const file of ['apps/web/src/components/Navbar.tsx', 'apps/web/src/components/Footer.tsx']) {
+  // --- Menú: los enlaces existen, pero solo detrás de PUBLIC_PAGES_LIVE. Footer: detrás de su propia bandera. ---
+  assert.equal(load('apps/web/src/lib/public-pages-live.ts').PUBLIC_PAGES_IN_FOOTER, true);
+  for (const [file, gateText] of [['apps/web/src/components/Navbar.tsx', '{PUBLIC_PAGES_LIVE && <>'], ['apps/web/src/components/Footer.tsx', '{(PUBLIC_PAGES_LIVE || PUBLIC_PAGES_IN_FOOTER) && <>']]) {
     const source = fs.readFileSync(file, 'utf8');
-    const gate = source.indexOf('{PUBLIC_PAGES_LIVE && <>');
+    const gate = source.indexOf(gateText);
     assert.ok(gate > 0, `${file}: bandera`);
     const block = source.slice(gate, source.indexOf('</>}', gate));
     assert.ok(block.includes('href="/nosotros"') && block.includes('href="/unete"'));
     assert.equal(source.split('href="/nosotros"').length, 2, `${file}: /nosotros solo dentro de la bandera`);
   }
 
-  console.log('OK páginas públicas T-4944: ocultas (noindex/sitemap/enlaces), /nosotros con panel y relleno, /unete como cuestionario (lógica, hash, resumen), sin scroll, i18n es/en/fr.');
+  console.log('OK páginas públicas T-4944: ocultas (noindex/sitemap/menú), enlazadas en el footer, /nosotros con panel y relleno, /unete como cuestionario (lógica, hash, resumen), sin scroll, i18n es/en/fr.');
 }
 main().catch(error => { console.error(error); process.exit(1); });

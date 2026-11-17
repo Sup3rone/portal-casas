@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import Reveal from './Reveal';
 import { useFooterContacts, formatContactWhatsapp } from './FooterContactsProvider';
+import { PUBLIC_PAGES_LIVE } from '@/lib/public-pages-live';
 
 export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}) {
   const t = useTranslations('footer');
@@ -27,6 +28,11 @@ export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}
             <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-100 mb-4">{t('navegacion')}</h4>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
               <li><Link href="/casas" className="hover:text-[var(--brand-brown)] dark:hover:text-[var(--brand-brown-light)]">{nav('casas')}</Link></li>
+              {/* T-4944: /nosotros y /unete se enlazan solo cuando tengan contenido real. */}
+              {PUBLIC_PAGES_LIVE && <>
+                <li><Link href="/nosotros" className="hover:text-[var(--brand-brown)] dark:hover:text-[var(--brand-brown-light)]">{nav('nosotros')}</Link></li>
+                <li><Link href="/unete" className="hover:text-[var(--brand-brown)] dark:hover:text-[var(--brand-brown-light)]">{nav('unete')}</Link></li>
+              </>}
             </ul>
           </div>
           <div>

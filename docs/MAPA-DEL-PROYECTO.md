@@ -845,3 +845,30 @@ Detalle en [REPORTE-MENSUAL.md](C:/Users/menib/Documents/GitHub/portal-casas/doc
 | Test | [test-referrals.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-referrals.cjs) §9–§10 | Acotación por dueño (3 mutaciones detectadas), cuenta ligada, vista del referidor y «Mis referidos» descontinuado. |
 
 Límite: el enlace general del referidor de un dueño también atribuye en casas de otro dueño, con el % del primero; se resuelve en la fase multi-dueño. Detalle en [REFERIDOS.md](C:/Users/menib/Documents/GitHub/portal-casas/docs/REFERIDOS.md) §2.6.
+
+## 14. Páginas «Sobre nosotros» y «Únete» (T-4944, 17 de noviembre de 2026)
+
+**Estado: esqueleto oculto.** Las rutas existen y se pueden abrir por URL, pero con `PUBLIC_PAGES_LIVE = false` (`apps/web/src/lib/public-pages-live.ts`) no aparecen en el Navbar ni en el Footer, llevan `noindex` y no van a `sitemap.ts`. Publicarlas = poner la bandera en `true` cuando esté el contenido de abajo; el test `scripts/test-public-pages.cjs` falla a propósito al cambiarla y hay que actualizar su primera aserción.
+
+| Ruta | Archivo | Qué muestra |
+|---|---|---|
+| `/{locale}/nosotros` | `app/[locale]/nosotros/page.tsx` | Hero (imagen y título de Panel → Contenido → Sobre nosotros), historia (`about_*` del panel, o relleno si está vacío), 3 valores, contacto (Instagram, Facebook y WhatsApp del panel; la sección no sale si no hay ninguno) y botones a `/casas` y `/unete`. |
+| `/{locale}/unete` | `app/[locale]/unete/page.tsx` | Hero con selector de dos tarjetas → `#duenos` y `#referidores`. Cada sección: intro, 3 beneficios, 3 pasos, botón y 3 preguntas frecuentes. |
+
+- **Dos audiencias.** Dueños = rol `COLLABORATOR` (botón de WhatsApp con mensaje prellenado). Referidores = tabla `Partner` (con sesión → WhatsApp; sin sesión → `/registro`, porque el referidor necesita una cuenta registrada, ver §13).
+- **WhatsApp:** número global `contact_whatsapp` del panel (`wa.me/<número>?text=…`, `whatsappHref` en `lib/public-pages.ts`). Sin número válido el botón no se pinta.
+- **Componentes de servidor reutilizables:** `PageHero`, `BenefitGrid`, `StepsList`, `FaqList` (con `<details>`, sin JS) y `WhatsappCta`.
+- **Textos:** namespaces `about.*` y `join.*`, más `nav.nosotros`, `nav.unete` y `seo.about*` / `seo.join*`, en `messages/{es,en,fr}.json`. No hay cambios de base de datos.
+- **Carga:** las cubre `app/[locale]/loading.tsx` (emblema, T-4835). La animación de primera carga (`SITE_INTRO_PATH`) no se activa en estas rutas.
+
+### 14.1 Contenido pendiente que debe dar el negocio
+
+Todo lo que lleva `[Pendiente]` en los tres idiomas (`grep -n "\[Pendiente\]" apps/web/messages/*.json`):
+
+1. **Nosotros:** historia (o rellenarla en el panel), 3 valores (título y texto), título y texto de cierre, descripción SEO. Imagen vertical en el panel si aún no hay.
+2. **Únete, general:** propuesta de valor del hero, descripción SEO.
+3. **Únete, dueños:** texto de la tarjeta, intro, 3 beneficios, 3 pasos y 3 preguntas con respuesta. Confirmar el mensaje prellenado de WhatsApp.
+4. **Únete, referidores:** lo mismo, y qué se promete del % (hoy el referidor ve códigos, conteos y %, sin importes).
+5. Fotos propias para los héroes, si se quieren.
+
+Fase 2 (fuera de T-4944): enlaces en menú y footer, quitar `noindex`, formulario propio con guardado en BD y textos editables desde el panel (exigiría claves nuevas en `SiteContent` y SQL por el CHECK).

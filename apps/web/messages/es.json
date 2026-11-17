@@ -8,7 +8,11 @@
       "weekday": "Tarifa por noche entre semana",
       "weekend": "Tarifa por noche en fin de semana",
       "perNight": "noche"
-    }
+    },
+    "aboutTitle": "Sobre nosotros",
+    "aboutDescription": "[Pendiente] Descripción para buscadores de la página Sobre nosotros.",
+    "joinTitle": "Únete a ALIA",
+    "joinDescription": "[Pendiente] Descripción para buscadores de la página Únete."
   },
   "notFoundPage": {
     "title": "Página no encontrada",
@@ -188,7 +192,9 @@
     "calendario": "Calendario",
     "forgotLink": "¿Olvidaste tu contraseña?",
     "panelAdmin": "Panel admin",
-    "panelCollaborator": "Panel del colaborador"
+    "panelCollaborator": "Panel del colaborador",
+    "nosotros": "Nosotros",
+    "unete": "Únete"
   },
   "details": {
     "backToTop": "Volver arriba",
@@ -801,6 +807,127 @@
       "TIMEOUT": "la plataforma tardó demasiado en responder",
       "NOT_A_CALENDAR": "el enlace no devolvió un calendario",
       "FETCH_FAILED": "no se pudo descargar el enlace"
+    }
+  },
+  "about": {
+    "heroEyebrow": "ALIA FOR RENT",
+    "heroTitleFallback": "Sobre nosotros",
+    "storyTitle": "Nuestra historia",
+    "storyFallback": "[Pendiente] Historia de ALIA. Se edita en Panel → Contenido → Sobre nosotros.",
+    "valuesTitle": "Lo que nos mueve",
+    "values": {
+      "one": {
+        "title": "[Pendiente] Valor 1",
+        "text": "[Pendiente] Texto breve del valor."
+      },
+      "two": {
+        "title": "[Pendiente] Valor 2",
+        "text": "[Pendiente] Texto breve del valor."
+      },
+      "three": {
+        "title": "[Pendiente] Valor 3",
+        "text": "[Pendiente] Texto breve del valor."
+      }
+    },
+    "contactTitle": "Hablemos",
+    "whatsappLabel": "Escríbenos por WhatsApp",
+    "whatsappMessage": "Hola, vengo de la página Sobre nosotros de ALIA.",
+    "ctaTitle": "[Pendiente] Título de cierre",
+    "ctaText": "[Pendiente] Texto de cierre que invita a ver casas o a unirse.",
+    "ctaHomes": "Ver casas",
+    "ctaJoin": "Únete"
+  },
+  "join": {
+    "heroEyebrow": "ALIA FOR RENT",
+    "heroTitle": "Únete a ALIA",
+    "heroText": "[Pendiente] Propuesta de valor general.",
+    "chooserLabel": "Elige cómo quieres unirte",
+    "benefitsTitle": "Beneficios",
+    "stepsTitle": "Cómo funciona",
+    "faqTitle": "Preguntas frecuentes",
+    "owners": {
+      "cardTitle": "Tengo una propiedad",
+      "cardText": "[Pendiente] Texto para dueños.",
+      "title": "Publica tu propiedad con ALIA",
+      "intro": "[Pendiente] Introducción de la sección.",
+      "benefits": {
+        "one": {
+          "title": "[Pendiente] Beneficio 1",
+          "text": "[Pendiente] Texto breve del beneficio."
+        },
+        "two": {
+          "title": "[Pendiente] Beneficio 2",
+          "text": "[Pendiente] Texto breve del beneficio."
+        },
+        "three": {
+          "title": "[Pendiente] Beneficio 3",
+          "text": "[Pendiente] Texto breve del beneficio."
+        }
+      },
+      "steps": {
+        "one": "[Pendiente] Paso 1",
+        "two": "[Pendiente] Paso 2",
+        "three": "[Pendiente] Paso 3"
+      },
+      "cta": "Quiero publicar mi propiedad",
+      "whatsappMessage": "Hola, quiero publicar mi propiedad con ALIA.",
+      "faq": {
+        "one": {
+          "question": "[Pendiente] Pregunta 1",
+          "answer": "[Pendiente] Respuesta."
+        },
+        "two": {
+          "question": "[Pendiente] Pregunta 2",
+          "answer": "[Pendiente] Respuesta."
+        },
+        "three": {
+          "question": "[Pendiente] Pregunta 3",
+          "answer": "[Pendiente] Respuesta."
+        }
+      }
+    },
+    "referrers": {
+      "cardTitle": "Quiero recomendar",
+      "cardText": "[Pendiente] Texto para referidores.",
+      "title": "Recomienda ALIA y gana",
+      "intro": "[Pendiente] Introducción de la sección.",
+      "benefits": {
+        "one": {
+          "title": "[Pendiente] Beneficio 1",
+          "text": "[Pendiente] Texto breve del beneficio."
+        },
+        "two": {
+          "title": "[Pendiente] Beneficio 2",
+          "text": "[Pendiente] Texto breve del beneficio."
+        },
+        "three": {
+          "title": "[Pendiente] Beneficio 3",
+          "text": "[Pendiente] Texto breve del beneficio."
+        }
+      },
+      "steps": {
+        "one": "[Pendiente] Paso 1",
+        "two": "[Pendiente] Paso 2",
+        "three": "[Pendiente] Paso 3"
+      },
+      "cta": "Quiero ser referidor",
+      "whatsappMessage": "Hola, quiero ser referidor de ALIA.",
+      "faq": {
+        "one": {
+          "question": "[Pendiente] Pregunta 1",
+          "answer": "[Pendiente] Respuesta."
+        },
+        "two": {
+          "question": "[Pendiente] Pregunta 2",
+          "answer": "[Pendiente] Respuesta."
+        },
+        "three": {
+          "question": "[Pendiente] Pregunta 3",
+          "answer": "[Pendiente] Respuesta."
+        }
+      },
+      "ctaRegister": "Crear cuenta",
+      "ctaRegisterHint": "Para ser referidor necesitas una cuenta registrada."
     }
   }
 }

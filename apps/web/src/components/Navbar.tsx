@@ -10,6 +10,7 @@ import { Marcellus } from 'next/font/google';
 import LocaleSwitcher from './LocaleSwitcher';
 import type { PublishedDestinationGroup } from '@/lib/published-destinations';
 import ThemeToggle from './ThemeToggle';
+import { PUBLIC_PAGES_LIVE } from '@/lib/public-pages-live';
 import PropertySearchForm from './PropertySearchForm';
 import { applyTheme, getServerTheme, getStoredTheme, getTheme, subscribeTheme } from '@/lib/theme';
 
@@ -177,6 +178,11 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
                   </li>)}</ul>
                   </li>)}</ul>
                 </details>}
+                {/* T-4944: /nosotros y /unete se enlazan solo cuando tengan contenido real. */}
+                {PUBLIC_PAGES_LIVE && <>
+                  <Link href="/nosotros" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('nosotros').toUpperCase()}</Link>
+                  <Link href="/unete" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('unete').toUpperCase()}</Link>
+                </>}
                 {!privatePage && <AccountThemeOption />}
               </div>}
             </div>

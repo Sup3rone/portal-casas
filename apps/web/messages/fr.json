@@ -8,7 +8,11 @@
       "weekday": "Tarif par nuit en semaine",
       "weekend": "Tarif par nuit le week-end",
       "perNight": "nuit"
-    }
+    },
+    "aboutTitle": "À propos",
+    "aboutDescription": "[Pendiente] Description pour les moteurs de recherche de la page À propos.",
+    "joinTitle": "Rejoignez ALIA",
+    "joinDescription": "[Pendiente] Description pour les moteurs de recherche de la page Rejoignez-nous."
   },
   "notFoundPage": {
     "title": "Page introuvable",
@@ -188,7 +192,9 @@
     "calendario": "Calendrier",
     "forgotLink": "Mot de passe oublié ?",
     "panelAdmin": "Panneau admin",
-    "panelCollaborator": "Panneau du collaborateur"
+    "panelCollaborator": "Panneau du collaborateur",
+    "nosotros": "À propos",
+    "unete": "Rejoignez-nous"
   },
   "details": {
     "backToTop": "Retour en haut",
@@ -802,6 +808,127 @@
       "TIMEOUT": "la plateforme a mis trop de temps à répondre",
       "NOT_A_CALENDAR": "le lien n’a pas renvoyé de calendrier",
       "FETCH_FAILED": "le lien n’a pas pu être téléchargé"
+    }
+  },
+  "about": {
+    "heroEyebrow": "ALIA FOR RENT",
+    "heroTitleFallback": "À propos",
+    "storyTitle": "Notre histoire",
+    "storyFallback": "[Pendiente] Histoire d’ALIA. Se modifie dans Panneau → Contenu → À propos.",
+    "valuesTitle": "Ce qui nous anime",
+    "values": {
+      "one": {
+        "title": "[Pendiente] Valeur 1",
+        "text": "[Pendiente] Texte court de la valeur."
+      },
+      "two": {
+        "title": "[Pendiente] Valeur 2",
+        "text": "[Pendiente] Texte court de la valeur."
+      },
+      "three": {
+        "title": "[Pendiente] Valeur 3",
+        "text": "[Pendiente] Texte court de la valeur."
+      }
+    },
+    "contactTitle": "Parlons-en",
+    "whatsappLabel": "Écrivez-nous sur WhatsApp",
+    "whatsappMessage": "Bonjour, je viens de la page À propos d’ALIA.",
+    "ctaTitle": "[Pendiente] Titre de clôture",
+    "ctaText": "[Pendiente] Texte de clôture invitant à voir les maisons ou à nous rejoindre.",
+    "ctaHomes": "Voir les maisons",
+    "ctaJoin": "Rejoignez-nous"
+  },
+  "join": {
+    "heroEyebrow": "ALIA FOR RENT",
+    "heroTitle": "Rejoignez ALIA",
+    "heroText": "[Pendiente] Proposition de valeur générale.",
+    "chooserLabel": "Choisissez comment nous rejoindre",
+    "benefitsTitle": "Avantages",
+    "stepsTitle": "Comment ça marche",
+    "faqTitle": "Questions fréquentes",
+    "owners": {
+      "cardTitle": "J’ai une propriété",
+      "cardText": "[Pendiente] Texte pour les propriétaires.",
+      "title": "Publiez votre propriété avec ALIA",
+      "intro": "[Pendiente] Introduction de la section.",
+      "benefits": {
+        "one": {
+          "title": "[Pendiente] Avantage 1",
+          "text": "[Pendiente] Texte court de l’avantage."
+        },
+        "two": {
+          "title": "[Pendiente] Avantage 2",
+          "text": "[Pendiente] Texte court de l’avantage."
+        },
+        "three": {
+          "title": "[Pendiente] Avantage 3",
+          "text": "[Pendiente] Texte court de l’avantage."
+        }
+      },
+      "steps": {
+        "one": "[Pendiente] Étape 1",
+        "two": "[Pendiente] Étape 2",
+        "three": "[Pendiente] Étape 3"
+      },
+      "cta": "Je veux publier ma propriété",
+      "whatsappMessage": "Bonjour, je veux publier ma propriété avec ALIA.",
+      "faq": {
+        "one": {
+          "question": "[Pendiente] Question 1",
+          "answer": "[Pendiente] Réponse."
+        },
+        "two": {
+          "question": "[Pendiente] Question 2",
+          "answer": "[Pendiente] Réponse."
+        },
+        "three": {
+          "question": "[Pendiente] Question 3",
+          "answer": "[Pendiente] Réponse."
+        }
+      }
+    },
+    "referrers": {
+      "cardTitle": "Je veux recommander",
+      "cardText": "[Pendiente] Texte pour les parrains.",
+      "title": "Recommandez ALIA et gagnez",
+      "intro": "[Pendiente] Introduction de la section.",
+      "benefits": {
+        "one": {
+          "title": "[Pendiente] Avantage 1",
+          "text": "[Pendiente] Texte court de l’avantage."
+        },
+        "two": {
+          "title": "[Pendiente] Avantage 2",
+          "text": "[Pendiente] Texte court de l’avantage."
+        },
+        "three": {
+          "title": "[Pendiente] Avantage 3",
+          "text": "[Pendiente] Texte court de l’avantage."
+        }
+      },
+      "steps": {
+        "one": "[Pendiente] Étape 1",
+        "two": "[Pendiente] Étape 2",
+        "three": "[Pendiente] Étape 3"
+      },
+      "cta": "Je veux devenir parrain",
+      "whatsappMessage": "Bonjour, je veux devenir parrain ALIA.",
+      "faq": {
+        "one": {
+          "question": "[Pendiente] Question 1",
+          "answer": "[Pendiente] Réponse."
+        },
+        "two": {
+          "question": "[Pendiente] Question 2",
+          "answer": "[Pendiente] Réponse."
+        },
+        "three": {
+          "question": "[Pendiente] Question 3",
+          "answer": "[Pendiente] Réponse."
+        }
+      },
+      "ctaRegister": "Créer un compte",
+      "ctaRegisterHint": "Il faut un compte enregistré pour devenir parrain."
     }
   }
 }

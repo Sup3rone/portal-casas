@@ -44,10 +44,47 @@ async function main() {
   for (const locale of ['es', 'en', 'fr']) {
     const values = pick(messagesFor(locale));
     for (const [key, value] of Object.entries(values)) assert.ok(typeof value === 'string' && value.trim(), `${locale} ${key} vacío`);
-    for (const key of keys.filter(key => /\.(benefits|faq|values)\.|\.steps\.|\.(intro|cardText|heroText|storyFallback|ctaTitle|ctaText)$|Description$/.test(key))) {
+    for (const key of keys.filter(key => /\.(benefits|values)\.|\.(help|cardText|doneText|storyFallback|ctaTitle|ctaText|contactMissing)$|Description$/.test(key))) {
       assert.ok(values[key].startsWith('[Pendiente]'), `${locale} ${key} debe marcarse [Pendiente]`);
     }
   }
+
+  // --- Lógica del cuestionario (lib/join-quiz.ts). ---
+  const quiz = load('apps/web/src/lib/join-quiz.ts');
+  const states = ['Jalisco', 'Yucatán'];
+  assert.deepEqual(quiz.stepsFor(undefined, states).map(s => s.id), ['audience']);
+  assert.deepEqual(quiz.stepsFor('owners', states).map(s => s.id), ['audience', 'propertyType', 'location', 'rental']);
+  assert.deepEqual(quiz.stepsFor('owners', []).map(s => s.id), ['audience', 'propertyType', 'rental'], 'Sin estados publicados no se pregunta ubicación');
+  assert.deepEqual(quiz.stepsFor('referrers', states).map(s => s.id), ['audience', 'referAudience', 'channel', 'reach']);
+  assert.deepEqual(quiz.stepsFor('owners', states)[2].options, ['Jalisco', 'Yucatán', 'other']);
+  assert.equal(quiz.totalSteps([], states), 4);
+  assert.equal(quiz.toHash(['owners', 'house', 'Yucatán']), '#owners/house/Yucat%C3%A1n');
+  assert.equal(quiz.toHash([]), '');
+  assert.deepEqual(quiz.parseHash('#owners/house/Yucat%C3%A1n', states), ['owners', 'house', 'Yucatán'], 'Ida y vuelta por el hash');
+  assert.deepEqual(quiz.parseHash('#owners/castle/Jalisco', states), ['owners'], 'Una respuesta inválida corta el resto');
+  assert.deepEqual(quiz.parseHash('#referrers/guests/social/many/extra', states), ['referrers', 'guests', 'social', 'many']);
+  assert.deepEqual(quiz.parseHash('#%E0%A4%A', states), [], 'Hash mal codificado no rompe');
+  assert.deepEqual(quiz.parseHash('#hack', states), []);
+  assert.equal(quiz.isComplete(['owners', 'house', 'Jalisco'], states), false);
+  assert.equal(quiz.isComplete(['owners', 'house', 'Jalisco', 'annual'], states), true);
+  assert.equal(quiz.isComplete(['owners', 'house', 'annual'], []), true);
+  assert.deepEqual([quiz.optionIndexForKey('a', 3), quiz.optionIndexForKey('C', 3), quiz.optionIndexForKey('2', 3), quiz.optionIndexForKey('d', 3), quiz.optionIndexForKey('0', 3), quiz.optionIndexForKey('Enter', 3)], [0, 2, 1, -1, -1, -1]);
+  const es = messagesFor('es').join;
+  const ownerSteps = quiz.stepsFor('owners', states), ownerAnswers = ['owners', 'apartment', 'Jalisco', 'annual'];
+  const label = (id, value) => id === 'location' && value !== 'other' ? value : es.quiz[id].options[value];
+  const summary = quiz.answerSummary(ownerSteps, ownerAnswers, label, id => es.quiz[id].short);
+  assert.equal(summary, 'Tipo: Departamento. Ubicación: Jalisco. Renta: Por año');
+  assert.equal(es.owners.whatsappMessage.replace('{summary}', summary), 'Hola, quiero publicar mi propiedad con ALIA. Tipo: Departamento. Ubicación: Jalisco. Renta: Por año.');
+  for (const locale of ['es', 'en', 'fr']) {
+    const messages = messagesFor(locale).join;
+    for (const audience of ['owners', 'referrers']) for (const step of quiz.stepsFor(audience, states).slice(1)) {
+      assert.ok(messages.quiz[step.id].title && messages.quiz[step.id].short, `${locale} ${step.id}`);
+      for (const option of step.options.filter(option => !states.includes(option))) assert.ok(messages.quiz[step.id].options[option], `${locale} ${step.id}.${option}`);
+    }
+  }
+  // Sin scroll: body a pantalla completa con el cuestionario y sin footer en /unete.
+  assert.match(fs.readFileSync('apps/web/src/app/globals.css', 'utf8'), /body:has\(main\[data-join-quiz\]\) \{[^}]*height: 100dvh; overflow: hidden;/);
+  assert.ok(fs.readFileSync('apps/web/src/components/Footer.tsx', 'utf8').includes(String.raw`unete\/?$/.test(pathname)) return null`), 'Sin footer en /unete');
 
   for (const locale of ['es', 'en', 'fr']) {
     setLocale(locale);
@@ -80,30 +117,16 @@ async function main() {
     assert.ok(html.includes('href="https://instagram.com/alia"'));
     assert.deepEqual(waLinks(html), [pages.whatsappHref(filled.contact_whatsapp, messages.about.whatsappMessage)]);
 
-    // --- /unete: selector con anclas y dos audiencias. ---
+    // --- /unete: cuestionario. SSR pinta la primera pregunta; el resto lo decide el hash en el cliente. ---
     html = render(locale, await join.default({ params: Promise.resolve({ locale }) }));
+    assert.ok(html.includes('data-join-quiz'), 'Main marcado para la regla sin scroll de globals.css');
     assert.equal((html.match(/<h1/g) || []).length, 1);
-    assert.ok(html.includes('href="#duenos"') && html.includes('href="#referidores"'));
-    assert.ok(html.indexOf('id="duenos"') < html.indexOf('id="referidores"'), 'Dueños primero, luego referidores');
-    for (const audience of ['owners', 'referrers']) {
-      const section = html.match(new RegExp(`<section[^>]*data-audience="${audience}"[\\s\\S]*?</section>`))[0];
-      assert.equal((section.match(/<details/g) || []).length, 3, `${audience}: 3 preguntas`);
-      assert.equal((section.match(/<ol/g) || []).length, 1, `${audience}: pasos en lista ordenada`);
-    }
-    const owners = html.match(/<section[^>]*data-audience="owners"[\s\S]*?<\/section>/)[0];
-    const referrers = html.match(/<section[^>]*data-audience="referrers"[\s\S]*?<\/section>/)[0];
-    // Sin sesión: dueños por WhatsApp; referidores a crear cuenta (necesitan cuenta registrada).
-    assert.deepEqual(waLinks(owners), [pages.whatsappHref(filled.contact_whatsapp, messages.join.owners.whatsappMessage)]);
-    assert.equal(waLinks(referrers).length, 0);
-    assert.ok(referrers.includes(`href="/${locale}/registro"`));
-    // Con sesión: el referidor también va por WhatsApp.
-    setSession({ user: { id: 'u1', email: 'huesped@test.local' } });
-    const signed = render(locale, await join.default({ params: Promise.resolve({ locale }) }));
-    setSession(null);
-    const signedReferrers = signed.match(/<section[^>]*data-audience="referrers"[\s\S]*?<\/section>/)[0];
-    assert.deepEqual(waLinks(signedReferrers), [pages.whatsappHref(filled.contact_whatsapp, messages.join.referrers.whatsappMessage)]);
-    assert.ok(!signedReferrers.includes('/registro'));
-
+    assert.ok(html.includes(messages.join.quiz.audience.title.replace(/'/g, '&#x27;')));
+    assert.deepEqual([...html.matchAll(/data-option="([^"]+)"/g)].map(m => m[1]), ['owners', 'referrers'], 'Primera pantalla: las dos audiencias');
+    assert.ok(html.includes('aria-keyshortcuts="A"') && html.includes('aria-keyshortcuts="B"'));
+    assert.ok(html.includes(messages.join.owners.cardTitle.replace(/'/g, '&#x27;')) && html.includes(messages.join.referrers.cardTitle.replace(/'/g, '&#x27;')));
+    assert.equal(waLinks(html).length, 0, 'La acción aparece hasta el final');
+    assert.ok(html.includes('aria-live="polite"') && html.includes('about.jpg'), 'Progreso anunciado y foto del panel en el costado');
     // --- Footer: no enlaza las páginas mientras sean esqueleto. ---
     const footer = render(locale, React.createElement(Footer));
     assert.ok(footer.includes(`href="/${locale}/casas"`), 'El footer sí se renderizó');
@@ -120,6 +143,6 @@ async function main() {
     assert.equal(source.split('href="/nosotros"').length, 2, `${file}: /nosotros solo dentro de la bandera`);
   }
 
-  console.log('OK páginas públicas T-4944: ocultas (noindex/sitemap/enlaces), /nosotros con panel y relleno, /unete con dos audiencias y CTAs, i18n es/en/fr.');
+  console.log('OK páginas públicas T-4944: ocultas (noindex/sitemap/enlaces), /nosotros con panel y relleno, /unete como cuestionario (lógica, hash, resumen), sin scroll, i18n es/en/fr.');
 }
 main().catch(error => { console.error(error); process.exit(1); });

@@ -15,6 +15,8 @@ export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}
   const privatePage = /^\/(?:(?:es|en|fr)\/)?(?:panel|admin)(?:\/|$)/.test(pathname);
   const Content = privatePage ? 'div' : Reveal;
   if (!inDetail && /^\/(?:(?:es|en|fr)\/)?casas\/[^/]+\/?$/.test(pathname)) return null;
+  // T-4944: /unete es un cuestionario a pantalla completa, sin scroll: no lleva footer.
+  if (/^\/(?:(?:es|en|fr)\/)?unete\/?$/.test(pathname)) return null;
 
   return (
     <footer className={`mt-20 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-12${privatePage ? '' : ' public-footer'}`}>

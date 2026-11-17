@@ -838,59 +838,85 @@
     "ctaJoin": "Únete"
   },
   "join": {
-    "heroEyebrow": "ALIA FOR RENT",
-    "heroTitle": "Únete a ALIA",
-    "heroText": "[Pendiente] Propuesta de valor general.",
-    "chooserLabel": "Elige cómo quieres unirte",
-    "benefitsTitle": "Beneficios",
-    "stepsTitle": "Cómo funciona",
-    "faqTitle": "Preguntas frecuentes",
-    "owners": {
-      "cardTitle": "Tengo una propiedad",
-      "cardText": "[Pendiente] Texto para dueños.",
-      "title": "Publica tu propiedad con ALIA",
-      "intro": "[Pendiente] Introducción de la sección.",
-      "benefits": {
-        "one": {
-          "title": "[Pendiente] Beneficio 1",
-          "text": "[Pendiente] Texto breve del beneficio."
-        },
-        "two": {
-          "title": "[Pendiente] Beneficio 2",
-          "text": "[Pendiente] Texto breve del beneficio."
-        },
-        "three": {
-          "title": "[Pendiente] Beneficio 3",
-          "text": "[Pendiente] Texto breve del beneficio."
+    "heroEyebrow": "Únete a ALIA",
+    "back": "Atrás",
+    "progress": "Pregunta {current} de {total}",
+    "doneLabel": "Listo",
+    "keyHint": "Atajo: pulsa la letra de cada opción.",
+    "restart": "Empezar de nuevo",
+    "summaryLabel": "Tus respuestas",
+    "editAnswer": "Cambiar respuesta: {answer}",
+    "contactMissing": "[Pendiente] Falta el número de WhatsApp en Panel → Contenido.",
+    "quiz": {
+      "audience": {
+        "title": "¿Cómo quieres unirte a ALIA?",
+        "help": "[Pendiente] Texto de apoyo de la primera pregunta.",
+        "short": "Perfil"
+      },
+      "propertyType": {
+        "title": "¿Qué tipo de propiedad tienes?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Tipo",
+        "options": {
+          "house": "Casa",
+          "apartment": "Departamento",
+          "other": "Otro tipo"
         }
       },
-      "steps": {
-        "one": "[Pendiente] Paso 1",
-        "two": "[Pendiente] Paso 2",
-        "three": "[Pendiente] Paso 3"
+      "location": {
+        "title": "¿Dónde está tu propiedad?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Ubicación",
+        "options": {
+          "other": "En otro lugar"
+        }
       },
-      "cta": "Quiero publicar mi propiedad",
-      "whatsappMessage": "Hola, quiero publicar mi propiedad con ALIA.",
-      "faq": {
-        "one": {
-          "question": "[Pendiente] Pregunta 1",
-          "answer": "[Pendiente] Respuesta."
-        },
-        "two": {
-          "question": "[Pendiente] Pregunta 2",
-          "answer": "[Pendiente] Respuesta."
-        },
-        "three": {
-          "question": "[Pendiente] Pregunta 3",
-          "answer": "[Pendiente] Respuesta."
+      "rental": {
+        "title": "¿Cómo te gustaría rentarla?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Renta",
+        "options": {
+          "nightly": "Por noches (vacacional)",
+          "annual": "Por año",
+          "both": "Las dos"
+        }
+      },
+      "referAudience": {
+        "title": "¿A quién recomendarías ALIA?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Recomendaría a",
+        "options": {
+          "guests": "Huéspedes que buscan dónde quedarse",
+          "owners": "Dueños con una propiedad",
+          "both": "A los dos"
+        }
+      },
+      "channel": {
+        "title": "¿Cómo sueles recomendar?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Canal",
+        "options": {
+          "social": "En redes sociales",
+          "whatsapp": "Por WhatsApp",
+          "person": "En persona"
+        }
+      },
+      "reach": {
+        "title": "¿A cuántas personas llegas, más o menos?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Alcance",
+        "options": {
+          "few": "Pocas, de confianza",
+          "some": "Un círculo mediano",
+          "many": "Muchas"
         }
       }
     },
-    "referrers": {
-      "cardTitle": "Quiero recomendar",
-      "cardText": "[Pendiente] Texto para referidores.",
-      "title": "Recomienda ALIA y gana",
-      "intro": "[Pendiente] Introducción de la sección.",
+    "owners": {
+      "cardTitle": "Tengo una propiedad",
+      "cardText": "[Pendiente] Texto corto para dueños.",
+      "doneTitle": "Gracias. Con esto podemos empezar.",
+      "doneText": "[Pendiente] Qué pasa después de enviar.",
       "benefits": {
         "one": {
           "title": "[Pendiente] Beneficio 1",
@@ -905,27 +931,30 @@
           "text": "[Pendiente] Texto breve del beneficio."
         }
       },
-      "steps": {
-        "one": "[Pendiente] Paso 1",
-        "two": "[Pendiente] Paso 2",
-        "three": "[Pendiente] Paso 3"
-      },
-      "cta": "Quiero ser referidor",
-      "whatsappMessage": "Hola, quiero ser referidor de ALIA.",
-      "faq": {
+      "cta": "Enviar por WhatsApp",
+      "whatsappMessage": "Hola, quiero publicar mi propiedad con ALIA. {summary}."
+    },
+    "referrers": {
+      "cardTitle": "Quiero recomendar",
+      "cardText": "[Pendiente] Texto corto para referidores.",
+      "doneTitle": "Gracias. Ya casi eres referidor.",
+      "doneText": "[Pendiente] Qué pasa después de enviar.",
+      "benefits": {
         "one": {
-          "question": "[Pendiente] Pregunta 1",
-          "answer": "[Pendiente] Respuesta."
+          "title": "[Pendiente] Beneficio 1",
+          "text": "[Pendiente] Texto breve del beneficio."
         },
         "two": {
-          "question": "[Pendiente] Pregunta 2",
-          "answer": "[Pendiente] Respuesta."
+          "title": "[Pendiente] Beneficio 2",
+          "text": "[Pendiente] Texto breve del beneficio."
         },
         "three": {
-          "question": "[Pendiente] Pregunta 3",
-          "answer": "[Pendiente] Respuesta."
+          "title": "[Pendiente] Beneficio 3",
+          "text": "[Pendiente] Texto breve del beneficio."
         }
       },
+      "cta": "Enviar por WhatsApp",
+      "whatsappMessage": "Hola, quiero ser referidor de ALIA. {summary}.",
       "ctaRegister": "Crear cuenta",
       "ctaRegisterHint": "Para ser referidor necesitas una cuenta registrada."
     }

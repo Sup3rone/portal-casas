@@ -838,59 +838,85 @@
     "ctaJoin": "Join us"
   },
   "join": {
-    "heroEyebrow": "ALIA FOR RENT",
-    "heroTitle": "Join ALIA",
-    "heroText": "[Pendiente] General value proposition.",
-    "chooserLabel": "Choose how you want to join",
-    "benefitsTitle": "Benefits",
-    "stepsTitle": "How it works",
-    "faqTitle": "Frequently asked questions",
-    "owners": {
-      "cardTitle": "I own a property",
-      "cardText": "[Pendiente] Text for owners.",
-      "title": "List your property with ALIA",
-      "intro": "[Pendiente] Section introduction.",
-      "benefits": {
-        "one": {
-          "title": "[Pendiente] Benefit 1",
-          "text": "[Pendiente] Short benefit text."
-        },
-        "two": {
-          "title": "[Pendiente] Benefit 2",
-          "text": "[Pendiente] Short benefit text."
-        },
-        "three": {
-          "title": "[Pendiente] Benefit 3",
-          "text": "[Pendiente] Short benefit text."
+    "heroEyebrow": "Join ALIA",
+    "back": "Back",
+    "progress": "Question {current} of {total}",
+    "doneLabel": "Done",
+    "keyHint": "Shortcut: press the letter next to each option.",
+    "restart": "Start over",
+    "summaryLabel": "Your answers",
+    "editAnswer": "Change answer: {answer}",
+    "contactMissing": "[Pendiente] WhatsApp number missing in Panel → Content.",
+    "quiz": {
+      "audience": {
+        "title": "How would you like to join ALIA?",
+        "help": "[Pendiente] Supporting text for the first question.",
+        "short": "Profile"
+      },
+      "propertyType": {
+        "title": "What kind of property do you have?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Type",
+        "options": {
+          "house": "House",
+          "apartment": "Apartment",
+          "other": "Something else"
         }
       },
-      "steps": {
-        "one": "[Pendiente] Step 1",
-        "two": "[Pendiente] Step 2",
-        "three": "[Pendiente] Step 3"
+      "location": {
+        "title": "Where is your property?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Location",
+        "options": {
+          "other": "Somewhere else"
+        }
       },
-      "cta": "I want to list my property",
-      "whatsappMessage": "Hi, I want to list my property with ALIA.",
-      "faq": {
-        "one": {
-          "question": "[Pendiente] Question 1",
-          "answer": "[Pendiente] Answer."
-        },
-        "two": {
-          "question": "[Pendiente] Question 2",
-          "answer": "[Pendiente] Answer."
-        },
-        "three": {
-          "question": "[Pendiente] Question 3",
-          "answer": "[Pendiente] Answer."
+      "rental": {
+        "title": "How would you like to rent it?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Rental",
+        "options": {
+          "nightly": "By the night (holiday)",
+          "annual": "By the year",
+          "both": "Both"
+        }
+      },
+      "referAudience": {
+        "title": "Who would you refer to ALIA?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Would refer",
+        "options": {
+          "guests": "Guests looking for a stay",
+          "owners": "Owners with a property",
+          "both": "Both"
+        }
+      },
+      "channel": {
+        "title": "How do you usually recommend?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Channel",
+        "options": {
+          "social": "On social media",
+          "whatsapp": "On WhatsApp",
+          "person": "In person"
+        }
+      },
+      "reach": {
+        "title": "Roughly how many people do you reach?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Reach",
+        "options": {
+          "few": "A few close contacts",
+          "some": "A mid-sized circle",
+          "many": "Many"
         }
       }
     },
-    "referrers": {
-      "cardTitle": "I want to refer",
-      "cardText": "[Pendiente] Text for referrers.",
-      "title": "Refer ALIA and earn",
-      "intro": "[Pendiente] Section introduction.",
+    "owners": {
+      "cardTitle": "I own a property",
+      "cardText": "[Pendiente] Short text for owners.",
+      "doneTitle": "Thank you. This is enough to start.",
+      "doneText": "[Pendiente] What happens after sending.",
       "benefits": {
         "one": {
           "title": "[Pendiente] Benefit 1",
@@ -905,27 +931,30 @@
           "text": "[Pendiente] Short benefit text."
         }
       },
-      "steps": {
-        "one": "[Pendiente] Step 1",
-        "two": "[Pendiente] Step 2",
-        "three": "[Pendiente] Step 3"
-      },
-      "cta": "I want to be a referrer",
-      "whatsappMessage": "Hi, I want to be an ALIA referrer.",
-      "faq": {
+      "cta": "Send on WhatsApp",
+      "whatsappMessage": "Hi, I want to list my property with ALIA. {summary}."
+    },
+    "referrers": {
+      "cardTitle": "I want to refer",
+      "cardText": "[Pendiente] Short text for referrers.",
+      "doneTitle": "Thank you. You are almost a referrer.",
+      "doneText": "[Pendiente] What happens after sending.",
+      "benefits": {
         "one": {
-          "question": "[Pendiente] Question 1",
-          "answer": "[Pendiente] Answer."
+          "title": "[Pendiente] Benefit 1",
+          "text": "[Pendiente] Short benefit text."
         },
         "two": {
-          "question": "[Pendiente] Question 2",
-          "answer": "[Pendiente] Answer."
+          "title": "[Pendiente] Benefit 2",
+          "text": "[Pendiente] Short benefit text."
         },
         "three": {
-          "question": "[Pendiente] Question 3",
-          "answer": "[Pendiente] Answer."
+          "title": "[Pendiente] Benefit 3",
+          "text": "[Pendiente] Short benefit text."
         }
       },
+      "cta": "Send on WhatsApp",
+      "whatsappMessage": "Hi, I want to be an ALIA referrer. {summary}.",
       "ctaRegister": "Create account",
       "ctaRegisterHint": "You need a registered account to become a referrer."
     }

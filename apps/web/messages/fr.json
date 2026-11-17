@@ -839,59 +839,85 @@
     "ctaJoin": "Rejoignez-nous"
   },
   "join": {
-    "heroEyebrow": "ALIA FOR RENT",
-    "heroTitle": "Rejoignez ALIA",
-    "heroText": "[Pendiente] Proposition de valeur générale.",
-    "chooserLabel": "Choisissez comment nous rejoindre",
-    "benefitsTitle": "Avantages",
-    "stepsTitle": "Comment ça marche",
-    "faqTitle": "Questions fréquentes",
-    "owners": {
-      "cardTitle": "J’ai une propriété",
-      "cardText": "[Pendiente] Texte pour les propriétaires.",
-      "title": "Publiez votre propriété avec ALIA",
-      "intro": "[Pendiente] Introduction de la section.",
-      "benefits": {
-        "one": {
-          "title": "[Pendiente] Avantage 1",
-          "text": "[Pendiente] Texte court de l’avantage."
-        },
-        "two": {
-          "title": "[Pendiente] Avantage 2",
-          "text": "[Pendiente] Texte court de l’avantage."
-        },
-        "three": {
-          "title": "[Pendiente] Avantage 3",
-          "text": "[Pendiente] Texte court de l’avantage."
+    "heroEyebrow": "Rejoignez ALIA",
+    "back": "Retour",
+    "progress": "Question {current} sur {total}",
+    "doneLabel": "Terminé",
+    "keyHint": "Raccourci : appuyez sur la lettre de chaque option.",
+    "restart": "Recommencer",
+    "summaryLabel": "Vos réponses",
+    "editAnswer": "Modifier la réponse : {answer}",
+    "contactMissing": "[Pendiente] Numéro WhatsApp manquant dans Panneau → Contenu.",
+    "quiz": {
+      "audience": {
+        "title": "Comment souhaitez-vous rejoindre ALIA ?",
+        "help": "[Pendiente] Texte d’appui de la première question.",
+        "short": "Profil"
+      },
+      "propertyType": {
+        "title": "Quel type de propriété avez-vous ?",
+        "help": "[Pendiente] Texte d’appui.",
+        "short": "Type",
+        "options": {
+          "house": "Maison",
+          "apartment": "Appartement",
+          "other": "Autre type"
         }
       },
-      "steps": {
-        "one": "[Pendiente] Étape 1",
-        "two": "[Pendiente] Étape 2",
-        "three": "[Pendiente] Étape 3"
+      "location": {
+        "title": "Où se trouve votre propriété ?",
+        "help": "[Pendiente] Texte d’appui.",
+        "short": "Lieu",
+        "options": {
+          "other": "Ailleurs"
+        }
       },
-      "cta": "Je veux publier ma propriété",
-      "whatsappMessage": "Bonjour, je veux publier ma propriété avec ALIA.",
-      "faq": {
-        "one": {
-          "question": "[Pendiente] Question 1",
-          "answer": "[Pendiente] Réponse."
-        },
-        "two": {
-          "question": "[Pendiente] Question 2",
-          "answer": "[Pendiente] Réponse."
-        },
-        "three": {
-          "question": "[Pendiente] Question 3",
-          "answer": "[Pendiente] Réponse."
+      "rental": {
+        "title": "Comment souhaitez-vous la louer ?",
+        "help": "[Pendiente] Texte d’appui.",
+        "short": "Location",
+        "options": {
+          "nightly": "À la nuit (vacances)",
+          "annual": "À l’année",
+          "both": "Les deux"
+        }
+      },
+      "referAudience": {
+        "title": "À qui recommanderiez-vous ALIA ?",
+        "help": "[Pendiente] Texte d’appui.",
+        "short": "Recommanderait à",
+        "options": {
+          "guests": "Des voyageurs qui cherchent un séjour",
+          "owners": "Des propriétaires",
+          "both": "Aux deux"
+        }
+      },
+      "channel": {
+        "title": "Comment recommandez-vous d’habitude ?",
+        "help": "[Pendiente] Texte d’appui.",
+        "short": "Canal",
+        "options": {
+          "social": "Sur les réseaux sociaux",
+          "whatsapp": "Sur WhatsApp",
+          "person": "En personne"
+        }
+      },
+      "reach": {
+        "title": "Combien de personnes touchez-vous, environ ?",
+        "help": "[Pendiente] Texte d’appui.",
+        "short": "Portée",
+        "options": {
+          "few": "Quelques proches",
+          "some": "Un cercle moyen",
+          "many": "Beaucoup"
         }
       }
     },
-    "referrers": {
-      "cardTitle": "Je veux recommander",
-      "cardText": "[Pendiente] Texte pour les parrains.",
-      "title": "Recommandez ALIA et gagnez",
-      "intro": "[Pendiente] Introduction de la section.",
+    "owners": {
+      "cardTitle": "J’ai une propriété",
+      "cardText": "[Pendiente] Texte court pour les propriétaires.",
+      "doneTitle": "Merci. Nous pouvons commencer.",
+      "doneText": "[Pendiente] Ce qui se passe après l’envoi.",
       "benefits": {
         "one": {
           "title": "[Pendiente] Avantage 1",
@@ -906,27 +932,30 @@
           "text": "[Pendiente] Texte court de l’avantage."
         }
       },
-      "steps": {
-        "one": "[Pendiente] Étape 1",
-        "two": "[Pendiente] Étape 2",
-        "three": "[Pendiente] Étape 3"
-      },
-      "cta": "Je veux devenir parrain",
-      "whatsappMessage": "Bonjour, je veux devenir parrain ALIA.",
-      "faq": {
+      "cta": "Envoyer sur WhatsApp",
+      "whatsappMessage": "Bonjour, je veux publier ma propriété avec ALIA. {summary}."
+    },
+    "referrers": {
+      "cardTitle": "Je veux recommander",
+      "cardText": "[Pendiente] Texte court pour les parrains.",
+      "doneTitle": "Merci. Vous êtes presque parrain.",
+      "doneText": "[Pendiente] Ce qui se passe après l’envoi.",
+      "benefits": {
         "one": {
-          "question": "[Pendiente] Question 1",
-          "answer": "[Pendiente] Réponse."
+          "title": "[Pendiente] Avantage 1",
+          "text": "[Pendiente] Texte court de l’avantage."
         },
         "two": {
-          "question": "[Pendiente] Question 2",
-          "answer": "[Pendiente] Réponse."
+          "title": "[Pendiente] Avantage 2",
+          "text": "[Pendiente] Texte court de l’avantage."
         },
         "three": {
-          "question": "[Pendiente] Question 3",
-          "answer": "[Pendiente] Réponse."
+          "title": "[Pendiente] Avantage 3",
+          "text": "[Pendiente] Texte court de l’avantage."
         }
       },
+      "cta": "Envoyer sur WhatsApp",
+      "whatsappMessage": "Bonjour, je veux devenir parrain ALIA. {summary}.",
       "ctaRegister": "Créer un compte",
       "ctaRegisterHint": "Il faut un compte enregistré pour devenir parrain."
     }

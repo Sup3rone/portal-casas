@@ -527,3 +527,8 @@ html.detail-free-scroll .detail-fullpage #reservar { scroll-snap-align: none; }
   .detail-fullpage { scroll-behavior: auto; }
   .detail-fullpage [data-section-active="true"] { animation: none; }
 }
+
+/* T-4944: /unete es un cuestionario a pantalla completa: el body mide la pantalla y no se desplaza;
+ el main ocupa lo que deja el header (JoinQuiz desplaza por dentro solo en pantallas muy bajas). */
+body:has(main[data-join-quiz]) { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+main[data-join-quiz] { flex: 1 1 auto; min-height: 0; }

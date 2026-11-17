@@ -853,11 +853,14 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 | Ruta | Archivo | Qué muestra |
 |---|---|---|
 | `/{locale}/nosotros` | `app/[locale]/nosotros/page.tsx` | Hero (imagen y título de Panel → Contenido → Sobre nosotros), historia (`about_*` del panel, o relleno si está vacío), 3 valores, contacto (Instagram, Facebook y WhatsApp del panel; la sección no sale si no hay ninguno) y botones a `/casas` y `/unete`. |
-| `/{locale}/unete` | `app/[locale]/unete/page.tsx` | Hero con selector de dos tarjetas → `#duenos` y `#referidores`. Cada sección: intro, 3 beneficios, 3 pasos, botón y 3 preguntas frecuentes. |
+| `/{locale}/unete` | `app/[locale]/unete/page.tsx` + `components/JoinQuiz.tsx` | Cuestionario a pantalla completa, sin scroll: una pregunta por pantalla, elegir avanza. Al final: resumen editable, 3 beneficios y la acción. Foto de «Sobre nosotros» al costado en escritorio. |
 
-- **Dos audiencias.** Dueños = rol `COLLABORATOR` (botón de WhatsApp con mensaje prellenado). Referidores = tabla `Partner` (con sesión → WhatsApp; sin sesión → `/registro`, porque el referidor necesita una cuenta registrada, ver §13).
+- **Dos audiencias, cuatro preguntas cada una** (`lib/join-quiz.ts`). Dueños = rol `COLLABORATOR`: perfil → tipo de propiedad → ubicación (estados con casas publicadas + «otro lugar»; sin estados se omite) → renta (por noches, anual, las dos; igual que `rentalType`). Referidores = tabla `Partner`: perfil → a quién recomendaría → canal → alcance. Las preguntas de referidores son una propuesta: el negocio debe confirmarlas.
+- **Al final:** dueños → WhatsApp con las respuestas en el mensaje («Tipo: Casa. Ubicación: Jalisco. Renta: Por año»). Referidores con sesión → WhatsApp; sin sesión → `/registro` (necesitan cuenta registrada, ver §13).
+- **Navegación:** las respuestas viven en el hash (`#owners/house/Jalisco`), así que funcionan el Atrás del navegador y un enlace directo a un paso; un hash inválido se recorta al prefijo válido. Teclado: A/B/C o 1/2/3 eligen; el foco pasa a cada pregunta nueva.
+- **Sin scroll:** `body:has(main[data-join-quiz])` mide `100dvh` sin desbordarse (`globals.css`) y `Footer.tsx` no se pinta en `/unete`. En pantallas muy bajas solo el bloque de la pregunta se desplaza por dentro.
 - **WhatsApp:** número global `contact_whatsapp` del panel (`wa.me/<número>?text=…`, `whatsappHref` en `lib/public-pages.ts`). Sin número válido el botón no se pinta.
-- **Componentes de servidor reutilizables:** `PageHero`, `BenefitGrid`, `StepsList`, `FaqList` (con `<details>`, sin JS) y `WhatsappCta`.
+- **Componentes:** `PageHero` y `BenefitGrid` (servidor, en /nosotros), `WhatsappCta` (ambas) y `JoinQuiz` (cliente, con `JoinQuiz.module.css`: entrada por pantalla, hover y pulsación; todo quieto con reduced-motion).
 - **Textos:** namespaces `about.*` y `join.*`, más `nav.nosotros`, `nav.unete` y `seo.about*` / `seo.join*`, en `messages/{es,en,fr}.json`. No hay cambios de base de datos.
 - **Carga:** las cubre `app/[locale]/loading.tsx` (emblema, T-4835). La animación de primera carga (`SITE_INTRO_PATH`) no se activa en estas rutas.
 
@@ -867,8 +870,9 @@ Todo lo que lleva `[Pendiente]` en los tres idiomas (`grep -n "\[Pendiente\]" ap
 
 1. **Nosotros:** historia (o rellenarla en el panel), 3 valores (título y texto), título y texto de cierre, descripción SEO. Imagen vertical en el panel si aún no hay.
 2. **Únete, general:** propuesta de valor del hero, descripción SEO.
-3. **Únete, dueños:** texto de la tarjeta, intro, 3 beneficios, 3 pasos y 3 preguntas con respuesta. Confirmar el mensaje prellenado de WhatsApp.
-4. **Únete, referidores:** lo mismo, y qué se promete del % (hoy el referidor ve códigos, conteos y %, sin importes).
-5. Fotos propias para los héroes, si se quieren.
+3. **Únete, preguntas:** el texto de apoyo de cada pregunta; confirmar las preguntas y opciones (sobre todo las de referidores).
+4. **Únete, dueños:** texto de la tarjeta, qué pasa después de enviar, 3 beneficios. Confirmar el mensaje prellenado de WhatsApp.
+5. **Únete, referidores:** lo mismo, y qué se promete del % (hoy el referidor ve códigos, conteos y %, sin importes).
+6. Fotos propias para los héroes y el costado del cuestionario, si se quieren.
 
 Fase 2 (fuera de T-4944): enlaces en menú y footer, quitar `noindex`, formulario propio con guardado en BD y textos editables desde el panel (exigiría claves nuevas en `SiteContent` y SQL por el CHECK).

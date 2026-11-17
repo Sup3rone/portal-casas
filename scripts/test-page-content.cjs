@@ -33,7 +33,7 @@ async function main() {
 
   // --- Validación. ---
   const ok = lib.pageContentInput('about', { texts: { es: { 'about.ctaTitle': '  Ven a vernos  ', 'about.ctaText': '   ' }, en: {}, fr: {} }, images: { hero: 'https://qa.public.blob.vercel-storage.com/hero.jpg' } });
-  assert.deepEqual(ok, { texts: { es: { 'about.ctaTitle': 'Ven a vernos' }, en: {}, fr: {} }, images: { hero: 'https://qa.public.blob.vercel-storage.com/hero.jpg' } }, 'Recorta y descarta vacíos');
+  assert.deepEqual(ok, { texts: { es: { 'about.ctaTitle': 'Ven a vernos' }, en: {}, fr: {} }, images: { hero: 'https://qa.public.blob.vercel-storage.com/hero.jpg' }, closed: false }, 'Recorta y descarta vacíos');
   assert.deepEqual(lib.pageContentInput('join', {}), lib.emptyPageContent());
   const rejects = (page, value, expected) => assert.throws(() => lib.pageContentInput(page, value), error => error.code === expected, JSON.stringify(value).slice(0, 80));
   rejects('about', null, 'INVALID_PAGE_CONTENT');
@@ -134,6 +134,40 @@ async function main() {
   assert.ok(panel.includes('{summary}'), 'Explica dónde van las respuestas en el mensaje de WhatsApp');
   assert.equal((panel.match(/role="tab"/g) || []).length, 6, 'Pestañas es/en/fr por página');
   assert.ok(panel.includes('hero.jpg') && panel.includes('side.jpg'));
+  setSession(null);
+
+  // --- «No estamos disponibles»: solo /unete, booleano, y la página muestra el aviso en vez del cuestionario. ---
+  assert.equal(lib.pageContentInput('join', { closed: true }).closed, true);
+  assert.equal(lib.pageContentInput('join', {}).closed, false);
+  assert.equal(lib.parsePageContent('join', JSON.stringify({ texts: {}, images: {} })).closed, false, 'JSON anterior sin closed = abierta');
+  rejects('join', { closed: 'true' }, 'INVALID_PAGE_CONTENT');
+  rejects('about', { closed: true }, 'INVALID_PAGE_CONTENT');
+  assert.equal(lib.pageContentInput('about', { closed: false }).closed, false);
+  setSession({ user: { id: 'admin' } });
+  assert.equal((await put({ ...joinBody, closed: true, texts: { es: { ...joinBody.texts.es, 'join.closed.text': 'Volvemos en enero.' } } })).status, 200);
+  assert.equal((await store.readPageContent('join')).closed, true);
+  assert.equal((await store.readPageContent('join')).texts.es['join.owners.cardTitle'], 'Soy dueño', 'Cerrar no borra los textos');
+  for (const locale of ['es', 'en', 'fr']) {
+    setLocale(locale);
+    const messages = messagesFor(locale);
+    const html = render(locale, await join.default({ params: Promise.resolve({ locale }) }));
+    assert.ok(html.includes('data-join-closed') && html.includes('data-join-quiz'), `${locale}: aviso a pantalla completa, sin scroll`);
+    assert.ok(!html.includes('data-option'), `${locale}: sin cuestionario`);
+    assert.ok(html.includes(esc(messages.join.closed.title)));
+    assert.ok(html.includes(esc(locale === 'es' ? 'Volvemos en enero.' : messages.join.closed.text)), `${locale}: texto editable con respaldo`);
+    assert.ok(html.includes(`href="/${locale}/casas"`) && html.includes(esc(messages.join.closed.cta)));
+    assert.equal((html.match(/<h1/g) || []).length, 1);
+  }
+  setLocale('es');
+  const closedPanel = render('es', await ContentPage({ params: Promise.resolve({ locale: 'es' }) }));
+  const joinEditor = closedPanel.split('data-page-editor="join"')[1], aboutEditor = closedPanel.split('data-page-editor="about"')[1].split('data-page-editor="join"')[0];
+  assert.match(joinEditor, /<input type="checkbox"[^>]*name="closed"[^>]*checked/, 'Casilla marcada en el editor de Únete');
+  assert.ok(joinEditor.includes(esc(messagesFor('es').panelPages.closedOn)), 'Avisa que la página está cerrada');
+  assert.ok(!aboutEditor.includes('name="closed"'), 'Nosotros no tiene casilla');
+  assert.equal((await put({ ...joinBody, closed: false })).status, 200);
+  setLocale('es');
+  const reopened = render('es', await join.default({ params: Promise.resolve({ locale: 'es' }) }));
+  assert.ok(!reopened.includes('data-join-closed') && reopened.includes('data-option="owners"'), 'Desmarcar reabre el cuestionario');
   setSession(null);
 
   console.log('OK páginas editables T-4944: validación, permisos, SQL pendiente, guardado aislado, lectura con respaldo por idioma, SSR y panel.');

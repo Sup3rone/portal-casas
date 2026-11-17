@@ -961,6 +961,11 @@
       "whatsappMessage": "Hola, quiero ser referidor de ALIA. {summary}.",
       "ctaRegister": "Crear cuenta",
       "ctaRegisterHint": "Para ser referidor necesitas una cuenta registrada."
+    },
+    "closed": {
+      "title": "Lo sentimos",
+      "text": "De momento no está disponible. Vuelve pronto.",
+      "cta": "Ver casas"
     }
   },
   "panelPages": {
@@ -1006,7 +1011,8 @@
       "done": {
         "owners": "Pantalla final de dueños",
         "referrers": "Pantalla final de referidores"
-      }
+      },
+      "closed": "Aviso de no disponible"
     },
     "roles": {
       "eyebrow": "Texto pequeño superior",
@@ -1028,6 +1034,9 @@
       "home": "Inicio: videos, destacadas, Sobre nosotros, redes y WhatsApp.",
       "about": "/nosotros: textos, valores, cierre e imagen de cabecera.",
       "join": "/unete: preguntas, opciones, pantallas finales y foto lateral."
-    }
+    },
+    "closedLabel": "No estamos disponibles",
+    "closedHint": "Al marcarla y guardar, /unete deja de mostrar el cuestionario y muestra el aviso «Lo sentimos, de momento no está disponible». Desmárcala para volver a abrirla.",
+    "closedOn": "Ahora /unete muestra el aviso de no disponible."
   }
 }

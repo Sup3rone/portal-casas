@@ -15,7 +15,7 @@ export const readPageContent = cache(async (page: PageContentPage) => {
 /** Textos editados de un idioma, por clave completa de messages (about.ctaTitle, seo.joinTitle…). */
 export async function pageTexts(page: PageContentPage, locale: string) {
   const content = await readPageContent(page);
-  return { texts: content.texts[(['es', 'en', 'fr'].includes(locale) ? locale : 'es') as PageContentLocale], images: content.images };
+  return { texts: content.texts[(['es', 'en', 'fr'].includes(locale) ? locale : 'es') as PageContentLocale], images: content.images, closed: content.closed };
 }
 
 export async function savePageContent(page: PageContentPage, input: unknown) {

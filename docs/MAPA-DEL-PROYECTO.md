@@ -872,6 +872,7 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 - **Dónde se guarda:** dos claves JSON en `SiteContent`, `page_about` y `page_join` (`{ texts: { es, en, fr }, images }`). Lectura y guardado en `lib/page-content-store.ts`, aparte de `saveSiteContent` a propósito: aquel reescribe todas sus claves en cada guardado. Endpoint: `PUT /api/panel/page-content`, con la comprobación de ADMIN dentro del mismo statement.
 - **Validación:** solo claves conocidas; 200 caracteres en títulos y botones, 1000 en textos; imágenes https sin credenciales. Un JSON dañado en BD hace que la página use los textos por defecto, nunca la rompe.
 - **WhatsApp:** en el mensaje editado, `{summary}` marca dónde van las respuestas; si falta, van al final.
+- **«No estamos disponibles»** (solo /unete): casilla arriba del editor de Únete; se guarda como `closed: true` en el mismo JSON `page_join` (no necesita SQL extra). Con ella, /unete muestra a pantalla completa el aviso `join.closed.*` («Lo sentimos», texto y botón «Ver casas»), también editable por idioma, en vez del cuestionario. Los textos del cuestionario se conservan; desmarcar lo reabre.
 - **SQL obligatorio antes del deploy:** `scripts/sql/site-content-pages.sql` amplía el CHECK `SiteContent_key_check` con `page_about` y `page_join`. Sin él, las páginas funcionan con sus textos por defecto, pero guardar responde 409 `PAGE_CONTENT_NOT_READY` («falta aplicar el SQL»).
 - **Test:** `scripts/test-page-content.cjs`.
 

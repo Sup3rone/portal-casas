@@ -13,7 +13,8 @@ export type PageContentLocale = typeof pageContentLocales[number];
 export type PageFieldRole = 'eyebrow' | 'title' | 'help' | 'text' | 'button' | 'whatsappMessage' | 'optionTitle' | 'optionText' | 'option' | 'itemTitle' | 'itemText' | 'seoTitle' | 'seoDescription';
 export type PageField = { key: string; role: PageFieldRole; n?: number };
 export type PageGroup = { id: string; fields: PageField[] };
-export type PageContentValue = { texts: Record<PageContentLocale, Record<string, string>>; images: Record<string, string> };
+// closed (solo /unete): «no estamos disponibles»; la página muestra el aviso en vez del cuestionario.
+export type PageContentValue = { texts: Record<PageContentLocale, Record<string, string>>; images: Record<string, string>; closed: boolean };
 
 const longRoles = new Set<PageFieldRole>(['help', 'text', 'whatsappMessage', 'optionText', 'itemText', 'seoDescription']);
 export const pageTextLimit = (role: PageFieldRole) => longRoles.has(role) ? 1000 : 200;
@@ -57,6 +58,7 @@ export const pageContentGroups: Record<PageContentPage, PageGroup[]> = {
     question('channel', ['social', 'whatsapp', 'person']),
     question('reach', ['few', 'some', 'many']),
     done('referrers'),
+    { id: 'closed', fields: [{ key: 'join.closed.title', role: 'title' }, { key: 'join.closed.text', role: 'text' }, { key: 'join.closed.cta', role: 'button' }] },
     { id: 'seo', fields: [{ key: 'seo.joinTitle', role: 'seoTitle' }, { key: 'seo.joinDescription', role: 'seoDescription' }] },
   ],
 };
@@ -64,7 +66,9 @@ export const pageContentGroups: Record<PageContentPage, PageGroup[]> = {
 export const pageContentImages: Record<PageContentPage, string[]> = { about: ['hero'], join: ['side'] };
 
 export const pageFields = (page: PageContentPage) => pageContentGroups[page].flatMap(group => group.fields);
-export const emptyPageContent = (): PageContentValue => ({ texts: { es: {}, en: {}, fr: {} }, images: {} });
+export const emptyPageContent = (): PageContentValue => ({ texts: { es: {}, en: {}, fr: {} }, images: {}, closed: false });
+/** Páginas que se pueden cerrar con la casilla «No estamos disponibles». */
+export const closablePages: readonly PageContentPage[] = ['join'];
 
 export class PageContentError extends Error {
   constructor(public code: 'INVALID_PAGE_CONTENT' | 'PAGE_TEXT_TOO_LONG' | 'INVALID_PAGE_IMAGE' | 'PAGE_CONTENT_NOT_READY') { super('validation'); }
@@ -76,7 +80,9 @@ function plainObject(value: unknown): value is Record<string, unknown> {
 
 /** Valida y normaliza lo que manda el panel. Solo campos conocidos; vacíos fuera; imágenes https sin credenciales. */
 export function pageContentInput(page: PageContentPage, input: unknown): PageContentValue {
-  if (!plainObject(input) || Object.keys(input).some(key => !['texts', 'images'].includes(key))) throw new PageContentError('INVALID_PAGE_CONTENT');
+  if (!plainObject(input) || Object.keys(input).some(key => !['texts', 'images', 'closed'].includes(key))) throw new PageContentError('INVALID_PAGE_CONTENT');
+  const closed = input.closed ?? false;
+  if (typeof closed !== 'boolean' || (closed && !closablePages.includes(page))) throw new PageContentError('INVALID_PAGE_CONTENT');
   const texts = input.texts ?? {}, images = input.images ?? {};
   if (!plainObject(texts) || !plainObject(images) || Object.keys(texts).some(locale => !pageContentLocales.includes(locale as PageContentLocale))) throw new PageContentError('INVALID_PAGE_CONTENT');
   const roles = new Map(pageFields(page).map(field => [field.key, field.role]));
@@ -102,6 +108,7 @@ export function pageContentInput(page: PageContentPage, input: unknown): PageCon
     } catch { throw new PageContentError('INVALID_PAGE_IMAGE'); }
     value.images[name] = url;
   }
+  value.closed = closed;
   return value;
 }
 

@@ -6,7 +6,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { pageContentGroups, pageContentImages, pageContentLocales, pageFields, pageTextLimit, type PageContentLocale, type PageContentPage, type PageContentValue, type PageField } from '@/lib/page-content';
+import { closablePages, pageContentGroups, pageContentImages, pageContentLocales, pageFields, pageTextLimit, type PageContentLocale, type PageContentPage, type PageContentValue, type PageField } from '@/lib/page-content';
 import { optimizePhoto, photoMetadata, photoTypes, photoCompression, PhotoUploadError, type PhotoType } from '@/lib/photo-upload';
 import { panelRequest, panelResponseError, panelErrorKey, inputClass, buttonClass } from './request';
 
@@ -17,6 +17,8 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
   const id = useId();
   const [locale, setLocale] = useState<PageContentLocale>('es');
   const [images, setImages] = useState<Record<string, string>>(initial.images);
+  const closable = closablePages.includes(page);
+  const [closed, setClosed] = useState(initial.closed), [savedClosed, setSavedClosed] = useState(initial.closed);
   const [edited, setEdited] = useState(() => Object.fromEntries(pageContentLocales.map(language => [language, Object.keys(initial.texts[language]).length])) as Record<PageContentLocale, number>);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   const [uploading, setUploading] = useState<string | null>(null), [uploadStatus, setUploadStatus] = useState('');
@@ -37,7 +39,8 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
     event.preventDefault(); setBusy(true); setMessage('');
     try {
       const texts = collect(event.currentTarget);
-      await panelRequest('/api/panel/page-content', 'PUT', { page, texts, images });
+      await panelRequest('/api/panel/page-content', 'PUT', { page, texts, images, ...(closable ? { closed } : {}) });
+      setSavedClosed(closed);
       setEdited(Object.fromEntries(pageContentLocales.map(language => [language, Object.keys(texts[language]).length])) as Record<PageContentLocale, number>);
       setMessage('saved'); router.refresh();
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
@@ -69,6 +72,15 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
 
   return <form onSubmit={save} data-page-editor={page} className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
     <fieldset disabled={busy || Boolean(uploading)} className="space-y-6">
+      {/* T-4944: cierre temporal de /unete; se aplica al guardar. */}
+      {closable && <div className={`rounded-xl border p-4 ${closed ? 'border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/40' : 'border-gray-200 dark:border-gray-700'}`}>
+        <label className="flex min-h-11 cursor-pointer items-center gap-3 font-medium">
+          <input type="checkbox" name="closed" checked={closed} onChange={event => setClosed(event.target.checked)} className="h-5 w-5 accent-green-700" />
+          {t('closedLabel')}
+        </label>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{t('closedHint')}</p>
+        {savedClosed && <p role="status" className="mt-2 text-sm font-medium text-amber-800 dark:text-amber-300">{t('closedOn')}</p>}
+      </div>}
       <div className="space-y-4">
         <h3 className="font-medium">{t('imagesTitle')}</h3>
         {pageContentImages[page].map(name => <div key={name} className="space-y-2 rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">

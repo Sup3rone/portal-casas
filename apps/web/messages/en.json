@@ -961,6 +961,11 @@
       "whatsappMessage": "Hi, I want to be an ALIA referrer. {summary}.",
       "ctaRegister": "Create account",
       "ctaRegisterHint": "You need a registered account to become a referrer."
+    },
+    "closed": {
+      "title": "We are sorry",
+      "text": "This is not available at the moment. Please come back soon.",
+      "cta": "Browse homes"
     }
   },
   "panelPages": {
@@ -1006,7 +1011,8 @@
       "done": {
         "owners": "Owners final screen",
         "referrers": "Referrers final screen"
-      }
+      },
+      "closed": "Not available notice"
     },
     "roles": {
       "eyebrow": "Small top text",
@@ -1028,6 +1034,9 @@
       "home": "Home: videos, featured homes, About us, social links and WhatsApp.",
       "about": "/nosotros: texts, values, closing and header image.",
       "join": "/unete: questions, options, final screens and side photo."
-    }
+    },
+    "closedLabel": "We are not available",
+    "closedHint": "When ticked and saved, /unete stops showing the questionnaire and shows the «not available» notice. Untick it to open it again.",
+    "closedOn": "/unete now shows the not available notice."
   }
 }

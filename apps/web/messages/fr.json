@@ -962,6 +962,11 @@
       "whatsappMessage": "Bonjour, je veux devenir parrain ALIA. {summary}.",
       "ctaRegister": "Créer un compte",
       "ctaRegisterHint": "Il faut un compte enregistré pour devenir parrain."
+    },
+    "closed": {
+      "title": "Nous sommes désolés",
+      "text": "Ce n’est pas disponible pour le moment. Revenez bientôt.",
+      "cta": "Voir les maisons"
     }
   },
   "panelPages": {
@@ -1007,7 +1012,8 @@
       "done": {
         "owners": "Écran final propriétaires",
         "referrers": "Écran final parrains"
-      }
+      },
+      "closed": "Avis de non-disponibilité"
     },
     "roles": {
       "eyebrow": "Petit texte supérieur",
@@ -1029,6 +1035,9 @@
       "home": "Accueil : vidéos, maisons à la une, À propos, réseaux et WhatsApp.",
       "about": "/nosotros : textes, valeurs, conclusion et image d’en-tête.",
       "join": "/unete : questions, options, écrans finaux et photo latérale."
-    }
+    },
+    "closedLabel": "Nous ne sommes pas disponibles",
+    "closedHint": "Cochée et enregistrée, /unete n’affiche plus le questionnaire mais l’avis « pas disponible ». Décochez-la pour la rouvrir.",
+    "closedOn": "/unete affiche maintenant l’avis de non-disponibilité."
   }
 }

@@ -176,7 +176,11 @@
       "baseWeekendPrice": "Prix le week-end (MXN)"
     },
     "invalidIcalUrl": "Lien iCal invalide : utilisez un lien https public d’Airbnb, Booking, VRBO ou Google (.ics).",
-    "invalidReferrerAccount": "Aucun compte client inscrit avec cet e-mail, ou il est déjà associé à un autre apporteur. Demandez-lui de s’inscrire sur le site puis réessayez."
+    "invalidReferrerAccount": "Aucun compte client inscrit avec cet e-mail, ou il est déjà associé à un autre apporteur. Demandez-lui de s’inscrire sur le site puis réessayez.",
+    "invalidPageContent": "Les textes de la page ne sont pas valides. Rechargez et réessayez.",
+    "pageTextTooLong": "Un texte est trop long.",
+    "invalidPageImage": "L’image doit être une adresse https valide.",
+    "pageContentNotReady": "Le SQL site-content-pages.sql n’est pas encore appliqué à la base. Impossible d’enregistrer d’ici là."
   },
   "nav": {
     "menu": "Menu",
@@ -958,6 +962,68 @@
       "whatsappMessage": "Bonjour, je veux devenir parrain ALIA. {summary}.",
       "ctaRegister": "Créer un compte",
       "ctaRegisterHint": "Il faut un compte enregistré pour devenir parrain."
+    }
+  },
+  "panelPages": {
+    "title": "Pages",
+    "intro": "Textes et images de « À propos » et « Rejoignez-nous ». Un champ vide utilise le texte par défaut, affiché en gris.",
+    "pages": {
+      "about": "À propos (/nosotros)",
+      "join": "Rejoignez-nous (/unete)"
+    },
+    "customized": "{count} sur {total} textes personnalisés dans cette langue",
+    "languages": "Langue",
+    "language": {
+      "es": "Espagnol",
+      "en": "Anglais",
+      "fr": "Français"
+    },
+    "imagesTitle": "Images",
+    "images": {
+      "hero": "Image d’en-tête",
+      "heroHint": "Vide = l’image de « À propos ». Horizontale, affichée sur toute la largeur.",
+      "side": "Photo latérale du questionnaire",
+      "sideHint": "Vide = l’image de « À propos ». Verticale ; visible seulement sur ordinateur."
+    },
+    "storyHint": "L’histoire se modifie plus haut, dans « À propos ». Ce texte n’apparaît que si cette histoire est vide.",
+    "whatsappHint": "Écrivez {summary} là où doivent aller les réponses du questionnaire ; sinon elles vont à la fin.",
+    "defaultLabel": "Par défaut : {text}",
+    "groups": {
+      "hero": "En-tête",
+      "story": "Histoire",
+      "values": "Valeurs",
+      "contact": "Contact",
+      "closing": "Conclusion",
+      "seo": "Moteurs de recherche et réseaux",
+      "start": "Premier écran",
+      "question": {
+        "propertyType": "Question propriétaires : type de bien",
+        "location": "Question propriétaires : lieu",
+        "rental": "Question propriétaires : type de location",
+        "referAudience": "Question parrains : à qui",
+        "channel": "Question parrains : canal",
+        "reach": "Question parrains : portée"
+      },
+      "done": {
+        "owners": "Écran final propriétaires",
+        "referrers": "Écran final parrains"
+      }
+    },
+    "roles": {
+      "eyebrow": "Petit texte supérieur",
+      "title": "Titre",
+      "help": "Texte d’appui",
+      "text": "Texte",
+      "button": "Texte du bouton",
+      "whatsappMessage": "Message WhatsApp",
+      "optionTitle": "Option {n} : titre",
+      "optionText": "Option {n} : description",
+      "option": "Option {n}",
+      "optionOther": "Option « ailleurs » (les états viennent des maisons publiées)",
+      "itemTitle": "Élément {n} : titre",
+      "itemText": "Élément {n} : texte",
+      "seoTitle": "Titre pour les moteurs",
+      "seoDescription": "Description pour les moteurs"
     }
   }
 }

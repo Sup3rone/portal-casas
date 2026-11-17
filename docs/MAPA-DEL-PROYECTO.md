@@ -864,7 +864,18 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 - **Textos:** namespaces `about.*` y `join.*`, más `nav.nosotros`, `nav.unete` y `seo.about*` / `seo.join*`, en `messages/{es,en,fr}.json`. No hay cambios de base de datos.
 - **Carga:** las cubre `app/[locale]/loading.tsx` (emblema, T-4835). La animación de primera carga (`SITE_INTRO_PATH`) no se activa en estas rutas.
 
-### 14.1 Contenido pendiente que debe dar el negocio
+### 14.1 Editar textos e imágenes desde el panel
+
+**Panel → Contenido → Páginas** (solo ADMIN): un editor por página (`components/panel/PageContentEditor.tsx`), con pestañas es/en/fr. Cada campo vacío muestra en gris el texto por defecto de `messages/*.json`, que es lo que se publica mientras nadie escriba otro.
+
+- **Qué se edita** (`lib/page-content.ts`, `pageContentGroups`): todas las palabras de /nosotros y /unete (títulos, textos de apoyo, etiquetas de opciones, pantallas finales, beneficios, botones, mensajes de WhatsApp y SEO), más una imagen por página: cabecera de /nosotros y foto lateral de /unete. Vacía = imagen de «Sobre nosotros». **No** se edita la estructura (qué preguntas hay, cuántas opciones) ni las palabras de la interfaz (Atrás, «Pregunta 2 de 4»…). La historia sigue saliendo de «Sobre nosotros».
+- **Dónde se guarda:** dos claves JSON en `SiteContent`, `page_about` y `page_join` (`{ texts: { es, en, fr }, images }`). Lectura y guardado en `lib/page-content-store.ts`, aparte de `saveSiteContent` a propósito: aquel reescribe todas sus claves en cada guardado. Endpoint: `PUT /api/panel/page-content`, con la comprobación de ADMIN dentro del mismo statement.
+- **Validación:** solo claves conocidas; 200 caracteres en títulos y botones, 1000 en textos; imágenes https sin credenciales. Un JSON dañado en BD hace que la página use los textos por defecto, nunca la rompe.
+- **WhatsApp:** en el mensaje editado, `{summary}` marca dónde van las respuestas; si falta, van al final.
+- **SQL obligatorio antes del deploy:** `scripts/sql/site-content-pages.sql` amplía el CHECK `SiteContent_key_check` con `page_about` y `page_join`. Sin él, las páginas funcionan con sus textos por defecto, pero guardar responde 409 `PAGE_CONTENT_NOT_READY` («falta aplicar el SQL»).
+- **Test:** `scripts/test-page-content.cjs`.
+
+### 14.2 Contenido pendiente que debe dar el negocio
 
 Todo lo que lleva `[Pendiente]` en los tres idiomas (`grep -n "\[Pendiente\]" apps/web/messages/*.json`):
 
@@ -875,4 +886,4 @@ Todo lo que lleva `[Pendiente]` en los tres idiomas (`grep -n "\[Pendiente\]" ap
 5. **Únete, referidores:** lo mismo, y qué se promete del % (hoy el referidor ve códigos, conteos y %, sin importes).
 6. Fotos propias para los héroes y el costado del cuestionario, si se quieren.
 
-Fase 2 (fuera de T-4944): enlaces en menú y footer, quitar `noindex`, formulario propio con guardado en BD y textos editables desde el panel (exigiría claves nuevas en `SiteContent` y SQL por el CHECK).
+Fase 2 (fuera de T-4944): enlaces en menú y footer, quitar `noindex`, formulario propio con guardado en BD y la traducción automática por campo en el editor de Páginas.

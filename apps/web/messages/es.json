@@ -176,7 +176,11 @@
       "baseWeekendPrice": "Precio fin de semana (MXN)"
     },
     "invalidIcalUrl": "Enlace iCal no válido: usa un enlace https público de Airbnb, Booking, VRBO o Google (.ics).",
-    "invalidReferrerAccount": "No hay una cuenta de huésped registrada con ese correo, o ya está ligada a otro referidor. Pídele que se registre en el sitio y vuelve a intentar."
+    "invalidReferrerAccount": "No hay una cuenta de huésped registrada con ese correo, o ya está ligada a otro referidor. Pídele que se registre en el sitio y vuelve a intentar.",
+    "invalidPageContent": "Los textos de la página no son válidos. Recarga e inténtalo de nuevo.",
+    "pageTextTooLong": "Algún texto es demasiado largo.",
+    "invalidPageImage": "La imagen debe ser una dirección https válida.",
+    "pageContentNotReady": "Falta aplicar el SQL site-content-pages.sql en la base de datos. Hasta entonces no se puede guardar."
   },
   "nav": {
     "menu": "Menú",
@@ -957,6 +961,68 @@
       "whatsappMessage": "Hola, quiero ser referidor de ALIA. {summary}.",
       "ctaRegister": "Crear cuenta",
       "ctaRegisterHint": "Para ser referidor necesitas una cuenta registrada."
+    }
+  },
+  "panelPages": {
+    "title": "Páginas",
+    "intro": "Textos e imágenes de «Sobre nosotros» y «Únete». Un campo vacío usa el texto por defecto, que ves en gris.",
+    "pages": {
+      "about": "Sobre nosotros (/nosotros)",
+      "join": "Únete (/unete)"
+    },
+    "customized": "{count} de {total} textos personalizados en este idioma",
+    "languages": "Idioma",
+    "language": {
+      "es": "Español",
+      "en": "Inglés",
+      "fr": "Francés"
+    },
+    "imagesTitle": "Imágenes",
+    "images": {
+      "hero": "Imagen de cabecera",
+      "heroHint": "Vacía = la imagen de «Sobre nosotros». Horizontal, se ve a todo lo ancho.",
+      "side": "Foto lateral del cuestionario",
+      "sideHint": "Vacía = la imagen de «Sobre nosotros». Vertical; solo se ve en escritorio."
+    },
+    "storyHint": "La historia se edita arriba, en «Sobre nosotros». Este texto solo aparece si esa historia está vacía.",
+    "whatsappHint": "Escribe {summary} donde deben ir las respuestas del cuestionario; si no lo pones, van al final.",
+    "defaultLabel": "Por defecto: {text}",
+    "groups": {
+      "hero": "Cabecera",
+      "story": "Historia",
+      "values": "Valores",
+      "contact": "Contacto",
+      "closing": "Cierre",
+      "seo": "Buscadores y redes",
+      "start": "Primera pantalla",
+      "question": {
+        "propertyType": "Pregunta a dueños: tipo de propiedad",
+        "location": "Pregunta a dueños: ubicación",
+        "rental": "Pregunta a dueños: tipo de renta",
+        "referAudience": "Pregunta a referidores: a quién",
+        "channel": "Pregunta a referidores: canal",
+        "reach": "Pregunta a referidores: alcance"
+      },
+      "done": {
+        "owners": "Pantalla final de dueños",
+        "referrers": "Pantalla final de referidores"
+      }
+    },
+    "roles": {
+      "eyebrow": "Texto pequeño superior",
+      "title": "Título",
+      "help": "Texto de apoyo",
+      "text": "Texto",
+      "button": "Texto del botón",
+      "whatsappMessage": "Mensaje de WhatsApp",
+      "optionTitle": "Opción {n}: título",
+      "optionText": "Opción {n}: descripción",
+      "option": "Opción {n}",
+      "optionOther": "Opción «otro lugar» (los estados salen solos de las casas publicadas)",
+      "itemTitle": "Elemento {n}: título",
+      "itemText": "Elemento {n}: texto",
+      "seoTitle": "Título para buscadores",
+      "seoDescription": "Descripción para buscadores"
     }
   }
 }

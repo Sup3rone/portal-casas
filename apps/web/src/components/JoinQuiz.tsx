@@ -9,15 +9,21 @@ import { Link } from '@/i18n/navigation';
 import WhatsappCta from './WhatsappCta';
 import { unoptimizedFor } from '@/lib/image-src';
 import { whatsappHref } from '@/lib/public-pages';
+import { fillPageText } from '@/lib/page-content';
 import { OTHER_LOCATION, answerSummary, isComplete, optionIndexForKey, optionKey, parseHash, stepsFor, toHash, totalSteps, type Step } from '@/lib/join-quiz';
 import styles from './JoinQuiz.module.css';
 
-type Props = { states: string[]; whatsapp: string; signedIn: boolean; image?: string };
+type Props = { states: string[]; whatsapp: string; signedIn: boolean; image?: string; texts?: Record<string, string> };
 const benefitKeys = ['one', 'two', 'three'] as const;
 const primaryClass = 'inline-flex min-h-11 items-center justify-center rounded-full bg-green-700 px-6 py-3 text-sm font-medium tracking-wide text-white hover:bg-green-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:bg-green-600 dark:hover:bg-green-500';
 
-export default function JoinQuiz({ states, whatsapp, signedIn, image }: Props) {
-  const t = useTranslations('join');
+export default function JoinQuiz({ states, whatsapp, signedIn, image, texts = {} }: Props) {
+  const messages = useTranslations('join');
+  // Panel → Contenido → Páginas manda; lo vacío cae a messages/*.json.
+  const t = (key: string, params?: Record<string, string | number>) => {
+    const edited = texts[`join.${key}`];
+    return edited ? fillPageText(edited, params) : messages(key as Parameters<typeof messages>[0], params);
+  };
   const [answers, setAnswers] = useState<string[]>([]);
   const [chosen, setChosen] = useState<string | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -72,9 +78,9 @@ export default function JoinQuiz({ states, whatsapp, signedIn, image }: Props) {
   const label = (id: Step['id'], value: string) => {
     if (id === 'audience') return t(`${value as 'owners' | 'referrers'}.cardTitle`);
     if (id === 'location' && value !== OTHER_LOCATION) return value;
-    return t(`quiz.${id}.options.${value}` as Parameters<typeof t>[0]);
+    return t(`quiz.${id}.options.${value}`);
   };
-  const summary = complete ? answerSummary(steps, answers, label, id => t(`quiz.${id}.short` as Parameters<typeof t>[0])) : '';
+  const summary = complete ? answerSummary(steps, answers, label, id => t(`quiz.${id}.short`)) : '';
   const contactReady = Boolean(whatsappHref(whatsapp, 'x'));
 
   return (

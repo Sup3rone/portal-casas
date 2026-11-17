@@ -10,26 +10,29 @@ import WhatsappCta from '@/components/WhatsappCta';
 import { readSiteContent } from '@/lib/site-content';
 import { pageMetadata } from '@/lib/seo';
 import { aboutFromContent, withPublicPageRobots } from '@/lib/public-pages';
+import { pageTexts } from '@/lib/page-content-store';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'seo' });
-  return withPublicPageRobots(pageMetadata(locale, '/nosotros', t('aboutTitle'), t('aboutDescription')));
+  const [t, { texts }] = await Promise.all([getTranslations({ locale, namespace: 'seo' }), pageTexts('about', locale)]);
+  return withPublicPageRobots(pageMetadata(locale, '/nosotros', texts['seo.aboutTitle'] || t('aboutTitle'), texts['seo.aboutDescription'] || t('aboutDescription')));
 }
 
 const linkClass = 'inline-flex min-h-11 items-center justify-center rounded-full border border-green-700 px-6 py-3 text-sm font-medium tracking-wide text-green-800 hover:bg-green-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-950';
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'about' });
+  const messages = await getTranslations({ locale, namespace: 'about' });
   const social = await getTranslations({ locale, namespace: 'siteContent' });
-  const content = await readSiteContent();
+  const [content, page] = await Promise.all([readSiteContent(), pageTexts('about', locale)]);
+  // Panel → Contenido → Páginas manda; lo vacío cae a messages/*.json.
+  const t = (key: string) => page.texts[`about.${key}`] || messages(key as Parameters<typeof messages>[0]);
   const about = aboutFromContent(content, locale);
   const values = (['one', 'two', 'three'] as const).map(key => ({ title: t(`values.${key}.title`), text: t(`values.${key}.text`) }));
   const hasContact = Boolean(content.social_instagram || content.social_facebook || content.contact_whatsapp);
   return (
     <main data-public-page="nosotros" className={`public-paper ${loadingStyles.content}`}>
-      <PageHero eyebrow={t('heroEyebrow')} title={about.title || t('heroTitleFallback')} image={about.image || undefined} />
+      <PageHero eyebrow={t('heroEyebrow')} title={about.title || t('heroTitleFallback')} image={page.images.hero || about.image || undefined} />
       <Reveal as="section" className="about-reveal mx-auto max-w-3xl px-4 py-16">
         <h2 className="mb-6 text-center text-2xl font-light tracking-widest">{t('storyTitle')}</h2>
         <p data-about-story className="whitespace-pre-wrap break-words leading-relaxed">{about.text || t('storyFallback')}</p>

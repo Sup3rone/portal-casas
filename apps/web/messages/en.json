@@ -176,7 +176,11 @@
       "baseWeekendPrice": "Weekend price (MXN)"
     },
     "invalidIcalUrl": "Invalid iCal link: use a public https link from Airbnb, Booking, VRBO or Google (.ics).",
-    "invalidReferrerAccount": "There is no registered guest account with that email, or it is already linked to another referrer. Ask them to sign up on the site and try again."
+    "invalidReferrerAccount": "There is no registered guest account with that email, or it is already linked to another referrer. Ask them to sign up on the site and try again.",
+    "invalidPageContent": "The page texts are not valid. Reload and try again.",
+    "pageTextTooLong": "A text is too long.",
+    "invalidPageImage": "The image must be a valid https address.",
+    "pageContentNotReady": "The SQL site-content-pages.sql has not been applied to the database yet. Saving is not possible until then."
   },
   "nav": {
     "menu": "Menu",
@@ -957,6 +961,68 @@
       "whatsappMessage": "Hi, I want to be an ALIA referrer. {summary}.",
       "ctaRegister": "Create account",
       "ctaRegisterHint": "You need a registered account to become a referrer."
+    }
+  },
+  "panelPages": {
+    "title": "Pages",
+    "intro": "Texts and images for «About us» and «Join us». An empty field uses the default text, shown in grey.",
+    "pages": {
+      "about": "About us (/nosotros)",
+      "join": "Join us (/unete)"
+    },
+    "customized": "{count} of {total} texts customised in this language",
+    "languages": "Language",
+    "language": {
+      "es": "Spanish",
+      "en": "English",
+      "fr": "French"
+    },
+    "imagesTitle": "Images",
+    "images": {
+      "hero": "Header image",
+      "heroHint": "Empty = the «About us» image. Landscape, shown full width.",
+      "side": "Questionnaire side photo",
+      "sideHint": "Empty = the «About us» image. Portrait; only shown on desktop."
+    },
+    "storyHint": "The story is edited above, in «About us». This text only shows if that story is empty.",
+    "whatsappHint": "Write {summary} where the questionnaire answers should go; otherwise they go at the end.",
+    "defaultLabel": "Default: {text}",
+    "groups": {
+      "hero": "Header",
+      "story": "Story",
+      "values": "Values",
+      "contact": "Contact",
+      "closing": "Closing",
+      "seo": "Search engines and social",
+      "start": "First screen",
+      "question": {
+        "propertyType": "Owner question: property type",
+        "location": "Owner question: location",
+        "rental": "Owner question: rental type",
+        "referAudience": "Referrer question: who",
+        "channel": "Referrer question: channel",
+        "reach": "Referrer question: reach"
+      },
+      "done": {
+        "owners": "Owners final screen",
+        "referrers": "Referrers final screen"
+      }
+    },
+    "roles": {
+      "eyebrow": "Small top text",
+      "title": "Title",
+      "help": "Supporting text",
+      "text": "Text",
+      "button": "Button text",
+      "whatsappMessage": "WhatsApp message",
+      "optionTitle": "Option {n}: title",
+      "optionText": "Option {n}: description",
+      "option": "Option {n}",
+      "optionOther": "«Somewhere else» option (states come from published homes)",
+      "itemTitle": "Item {n}: title",
+      "itemText": "Item {n}: text",
+      "seoTitle": "Search title",
+      "seoDescription": "Search description"
     }
   }
 }

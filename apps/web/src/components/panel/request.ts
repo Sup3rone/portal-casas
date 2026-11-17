@@ -11,6 +11,7 @@ const codes: Record<string, string> = {
   INVALID_SECTION_CONTENT: 'invalidSectionContent', INVALID_SECTION_PHOTOS: 'invalidSectionPhotos', INVALID_HERO: 'invalidHero',
   ABOUT_TOO_LONG: 'aboutTooLong', INVALID_SOCIAL_URL: 'invalidSocialUrl', INVALID_CONTACT_WHATSAPP: 'invalidContactWhatsapp',
   INVALID_FEATURED_PROPERTY: 'invalidFeaturedProperty', INVALID_SITE_CONTENT: 'invalidSiteContent', INVALID_HOME_VIDEOS: 'invalidHomeVideos', INVALID_JSON: 'invalidRequest',
+  INVALID_PAGE_CONTENT: 'invalidPageContent', PAGE_TEXT_TOO_LONG: 'pageTextTooLong', INVALID_PAGE_IMAGE: 'invalidPageImage', PAGE_CONTENT_NOT_READY: 'pageContentNotReady',
   INVALID_FILE_TYPE: 'invalidPhotoType', INVALID_FILE_SIZE: 'invalidPhotoSize', INVALID_UPLOAD_REQUEST: 'invalidUploadRequest', UPLOAD_FAILED: 'uploadFailed',
 };
 const keys = new Set(['error', 'validation', 'forbidden', 'notFound', 'conflict', 'sessionExpired', 'networkError', ...Object.values(codes)]);

@@ -86,7 +86,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           {HOME_SEARCH_IN_HERO && <PropertySearchForm />}
         </div>
       </section>
-      {HOME_HERO_MEDIA_ENABLED && <div className="home-video-closing pointer-events-none absolute inset-x-0 bottom-0 h-24" aria-hidden="true" />}
+      {HOME_HERO_MEDIA_ENABLED && <div className="home-video-closing pointer-events-none absolute inset-x-0 bottom-0" aria-hidden="true" />}
       </div>
       {featured.length > 0 && <Reveal as="section" delay={200} className="about-reveal mx-auto max-w-6xl px-4 py-16">
         <h2 className="mb-8 text-center text-2xl font-light tracking-widest">{social('featuredTitle')}</h2>

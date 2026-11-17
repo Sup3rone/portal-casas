@@ -121,7 +121,16 @@ html { scroll-behavior: smooth; }
 /* Una sola superficie de video en home, con fallback estático y cierre al tema. */
 .home-video-scene { background-color: var(--color-gray-900); }
 .home-about-video { background: linear-gradient(to bottom, transparent, rgb(0 0 0 / 18%) 35%, rgb(0 0 0 / 28%)); }
-.home-video-closing { background: linear-gradient(to bottom, transparent, var(--background)); }
+/* T-4944: el video llega nítido hasta abajo y el papel de la página sube encima como una hoja (esquinas superiores
+ * redondeadas, sombra suave). Sustituye al degradado al color plano del papel, que dejaba una franja lechosa en
+ * modo claro. Lleva el mismo papel y grano que <main>, así que en claro y oscuro empalma sin costura. */
+.home-video-closing {
+  height: clamp(2rem, 4vw, 3rem);
+  background-color: var(--paper-bg);
+  background-image: var(--paper-grain);
+  border-radius: clamp(1.5rem, 3vw, 2.5rem) clamp(1.5rem, 3vw, 2.5rem) 0 0;
+  box-shadow: 0 -14px 40px rgb(0 0 0 / .22);
+}
 @media (prefers-reduced-motion: reduce) {
   .home-background-video { display: none; }
 }

@@ -964,11 +964,11 @@
     }
   },
   "panelPages": {
-    "title": "Pages",
-    "intro": "Texts and images for «About us» and «Join us». An empty field uses the default text, shown in grey.",
+    "intro": "An empty field uses the default text, shown in grey.",
     "pages": {
-      "about": "About us (/nosotros)",
-      "join": "Join us (/unete)"
+      "home": "Edit home page",
+      "about": "Edit About us page",
+      "join": "Edit Join us page"
     },
     "customized": "{count} of {total} texts customised in this language",
     "languages": "Language",
@@ -984,7 +984,7 @@
       "side": "Questionnaire side photo",
       "sideHint": "Empty = the «About us» image. Portrait; only shown on desktop."
     },
-    "storyHint": "The story is edited above, in «About us». This text only shows if that story is empty.",
+    "storyHint": "The story is edited in «Edit home page», under About us. This text only shows if that story is empty.",
     "whatsappHint": "Write {summary} where the questionnaire answers should go; otherwise they go at the end.",
     "defaultLabel": "Default: {text}",
     "groups": {
@@ -1023,6 +1023,11 @@
       "itemText": "Item {n}: text",
       "seoTitle": "Search title",
       "seoDescription": "Search description"
+    },
+    "pageDescriptions": {
+      "home": "Home: videos, featured homes, About us, social links and WhatsApp.",
+      "about": "/nosotros: texts, values, closing and header image.",
+      "join": "/unete: questions, options, final screens and side photo."
     }
   }
 }

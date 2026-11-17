@@ -965,11 +965,11 @@
     }
   },
   "panelPages": {
-    "title": "Pages",
-    "intro": "Textes et images de « À propos » et « Rejoignez-nous ». Un champ vide utilise le texte par défaut, affiché en gris.",
+    "intro": "Un champ vide utilise le texte par défaut, affiché en gris.",
     "pages": {
-      "about": "À propos (/nosotros)",
-      "join": "Rejoignez-nous (/unete)"
+      "home": "Modifier la page d’accueil",
+      "about": "Modifier la page À propos",
+      "join": "Modifier la page Rejoignez-nous"
     },
     "customized": "{count} sur {total} textes personnalisés dans cette langue",
     "languages": "Langue",
@@ -985,7 +985,7 @@
       "side": "Photo latérale du questionnaire",
       "sideHint": "Vide = l’image de « À propos ». Verticale ; visible seulement sur ordinateur."
     },
-    "storyHint": "L’histoire se modifie plus haut, dans « À propos ». Ce texte n’apparaît que si cette histoire est vide.",
+    "storyHint": "L’histoire se modifie dans « Modifier la page d’accueil », section À propos. Ce texte n’apparaît que si cette histoire est vide.",
     "whatsappHint": "Écrivez {summary} là où doivent aller les réponses du questionnaire ; sinon elles vont à la fin.",
     "defaultLabel": "Par défaut : {text}",
     "groups": {
@@ -1024,6 +1024,11 @@
       "itemText": "Élément {n} : texte",
       "seoTitle": "Titre pour les moteurs",
       "seoDescription": "Description pour les moteurs"
+    },
+    "pageDescriptions": {
+      "home": "Accueil : vidéos, maisons à la une, À propos, réseaux et WhatsApp.",
+      "about": "/nosotros : textes, valeurs, conclusion et image d’en-tête.",
+      "join": "/unete : questions, options, écrans finaux et photo latérale."
     }
   }
 }

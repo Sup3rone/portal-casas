@@ -71,7 +71,7 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
     <fieldset disabled={busy || Boolean(uploading)} className="space-y-6">
       <div className="space-y-4">
         <h3 className="font-medium">{t('imagesTitle')}</h3>
-        {pageContentImages[page].map(name => <div key={name} className="space-y-2 rounded-xl border border-dashed p-4 dark:border-gray-700">
+        {pageContentImages[page].map(name => <div key={name} className="space-y-2 rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">
           <p className="font-medium">{t(`images.${name}`)}</p>
           <p className="text-sm text-gray-600 dark:text-gray-300">{t(`images.${name}Hint`)}</p>
           {images[name] && <Image src={images[name]} alt={t(`images.${name}`)} width={192} height={128} unoptimized className="h-32 w-48 rounded-lg object-cover" />}
@@ -93,7 +93,7 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
       {/* Todos los idiomas están en el formulario (los ocultos también se envían); la pestaña solo elige cuál se ve. */}
       {pageContentLocales.map(language => <div key={language} role="tabpanel" id={`${id}-${language}`} aria-labelledby={`${id}-${language}-tab`} hidden={locale !== language} lang={language} className="space-y-5">
         <p className="text-sm text-gray-600 dark:text-gray-300">{t('customized', { count: edited[language], total })}</p>
-        {pageContentGroups[page].map(group => <fieldset key={group.id} className="space-y-3 rounded-xl border p-4 dark:border-gray-700">
+        {pageContentGroups[page].map(group => <fieldset key={group.id} className="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
           <legend className="px-1 font-medium">{t(`groups.${group.id}`)}</legend>
           {group.id === 'story' && <p className="text-sm text-gray-600 dark:text-gray-300">{t('storyHint')}</p>}
           {group.fields.map(field => {

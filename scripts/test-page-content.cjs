@@ -120,6 +120,14 @@ async function main() {
   setSession({ user: { id: 'admin' } });
   const panel = render('es', await ContentPage({ params: Promise.resolve({ locale: 'es' }) }));
   assert.ok(panel.includes('data-page-editor="about"') && panel.includes('data-page-editor="join"'));
+  // Tres desplegables bajo el título, en orden, cerrados al cargar y excluyentes (mismo name).
+  const sections = [...panel.matchAll(/<details([^>]*)data-content-section="([^"]+)"([^>]*)>/g)];
+  assert.deepEqual(sections.map(match => match[2]), ['home', 'about', 'join']);
+  assert.ok(sections.every(match => /name="content-section"/.test(match[0]) && !/\sopen[\s=>]/.test(match[0])), 'Todos cerrados y con el mismo name');
+  const es = messagesFor('es').panelPages;
+  for (const key of ['home', 'about', 'join']) assert.ok(panel.includes(esc(es.pages[key])) && panel.includes(esc(es.pageDescriptions[key])));
+  const home = panel.split('data-content-section="home"')[1].split('data-content-section="about"')[0];
+  assert.ok(home.includes('name="about_es"') && home.includes('name="contact_whatsapp"'), 'El editor de siempre vive en «Página principal»');
   assert.ok(panel.includes(`name="fr:about.ctaTitle"`) && panel.includes(`name="en:join.quiz.rental.options.annual"`), 'Campos de los 3 idiomas en el formulario');
   assert.ok(panel.includes(`value="Ven a vernos"`), 'Lo guardado aparece en su campo');
   assert.ok(panel.includes(`placeholder="${esc(messagesFor('fr').about.ctaText)}"`), 'Texto por defecto en gris, en su idioma');

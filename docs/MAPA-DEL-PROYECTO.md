@@ -866,7 +866,7 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 
 ### 14.1 Editar textos e imágenes desde el panel
 
-**Panel → Contenido → Páginas** (solo ADMIN): un editor por página (`components/panel/PageContentEditor.tsx`), con pestañas es/en/fr. Cada campo vacío muestra en gris el texto por defecto de `messages/*.json`, que es lo que se publica mientras nadie escriba otro.
+**Panel → Contenido** (solo ADMIN): tres desplegables excluyentes (`<details name="content-section">`, uno abierto a la vez): «Editar página principal» (el `SiteContentEditor` de siempre), «Editar página Nosotros» y «Editar página Únete» (`components/panel/PageContentEditor.tsx`, con pestañas es/en/fr). Cada campo vacío muestra en gris el texto por defecto de `messages/*.json`, que es lo que se publica mientras nadie escriba otro.
 
 - **Qué se edita** (`lib/page-content.ts`, `pageContentGroups`): todas las palabras de /nosotros y /unete (títulos, textos de apoyo, etiquetas de opciones, pantallas finales, beneficios, botones, mensajes de WhatsApp y SEO), más una imagen por página: cabecera de /nosotros y foto lateral de /unete. Vacía = imagen de «Sobre nosotros». **No** se edita la estructura (qué preguntas hay, cuántas opciones) ni las palabras de la interfaz (Atrás, «Pregunta 2 de 4»…). La historia sigue saliendo de «Sobre nosotros».
 - **Dónde se guarda:** dos claves JSON en `SiteContent`, `page_about` y `page_join` (`{ texts: { es, en, fr }, images }`). Lectura y guardado en `lib/page-content-store.ts`, aparte de `saveSiteContent` a propósito: aquel reescribe todas sus claves en cada guardado. Endpoint: `PUT /api/panel/page-content`, con la comprobación de ADMIN dentro del mismo statement.

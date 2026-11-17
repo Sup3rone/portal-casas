@@ -964,11 +964,11 @@
     }
   },
   "panelPages": {
-    "title": "Páginas",
-    "intro": "Textos e imágenes de «Sobre nosotros» y «Únete». Un campo vacío usa el texto por defecto, que ves en gris.",
+    "intro": "Un campo vacío usa el texto por defecto, que ves en gris.",
     "pages": {
-      "about": "Sobre nosotros (/nosotros)",
-      "join": "Únete (/unete)"
+      "home": "Editar página principal",
+      "about": "Editar página Nosotros",
+      "join": "Editar página Únete"
     },
     "customized": "{count} de {total} textos personalizados en este idioma",
     "languages": "Idioma",
@@ -984,7 +984,7 @@
       "side": "Foto lateral del cuestionario",
       "sideHint": "Vacía = la imagen de «Sobre nosotros». Vertical; solo se ve en escritorio."
     },
-    "storyHint": "La historia se edita arriba, en «Sobre nosotros». Este texto solo aparece si esa historia está vacía.",
+    "storyHint": "La historia se edita en «Editar página principal», en Sobre nosotros. Este texto solo aparece si esa historia está vacía.",
     "whatsappHint": "Escribe {summary} donde deben ir las respuestas del cuestionario; si no lo pones, van al final.",
     "defaultLabel": "Por defecto: {text}",
     "groups": {
@@ -1023,6 +1023,11 @@
       "itemText": "Elemento {n}: texto",
       "seoTitle": "Título para buscadores",
       "seoDescription": "Descripción para buscadores"
+    },
+    "pageDescriptions": {
+      "home": "Inicio: videos, destacadas, Sobre nosotros, redes y WhatsApp.",
+      "about": "/nosotros: textos, valores, cierre e imagen de cabecera.",
+      "join": "/unete: preguntas, opciones, pantallas finales y foto lateral."
     }
   }
 }

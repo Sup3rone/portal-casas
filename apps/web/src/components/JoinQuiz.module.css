@@ -1,0 +1,23 @@
+/* T-4944: movimiento del cuestionario de /unete. Todo dentro de no-preference: con reduced-motion nada se mueve
+   y nada queda oculto. Colores desde las variables de marca (globals.css), sin hex propios. */
+.option, .chip, .cta, .back { transition: transform 160ms ease-out, border-color 160ms ease-out, background-color 160ms ease-out; }
+.key { transition: background-color 160ms ease-out, color 160ms ease-out, border-color 160ms ease-out; }
+.option:hover .key, .chosen .key { background-color: var(--brand-brown); border-color: var(--brand-brown); color: var(--paper-bg, white); }
+.chosen { border-color: var(--brand-brown); background-color: var(--brand-brown-soft); }
+:global(html.dark) .chosen { background-color: color-mix(in srgb, var(--brand-brown-light) 18%, transparent); border-color: var(--brand-brown-light); }
+:global(html.dark) .option:hover .key, :global(html.dark) .chosen .key { background-color: var(--brand-brown-light); border-color: var(--brand-brown-light); color: var(--brand-brown-strong); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .option:hover, .chip:hover, .cta:hover { transform: translateY(-2px); }
+  .option:active, .chip:active, .cta:active { transform: translateY(0) scale(0.98); }
+  .back:hover { transform: translateX(-2px); }
+  .step { animation: quiz-step-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .option { animation: quiz-option-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 60ms + 120ms); }
+  .chosen { animation: quiz-chosen 220ms ease-out; }
+  .bar { transition: width 420ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .photo { animation: quiz-photo-in 900ms ease-out both; }
+  @keyframes quiz-step-in { from { opacity: 0; transform: translateY(24px); } }
+  @keyframes quiz-option-in { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes quiz-chosen { 50% { transform: scale(0.98); } }
+  @keyframes quiz-photo-in { from { opacity: 0; transform: scale(1.04); } }
+}

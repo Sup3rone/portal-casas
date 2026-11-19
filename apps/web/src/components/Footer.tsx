@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import Reveal from './Reveal';
 import { useFooterContacts, formatContactWhatsapp } from './FooterContactsProvider';
+import { PUBLIC_PAGES_IN_FOOTER, PUBLIC_PAGES_LIVE } from '@/lib/public-pages-live';
 
 export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}) {
   const t = useTranslations('footer');
@@ -14,6 +15,8 @@ export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}
   const privatePage = /^\/(?:(?:es|en|fr)\/)?(?:panel|admin)(?:\/|$)/.test(pathname);
   const Content = privatePage ? 'div' : Reveal;
   if (!inDetail && /^\/(?:(?:es|en|fr)\/)?casas\/[^/]+\/?$/.test(pathname)) return null;
+  // T-4944: /unete es un cuestionario a pantalla completa, sin scroll: no lleva footer.
+  if (/^\/(?:(?:es|en|fr)\/)?unete\/?$/.test(pathname)) return null;
 
   return (
     <footer className={`mt-20 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-12${privatePage ? '' : ' public-footer'}`}>
@@ -27,6 +30,11 @@ export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}
             <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-100 mb-4">{t('navegacion')}</h4>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
               <li><Link href="/casas" className="hover:text-[var(--brand-brown)] dark:hover:text-[var(--brand-brown-light)]">{nav('casas')}</Link></li>
+              {/* T-4944: /nosotros y /unete en el footer ya (PUBLIC_PAGES_IN_FOOTER); el menú espera a PUBLIC_PAGES_LIVE. */}
+              {(PUBLIC_PAGES_LIVE || PUBLIC_PAGES_IN_FOOTER) && <>
+                <li><Link href="/nosotros" className="hover:text-[var(--brand-brown)] dark:hover:text-[var(--brand-brown-light)]">{nav('nosotros')}</Link></li>
+                <li><Link href="/unete" className="hover:text-[var(--brand-brown)] dark:hover:text-[var(--brand-brown-light)]">{nav('unete')}</Link></li>
+              </>}
             </ul>
           </div>
           <div>

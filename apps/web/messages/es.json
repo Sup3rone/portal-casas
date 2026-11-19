@@ -8,7 +8,11 @@
       "weekday": "Tarifa por noche entre semana",
       "weekend": "Tarifa por noche en fin de semana",
       "perNight": "noche"
-    }
+    },
+    "aboutTitle": "Sobre nosotros",
+    "aboutDescription": "[Pendiente] Descripción para buscadores de la página Sobre nosotros.",
+    "joinTitle": "Únete a ALIA",
+    "joinDescription": "[Pendiente] Descripción para buscadores de la página Únete."
   },
   "notFoundPage": {
     "title": "Página no encontrada",
@@ -172,7 +176,11 @@
       "baseWeekendPrice": "Precio fin de semana (MXN)"
     },
     "invalidIcalUrl": "Enlace iCal no válido: usa un enlace https público de Airbnb, Booking, VRBO o Google (.ics).",
-    "invalidReferrerAccount": "No hay una cuenta de huésped registrada con ese correo, o ya está ligada a otro referidor. Pídele que se registre en el sitio y vuelve a intentar."
+    "invalidReferrerAccount": "No hay una cuenta de huésped registrada con ese correo, o ya está ligada a otro referidor. Pídele que se registre en el sitio y vuelve a intentar.",
+    "invalidPageContent": "Los textos de la página no son válidos. Recarga e inténtalo de nuevo.",
+    "pageTextTooLong": "Algún texto es demasiado largo.",
+    "invalidPageImage": "La imagen debe ser una dirección https válida.",
+    "pageContentNotReady": "Falta aplicar el SQL site-content-pages.sql en la base de datos. Hasta entonces no se puede guardar."
   },
   "nav": {
     "menu": "Menú",
@@ -188,7 +196,9 @@
     "calendario": "Calendario",
     "forgotLink": "¿Olvidaste tu contraseña?",
     "panelAdmin": "Panel admin",
-    "panelCollaborator": "Panel del colaborador"
+    "panelCollaborator": "Panel del colaborador",
+    "nosotros": "Nosotros",
+    "unete": "Únete"
   },
   "details": {
     "backToTop": "Volver arriba",
@@ -802,5 +812,247 @@
       "NOT_A_CALENDAR": "el enlace no devolvió un calendario",
       "FETCH_FAILED": "no se pudo descargar el enlace"
     }
+  },
+  "about": {
+    "heroEyebrow": "ALIA FOR RENT",
+    "heroTitleFallback": "Sobre nosotros",
+    "storyTitle": "Nuestra historia",
+    "storyFallback": "[Pendiente] Historia de ALIA. Se edita en Panel → Contenido → Sobre nosotros.",
+    "valuesTitle": "Lo que nos mueve",
+    "values": {
+      "one": {
+        "title": "[Pendiente] Valor 1",
+        "text": "[Pendiente] Texto breve del valor."
+      },
+      "two": {
+        "title": "[Pendiente] Valor 2",
+        "text": "[Pendiente] Texto breve del valor."
+      },
+      "three": {
+        "title": "[Pendiente] Valor 3",
+        "text": "[Pendiente] Texto breve del valor."
+      }
+    },
+    "contactTitle": "Hablemos",
+    "whatsappLabel": "Escríbenos por WhatsApp",
+    "whatsappMessage": "Hola, vengo de la página Sobre nosotros de ALIA.",
+    "ctaTitle": "[Pendiente] Título de cierre",
+    "ctaText": "[Pendiente] Texto de cierre que invita a ver casas o a unirse.",
+    "ctaHomes": "Ver casas",
+    "ctaJoin": "Únete",
+    "teamTitle": "[Pendiente] Quiénes estamos detrás",
+    "teamText": "[Pendiente] Presentación breve de las personas detrás de ALIA: quiénes son y por qué cuidan cada casa.",
+    "photoOneCaption": "[Pendiente] Pie de foto 1",
+    "photoTwoCaption": "[Pendiente] Pie de foto 2"
+  },
+  "join": {
+    "heroEyebrow": "Únete a ALIA",
+    "back": "Atrás",
+    "progress": "Pregunta {current} de {total}",
+    "doneLabel": "Listo",
+    "keyHint": "Atajo: pulsa la letra de cada opción.",
+    "restart": "Empezar de nuevo",
+    "summaryLabel": "Tus respuestas",
+    "editAnswer": "Cambiar respuesta: {answer}",
+    "contactMissing": "[Pendiente] Falta el número de WhatsApp en Panel → Contenido.",
+    "quiz": {
+      "audience": {
+        "title": "¿Cómo quieres unirte a ALIA?",
+        "help": "[Pendiente] Texto de apoyo de la primera pregunta.",
+        "short": "Perfil"
+      },
+      "propertyType": {
+        "title": "¿Qué tipo de propiedad tienes?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Tipo",
+        "options": {
+          "house": "Casa",
+          "apartment": "Departamento",
+          "other": "Otro tipo"
+        }
+      },
+      "location": {
+        "title": "¿Dónde está tu propiedad?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Ubicación",
+        "options": {
+          "other": "En otro lugar"
+        }
+      },
+      "rental": {
+        "title": "¿Cómo te gustaría rentarla?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Renta",
+        "options": {
+          "nightly": "Por noches (vacacional)",
+          "annual": "Por año",
+          "both": "Las dos"
+        }
+      },
+      "referAudience": {
+        "title": "¿A quién recomendarías ALIA?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Recomendaría a",
+        "options": {
+          "guests": "Huéspedes que buscan dónde quedarse",
+          "owners": "Dueños con una propiedad",
+          "both": "A los dos"
+        }
+      },
+      "channel": {
+        "title": "¿Cómo sueles recomendar?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Canal",
+        "options": {
+          "social": "En redes sociales",
+          "whatsapp": "Por WhatsApp",
+          "person": "En persona"
+        }
+      },
+      "reach": {
+        "title": "¿A cuántas personas llegas, más o menos?",
+        "help": "[Pendiente] Texto de apoyo.",
+        "short": "Alcance",
+        "options": {
+          "few": "Pocas, de confianza",
+          "some": "Un círculo mediano",
+          "many": "Muchas"
+        }
+      }
+    },
+    "owners": {
+      "cardTitle": "Tengo una propiedad",
+      "cardText": "[Pendiente] Texto corto para dueños.",
+      "doneTitle": "Gracias. Con esto podemos empezar.",
+      "doneText": "[Pendiente] Qué pasa después de enviar.",
+      "benefits": {
+        "one": {
+          "title": "[Pendiente] Beneficio 1",
+          "text": "[Pendiente] Texto breve del beneficio."
+        },
+        "two": {
+          "title": "[Pendiente] Beneficio 2",
+          "text": "[Pendiente] Texto breve del beneficio."
+        },
+        "three": {
+          "title": "[Pendiente] Beneficio 3",
+          "text": "[Pendiente] Texto breve del beneficio."
+        }
+      },
+      "cta": "Enviar por WhatsApp",
+      "whatsappMessage": "Hola, quiero publicar mi propiedad con ALIA. {summary}."
+    },
+    "referrers": {
+      "cardTitle": "Quiero recomendar",
+      "cardText": "[Pendiente] Texto corto para referidores.",
+      "doneTitle": "Gracias. Ya casi eres referidor.",
+      "doneText": "[Pendiente] Qué pasa después de enviar.",
+      "benefits": {
+        "one": {
+          "title": "[Pendiente] Beneficio 1",
+          "text": "[Pendiente] Texto breve del beneficio."
+        },
+        "two": {
+          "title": "[Pendiente] Beneficio 2",
+          "text": "[Pendiente] Texto breve del beneficio."
+        },
+        "three": {
+          "title": "[Pendiente] Beneficio 3",
+          "text": "[Pendiente] Texto breve del beneficio."
+        }
+      },
+      "cta": "Enviar por WhatsApp",
+      "whatsappMessage": "Hola, quiero ser referidor de ALIA. {summary}.",
+      "ctaRegister": "Crear cuenta",
+      "ctaRegisterHint": "Para ser referidor necesitas una cuenta registrada."
+    },
+    "closed": {
+      "title": "Lo sentimos",
+      "text": "De momento no está disponible. Vuelve pronto.",
+      "cta": "Ver casas"
+    }
+  },
+  "panelPages": {
+    "intro": "Un campo vacío usa el texto por defecto, que ves en gris.",
+    "pages": {
+      "home": "Editar página principal",
+      "about": "Editar página Nosotros",
+      "join": "Editar página Únete"
+    },
+    "customized": "{count} de {total} textos personalizados en este idioma",
+    "languages": "Idioma",
+    "language": {
+      "es": "Español",
+      "en": "Inglés",
+      "fr": "Francés"
+    },
+    "imagesTitle": "Imágenes",
+    "images": {
+      "hero": "Imagen de cabecera",
+      "heroHint": "Vacía = la imagen de «Sobre nosotros». Horizontal, se ve a todo lo ancho.",
+      "side": "Foto lateral del cuestionario",
+      "sideHint": "Vacía = la imagen de «Sobre nosotros». Vertical; solo se ve en escritorio.",
+      "team": "Foto del equipo",
+      "teamHint": "Vacía = la imagen de cabecera. Vertical; se ve junto a la presentación.",
+      "photoOne": "Foto 1 con pie",
+      "photoOneHint": "Vacía = la imagen de cabecera. Vertical; entra girada al hacer scroll.",
+      "photoTwo": "Foto 2 con pie",
+      "photoTwoHint": "Vacía = la imagen de cabecera. Vertical; entra girada, un poco después de la 1.",
+      "closing": "Foto de cierre",
+      "closingHint": "Vacía = la imagen de cabecera. Horizontal, a todo lo ancho, al final."
+    },
+    "titleHint": "El título grande de la cabecera se edita en «Editar página principal», en Sobre nosotros (es el mismo de la home). El campo «Título» de aquí solo aparece si ese está vacío.",
+    "storyHint": "La historia se edita en «Editar página principal», en Sobre nosotros. Este texto solo aparece si esa historia está vacía.",
+    "whatsappHint": "Escribe {summary} donde deben ir las respuestas del cuestionario; si no lo pones, van al final.",
+    "defaultLabel": "Por defecto: {text}",
+    "groups": {
+      "hero": "Cabecera",
+      "story": "Historia",
+      "values": "Valores",
+      "contact": "Contacto",
+      "closing": "Cierre",
+      "team": "Equipo",
+      "photos": "Fotos con pie",
+      "seo": "Buscadores y redes",
+      "start": "Primera pantalla",
+      "question": {
+        "propertyType": "Pregunta a dueños: tipo de propiedad",
+        "location": "Pregunta a dueños: ubicación",
+        "rental": "Pregunta a dueños: tipo de renta",
+        "referAudience": "Pregunta a referidores: a quién",
+        "channel": "Pregunta a referidores: canal",
+        "reach": "Pregunta a referidores: alcance"
+      },
+      "done": {
+        "owners": "Pantalla final de dueños",
+        "referrers": "Pantalla final de referidores"
+      },
+      "closed": "Aviso de no disponible"
+    },
+    "roles": {
+      "eyebrow": "Texto pequeño superior",
+      "title": "Título",
+      "help": "Texto de apoyo",
+      "text": "Texto",
+      "button": "Texto del botón",
+      "whatsappMessage": "Mensaje de WhatsApp",
+      "optionTitle": "Opción {n}: título",
+      "optionText": "Opción {n}: descripción",
+      "option": "Opción {n}",
+      "optionOther": "Opción «otro lugar» (los estados salen solos de las casas publicadas)",
+      "itemTitle": "Elemento {n}: título",
+      "itemText": "Elemento {n}: texto",
+      "caption": "Pie de foto {n}",
+      "seoTitle": "Título para buscadores",
+      "seoDescription": "Descripción para buscadores"
+    },
+    "pageDescriptions": {
+      "home": "Inicio: videos, destacadas, Sobre nosotros, redes y WhatsApp.",
+      "about": "/nosotros: textos, equipo, fotos con pie, valores, cierre e imágenes.",
+      "join": "/unete: preguntas, opciones, pantallas finales y foto lateral."
+    },
+    "closedLabel": "No estamos disponibles",
+    "closedHint": "Al marcarla y guardar, /unete deja de mostrar el cuestionario y muestra el aviso «Lo sentimos, de momento no está disponible». Desmárcala para volver a abrirla.",
+    "closedOn": "Ahora /unete muestra el aviso de no disponible."
   }
 }

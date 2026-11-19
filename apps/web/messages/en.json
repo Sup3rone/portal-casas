@@ -8,7 +8,11 @@
       "weekday": "Weeknight rate",
       "weekend": "Weekend night rate",
       "perNight": "night"
-    }
+    },
+    "aboutTitle": "About us",
+    "aboutDescription": "[Pendiente] Search description for the About us page.",
+    "joinTitle": "Join ALIA",
+    "joinDescription": "[Pendiente] Search description for the Join us page."
   },
   "notFoundPage": {
     "title": "Page not found",
@@ -172,7 +176,11 @@
       "baseWeekendPrice": "Weekend price (MXN)"
     },
     "invalidIcalUrl": "Invalid iCal link: use a public https link from Airbnb, Booking, VRBO or Google (.ics).",
-    "invalidReferrerAccount": "There is no registered guest account with that email, or it is already linked to another referrer. Ask them to sign up on the site and try again."
+    "invalidReferrerAccount": "There is no registered guest account with that email, or it is already linked to another referrer. Ask them to sign up on the site and try again.",
+    "invalidPageContent": "The page texts are not valid. Reload and try again.",
+    "pageTextTooLong": "A text is too long.",
+    "invalidPageImage": "The image must be a valid https address.",
+    "pageContentNotReady": "The SQL site-content-pages.sql has not been applied to the database yet. Saving is not possible until then."
   },
   "nav": {
     "menu": "Menu",
@@ -188,7 +196,9 @@
     "calendario": "Calendar",
     "forgotLink": "Forgot your password?",
     "panelAdmin": "Admin panel",
-    "panelCollaborator": "Collaborator panel"
+    "panelCollaborator": "Collaborator panel",
+    "nosotros": "About us",
+    "unete": "Join us"
   },
   "details": {
     "backToTop": "Back to top",
@@ -802,5 +812,247 @@
       "NOT_A_CALENDAR": "the link did not return a calendar",
       "FETCH_FAILED": "the link could not be downloaded"
     }
+  },
+  "about": {
+    "heroEyebrow": "ALIA FOR RENT",
+    "heroTitleFallback": "About us",
+    "storyTitle": "Our story",
+    "storyFallback": "[Pendiente] ALIA story. Edited in Panel → Content → About us.",
+    "valuesTitle": "What drives us",
+    "values": {
+      "one": {
+        "title": "[Pendiente] Value 1",
+        "text": "[Pendiente] Short value text."
+      },
+      "two": {
+        "title": "[Pendiente] Value 2",
+        "text": "[Pendiente] Short value text."
+      },
+      "three": {
+        "title": "[Pendiente] Value 3",
+        "text": "[Pendiente] Short value text."
+      }
+    },
+    "contactTitle": "Let's talk",
+    "whatsappLabel": "Message us on WhatsApp",
+    "whatsappMessage": "Hi, I'm coming from ALIA's About us page.",
+    "ctaTitle": "[Pendiente] Closing title",
+    "ctaText": "[Pendiente] Closing text inviting visitors to browse homes or join.",
+    "ctaHomes": "Browse homes",
+    "ctaJoin": "Join us",
+    "teamTitle": "[Pendiente] The people behind ALIA",
+    "teamText": "[Pendiente] Short introduction of the people behind ALIA: who they are and why they care for every home.",
+    "photoOneCaption": "[Pendiente] Photo caption 1",
+    "photoTwoCaption": "[Pendiente] Photo caption 2"
+  },
+  "join": {
+    "heroEyebrow": "Join ALIA",
+    "back": "Back",
+    "progress": "Question {current} of {total}",
+    "doneLabel": "Done",
+    "keyHint": "Shortcut: press the letter next to each option.",
+    "restart": "Start over",
+    "summaryLabel": "Your answers",
+    "editAnswer": "Change answer: {answer}",
+    "contactMissing": "[Pendiente] WhatsApp number missing in Panel → Content.",
+    "quiz": {
+      "audience": {
+        "title": "How would you like to join ALIA?",
+        "help": "[Pendiente] Supporting text for the first question.",
+        "short": "Profile"
+      },
+      "propertyType": {
+        "title": "What kind of property do you have?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Type",
+        "options": {
+          "house": "House",
+          "apartment": "Apartment",
+          "other": "Something else"
+        }
+      },
+      "location": {
+        "title": "Where is your property?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Location",
+        "options": {
+          "other": "Somewhere else"
+        }
+      },
+      "rental": {
+        "title": "How would you like to rent it?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Rental",
+        "options": {
+          "nightly": "By the night (holiday)",
+          "annual": "By the year",
+          "both": "Both"
+        }
+      },
+      "referAudience": {
+        "title": "Who would you refer to ALIA?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Would refer",
+        "options": {
+          "guests": "Guests looking for a stay",
+          "owners": "Owners with a property",
+          "both": "Both"
+        }
+      },
+      "channel": {
+        "title": "How do you usually recommend?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Channel",
+        "options": {
+          "social": "On social media",
+          "whatsapp": "On WhatsApp",
+          "person": "In person"
+        }
+      },
+      "reach": {
+        "title": "Roughly how many people do you reach?",
+        "help": "[Pendiente] Supporting text.",
+        "short": "Reach",
+        "options": {
+          "few": "A few close contacts",
+          "some": "A mid-sized circle",
+          "many": "Many"
+        }
+      }
+    },
+    "owners": {
+      "cardTitle": "I own a property",
+      "cardText": "[Pendiente] Short text for owners.",
+      "doneTitle": "Thank you. This is enough to start.",
+      "doneText": "[Pendiente] What happens after sending.",
+      "benefits": {
+        "one": {
+          "title": "[Pendiente] Benefit 1",
+          "text": "[Pendiente] Short benefit text."
+        },
+        "two": {
+          "title": "[Pendiente] Benefit 2",
+          "text": "[Pendiente] Short benefit text."
+        },
+        "three": {
+          "title": "[Pendiente] Benefit 3",
+          "text": "[Pendiente] Short benefit text."
+        }
+      },
+      "cta": "Send on WhatsApp",
+      "whatsappMessage": "Hi, I want to list my property with ALIA. {summary}."
+    },
+    "referrers": {
+      "cardTitle": "I want to refer",
+      "cardText": "[Pendiente] Short text for referrers.",
+      "doneTitle": "Thank you. You are almost a referrer.",
+      "doneText": "[Pendiente] What happens after sending.",
+      "benefits": {
+        "one": {
+          "title": "[Pendiente] Benefit 1",
+          "text": "[Pendiente] Short benefit text."
+        },
+        "two": {
+          "title": "[Pendiente] Benefit 2",
+          "text": "[Pendiente] Short benefit text."
+        },
+        "three": {
+          "title": "[Pendiente] Benefit 3",
+          "text": "[Pendiente] Short benefit text."
+        }
+      },
+      "cta": "Send on WhatsApp",
+      "whatsappMessage": "Hi, I want to be an ALIA referrer. {summary}.",
+      "ctaRegister": "Create account",
+      "ctaRegisterHint": "You need a registered account to become a referrer."
+    },
+    "closed": {
+      "title": "We are sorry",
+      "text": "This is not available at the moment. Please come back soon.",
+      "cta": "Browse homes"
+    }
+  },
+  "panelPages": {
+    "intro": "An empty field uses the default text, shown in grey.",
+    "pages": {
+      "home": "Edit home page",
+      "about": "Edit About us page",
+      "join": "Edit Join us page"
+    },
+    "customized": "{count} of {total} texts customised in this language",
+    "languages": "Language",
+    "language": {
+      "es": "Spanish",
+      "en": "English",
+      "fr": "French"
+    },
+    "imagesTitle": "Images",
+    "images": {
+      "hero": "Header image",
+      "heroHint": "Empty = the «About us» image. Landscape, shown full width.",
+      "side": "Questionnaire side photo",
+      "sideHint": "Empty = the «About us» image. Portrait; only shown on desktop.",
+      "team": "Team photo",
+      "teamHint": "Empty = the header image. Portrait; shown next to the introduction.",
+      "photoOne": "Photo 1 with caption",
+      "photoOneHint": "Empty = the header image. Portrait; tilts in while scrolling.",
+      "photoTwo": "Photo 2 with caption",
+      "photoTwoHint": "Empty = the header image. Portrait; tilts in just after photo 1.",
+      "closing": "Closing photo",
+      "closingHint": "Empty = the header image. Landscape, full width, at the end."
+    },
+    "titleHint": "The large header title is edited in «Edit home page», under About us (it is the same as on the home page). The «Title» field here only shows if that one is empty.",
+    "storyHint": "The story is edited in «Edit home page», under About us. This text only shows if that story is empty.",
+    "whatsappHint": "Write {summary} where the questionnaire answers should go; otherwise they go at the end.",
+    "defaultLabel": "Default: {text}",
+    "groups": {
+      "hero": "Header",
+      "story": "Story",
+      "values": "Values",
+      "contact": "Contact",
+      "closing": "Closing",
+      "team": "Team",
+      "photos": "Photos with caption",
+      "seo": "Search engines and social",
+      "start": "First screen",
+      "question": {
+        "propertyType": "Owner question: property type",
+        "location": "Owner question: location",
+        "rental": "Owner question: rental type",
+        "referAudience": "Referrer question: who",
+        "channel": "Referrer question: channel",
+        "reach": "Referrer question: reach"
+      },
+      "done": {
+        "owners": "Owners final screen",
+        "referrers": "Referrers final screen"
+      },
+      "closed": "Not available notice"
+    },
+    "roles": {
+      "eyebrow": "Small top text",
+      "title": "Title",
+      "help": "Supporting text",
+      "text": "Text",
+      "button": "Button text",
+      "whatsappMessage": "WhatsApp message",
+      "optionTitle": "Option {n}: title",
+      "optionText": "Option {n}: description",
+      "option": "Option {n}",
+      "optionOther": "«Somewhere else» option (states come from published homes)",
+      "itemTitle": "Item {n}: title",
+      "itemText": "Item {n}: text",
+      "caption": "Photo caption {n}",
+      "seoTitle": "Search title",
+      "seoDescription": "Search description"
+    },
+    "pageDescriptions": {
+      "home": "Home: videos, featured homes, About us, social links and WhatsApp.",
+      "about": "/nosotros: texts, team, captioned photos, values, closing and images.",
+      "join": "/unete: questions, options, final screens and side photo."
+    },
+    "closedLabel": "We are not available",
+    "closedHint": "When ticked and saved, /unete stops showing the questionnaire and shows the «not available» notice. Untick it to open it again.",
+    "closedOn": "/unete now shows the not available notice."
   }
 }

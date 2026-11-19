@@ -839,7 +839,11 @@
     "ctaTitle": "[Pendiente] Closing title",
     "ctaText": "[Pendiente] Closing text inviting visitors to browse homes or join.",
     "ctaHomes": "Browse homes",
-    "ctaJoin": "Join us"
+    "ctaJoin": "Join us",
+    "teamTitle": "[Pendiente] The people behind ALIA",
+    "teamText": "[Pendiente] Short introduction of the people behind ALIA: who they are and why they care for every home.",
+    "photoOneCaption": "[Pendiente] Photo caption 1",
+    "photoTwoCaption": "[Pendiente] Photo caption 2"
   },
   "join": {
     "heroEyebrow": "Join ALIA",
@@ -987,8 +991,17 @@
       "hero": "Header image",
       "heroHint": "Empty = the «About us» image. Landscape, shown full width.",
       "side": "Questionnaire side photo",
-      "sideHint": "Empty = the «About us» image. Portrait; only shown on desktop."
+      "sideHint": "Empty = the «About us» image. Portrait; only shown on desktop.",
+      "team": "Team photo",
+      "teamHint": "Empty = the header image. Portrait; shown next to the introduction.",
+      "photoOne": "Photo 1 with caption",
+      "photoOneHint": "Empty = the header image. Portrait; tilts in while scrolling.",
+      "photoTwo": "Photo 2 with caption",
+      "photoTwoHint": "Empty = the header image. Portrait; tilts in just after photo 1.",
+      "closing": "Closing photo",
+      "closingHint": "Empty = the header image. Landscape, full width, at the end."
     },
+    "titleHint": "The large header title is edited in «Edit home page», under About us (it is the same as on the home page). The «Title» field here only shows if that one is empty.",
     "storyHint": "The story is edited in «Edit home page», under About us. This text only shows if that story is empty.",
     "whatsappHint": "Write {summary} where the questionnaire answers should go; otherwise they go at the end.",
     "defaultLabel": "Default: {text}",
@@ -998,6 +1011,8 @@
       "values": "Values",
       "contact": "Contact",
       "closing": "Closing",
+      "team": "Team",
+      "photos": "Photos with caption",
       "seo": "Search engines and social",
       "start": "First screen",
       "question": {
@@ -1027,12 +1042,13 @@
       "optionOther": "«Somewhere else» option (states come from published homes)",
       "itemTitle": "Item {n}: title",
       "itemText": "Item {n}: text",
+      "caption": "Photo caption {n}",
       "seoTitle": "Search title",
       "seoDescription": "Search description"
     },
     "pageDescriptions": {
       "home": "Home: videos, featured homes, About us, social links and WhatsApp.",
-      "about": "/nosotros: texts, values, closing and header image.",
+      "about": "/nosotros: texts, team, captioned photos, values, closing and images.",
       "join": "/unete: questions, options, final screens and side photo."
     },
     "closedLabel": "We are not available",

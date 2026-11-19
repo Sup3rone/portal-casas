@@ -1,0 +1,10 @@
+/* T-4944: la capa (120 % del marco) se desplaza más lenta que el scroll. Solo CSS y solo donde hay
+ * scroll-driven animations; en el resto (p. ej. Firefox) o con reduced-motion queda quieta y bien encuadrada.
+ * El marco usa overflow: clip, no hidden: hidden lo vuelve contenedor de scroll y view() se quedaría quieto.
+ * Va aquí y no en globals.css: allí test-detail-scroll prohíbe animation-timeline (fondos del detalle). */
+@keyframes shift { from { transform: translateY(-8%); } to { transform: translateY(8%); } }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .layer { animation: shift linear both; animation-timeline: view(); will-change: transform; }
+  }
+}

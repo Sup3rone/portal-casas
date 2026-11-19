@@ -840,7 +840,11 @@
     "ctaTitle": "[Pendiente] Titre de clôture",
     "ctaText": "[Pendiente] Texte de clôture invitant à voir les maisons ou à nous rejoindre.",
     "ctaHomes": "Voir les maisons",
-    "ctaJoin": "Rejoignez-nous"
+    "ctaJoin": "Rejoignez-nous",
+    "teamTitle": "[Pendiente] Les personnes derrière ALIA",
+    "teamText": "[Pendiente] Brève présentation des personnes derrière ALIA : qui elles sont et pourquoi elles prennent soin de chaque maison.",
+    "photoOneCaption": "[Pendiente] Légende de la photo 1",
+    "photoTwoCaption": "[Pendiente] Légende de la photo 2"
   },
   "join": {
     "heroEyebrow": "Rejoignez ALIA",
@@ -988,8 +992,17 @@
       "hero": "Image d’en-tête",
       "heroHint": "Vide = l’image de « À propos ». Horizontale, affichée sur toute la largeur.",
       "side": "Photo latérale du questionnaire",
-      "sideHint": "Vide = l’image de « À propos ». Verticale ; visible seulement sur ordinateur."
+      "sideHint": "Vide = l’image de « À propos ». Verticale ; visible seulement sur ordinateur.",
+      "team": "Photo de l’équipe",
+      "teamHint": "Vide = l’image d’en-tête. Verticale ; à côté de la présentation.",
+      "photoOne": "Photo 1 avec légende",
+      "photoOneHint": "Vide = l’image d’en-tête. Verticale ; entre inclinée au défilement.",
+      "photoTwo": "Photo 2 avec légende",
+      "photoTwoHint": "Vide = l’image d’en-tête. Verticale ; entre inclinée juste après la photo 1.",
+      "closing": "Photo de conclusion",
+      "closingHint": "Vide = l’image d’en-tête. Horizontale, sur toute la largeur, à la fin."
     },
+    "titleHint": "Le grand titre de l’en-tête se modifie dans « Modifier la page d’accueil », section À propos (c’est le même que sur l’accueil). Le champ « Titre » d’ici n’apparaît que si celui-là est vide.",
     "storyHint": "L’histoire se modifie dans « Modifier la page d’accueil », section À propos. Ce texte n’apparaît que si cette histoire est vide.",
     "whatsappHint": "Écrivez {summary} là où doivent aller les réponses du questionnaire ; sinon elles vont à la fin.",
     "defaultLabel": "Par défaut : {text}",
@@ -999,6 +1012,8 @@
       "values": "Valeurs",
       "contact": "Contact",
       "closing": "Conclusion",
+      "team": "Équipe",
+      "photos": "Photos avec légende",
       "seo": "Moteurs de recherche et réseaux",
       "start": "Premier écran",
       "question": {
@@ -1028,12 +1043,13 @@
       "optionOther": "Option « ailleurs » (les états viennent des maisons publiées)",
       "itemTitle": "Élément {n} : titre",
       "itemText": "Élément {n} : texte",
+      "caption": "Légende de la photo {n}",
       "seoTitle": "Titre pour les moteurs",
       "seoDescription": "Description pour les moteurs"
     },
     "pageDescriptions": {
       "home": "Accueil : vidéos, maisons à la une, À propos, réseaux et WhatsApp.",
-      "about": "/nosotros : textes, valeurs, conclusion et image d’en-tête.",
+      "about": "/nosotros : textes, équipe, photos avec légende, valeurs, conclusion et images.",
       "join": "/unete : questions, options, écrans finaux et photo latérale."
     },
     "closedLabel": "Nous ne sommes pas disponibles",

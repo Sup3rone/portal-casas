@@ -11,7 +11,7 @@ const join = load('apps/web/src/app/[locale]/unete/page.tsx');
 const sitemap = load('apps/web/src/app/sitemap.ts').default;
 const Footer = load('apps/web/src/components/Footer.tsx').default;
 const api = load('apps/web/src/app/api/panel/site-content/route.ts');
-const empty = { about_es: '', about_en: '', about_fr: '', social_instagram: '', social_facebook: '', featured_property_id: '', contact_whatsapp: '' };
+const empty = { about_es: '', about_en: '', about_fr: '', social_instagram: '', social_facebook: '', featured_property_id: '', contact_whatsapp: '', about_title_es: '', about_title_en: '', about_title_fr: '', about_image: '' };
 const filled = { ...empty, about_es: 'Somos ALIA', about_en: 'We are ALIA', about_fr: 'Nous sommes ALIA', about_title_es: 'Quiénes somos', about_title_en: 'Who we are', about_title_fr: 'Qui sommes-nous', about_image: 'https://qa.public.blob.vercel-storage.com/about.jpg', contact_whatsapp: '5213312345678', social_instagram: 'https://instagram.com/alia' };
 const put = async body => { setSession({ user: { id: 'admin' } }); const res = await api.PUT(new Request('http://localhost/test', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })); assert.equal(res.status, 200); setSession(null); };
 const messagesFor = locale => JSON.parse(fs.readFileSync(`apps/web/messages/${locale}.json`, 'utf8'));
@@ -102,9 +102,15 @@ async function main() {
     await put(empty);
     let html = render(locale, await about.default({ params: Promise.resolve({ locale }) }));
     assert.ok(html.includes('data-public-page="nosotros"') && html.includes('data-page-hero'));
-    assert.match(html, /<h1[^>]*>[^<]*<\/h1>/);
-    assert.ok(html.includes(messages.about.heroTitleFallback) && html.includes(messages.about.storyFallback.replace(/&/g, '&amp;')));
+    // Títulos palabra a palabra: el texto entero en sr-only y las palabras animadas aria-hidden.
+    assert.match(html, /<h1 [^>]*><span class="sr-only">[^<]+<\/span><span aria-hidden="true" class="split-words split-words-paint">(<span class="split-word"><span style="--word-delay:\d+ms">[^<]+<\/span><\/span> ?)+<\/span><\/h1>/, 'h1: texto entero accesible y palabras animadas al primer pintado');
+    assert.ok(html.includes(messages.about.storyFallback.replace(/&/g, '&amp;')));
     assert.equal((html.match(/<h1/g) || []).length, 1, 'Un solo h1');
+    assert.equal((html.match(/class="split-words"/g) || []).length, 4, 'h2 de historia, equipo, valores y cierre con SplitWords');
+    assert.ok(html.includes(esc(messages.about.teamTitle)) && html.includes(esc(messages.about.teamText)), 'Equipo con relleno');
+    assert.ok(!html.includes('data-parallax') && !html.includes('data-about-section="photos"'), 'Sin ninguna imagen no hay parallax ni fotos con pie');
+    assert.ok(html.includes(`<span class="sr-only">${esc(messages.about.ctaHomes)}</span><span aria-hidden="true" class="roll-chars">`), 'Botón con letras que ruedan y texto accesible');
+    assert.equal((html.match(/<ol/g) || []).length, 1, 'Valores como lista numerada');
     assert.equal(waLinks(html).length, 0, 'Sin número no hay botón de WhatsApp');
     assert.ok(!html.includes(messages.about.contactTitle), 'Sin redes ni WhatsApp no se pinta la sección de contacto');
     assert.ok(html.includes(`href="/${locale}/casas"`) && html.includes(`href="/${locale}/unete"`));
@@ -115,6 +121,11 @@ async function main() {
     assert.ok(html.includes(filled[`about_title_${locale}`].replace(/'/g, '&#x27;')) && html.includes(filled[`about_${locale}`]));
     assert.ok(!html.includes(messages.about.storyFallback.replace(/&/g, '&amp;')));
     assert.ok(html.includes('about.jpg'), 'Imagen del panel en el hero');
+    // Sin imágenes propias, cabecera, equipo, dos fotos con pie y cierre caen a la del panel.
+    assert.equal((html.match(/data-parallax/g) || []).length, 3, 'Parallax en cabecera, equipo y cierre');
+    assert.equal((html.match(/<figure class="reveal about-tilt/g) || []).length, 2, 'Dos fotos con pie que entran giradas');
+    assert.ok(html.includes(esc(messages.about.photoOneCaption)) && html.includes(esc(messages.about.photoTwoCaption)));
+    assert.ok(html.indexOf('data-page-hero') < html.indexOf('data-about-section="story"') && html.indexOf('data-about-section="team"') < html.indexOf('data-about-section="photos"') && html.indexOf('data-about-section="photos"') < html.indexOf('data-about-section="values"'), 'Orden: cabecera, historia, equipo, fotos, valores');
     assert.ok(html.includes('href="https://instagram.com/alia"'));
     assert.deepEqual(waLinks(html), [pages.whatsappHref(filled.contact_whatsapp, messages.about.whatsappMessage)]);
 

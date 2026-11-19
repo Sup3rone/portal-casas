@@ -852,7 +852,7 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 
 | Ruta | Archivo | Qué muestra |
 |---|---|---|
-| `/{locale}/nosotros` | `app/[locale]/nosotros/page.tsx` | Hero (imagen y título de Panel → Contenido → Sobre nosotros), historia (`about_*` del panel, o relleno si está vacío), 3 valores, contacto (Instagram, Facebook y WhatsApp del panel; la sección no sale si no hay ninguno) y botones a `/casas` y `/unete`. |
+| `/{locale}/nosotros` | `app/[locale]/nosotros/page.tsx` | Reparto editorial (referencia de reparto y movimiento: casamomo.at/about, 19-11). Orden: título enorme y foto a lo ancho (título de «Sobre nosotros» del panel), historia (`about_*` del panel, o relleno), equipo (foto vertical + presentación), dos fotos con pie escalonadas, 3 valores numerados 01–03, contacto (Instagram, Facebook y WhatsApp del panel; no sale si no hay ninguno) y cierre con botones a `/casas` y `/unete` y foto final. Ver §14.3. |
 | `/{locale}/unete` | `app/[locale]/unete/page.tsx` + `components/JoinQuiz.tsx` | Cuestionario a pantalla completa, sin scroll: una pregunta por pantalla, elegir avanza. Al final: resumen editable, 3 beneficios y la acción. Foto de «Sobre nosotros» al costado en escritorio. |
 
 - **Dos audiencias, cuatro preguntas cada una** (`lib/join-quiz.ts`). Dueños = rol `COLLABORATOR`: perfil → tipo de propiedad → ubicación (estados con casas publicadas + «otro lugar»; sin estados se omite) → renta (por noches, anual, las dos; igual que `rentalType`). Referidores = tabla `Partner`: perfil → a quién recomendaría → canal → alcance. Las preguntas de referidores son una propuesta: el negocio debe confirmarlas.
@@ -860,7 +860,7 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 - **Navegación:** las respuestas viven en el hash (`#owners/house/Jalisco`), así que funcionan el Atrás del navegador y un enlace directo a un paso; un hash inválido se recorta al prefijo válido. Teclado: A/B/C o 1/2/3 eligen; el foco pasa a cada pregunta nueva. El avance («Pregunta 2 de 4» y la barra) está oculto a pedido del negocio: `SHOW_QUIZ_PROGRESS = false` en `JoinQuiz.tsx`; el texto sigue para lectores de pantalla.
 - **Sin scroll:** `body:has(main[data-join-quiz])` mide `100dvh` sin desbordarse (`globals.css`) y `Footer.tsx` no se pinta en `/unete`. En pantallas muy bajas solo el bloque de la pregunta se desplaza por dentro.
 - **WhatsApp:** número global `contact_whatsapp` del panel (`wa.me/<número>?text=…`, `whatsappHref` en `lib/public-pages.ts`). Sin número válido el botón no se pinta.
-- **Componentes:** `PageHero` y `BenefitGrid` (servidor, en /nosotros), `WhatsappCta` (ambas) y `JoinQuiz` (cliente, con `JoinQuiz.module.css`: entrada por pantalla, hover y pulsación; todo quieto con reduced-motion).
+- **Componentes:** `SplitWords`, `ParallaxImage` y `RollText` (servidor, en /nosotros; §14.3), `WhatsappCta` (ambas) y `JoinQuiz` (cliente, con `JoinQuiz.module.css`: entrada por pantalla, hover y pulsación; todo quieto con reduced-motion).
 - **Textos:** namespaces `about.*` y `join.*`, más `nav.nosotros`, `nav.unete` y `seo.about*` / `seo.join*`, en `messages/{es,en,fr}.json`. No hay cambios de base de datos.
 - **Carga:** las cubre `app/[locale]/loading.tsx` (emblema, T-4835). La animación de primera carga (`SITE_INTRO_PATH`) no se activa en estas rutas.
 
@@ -868,7 +868,7 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 
 **Panel → Contenido** (solo ADMIN): tres desplegables excluyentes (`<details name="content-section">`, uno abierto a la vez): «Editar página principal» (el `SiteContentEditor` de siempre), «Editar página Nosotros» y «Editar página Únete» (`components/panel/PageContentEditor.tsx`, con pestañas es/en/fr). Cada campo vacío muestra en gris el texto por defecto de `messages/*.json`, que es lo que se publica mientras nadie escriba otro.
 
-- **Qué se edita** (`lib/page-content.ts`, `pageContentGroups`): todas las palabras de /nosotros y /unete (títulos, textos de apoyo, etiquetas de opciones, pantallas finales, beneficios, botones, mensajes de WhatsApp y SEO), más una imagen por página: cabecera de /nosotros y foto lateral de /unete. Vacía = imagen de «Sobre nosotros». **No** se edita la estructura (qué preguntas hay, cuántas opciones) ni las palabras de la interfaz (Atrás, «Pregunta 2 de 4»…). La historia sigue saliendo de «Sobre nosotros».
+- **Qué se edita** (`lib/page-content.ts`, `pageContentGroups`): todas las palabras de /nosotros y /unete (títulos, textos de apoyo, etiquetas de opciones, pantallas finales, beneficios, botones, mensajes de WhatsApp y SEO), más las imágenes: en /nosotros cabecera, equipo, foto 1, foto 2 y cierre (`aboutImages`: vacía = la de cabecera, y la de cabecera vacía = la de «Sobre nosotros»); en /unete la foto lateral (vacía = la de «Sobre nosotros»). **No** se edita la estructura (qué preguntas hay, cuántas opciones) ni las palabras de la interfaz (Atrás, «Pregunta 2 de 4»…). La historia sigue saliendo de «Sobre nosotros».
 - **Dónde se guarda:** dos claves JSON en `SiteContent`, `page_about` y `page_join` (`{ texts: { es, en, fr }, images }`). Lectura y guardado en `lib/page-content-store.ts`, aparte de `saveSiteContent` a propósito: aquel reescribe todas sus claves en cada guardado. Endpoint: `PUT /api/panel/page-content`, con la comprobación de ADMIN dentro del mismo statement.
 - **Validación:** solo claves conocidas; 200 caracteres en títulos y botones, 1000 en textos; imágenes https sin credenciales. Un JSON dañado en BD hace que la página use los textos por defecto, nunca la rompe.
 - **WhatsApp:** en el mensaje editado, `{summary}` marca dónde van las respuestas; si falta, van al final.
@@ -880,11 +880,24 @@ Límite: el enlace general del referidor de un dueño también atribuye en casas
 
 Todo lo que lleva `[Pendiente]` en los tres idiomas (`grep -n "\[Pendiente\]" apps/web/messages/*.json`):
 
-1. **Nosotros:** historia (o rellenarla en el panel), 3 valores (título y texto), título y texto de cierre, descripción SEO. Imagen vertical en el panel si aún no hay.
+1. **Nosotros:** historia (o rellenarla en el panel), título y presentación del equipo, 2 pies de foto, 3 valores (título y texto), título y texto de cierre, descripción SEO. Fotos propias de equipo, foto 1, foto 2 y cierre (hoy repiten la de cabecera).
 2. **Únete, general:** propuesta de valor del hero, descripción SEO.
 3. **Únete, preguntas:** el texto de apoyo de cada pregunta; confirmar las preguntas y opciones (sobre todo las de referidores).
 4. **Únete, dueños:** texto de la tarjeta, qué pasa después de enviar, 3 beneficios. Confirmar el mensaje prellenado de WhatsApp.
 5. **Únete, referidores:** lo mismo, y qué se promete del % (hoy el referidor ve códigos, conteos y %, sin importes).
 6. Fotos propias para los héroes y el costado del cuestionario, si se quieren.
+
+### 14.3 Animaciones de /nosotros
+
+Sin librerías; todo quieto con reduced-motion (comprobado por CDP).
+
+| Efecto | Dónde | Cómo |
+|---|---|---|
+| Títulos palabra por palabra | `components/SplitWords.tsx` + `globals.css` (`.split-word`) | Cada palabra sube desde detrás de una máscara. h1 al primer pintado (`paint`); h2 dentro de `<Reveal className="about-split">`. Texto entero en `sr-only`, palabras `aria-hidden`. |
+| Parallax de fotos | `components/ParallaxImage.tsx` + `ParallaxImage.module.css` | Capa al 120 % movida con `animation-timeline: view()`, solo CSS. El marco usa `overflow: clip` (con `hidden` se vuelve contenedor de scroll y no se mueve). Va en módulo porque `test-detail-scroll` prohíbe `animation-timeline` en globals.css. Sin soporte (Firefox) queda quieta. |
+| Fotos con pie que entran giradas | `.about-tilt` en `globals.css` | `Reveal` con distancia 120/220 px: suben inclinadas 8° desde su base y se enderezan; la segunda 150 ms después. |
+| Letras que ruedan en botones | `components/RollText.tsx` + `globals.css` (`.roll-char`) | Hover (solo puntero fino) o foco de teclado: cada letra sube y entra su copia (`::after` con `data-char`). Texto real en `sr-only`. |
+
+No se trajo el scroll suave (Lenis) de la referencia: cambia el scroll de todo el sitio y choca con el de la home.
 
 Fase 2 (fuera de T-4944): enlaces en menú y footer, quitar `noindex`, formulario propio con guardado en BD y la traducción automática por campo en el editor de Páginas.

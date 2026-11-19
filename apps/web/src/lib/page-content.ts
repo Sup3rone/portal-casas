@@ -10,7 +10,7 @@ export const pageContentLocales = ['es', 'en', 'fr'] as const;
 export type PageContentLocale = typeof pageContentLocales[number];
 
 /** Rol del campo: da la etiqueta en el panel (panelPages.roles.*) y el largo máximo. */
-export type PageFieldRole = 'eyebrow' | 'title' | 'help' | 'text' | 'button' | 'whatsappMessage' | 'optionTitle' | 'optionText' | 'option' | 'itemTitle' | 'itemText' | 'seoTitle' | 'seoDescription';
+export type PageFieldRole = 'eyebrow' | 'title' | 'help' | 'text' | 'button' | 'whatsappMessage' | 'optionTitle' | 'optionText' | 'option' | 'itemTitle' | 'itemText' | 'caption' | 'seoTitle' | 'seoDescription';
 export type PageField = { key: string; role: PageFieldRole; n?: number };
 export type PageGroup = { id: string; fields: PageField[] };
 // closed (solo /unete): «no estamos disponibles»; la página muestra el aviso en vez del cuestionario.
@@ -39,6 +39,8 @@ export const pageContentGroups: Record<PageContentPage, PageGroup[]> = {
   about: [
     { id: 'hero', fields: [{ key: 'about.heroEyebrow', role: 'eyebrow' }, { key: 'about.heroTitleFallback', role: 'title' }] },
     { id: 'story', fields: [{ key: 'about.storyTitle', role: 'title' }, { key: 'about.storyFallback', role: 'text' }] },
+    { id: 'team', fields: [{ key: 'about.teamTitle', role: 'title' }, { key: 'about.teamText', role: 'text' }] },
+    { id: 'photos', fields: [{ key: 'about.photoOneCaption', role: 'caption', n: 1 }, { key: 'about.photoTwoCaption', role: 'caption', n: 2 }] },
     { id: 'values', fields: [{ key: 'about.valuesTitle', role: 'title' }, ...pairs('about.values', 'itemTitle', 'itemText')] },
     { id: 'contact', fields: [{ key: 'about.contactTitle', role: 'title' }, { key: 'about.whatsappLabel', role: 'button' }, { key: 'about.whatsappMessage', role: 'whatsappMessage' }] },
     { id: 'closing', fields: [{ key: 'about.ctaTitle', role: 'title' }, { key: 'about.ctaText', role: 'text' }, { key: 'about.ctaHomes', role: 'button' }, { key: 'about.ctaJoin', role: 'button' }] },
@@ -62,8 +64,15 @@ export const pageContentGroups: Record<PageContentPage, PageGroup[]> = {
     { id: 'seo', fields: [{ key: 'seo.joinTitle', role: 'seoTitle' }, { key: 'seo.joinDescription', role: 'seoDescription' }] },
   ],
 };
-/** Imágenes propias de cada página; vacía = la imagen de «Sobre nosotros» del panel. */
-export const pageContentImages: Record<PageContentPage, string[]> = { about: ['hero'], join: ['side'] };
+/** Imágenes propias de cada página. Vacía: hero y side = la imagen de «Sobre nosotros» del panel;
+ * las demás de /nosotros = la de cabecera (aboutImages). */
+export const pageContentImages: Record<PageContentPage, string[]> = { about: ['hero', 'team', 'photoOne', 'photoTwo', 'closing'], join: ['side'] };
+
+/** Imágenes de /nosotros ya resueltas: cada hueco vacío cae a la cabecera, y la cabecera a la del panel. */
+export function aboutImages(images: Record<string, string>, fallback: string) {
+  const hero = images.hero || fallback;
+  return { hero, team: images.team || hero, photoOne: images.photoOne || hero, photoTwo: images.photoTwo || hero, closing: images.closing || hero };
+}
 
 export const pageFields = (page: PageContentPage) => pageContentGroups[page].flatMap(group => group.fields);
 export const emptyPageContent = (): PageContentValue => ({ texts: { es: {}, en: {}, fr: {} }, images: {}, closed: false });

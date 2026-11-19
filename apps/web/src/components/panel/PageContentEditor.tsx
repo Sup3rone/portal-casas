@@ -107,7 +107,8 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
         <p className="text-sm text-gray-600 dark:text-gray-300">{t('customized', { count: edited[language], total })}</p>
         {pageContentGroups[page].map(group => <fieldset key={group.id} className="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
           <legend className="px-1 font-medium">{t(`groups.${group.id}`)}</legend>
-          {group.id === 'story' && <p className="text-sm text-gray-600 dark:text-gray-300">{t('storyHint')}</p>}
+          {/* Título e historia de /nosotros salen de «Sobre nosotros» de la home; aquí solo son el respaldo. */}
+          {page === 'about' && (group.id === 'hero' || group.id === 'story') && <p className="text-sm text-gray-600 dark:text-gray-300">{t(group.id === 'hero' ? 'titleHint' : 'storyHint')}</p>}
           {group.fields.map(field => {
             const name = `${language}:${field.key}`, fallback = defaults[language][field.key] ?? '';
             const props = { name, defaultValue: initial.texts[language][field.key] ?? '', placeholder: fallback, maxLength: pageTextLimit(field.role), className: inputClass, 'aria-description': t('defaultLabel', { text: fallback }) };

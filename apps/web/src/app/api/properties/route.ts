@@ -6,6 +6,8 @@ import { accessFailure, managedProperties, requirePropertyManager } from '@/lib/
 import { propertyInput } from '@/lib/panel-validation';
 import { panelError } from '@/lib/panel-response';
 import { insertFirstIcalFeed, validateFeedInput } from '@/lib/ical-feeds';
+import { autoTranslate } from '@/lib/auto-translation';
+import { propertyGroups } from '@/lib/translation-groups';
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,6 +20,10 @@ export async function POST(req: NextRequest) {
     const values = propertyInput(body && typeof body === 'object' && !Array.isArray(body) ? propertyBody : body, true);
     const ical = icalUrl == null || icalUrl === '' || values.rentalType === 'anual' ? null : validateFeedInput({ url: icalUrl, source: icalSource });
     const id = crypto.randomUUID();
+    // T-5072: en/fr vacíos se traducen desde el español antes de crear la ficha.
+    const translation = await autoTranslate(propertyGroups(id, values));
+    const [title, desc] = translation.groups;
+    Object.assign(values, { titleEn: title.en, titleFr: title.fr, descEn: desc.en, descFr: desc.fr });
     const slug = `${values.titleEs!.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'property'}-${id.slice(0, 8)}`;
     const result = await db.execute(sql`
       insert into "Property" ("id", "slug", "titleEs", "titleEn", "titleFr", "descEs", "descEn", "descFr", "address", "city", "lat", "lng", "maxGuests", "bedrooms", "bathrooms", "baseWeekdayPrice", "baseWeekendPrice", "ownerId", "published", "rentalType", "contactName", "whatsapp", "state", "destinationCity", "sectionTitles", "contactEmail", "sectionsEnabled", "sectionsOrder")
@@ -30,13 +36,14 @@ export async function POST(req: NextRequest) {
       returning "id"
     `);
     if (!result.rows.length) return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    await translation.commit();
     let icalFeedId: string | null = null;
     if (ical) {
       try { icalFeedId = (await insertFirstIcalFeed(id, ical)).id; }
       catch (feedError) { console.error('Propiedad creada; no se pudo guardar su calendario iCal:', feedError); }
     }
     revalidatePath('/[locale]/panel', 'layout');
-    return NextResponse.json({ id, icalFeedId, icalRequested: Boolean(ical) }, { status: 201 });
+    return NextResponse.json({ id, icalFeedId, icalRequested: Boolean(ical), translation: translation.outcome }, { status: 201 });
   } catch (error) { return panelError(error); }
 }
 

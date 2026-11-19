@@ -11,10 +11,10 @@ export async function PUT(request: Request) {
     const body = await request.json().catch(() => null) as { page?: unknown; texts?: unknown; images?: unknown } | null;
     if (!body || !pageContentPages.includes(body.page as PageContentPage)) throw new PageContentError('INVALID_PAGE_CONTENT');
     const { page, ...content } = body;
-    await savePageContent(page as PageContentPage, content);
+    const { translation } = await savePageContent(page as PageContentPage, content);
     revalidatePath(page === 'about' ? '/[locale]/nosotros' : '/[locale]/unete', 'page');
     revalidatePath('/[locale]/panel/contenido', 'page');
-    return NextResponse.json({ success: true }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ success: true, translation }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof PageContentError) return NextResponse.json({ error: 'validation', code: error.code }, { status: error.code === 'PAGE_CONTENT_NOT_READY' ? 409 : 400 });
     const denied = accessFailure(error);

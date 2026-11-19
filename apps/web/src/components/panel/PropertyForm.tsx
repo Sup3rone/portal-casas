@@ -3,14 +3,15 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { PanelProperty } from '@/lib/panel-resources';
-import { panelRequest, inputClass, buttonClass } from './request';
+import { panelRequest, savedKey, inputClass, buttonClass } from './request';
 import MapsLocationInput from './MapsLocationInput';
-import TranslationDraftButton from './TranslationDraftButton';
+import { AutoTranslationHint, AutoTranslatedTag } from './AutoTranslation';
 import { usePropertyRentalType } from './PropertyRentalType';
 import { DESTINATION_STATES, citiesByState, isDestinationValue, type DestinationState } from '@/lib/destinations';
 import { airbnbListingId, provisionalTitle } from '@/lib/ical-link';
 
-export default function PropertyForm({ property }: { property?: PanelProperty }) {
+// T-5072: autoTranslated = campos en/fr cuyo texto actual es la traducción automática (etiqueta junto al campo).
+export default function PropertyForm({ property, autoTranslated = [] }: { property?: PanelProperty; autoTranslated?: string[] }) {
   const t = useTranslations('panel'), router = useRouter();
   const rental = usePropertyRentalType();
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
@@ -47,7 +48,7 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
         }
         router.push(`/panel/propiedades/${result.id}${ical ? `?ical=${ical}` : ''}`);
       }
-      else { setMessage('saved'); router.refresh(); }
+      else { setMessage(savedKey(result)); router.refresh(); }
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
@@ -71,7 +72,7 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
         {listingId && <div className="space-y-2 text-sm"><p>{ical('noNameInFeed', { id: listingId })}</p>
           <button type="button" className="min-h-11 rounded-lg border border-green-700 px-3 text-green-800 dark:border-green-400 dark:text-green-300" onClick={event => {
             const form = event.currentTarget.form;
-            for (const name of ['titleEs', 'titleEn', 'titleFr']) {
+            for (const name of ['titleEs']) { // T-5072: en/fr se traducen al guardar
               const input = form?.elements.namedItem(name);
               if (input instanceof HTMLInputElement && !input.value.trim()) input.value = provisionalTitle(listingId);
             }
@@ -96,11 +97,17 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
         <label className="block text-sm">{t('fields.contactEmail')}
           <input key={`contactEmail:${property?.contactEmail ?? ''}`} name="contactEmail" type="email" maxLength={254} defaultValue={property?.contactEmail ?? ''} className={inputClass} />
         </label>
-        {texts.map(key => <label key={key} className="block text-sm">{t(`fields.${key}`)}
-          {key.startsWith('desc') ? <textarea name={key} required rows={4} defaultValue={property?.[key]} className={inputClass} />
-            : <input name={key} required defaultValue={property?.[key]} className={inputClass} />}
-          {(key.startsWith('desc') || key.startsWith('title')) && <TranslationDraftButton source={key.slice(-2).toLowerCase() as 'es' | 'en' | 'fr'} prefix={key.startsWith('desc') ? 'desc' : 'title'} disabled={busy} />}
-        </label>)}
+        <div className="md:col-span-2"><AutoTranslationHint /></div>
+        {texts.map(key => {
+          // Solo el español (y la dirección) es obligatorio; en/fr vacíos se traducen al guardar. La key remonta
+          // el campo tras router.refresh() para que se vea la traducción recién guardada.
+          const required = key.endsWith('Es') || key === 'address';
+          return <label key={`${key}:${property?.[key] ?? ''}`} className="block text-sm">{t(`fields.${key}`)}
+            {key.startsWith('desc') ? <textarea name={key} required={required} rows={4} defaultValue={property?.[key]} className={inputClass} />
+              : <input name={key} required={required} defaultValue={property?.[key]} className={inputClass} />}
+            <AutoTranslatedTag show={autoTranslated.includes(key)} />
+          </label>;
+        })}
         <label className="block text-sm">{t('fields.state')}
           <select name="state" value={state} onChange={event => { setState(event.target.value as DestinationState | ''); setDestinationCity(''); }} className={`${inputClass} min-h-11`}>
             <option value="">{t('destinationEmpty')}</option>

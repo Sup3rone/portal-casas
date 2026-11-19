@@ -9,7 +9,8 @@ function renderInstance(target,render){instance=target;cursor=0;return render();
 mockModule('react',{...React,useState(initial){const owner=instance,index=cursor++;if(!(index in owner.hooks))owner.hooks[index]=typeof initial==='function'?initial():initial;return[owner.hooks[index],next=>{owner.hooks[index]=typeof next==='function'?next(owner.hooks[index]):next;}];}});
 mockModule('next-intl',{useTranslations:namespace=>req('next-intl').createTranslator({locale,messages:require('../apps/web/messages/'+locale+'.json'),namespace,onError(error){throw error;}})});
 mockModule('@/i18n/navigation',{useRouter:()=>({refresh(){}})});
-mockModule('./request',{buttonClass:'button',inputClass:'input',panelRequest:async(url,method,body)=>{
+mockModule('./request',{buttonClass:'button',inputClass:'input',savedKey:()=>'saved',savedKeys:new Set(['saved','savedTranslated','savedTranslationPending']),// T-5072
+  panelRequest:async(url,method,body)=>{
   calls.push({url,method,body:structuredClone(body)});
   if(method==='PATCH')server.modules=structuredClone(body.sectionsEnabled);
   if(method==='PUT')Object.assign(server.sections.find(row=>row.section===url.split('/').at(-1)),body);

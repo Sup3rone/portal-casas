@@ -60,7 +60,7 @@ flowchart TD
   DB --> NEON[(PostgreSQL / Neon)]
   A --> BLOB[Vercel Blob]
   A --> MAIL[Resend]
-  A --> TR[MyMemory]
+  A --> TR[DeepL]
   A --> ICAL[Feeds iCal]
   C --> MAP[Google Maps iframe]
   C --> WA[Enlace wa.me]
@@ -186,9 +186,9 @@ flowchart LR
 
 Gestiona textos/títulos About por idioma, imagen, redes, WhatsApp global, video home, imagen listado y selección de destacadas. Las claves permitidas están tanto en el helper como en el CHECK del esquema.
 
-`TranslationDraftButton → /api/traducir → permisos/cuota → MyMemory → campos editables`.
+`Guardar (propiedad, secciones, Sobre nosotros, Páginas) → autoTranslate (lib/auto-translation.ts) → DeepL → BD + estado en AutoTranslation` (T-5072, 19-11-2026; sustituye al botón «Traducir» y a MyMemory).
 
-Traducir no guarda. El helper respeta campos ya ocupados y comunica cuota/error. No duplicar lógica al añadir otro formulario.
+Se escribe en español. Al guardar, en/fr se traducen solos si están **vacíos** o si siguen siendo la **traducción automática** (su texto coincide con `valueHash` de `AutoTranslation`); si cambia el español, esos se retraducen. Editar en/fr a mano lo protege. Reglas puras en `lib/auto-translation-plan.ts`; qué campos y con qué key, en `lib/translation-groups.ts`. Si DeepL falla o falta `DEEPL_API_KEY`: se guarda igual, el idioma vacío lleva el español (salvo Páginas, donde vacío = texto por defecto) y queda pendiente hasta el siguiente guardado. Sin la tabla (`scripts/sql/auto-translation.sql` sin aplicar) solo se rellenan los vacíos. Clave `:fx` = DeepL API Free (`api-free.deepl.com`); `{marcadores}` viajan protegidos con `<keep>`.
 
 ### 2.7 Ocupación y calendarios
 
@@ -366,8 +366,9 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | [apps/web/src/lib/panel-resources.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/panel-resources.ts) | Carga recursos del editor: tarifas, reservas, medios y bloqueos. |
 | [apps/web/src/lib/panel-response.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/panel-response.ts) | Respuesta/error centralizado de servidor del panel. |
 | [apps/web/src/lib/panel-server.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/panel-server.ts) | Gestor/propiedad autorizada y adaptación a redirect/notFound. |
-| [apps/web/src/lib/panel-translation-drafts.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/panel-translation-drafts.ts) | Rellena destinos sin sobrescribir contenido previo; traducción no guarda. |
-| [apps/web/src/lib/panel-translation.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/panel-translation.ts) | MyMemory, troceado por bytes, errores y cuota/limitador propio. |
+| [apps/web/src/lib/auto-translation-plan.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/auto-translation-plan.ts) | Reglas de la traducción al guardar: vacío/automático/manual, retraducción, pendientes y marcadores. Sin red ni BD. |
+| [apps/web/src/lib/auto-translation.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/auto-translation.ts) | DeepL por lotes, estado en `AutoTranslation` y lectura de campos automáticos para el panel. |
+| [apps/web/src/lib/translation-groups.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/translation-groups.ts) | Campos traducibles de cada guardado y su key de estado. |
 | [apps/web/src/lib/panel-validation.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/panel-validation.ts) | Payloads de propiedad/recursos; contactos, destino, modalidad, módulos y orden. |
 | [apps/web/src/lib/photo-upload.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/photo-upload.ts) | Compresión cliente canvas/bitmap, nombre final, MIME/tamaño y fallback. |
 | [apps/web/src/lib/property-access.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/lib/property-access.ts) | Rol vigente en BD, ownership/ámbito de recursos y errores 401/403/404. |
@@ -429,7 +430,7 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | [apps/web/src/components/panel/ResourceEditor.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/ResourceEditor.tsx) | Biblioteca de fotos, alta URL plegada y cola; también tarifas. |
 | [apps/web/src/components/panel/SectionBackgroundEditor.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/SectionBackgroundEditor.tsx) | Editor histórico de fondos, comentado en composición principal. |
 | [apps/web/src/components/panel/SiteContentEditor.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/SiteContentEditor.tsx) | Textos/redes/contactos/activos y destacadas globales. |
-| [apps/web/src/components/panel/TranslationDraftButton.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/TranslationDraftButton.tsx) | Auto-traducción de borradores entre idiomas sin autoguardado. |
+| [apps/web/src/components/panel/AutoTranslation.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/AutoTranslation.tsx) | Nota «se traduce al guardar» y etiqueta «traducido automáticamente» junto a cada campo en/fr. |
 | [apps/web/src/components/panel/UserActions.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/panel/UserActions.tsx) | Controles para administrar usuarios. |
 | [apps/web/src/components/PropertyCard.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/PropertyCard.tsx) | Tarjeta de listado: portada, datos, renta anual y enlaces. |
 | [apps/web/src/components/PropertyDetailScroll.tsx](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/components/PropertyDetailScroll.tsx) | Navbar inteligente, ancla reservar y botón arriba de ficha. |
@@ -509,7 +510,6 @@ Las tablas siguientes completan el mapa con ubicación precisa. Los métodos de 
 | /api/properties/[id]/upload | POST | [apps/web/src/app/api/properties/[id]/upload/route.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/api/properties/[id]/upload/route.ts) | Upload Blob de fotos/video de hero; MIME/tamaño/permisos. |
 | /api/properties | POST, GET | [apps/web/src/app/api/properties/route.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/api/properties/route.ts) | Crear propiedad borrador con validación y dueño. |
 | /api/public-auth/[flow] | POST | [apps/web/src/app/api/public-auth/[flow]/route.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/api/public-auth/[flow]/route.ts) | Transporte POST login/register/recovery; mismo origen y 429. |
-| /api/traducir | POST | [apps/web/src/app/api/traducir/route.ts](C:/Users/menib/Documents/GitHub/portal-casas/apps/web/src/app/api/traducir/route.ts) | Traducción autenticada, validación y cuota. |
 
 ### 7.5 Configuración, soporte, idiomas y acceso a BD
 
@@ -625,7 +625,7 @@ No ejecutar SQL o mantenimiento por el solo hecho de aparecer en esta lista. Los
 | [scripts/test-panel-location-translation.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-panel-location-translation.cjs) | Regresión offline de panel location translation |
 | [scripts/test-panel-render.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-panel-render.cjs) | Regresión offline de panel render |
 | [scripts/test-panel-skin.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-panel-skin.cjs) | Regresión offline de panel skin |
-| [scripts/test-panel-translation.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-panel-translation.cjs) | Regresión offline de panel translation |
+| [scripts/test-panel-translation.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-panel-translation.cjs) | Traducción al guardar (T-5072): reglas, DeepL simulado, los cuatro guardados, fallos y sin tabla. |
 | [scripts/test-panel.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-panel.cjs) | Regresión offline de panel |
 | [scripts/test-photo-library.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-photo-library.cjs) | Regresión offline de photo library |
 | [scripts/test-photo-upload-property-switch.cjs](C:/Users/menib/Documents/GitHub/portal-casas/scripts/test-photo-upload-property-switch.cjs) | Regresión offline de photo upload property switch |

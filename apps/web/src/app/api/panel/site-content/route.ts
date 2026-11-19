@@ -18,9 +18,9 @@ export async function GET() {
 }
 export async function PUT(request: Request) {
   try {
-    await saveSiteContent(await request.json().catch(() => null));
+    const translation = await saveSiteContent(await request.json().catch(() => null));
     revalidatePath('/[locale]', 'layout');
     revalidatePath('/[locale]/panel/contenido', 'page');
-    return NextResponse.json({ success: true }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ success: true, translation }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) { return failure(error); }
 }

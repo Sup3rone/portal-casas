@@ -8,18 +8,21 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { closablePages, pageContentGroups, pageContentImages, pageContentLocales, pageFields, pageTextLimit, type PageContentLocale, type PageContentPage, type PageContentValue, type PageField } from '@/lib/page-content';
 import { optimizePhoto, photoMetadata, photoTypes, photoCompression, PhotoUploadError, type PhotoType } from '@/lib/photo-upload';
-import { panelRequest, panelResponseError, panelErrorKey, inputClass, buttonClass } from './request';
+import { panelRequest, panelResponseError, panelErrorKey, savedKey, savedKeys, inputClass, buttonClass } from './request';
+import { AutoTranslationHint, AutoTranslatedTag } from './AutoTranslation';
 
-type Props = { page: PageContentPage; initial: PageContentValue; defaults: Record<PageContentLocale, Record<string, string>> };
+// T-5072: autoTranslated = nombres de campo ("en:about.ctaTitle") cuyo texto es la traducción automática.
+type Props = { page: PageContentPage; initial: PageContentValue; defaults: Record<PageContentLocale, Record<string, string>>; autoTranslated?: string[] };
 
-export default function PageContentEditor({ page, initial, defaults }: Props) {
+export default function PageContentEditor({ page, initial, defaults, autoTranslated = [] }: Props) {
   const t = useTranslations('panelPages'), panel = useTranslations('panel'), uploader = useTranslations('photoUpload'), site = useTranslations('siteContent'), router = useRouter();
   const id = useId();
   const [locale, setLocale] = useState<PageContentLocale>('es');
   const [images, setImages] = useState<Record<string, string>>(initial.images);
   const closable = closablePages.includes(page);
   const [closed, setClosed] = useState(initial.closed), [savedClosed, setSavedClosed] = useState(initial.closed);
-  const [edited, setEdited] = useState(() => Object.fromEntries(pageContentLocales.map(language => [language, Object.keys(initial.texts[language]).length])) as Record<PageContentLocale, number>);
+  // T-5072: lo guardado manda (tras guardar, router.refresh() trae también las traducciones automáticas).
+  const edited = Object.fromEntries(pageContentLocales.map(language => [language, Object.keys(initial.texts[language]).length])) as Record<PageContentLocale, number>;
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   const [uploading, setUploading] = useState<string | null>(null), [uploadStatus, setUploadStatus] = useState('');
   const fileRef = useRef<HTMLInputElement>(null), target = useRef(''), controller = useRef<AbortController | null>(null);
@@ -39,10 +42,9 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
     event.preventDefault(); setBusy(true); setMessage('');
     try {
       const texts = collect(event.currentTarget);
-      await panelRequest('/api/panel/page-content', 'PUT', { page, texts, images, ...(closable ? { closed } : {}) });
+      const result = await panelRequest('/api/panel/page-content', 'PUT', { page, texts, images, ...(closable ? { closed } : {}) });
       setSavedClosed(closed);
-      setEdited(Object.fromEntries(pageContentLocales.map(language => [language, Object.keys(texts[language]).length])) as Record<PageContentLocale, number>);
-      setMessage('saved'); router.refresh();
+      setMessage(savedKey(result)); router.refresh();
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
@@ -105,6 +107,7 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
       {/* Todos los idiomas están en el formulario (los ocultos también se envían); la pestaña solo elige cuál se ve. */}
       {pageContentLocales.map(language => <div key={language} role="tabpanel" id={`${id}-${language}`} aria-labelledby={`${id}-${language}-tab`} hidden={locale !== language} lang={language} className="space-y-5">
         <p className="text-sm text-gray-600 dark:text-gray-300">{t('customized', { count: edited[language], total })}</p>
+        <AutoTranslationHint />
         {pageContentGroups[page].map(group => <fieldset key={group.id} className="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
           <legend className="px-1 font-medium">{t(`groups.${group.id}`)}</legend>
           {/* Título e historia de /nosotros salen de «Sobre nosotros» de la home; aquí solo son el respaldo. */}
@@ -112,15 +115,16 @@ export default function PageContentEditor({ page, initial, defaults }: Props) {
           {group.fields.map(field => {
             const name = `${language}:${field.key}`, fallback = defaults[language][field.key] ?? '';
             const props = { name, defaultValue: initial.texts[language][field.key] ?? '', placeholder: fallback, maxLength: pageTextLimit(field.role), className: inputClass, 'aria-description': t('defaultLabel', { text: fallback }) };
-            return <label key={field.key} className="block text-sm">{label(field)}
+            return <label key={`${field.key}:${initial.texts[language][field.key] ?? ''}`} className="block text-sm">{label(field)}
               {pageTextLimit(field.role) > 200 ? <textarea rows={3} {...props} /> : <input {...props} />}
+              <AutoTranslatedTag show={autoTranslated.includes(name)} />
               {field.role === 'whatsappMessage' && <span className="mt-1 block text-xs text-gray-600 dark:text-gray-300">{t('whatsappHint', { summary: '{summary}' })}</span>}
             </label>;
           })}
         </fieldset>)}
       </div>)}
     </fieldset>
-    {message && <p role={message === 'saved' ? 'status' : 'alert'}>{panel(message)}</p>}
+    {message && <p role={savedKeys.has(message) ? 'status' : 'alert'}>{panel(message)}</p>}
     <button disabled={busy || Boolean(uploading)} className={buttonClass}>{panel(busy ? 'saving' : 'save')}</button>
   </form>;
 }

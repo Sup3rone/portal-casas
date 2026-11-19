@@ -2,16 +2,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import TranslationDraftButton from './TranslationDraftButton';
+import { AutoTranslationHint, AutoTranslatedTag } from './AutoTranslation';
 import { useRouter } from '@/i18n/navigation';
 import { parseFeaturedSelection, serializeFeaturedSelection } from '@/lib/featured-selection';
 import type { SiteContentValues } from '@/lib/site-content';
-import { panelRequest, panelResponseError, panelErrorKey, inputClass, buttonClass } from './request';
+import { panelRequest, panelResponseError, panelErrorKey, savedKey, savedKeys, inputClass, buttonClass } from './request';
 import { optimizePhoto, photoMetadata, photoTypes, photoCompression, PhotoUploadError, type PhotoType } from '@/lib/photo-upload';
 import { heroVideoMetadata } from '@/lib/hero-video-upload';
 import { parseHomeVideos, serializeHomeVideos, homeVideoDevices, maxHomeVideos, type HomeVideo, type HomeVideoDevice } from '@/lib/home-videos';
 
-export default function SiteContentEditor({ content, properties }: { content: SiteContentValues; properties: { id: string; label: string; city: string }[] }) {
+// T-5072: autoTranslated = campos en/fr de «Sobre nosotros» cuyo texto es la traducción automática.
+export default function SiteContentEditor({ content, properties, autoTranslated = [] }: { content: SiteContentValues; properties: { id: string; label: string; city: string }[]; autoTranslated?: string[] }) {
   const t = useTranslations('siteContent'), panel = useTranslations('panel'), router = useRouter();
   const [featuredIds, setFeaturedIds] = useState(() => parseFeaturedSelection(content.featured_property_id) ?? []);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
@@ -91,26 +92,26 @@ export default function SiteContentEditor({ content, properties }: { content: Si
     event.preventDefault(); setBusy(true); setMessage('');
     const form = new FormData(event.currentTarget);
     try {
-      await panelRequest('/api/panel/site-content', 'PUT', { ...Object.fromEntries(Object.keys(content).map(key => [key, form.get(key)])), home_background_videos: serializeHomeVideos(videos), featured_property_id: serializeFeaturedSelection(featuredIds) });
-      setMessage('saved'); router.refresh();
+      const result = await panelRequest('/api/panel/site-content', 'PUT', { ...Object.fromEntries(Object.keys(content).map(key => [key, form.get(key)])), home_background_videos: serializeHomeVideos(videos), featured_property_id: serializeFeaturedSelection(featuredIds) });
+      setMessage(savedKey(result)); router.refresh();
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
   return <form onSubmit={save} className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
     <p className="text-sm text-gray-600 dark:text-gray-300">{t('hint')}</p>
     <fieldset disabled={busy || uploading || videoUploading} className="space-y-4">
-      {(['about_title_es', 'about_title_en', 'about_title_fr'] as const).map(key => <label key={key} className="block text-sm">{t(key)}<input name={key} maxLength={200} defaultValue={content[key]} className={inputClass} /></label>)}
-      <TranslationDraftButton source="es" prefix="title" fieldNames={{ es: 'about_title_es', en: 'about_title_en', fr: 'about_title_fr' }} disabled={busy || uploading} useCentralErrors />
+      <AutoTranslationHint />
+      {(['about_title_es', 'about_title_en', 'about_title_fr'] as const).map(key => <label key={`${key}:${content[key]}`} className="block text-sm">{t(key)}<input name={key} maxLength={200} defaultValue={content[key]} className={inputClass} /><AutoTranslatedTag show={autoTranslated.includes(key)} /></label>)}
       <label className="block text-sm">{t('aboutImageLabel')}<input name="about_image" type="url" value={aboutImageUrl} readOnly className={inputClass} /></label>
       {aboutImageUrl && <><Image src={aboutImageUrl} alt={t('aboutImageLabel')} width={160} height={240} unoptimized className="aspect-[2/3] w-40 rounded-lg object-cover" /><button type="button" className={buttonClass} onClick={() => setAboutImageUrl('')}>{t('assetClear')}</button></>}
       <div onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void upload(event.dataTransfer.files, 'about_image'); }} className="rounded-xl border border-dashed p-4">
         <p>{t('aboutImageHint')}</p><p className="text-sm">{t('imageLimits')}</p>
         <button type="button" className={buttonClass} disabled={busy || uploading} onClick={() => { uploadTarget.current = 'about_image'; fileRef.current?.click(); }}>{uploader(uploading ? 'uploading' : 'choose')}</button>
       </div>
-      {(['about_es', 'about_en', 'about_fr'] as const).map(key => <label key={key} className="block text-sm">{t(key)}
+      {(['about_es', 'about_en', 'about_fr'] as const).map(key => <label key={`${key}:${content[key]}`} className="block text-sm">{t(key)}
         <textarea name={key} rows={5} maxLength={2000} defaultValue={content[key]} className={inputClass} />
+        <AutoTranslatedTag show={autoTranslated.includes(key)} />
       </label>)}
-      <TranslationDraftButton source="es" prefix="desc" fieldNames={{ es: 'about_es', en: 'about_en', fr: 'about_fr' }} disabled={busy || uploading} useCentralErrors />
       {(['social_instagram', 'social_facebook'] as const).map(key => <label key={key} className="block text-sm">{t(key)}
         <input name={key} type="url" pattern="https://.+" title={t('socialHint')} maxLength={2048} defaultValue={content[key]} className={inputClass} />
       </label>)}
@@ -181,7 +182,7 @@ export default function SiteContentEditor({ content, properties }: { content: Si
       {uploadStatus && <p role="status">{uploadStatus}</p>}
       {uploadErrors.length > 0 && <ul role="alert" className="space-y-2 break-words text-sm">{uploadErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}
     </div>
-    {message && <p role={message === 'saved' ? 'status' : 'alert'}>{panel(message)}</p>}
+    {message && <p role={savedKeys.has(message) ? 'status' : 'alert'}>{panel(message)}</p>}
     <button disabled={busy || uploading} className={buttonClass}>{panel(busy ? 'saving' : 'save')}</button>
   </form>;
 }

@@ -608,7 +608,9 @@
   },
   "panelTranslation": {
     "auto": "Automatically translated from Spanish",
-    "hint": "Write in Spanish. When you save, English and French are translated automatically if they are empty or still the automatic translation. If you edit one by hand, your version is kept."
+    "hint": "Write in Spanish. When you save, English and French are translated automatically if they are empty or still the automatic translation. If you edit one by hand, your version is kept.",
+    "useAuto": "Use automatic translation",
+    "useAutoDone": "It will be translated from Spanish when you save."
   },
   "referrals": {
     "title": "Referrals",

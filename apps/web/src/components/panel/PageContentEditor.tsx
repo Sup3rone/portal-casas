@@ -9,7 +9,7 @@ import { useRouter } from '@/i18n/navigation';
 import { closablePages, pageContentGroups, pageContentImages, pageContentLocales, pageFields, pageTextLimit, type PageContentLocale, type PageContentPage, type PageContentValue, type PageField } from '@/lib/page-content';
 import { optimizePhoto, photoMetadata, photoTypes, photoCompression, PhotoUploadError, type PhotoType } from '@/lib/photo-upload';
 import { panelRequest, panelResponseError, panelErrorKey, savedKey, savedKeys, inputClass, buttonClass } from './request';
-import { AutoTranslationHint, AutoTranslatedTag } from './AutoTranslation';
+import { AutoTranslationHint, AutoTranslationControl } from './AutoTranslation';
 
 // T-5072: autoTranslated = nombres de campo ("en:about.ctaTitle") cuyo texto es la traducción automática.
 type Props = { page: PageContentPage; initial: PageContentValue; defaults: Record<PageContentLocale, Record<string, string>>; autoTranslated?: string[] };
@@ -117,7 +117,7 @@ export default function PageContentEditor({ page, initial, defaults, autoTransla
             const props = { name, defaultValue: initial.texts[language][field.key] ?? '', placeholder: fallback, maxLength: pageTextLimit(field.role), className: inputClass, 'aria-description': t('defaultLabel', { text: fallback }) };
             return <label key={`${field.key}:${initial.texts[language][field.key] ?? ''}`} className="block text-sm">{label(field)}
               {pageTextLimit(field.role) > 200 ? <textarea rows={3} {...props} /> : <input {...props} />}
-              <AutoTranslatedTag show={autoTranslated.includes(name)} />
+              <AutoTranslationControl auto={autoTranslated.includes(name)} target={language !== 'es'} />
               {field.role === 'whatsappMessage' && <span className="mt-1 block text-xs text-gray-600 dark:text-gray-300">{t('whatsappHint', { summary: '{summary}' })}</span>}
             </label>;
           })}

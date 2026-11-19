@@ -609,7 +609,9 @@
   },
   "panelTranslation": {
     "auto": "Traduit automatiquement de l’espagnol",
-    "hint": "Écrivez en espagnol. À l’enregistrement, l’anglais et le français se traduisent seuls s’ils sont vides ou s’ils sont encore la traduction automatique. Si vous en modifiez un à la main, votre version est conservée."
+    "hint": "Écrivez en espagnol. À l’enregistrement, l’anglais et le français se traduisent seuls s’ils sont vides ou s’ils sont encore la traduction automatique. Si vous en modifiez un à la main, votre version est conservée.",
+    "useAuto": "Utiliser la traduction automatique",
+    "useAutoDone": "Sera traduit de l’espagnol à l’enregistrement."
   },
   "referrals": {
     "title": "Parrainage",

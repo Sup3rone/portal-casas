@@ -5,7 +5,7 @@ import { useRouter } from '@/i18n/navigation';
 import type { PanelProperty } from '@/lib/panel-resources';
 import { panelRequest, savedKey, inputClass, buttonClass } from './request';
 import MapsLocationInput from './MapsLocationInput';
-import { AutoTranslationHint, AutoTranslatedTag } from './AutoTranslation';
+import { AutoTranslationHint, AutoTranslationControl } from './AutoTranslation';
 import { usePropertyRentalType } from './PropertyRentalType';
 import { DESTINATION_STATES, citiesByState, isDestinationValue, type DestinationState } from '@/lib/destinations';
 import { airbnbListingId, provisionalTitle } from '@/lib/ical-link';
@@ -105,7 +105,7 @@ export default function PropertyForm({ property, autoTranslated = [] }: { proper
           return <label key={`${key}:${property?.[key] ?? ''}`} className="block text-sm">{t(`fields.${key}`)}
             {key.startsWith('desc') ? <textarea name={key} required={required} rows={4} defaultValue={property?.[key]} className={inputClass} />
               : <input name={key} required={required} defaultValue={property?.[key]} className={inputClass} />}
-            <AutoTranslatedTag show={autoTranslated.includes(key)} />
+            <AutoTranslationControl auto={autoTranslated.includes(key)} target={/^(title|desc)(En|Fr)$/.test(key)} />
           </label>;
         })}
         <label className="block text-sm">{t('fields.state')}

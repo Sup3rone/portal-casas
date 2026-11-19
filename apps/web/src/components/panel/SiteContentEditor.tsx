@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { AutoTranslationHint, AutoTranslatedTag } from './AutoTranslation';
+import { AutoTranslationHint, AutoTranslationControl } from './AutoTranslation';
 import { useRouter } from '@/i18n/navigation';
 import { parseFeaturedSelection, serializeFeaturedSelection } from '@/lib/featured-selection';
 import type { SiteContentValues } from '@/lib/site-content';
@@ -101,7 +101,7 @@ export default function SiteContentEditor({ content, properties, autoTranslated 
     <p className="text-sm text-gray-600 dark:text-gray-300">{t('hint')}</p>
     <fieldset disabled={busy || uploading || videoUploading} className="space-y-4">
       <AutoTranslationHint />
-      {(['about_title_es', 'about_title_en', 'about_title_fr'] as const).map(key => <label key={`${key}:${content[key]}`} className="block text-sm">{t(key)}<input name={key} maxLength={200} defaultValue={content[key]} className={inputClass} /><AutoTranslatedTag show={autoTranslated.includes(key)} /></label>)}
+      {(['about_title_es', 'about_title_en', 'about_title_fr'] as const).map(key => <label key={`${key}:${content[key]}`} className="block text-sm">{t(key)}<input name={key} maxLength={200} defaultValue={content[key]} className={inputClass} /><AutoTranslationControl auto={autoTranslated.includes(key)} target={!key.endsWith('_es')} /></label>)}
       <label className="block text-sm">{t('aboutImageLabel')}<input name="about_image" type="url" value={aboutImageUrl} readOnly className={inputClass} /></label>
       {aboutImageUrl && <><Image src={aboutImageUrl} alt={t('aboutImageLabel')} width={160} height={240} unoptimized className="aspect-[2/3] w-40 rounded-lg object-cover" /><button type="button" className={buttonClass} onClick={() => setAboutImageUrl('')}>{t('assetClear')}</button></>}
       <div onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void upload(event.dataTransfer.files, 'about_image'); }} className="rounded-xl border border-dashed p-4">
@@ -110,7 +110,7 @@ export default function SiteContentEditor({ content, properties, autoTranslated 
       </div>
       {(['about_es', 'about_en', 'about_fr'] as const).map(key => <label key={`${key}:${content[key]}`} className="block text-sm">{t(key)}
         <textarea name={key} rows={5} maxLength={2000} defaultValue={content[key]} className={inputClass} />
-        <AutoTranslatedTag show={autoTranslated.includes(key)} />
+        <AutoTranslationControl auto={autoTranslated.includes(key)} target={!key.endsWith('_es')} />
       </label>)}
       {(['social_instagram', 'social_facebook'] as const).map(key => <label key={key} className="block text-sm">{t(key)}
         <input name={key} type="url" pattern="https://.+" title={t('socialHint')} maxLength={2048} defaultValue={content[key]} className={inputClass} />

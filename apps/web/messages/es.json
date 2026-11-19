@@ -608,7 +608,9 @@
   },
   "panelTranslation": {
     "auto": "Traducido automáticamente del español",
-    "hint": "Escribe en español. Al guardar, inglés y francés se traducen solos si están vacíos o siguen siendo la traducción automática. Si editas uno a mano, se respeta tu versión."
+    "hint": "Escribe en español. Al guardar, inglés y francés se traducen solos si están vacíos o siguen siendo la traducción automática. Si editas uno a mano, se respeta tu versión.",
+    "useAuto": "Usar traducción automática",
+    "useAutoDone": "Se traducirá del español al guardar."
   },
   "referrals": {
     "title": "Referidos",

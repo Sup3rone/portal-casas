@@ -3,7 +3,7 @@
 // fallos del proveedor, marcadores {summary}, los cuatro guardados y que el botón y MyMemory ya no existen.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const { load, memory, setSession } = require('./test-property-access.cjs');
+const { load, req, memory, setSession } = require('./test-property-access.cjs');
 const plan = load('apps/web/src/lib/auto-translation-plan.ts');
 const groupsLib = load('apps/web/src/lib/translation-groups.ts');
 const auto = load('apps/web/src/lib/auto-translation.ts');
@@ -162,15 +162,24 @@ async function main() {
   for (const file of ['apps/web/src/components/panel/TranslationDraftButton.tsx', 'apps/web/src/app/api/traducir/route.ts', 'apps/web/src/lib/panel-translation.ts', 'apps/web/src/lib/panel-translation-drafts.ts']) assert.ok(!fs.existsSync(file), `${file} eliminado`);
   for (const file of ['PropertyForm', 'PropertySectionsEditor', 'SiteContentEditor', 'PageContentEditor']) {
     const source = fs.readFileSync(`apps/web/src/components/panel/${file}.tsx`, 'utf8');
-    assert.ok(source.includes('AutoTranslatedTag') && source.includes('AutoTranslationHint') && source.includes('savedKey'), `${file}: etiqueta, nota y aviso de traducción`);
+    assert.ok(source.includes('AutoTranslationControl') && source.includes('AutoTranslationHint') && source.includes('savedKey'), `${file}: etiqueta, nota y aviso de traducción`);
   }
   assert.ok(!/mymemory.translated.net/.test(fs.readFileSync('apps/web/src/lib/auto-translation.ts', 'utf8')), 'Sin llamadas a MyMemory');
   assert.match(fs.readFileSync('scripts/sql/auto-translation.sql', 'utf8'), /CREATE TABLE IF NOT EXISTS "AutoTranslation"/);
   for (const locale of ['es', 'en', 'fr']) {
     const messages = JSON.parse(fs.readFileSync(`apps/web/messages/${locale}.json`, 'utf8'));
-    assert.ok(messages.panelTranslation.auto && messages.panelTranslation.hint && messages.panel.savedTranslated && messages.panel.savedTranslationPending, `${locale}: textos`);
+    assert.ok(messages.panelTranslation.auto && messages.panelTranslation.hint && messages.panelTranslation.useAuto && messages.panelTranslation.useAutoDone && messages.panel.savedTranslated && messages.panel.savedTranslationPending, `${locale}: textos`);
   }
+  // --- Control bajo cada campo en/fr: etiqueta si es automático; «Usar traducción automática» si es manual ---
+  const React = req('react'), { renderToStaticMarkup } = req('react-dom/server'), { NextIntlClientProvider } = req('next-intl');
+  const { AutoTranslationControl } = load('apps/web/src/components/panel/AutoTranslation.tsx');
+  const messagesEs = JSON.parse(fs.readFileSync('apps/web/messages/es.json', 'utf8'));
+  const render = props => renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale: 'es', messages: messagesEs }, React.createElement('label', null, React.createElement('input', { defaultValue: 'test' }), React.createElement(AutoTranslationControl, props))));
+  assert.ok(render({ auto: true }).includes('data-auto-translated') && render({ auto: true }).includes(messagesEs.panelTranslation.auto));
+  const manual = render({ auto: false });
+  assert.ok(manual.includes('type="button"') && manual.includes('data-use-auto-translation') && manual.includes(messagesEs.panelTranslation.useAuto), 'Manual: enlace para volver a lo automático');
+  assert.ok(!render({ auto: false, target: false }).includes('data-use-auto') && !render({ auto: true, target: false }).includes('data-auto-translated'), 'Español: sin control');
   global.fetch = originalFetch;
-  console.log('OK traducción al guardar T-5072: vacío/automático/manual, retraducción, DeepL Free/Pro, fallo y sin clave, propiedad (alta y edición), secciones, Sobre nosotros, Páginas con {summary}, sin tabla y sin botón.');
+  console.log('OK traducción al guardar T-5072: vacío/automático/manual, retraducción, DeepL Free/Pro, fallo y sin clave, propiedad (alta y edición), secciones, Sobre nosotros, Páginas con {summary}, sin tabla, sin botón y enlace «Usar traducción automática» en lo manual.');
 }
 main().catch(error => { console.error(error); process.exit(1); });

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { EditorialSection, SectionName } from '@/lib/property-sections';
 import { panelRequest, savedKey, savedKeys, buttonClass, inputClass } from './request';
-import { AutoTranslationHint, AutoTranslatedTag } from './AutoTranslation';
+import { AutoTranslationHint, AutoTranslationControl } from './AutoTranslation';
 import { sectionOrder, sectionModules, type ModuleName } from '@/lib/section-modules';
 import styles from './PropertySectionsEditor.module.css';
 
@@ -40,7 +40,7 @@ function SectionForm({ propertyId, name, value, saved, photos, enabled, onDraft,
     <div className="space-y-4">
     <AutoTranslationHint />
     <div className="grid gap-4 md:grid-cols-3">{(['descriptionEs', 'descriptionEn', 'descriptionFr'] as const).map(field =>
-      <label key={`${field}:${saved?.[field] ?? ''}`} className="block text-sm">{t(field)}<textarea name={field} maxLength={10000} rows={5} defaultValue={value?.[field] || ''} onChange={event => onDraft({ [field]: event.target.value })} disabled={busy} className={inputClass} /><AutoTranslatedTag show={autoTranslated.includes(field)} /></label>)}</div>
+      <label key={`${field}:${saved?.[field] ?? ''}`} className="block text-sm">{t(field)}<textarea name={field} maxLength={10000} rows={5} defaultValue={value?.[field] || ''} onChange={event => onDraft({ [field]: event.target.value })} disabled={busy} className={inputClass} /><AutoTranslationControl auto={autoTranslated.includes(field)} target={field !== 'descriptionEs'} /></label>)}</div>
     {SECTION_HERO_PICKER_ENABLED && <><label className="block text-sm">{t('hero')}<select value={hero} onChange={event => setHero(event.target.value)} disabled={busy} className={inputClass}>
       <option value="">{t('noImage')}</option>
       {hero && !selected && <option value={hero}>{t('unavailable')}</option>}

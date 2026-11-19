@@ -283,3 +283,14 @@ export const ownershipMigrationAudit = pgTable('OwnershipMigrationAudit', {
   changed: boolean('changed').notNull(),
   recordedAt: timestamp('recordedAt', { withTimezone: true }).notNull().defaultNow(),
 }, table => [primaryKey({ columns: [table.migrationKey, table.propertyId] })]);
+
+// T-5072: estado de las traducciones automáticas del panel (una fila por campo e idioma, p. ej.
+// "property:<id>:title:en"). sourceHash = sha256 del español del que salió; valueHash = sha256 del texto
+// guardado. Si el valor actual ya no coincide con valueHash, alguien lo editó a mano y no se vuelve a tocar.
+// SQL: scripts/sql/auto-translation.sql. Sin la tabla, el panel solo rellena idiomas vacíos.
+export const autoTranslations = pgTable('AutoTranslation', {
+  key: text('key').primaryKey(),
+  sourceHash: text('sourceHash').notNull(),
+  valueHash: text('valueHash').notNull(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
+});

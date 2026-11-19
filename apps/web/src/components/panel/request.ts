@@ -14,6 +14,12 @@ const codes: Record<string, string> = {
   INVALID_PAGE_CONTENT: 'invalidPageContent', PAGE_TEXT_TOO_LONG: 'pageTextTooLong', INVALID_PAGE_IMAGE: 'invalidPageImage', PAGE_CONTENT_NOT_READY: 'pageContentNotReady',
   INVALID_FILE_TYPE: 'invalidPhotoType', INVALID_FILE_SIZE: 'invalidPhotoSize', INVALID_UPLOAD_REQUEST: 'invalidUploadRequest', UPLOAD_FAILED: 'uploadFailed',
 };
+/** T-5072: mensaje tras guardar según lo que pasó con la traducción automática (campo translation de la respuesta). */
+export function savedKey(result: unknown) {
+  const translation = result && typeof result === 'object' ? (result as { translation?: unknown }).translation : undefined;
+  return translation === 'translated' ? 'savedTranslated' : translation === 'pending' ? 'savedTranslationPending' : 'saved';
+}
+export const savedKeys = new Set(['saved', 'savedTranslated', 'savedTranslationPending']);
 const keys = new Set(['error', 'validation', 'forbidden', 'notFound', 'conflict', 'sessionExpired', 'networkError', ...Object.values(codes)]);
 export class PanelRequestError extends Error {
   constructor(key: string, public status?: number, public code?: string) { super(key); }

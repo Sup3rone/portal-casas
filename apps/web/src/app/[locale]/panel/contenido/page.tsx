@@ -6,6 +6,8 @@ import SiteContentEditor from '@/components/panel/SiteContentEditor';
 import PageContentEditor from '@/components/panel/PageContentEditor';
 import { pageContentLocales, pageContentPages, pageFields, type PageContentLocale } from '@/lib/page-content';
 import { readPageContent } from '@/lib/page-content-store';
+import { readAutoTranslated } from '@/lib/auto-translation';
+import { fieldNameForKey, pageGroups, siteGroups } from '@/lib/translation-groups';
 
 const sections = ['home', ...pageContentPages] as const;
 
@@ -23,6 +25,9 @@ export default async function ContentPage({ params }: { params: Promise<{ locale
     const messages = await getTranslations({ locale: language });
     return [language, Object.fromEntries(keys.map(key => [key, String(messages.raw(key as Parameters<typeof messages.raw>[0]) ?? '')]))];
   }))) as Record<PageContentLocale, Record<string, string>>;
+  // T-5072: campos en/fr que hoy muestran la traducción automática (etiqueta en cada editor).
+  const auto = [...await readAutoTranslated([...siteGroups(content), ...pageGroups('about', about.texts), ...pageGroups('join', join.texts)])];
+  const autoFor = (prefix: string) => auto.filter(key => key.startsWith(prefix)).map(fieldNameForKey);
   // T-4944: tres desplegables, uno abierto a la vez (details con el mismo name), para no apilar todo en una sola página.
   return <section className="space-y-6">
     <h1 className="text-3xl font-semibold">{t('title')}</h1>
@@ -38,8 +43,8 @@ export default async function ContentPage({ params }: { params: Promise<{ locale
         {/* El formulario trae su propia tarjeta; dentro del desplegable se aplana para no anidar cajas. */}
         <div className="border-t border-gray-200 dark:border-gray-700 [&>form]:rounded-none [&>form]:rounded-b-2xl [&>form]:border-0 [&>form]:shadow-none">
           {section === 'home'
-            ? <SiteContentEditor content={content} properties={options} />
-            : <><p className="px-6 pt-5 text-sm text-gray-600 dark:text-gray-300">{pages('intro')}</p><PageContentEditor page={section} initial={section === 'about' ? about : join} defaults={defaults} /></>}
+            ? <SiteContentEditor content={content} properties={options} autoTranslated={autoFor('site:')} />
+            : <><p className="px-6 pt-5 text-sm text-gray-600 dark:text-gray-300">{pages('intro')}</p><PageContentEditor page={section} initial={section === 'about' ? about : join} defaults={defaults} autoTranslated={autoFor(`page:${section}:`)} /></>}
         </div>
       </details>)}
     </div>

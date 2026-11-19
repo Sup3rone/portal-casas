@@ -8,8 +8,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const manager = await requirePropertyManager(), { id, section } = await params;
     await managedProperty(id, manager);
-    await savePropertySection(id, section, await req.json().catch(() => null), manager);
+    const translation = await savePropertySection(id, section, await req.json().catch(() => null), manager);
     revalidatePath('/[locale]/panel', 'layout');
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, translation });
   } catch (error) { return sectionError(error); }
 }

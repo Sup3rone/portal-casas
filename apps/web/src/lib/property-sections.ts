@@ -5,6 +5,8 @@ import { NextResponse } from 'next/server';
 import { AccessError, accessFailure, managedProperties, managedResource, type PropertyManager } from './property-access';
 import { objectBody, PanelValidationError } from './panel-validation';
 import { panelError } from './panel-response';
+import { autoTranslate } from './auto-translation';
+import { sectionGroup } from './translation-groups';
 
 export const sectionNames = ['destino', 'amenidades', 'habitaciones', 'lugar', 'advertencias'] as const;
 export type SectionName = typeof sectionNames[number];
@@ -40,6 +42,10 @@ export async function sectionsForProperty(id: string, manager: PropertyManager) 
 }
 export async function savePropertySection(id: string, section: string, input: unknown, manager: PropertyManager) {
   const value = sectionInput(section, input);
+  // T-5072: en/fr vacíos o automáticos se traducen desde el español.
+  const translation = await autoTranslate([sectionGroup(id, section, value)]);
+  const [translated] = translation.groups;
+  value.descriptionEn = translated.en || null; value.descriptionFr = translated.fr || null;
   if (value.heroMediaId !== null) {
     const [hero] = await db.select({ id: media.id }).from(media)
       .where(and(eq(media.id, value.heroMediaId), eq(media.propertyId, id), eq(media.type, 'PHOTO'), managedResource(media.propertyId, manager))).limit(1);
@@ -70,6 +76,8 @@ export async function savePropertySection(id: string, section: string, input: un
     returning *
   `);
   if (!result.rows.length) throw new AccessError(404);
+  await translation.commit();
+  return translation.outcome;
 }
 export function sectionError(error: unknown) {
   if (error instanceof SectionValidationError) return NextResponse.json({ error: 'validation', code: error.code }, { status: 400 });

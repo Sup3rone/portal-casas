@@ -6,6 +6,8 @@ import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { requireAdmin, AccessError } from './property-access';
 import { objectBody, PanelValidationError } from './panel-validation';
 import { parseHomeVideos, serializeHomeVideos } from './home-videos';
+import { autoTranslate } from './auto-translation';
+import { siteGroups } from './translation-groups';
 
 export const siteContentKeys = ['about_es', 'about_en', 'about_fr', 'social_instagram', 'social_facebook', 'featured_property_id', 'contact_whatsapp', 'home_background_video', 'listing_background_image', 'about_title_es', 'about_title_en', 'about_title_fr', 'about_image', 'home_background_videos'] as const;
 export type SiteContentValues = Record<typeof siteContentKeys[number], string>;
@@ -69,6 +71,10 @@ export async function saveSiteContent(input: unknown) {
     const selected = await db.select({ id: properties.id }).from(properties).where(and(inArray(properties.id, featuredIds), eq(properties.published, true)));
     if (selected.length !== featuredIds.length) throw new SiteContentError('INVALID_FEATURED_PROPERTY');
   }
+  // T-5072: título y texto de «Sobre nosotros» en en/fr se traducen solos desde el español.
+  const translation = await autoTranslate(siteGroups(values));
+  const [title, about] = translation.groups;
+  Object.assign(values, { about_title_en: title.en, about_title_fr: title.fr, about_en: about.en, about_fr: about.fr });
   // Guardado atómico de las claves; revalidar ADMIN dentro del statement.
   const rows = await db.execute(sql`
     insert into "SiteContent" ("key", "value")
@@ -78,6 +84,8 @@ export async function saveSiteContent(input: unknown) {
     returning "key"
   `);
   if (!rows.rows.length) throw new AccessError(403);
+  await translation.commit();
+  return translation.outcome;
 }
 
 export async function featuredPropertyOptions() {

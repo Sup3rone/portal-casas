@@ -173,7 +173,8 @@
       "bedrooms": "Chambres",
       "bathrooms": "Salles de bains",
       "baseWeekdayPrice": "Prix en semaine (MXN)",
-      "baseWeekendPrice": "Prix le week-end (MXN)"
+      "baseWeekendPrice": "Prix le week-end (MXN)",
+      "cleaningPrice": "Ménage par séjour (MXN, facultatif)"
     },
     "invalidIcalUrl": "Lien iCal invalide : utilisez un lien https public d’Airbnb, Booking, VRBO ou Google (.ics).",
     "invalidReferrerAccount": "Aucun compte client inscrit avec cet e-mail, ou il est déjà associé à un autre apporteur. Demandez-lui de s’inscrire sur le site puis réessayez.",

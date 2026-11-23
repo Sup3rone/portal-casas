@@ -21,7 +21,7 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
   const [state, setState] = useState<DestinationState | ''>(validDestination ? property.state as DestinationState : '');
   const [destinationCity, setDestinationCity] = useState(validDestination ? property.destinationCity! : '');
   const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address'] as const;
-  const numbers = ['maxGuests', 'bedrooms', 'bathrooms', 'lat', 'lng', 'baseWeekdayPrice', 'baseWeekendPrice'] as const;
+  const numbers = ['maxGuests', 'bedrooms', 'bathrooms', 'lat', 'lng', 'baseWeekdayPrice', 'baseWeekendPrice', 'cleaningPrice'] as const;
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage('');
     const form = new FormData(event.currentTarget);
@@ -29,7 +29,7 @@ export default function PropertyForm({ property }: { property?: PanelProperty })
     for (const key of texts) body[key] = form.get(key);
     body.state = form.get('state') || null;
     body.destinationCity = form.get('destinationCity') || null;
-    for (const key of numbers) body[key] = form.get(key) === '' ? null : Number(form.get(key));
+    for (const key of numbers) body[key] = form.get(key) === '' || form.get(key) === null ? null : Number(form.get(key));
     body.rentalType = form.get('rentalType') ?? 'nocturna';
     body.contactName = form.get('contactName') || null;
     body.contactEmail = form.get('contactEmail') || null;

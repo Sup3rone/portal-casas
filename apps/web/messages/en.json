@@ -1054,5 +1054,31 @@
     "closedLabel": "We are not available",
     "closedHint": "When ticked and saved, /unete stops showing the questionnaire and shows the «not available» notice. Untick it to open it again.",
     "closedOn": "/unete now shows the not available notice."
+  },
+  "vendor": {
+    "navSell": "Sell",
+    "more": "More",
+    "title": "What's available?",
+    "intro": "Pick dates and guests: you will see only the available homes and the total for those nights.",
+    "start": "Check-in",
+    "end": "Check-out",
+    "guests": "Guests",
+    "fewer": "Fewer guests",
+    "moreGuests": "More guests",
+    "state": "State",
+    "city": "City",
+    "anyState": "All states",
+    "anyCity": "All cities",
+    "search": "Search",
+    "count": "{count, plural, =1 {1 home available} other {# homes available}}",
+    "free": "Available",
+    "draft": "Not published",
+    "noPrice": "No price",
+    "nights": "{count, plural, =1 {1 night} other {# nights}}",
+    "specs": "{bedrooms} bd · {bathrooms} ba · up to {maxGuests}",
+    "invalid": "Check the dates: check-in must be today or later, and check-out after check-in.",
+    "pickDates": "Pick check-in and check-out to see which homes are available.",
+    "empty": "No homes available with those filters.",
+    "mobileNav": "Quick links"
   }
 }

@@ -10,6 +10,11 @@ export type PublishedDestinationGroup = { state: string; cities: string[] };
 export const readPublishedDestinations = cache(async (): Promise<PublishedDestinationGroup[]> => {
   const rows = await db.select({ state: properties.state, destinationCity: properties.destinationCity })
     .from(properties).where(eq(properties.published, true)).groupBy(properties.state, properties.destinationCity);
+  return groupDestinations(rows);
+});
+
+// T-5201: agrupación compartida con los destinos de las casas que gestiona el vendedor (vendor-availability.ts).
+export function groupDestinations(rows: { state: string | null; destinationCity: string | null }[]): PublishedDestinationGroup[] {
   const groups = new Map<string, string[]>();
   for (const row of rows) {
     if (!isDestinationValue(row)) continue;
@@ -20,4 +25,4 @@ export const readPublishedDestinations = cache(async (): Promise<PublishedDestin
   const compare = (a: string, b: string) => a.localeCompare(b, 'es');
   return [...groups].sort(([a], [b]) => compare(a, b))
     .map(([state, cities]) => ({ state, cities: cities.sort(compare) }));
-});
+}

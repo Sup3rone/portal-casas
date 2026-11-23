@@ -1054,5 +1054,31 @@
     "closedLabel": "No estamos disponibles",
     "closedHint": "Al marcarla y guardar, /unete deja de mostrar el cuestionario y muestra el aviso «Lo sentimos, de momento no está disponible». Desmárcala para volver a abrirla.",
     "closedOn": "Ahora /unete muestra el aviso de no disponible."
+  },
+  "vendor": {
+    "navSell": "Vender",
+    "more": "Más",
+    "title": "¿Qué está libre?",
+    "intro": "Elige fechas y huéspedes: verás solo las casas libres y el total de esas noches.",
+    "start": "Llegada",
+    "end": "Salida",
+    "guests": "Huéspedes",
+    "fewer": "Menos huéspedes",
+    "moreGuests": "Más huéspedes",
+    "state": "Estado",
+    "city": "Ciudad",
+    "anyState": "Todos los estados",
+    "anyCity": "Todas las ciudades",
+    "search": "Buscar",
+    "count": "{count, plural, =1 {1 casa libre} other {# casas libres}}",
+    "free": "Libre",
+    "draft": "No publicada",
+    "noPrice": "Sin precio",
+    "nights": "{count, plural, =1 {1 noche} other {# noches}}",
+    "specs": "{bedrooms} rec. · {bathrooms} baños · hasta {maxGuests}",
+    "invalid": "Revisa las fechas: la llegada debe ser hoy o después y la salida, posterior a la llegada.",
+    "pickDates": "Elige llegada y salida para ver qué casas están libres.",
+    "empty": "Ninguna casa libre con esos filtros.",
+    "mobileNav": "Accesos rápidos"
   }
 }

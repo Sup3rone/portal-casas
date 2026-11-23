@@ -7,7 +7,15 @@ import 'server-only';
 import { db, properties, seasonRates } from '@portal/db';
 import { and, asc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { managedProperties, type PropertyManager } from './property-access';
+import { groupDestinations, type PublishedDestinationGroup } from './published-destinations';
 import { quoteStay, type StayPricing } from './stay-quote';
+
+/** T-5201: destinos de las casas que gestiona el vendedor (publicadas o no), para el buscador de /panel/vender. */
+export async function managedDestinations(manager: PropertyManager): Promise<PublishedDestinationGroup[]> {
+  const rows = await db.select({ state: properties.state, destinationCity: properties.destinationCity })
+    .from(properties).where(managedProperties(manager)).groupBy(properties.state, properties.destinationCity);
+  return groupDestinations(rows);
+}
 
 export type VendorFilters = { start: string; end: string; guests?: number; state?: string; destinationCity?: string };
 export type VendorCard = {

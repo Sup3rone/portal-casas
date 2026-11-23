@@ -1079,6 +1079,22 @@
     "invalid": "Revisa las fechas: la llegada debe ser hoy o después y la salida, posterior a la llegada.",
     "pickDates": "Elige llegada y salida para ver qué casas están libres.",
     "empty": "Ninguna casa libre con esos filtros.",
-    "mobileNav": "Accesos rápidos"
+    "mobileNav": "Accesos rápidos",
+    "back": "Volver a la búsqueda",
+    "rates": "Tarifas por noche",
+    "weekday": "Entre semana",
+    "weekend": "Fin de semana",
+    "season": "Temporada «{name}» del {start} al {end}: esas noches cambian de precio.",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "legendFree": "Libre",
+    "legendOccupied": "Ocupado",
+    "legendSelected": "Fechas elegidas",
+    "legendCheckout": "Salida",
+    "quote": "Cotizar {start} – {end}",
+    "share": "Compartir ficha",
+    "copied": "Enlace copiado",
+    "occupied": "La casa está ocupada en alguna de esas noches.",
+    "pickStay": "Elige llegada y salida en la búsqueda para cotizar esta casa."
   }
 }

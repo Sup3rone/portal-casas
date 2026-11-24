@@ -1111,6 +1111,21 @@
     "clientMode": "Client mode",
     "clientModeHint": "Hides what the client should not see on your screen",
     "whatsapp": "Send by WhatsApp",
-    "noReferralLink": "You have no referral link: create one in Referrals so this sale is credited to you."
+    "noReferralLink": "You have no referral link: create one in Referrals so this sale is credited to you.",
+    "hold": "Hold these dates",
+    "holdIntro": "Creates the client inquiry and blocks these dates on the calendar. You can release them later.",
+    "clientName": "Client name",
+    "clientPhone": "Phone (optional)",
+    "clientEmail": "Email (optional)",
+    "clientNote": "Note (optional)",
+    "holding": "Holding…",
+    "held": "Dates held: they are blocked and the inquiry is in Inquiries.",
+    "holdTaken": "Someone just took those dates. They are no longer free.",
+    "holdError": "Could not hold the dates. Try again.",
+    "holdsTitle": "Holds",
+    "release": "Release",
+    "releaseConfirm": "Release? Tap again",
+    "releasing": "Releasing…",
+    "releaseError": "Could not release"
   }
 }

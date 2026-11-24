@@ -12,6 +12,7 @@ import { formatMoney } from '@/lib/booking-breakdown';
 import { localizedUrl, siteUrl } from '@/lib/seo';
 import { referralUrl } from '@/lib/referral';
 import ClientModeToggle from '@/components/panel/vendor/ClientModeToggle';
+import HoldForm from '@/components/panel/vendor/HoldForm';
 
 type Query = { start?: string | string[]; end?: string | string[]; guests?: string | string[] };
 
@@ -63,6 +64,8 @@ export default async function VendorQuotePage({ params, searchParams }: { params
           : quote.referralCode ? referralUrl(siteUrl(), quote.referralCode, property.slug) : localizedUrl(locale, `/casas/${property.slug}`) }, { start: filters.start, end: filters.end }, lang))}
           target="_blank" rel="noopener noreferrer"
           className="flex min-h-12 items-center justify-center rounded-lg bg-green-700 px-6 text-base font-semibold text-white hover:bg-green-600">{t('whatsapp')}</a>
+        {/* T-5209: apartar = consulta + bloqueo; solo si las fechas siguen libres (este bloque no se pinta si hay traslape). */}
+        <HoldForm propertyId={property.id} start={filters.start} end={filters.end} guests={filters.guests ?? 1} />
         {quote.commission && <ClientModeToggle label={t('clientMode')} hint={t('clientModeHint')}>
           <section aria-label={t('onlyYou')} className="space-y-1 rounded-2xl border border-dashed border-amber-500 bg-amber-50 p-4 dark:bg-amber-950">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-amber-900 dark:text-amber-100">{t('onlyYou')}</h2>

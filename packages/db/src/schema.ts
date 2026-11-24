@@ -207,6 +207,9 @@ export const blockDates = pgTable('BlockDate', {
   endDate: date('endDate').notNull(),
   createdBy: text('createdBy').notNull().references(() => users.id),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
+  // T-5209: consulta que originó el bloqueo («Apartar» del vendedor); null = bloqueo manual. Sin FK, como
+  // Booking.referralMessageId. La exclusión «BlockDate_no_overlap» (btree_gist) vive en scripts/sql/blockdate-hold.sql.
+  messageId: text('messageId'),
 }, table => [
   check('BlockDate_range_check', sql`${table.endDate} > ${table.startDate}`),
   index('BlockDate_property_dates_idx').on(table.propertyId, table.startDate, table.endDate),

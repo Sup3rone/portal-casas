@@ -1112,6 +1112,21 @@
     "clientMode": "Mode client",
     "clientModeHint": "Masque ce que le client ne doit pas voir sur votre écran",
     "whatsapp": "Envoyer par WhatsApp",
-    "noReferralLink": "Vous n’avez pas de lien de parrainage : créez-en un dans Parrainages pour que cette vente vous soit attribuée."
+    "noReferralLink": "Vous n’avez pas de lien de parrainage : créez-en un dans Parrainages pour que cette vente vous soit attribuée.",
+    "hold": "Bloquer ces dates",
+    "holdIntro": "Crée la demande du client et bloque ces dates dans le calendrier. Vous pourrez les libérer ensuite.",
+    "clientName": "Nom du client",
+    "clientPhone": "Téléphone (facultatif)",
+    "clientEmail": "E-mail (facultatif)",
+    "clientNote": "Note (facultatif)",
+    "holding": "Blocage…",
+    "held": "Dates bloquées : la demande est dans Demandes.",
+    "holdTaken": "Quelqu’un vient de prendre ces dates. Elles ne sont plus libres.",
+    "holdError": "Impossible de bloquer les dates. Réessayez.",
+    "holdsTitle": "Dates bloquées",
+    "release": "Libérer",
+    "releaseConfirm": "Libérer ? Touchez encore",
+    "releasing": "Libération…",
+    "releaseError": "Impossible de libérer"
   }
 }

@@ -15,6 +15,8 @@ import PropertyGallery from '@/components/PropertyGallery';
 import MonthAvailability, { monthCells } from '@/components/panel/vendor/MonthAvailability';
 import ShareListing from '@/components/panel/vendor/ShareListing';
 import { stayTooLong } from '@/lib/vendor-quote';
+import { propertyHolds } from '@/lib/vendor-hold';
+import ReleaseHoldButton from '@/components/panel/vendor/ReleaseHoldButton';
 
 type Query = { start?: string | string[]; end?: string | string[]; guests?: string | string[]; month?: string | string[] };
 
@@ -26,7 +28,7 @@ const shift = (year: number, month: number, by: number) => {
 
 export default async function VendorPropertyPage({ params, searchParams }: { params: Promise<{ locale: string; id: string }>; searchParams?: Promise<Query> }) {
   const { locale, id } = await params;
-  const { property } = await panelProperty(id, locale);
+  const { manager, property } = await panelProperty(id, locale);
   const query = await searchParams ?? {};
   const t = await getTranslations({ locale, namespace: 'vendor' });
   const filters = propertySearch({ start: query.start, end: query.end, guests: query.guests });
@@ -35,11 +37,12 @@ export default async function VendorPropertyPage({ params, searchParams }: { par
   const chosen = !filters.invalid && !tooLong && Boolean(filters.start && filters.end);
 
   const isAnnual = property.rentalType === 'anual';
-  const [mediaRows, bookingRows, blockRows, rateRows] = await Promise.all([
+  const [mediaRows, bookingRows, blockRows, rateRows, holds] = await Promise.all([
     db.select({ url: media.url, type: media.type }).from(media).where(eq(media.propertyId, property.id)).orderBy(desc(media.isCover), asc(media.order), asc(media.id)),
     db.select({ startDate: bookings.startDate, endDate: bookings.endDate }).from(bookings).where(eq(bookings.propertyId, property.id)),
     propertyBlocks(property.id),
     isAnnual ? Promise.resolve([]) : db.select().from(seasonRates).where(eq(seasonRates.propertyId, property.id)),
+    propertyHolds(property.id, manager),
   ]);
   const occupied = [...bookingRows, ...blockRows].map(row => ({ start: String(row.startDate), end: String(row.endDate) }));
   const seasons = rateRows.map(rate => ({ name: rate.name, start: String(rate.startDate), end: String(rate.endDate), weekday: Number(rate.weekdayPrice), weekend: Number(rate.weekendPrice), priority: Number(rate.priority) }));
@@ -99,6 +102,17 @@ export default async function VendorPropertyPage({ params, searchParams }: { par
               {t('quote', { start: dateLabel(filters.start), end: dateLabel(filters.end) })}
             </Link>
           </div>}
+        {/* T-5209: apartados del vendedor (bloqueo + consulta) con «Liberar»; los bloqueos manuales no salen aquí. */}
+        {holds.length > 0 && <section aria-label={t('holdsTitle')} className="space-y-2 rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
+          <h2 className="text-lg font-semibold">{t('holdsTitle')}</h2>
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+            {holds.map(hold => <li key={hold.blockId} className="flex flex-wrap items-center justify-between gap-3 py-2">
+              <span><span className="block font-semibold">{hold.name}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300">{dateLabel(String(hold.start))} → {dateLabel(String(hold.end))}</span></span>
+              <ReleaseHoldButton blockId={hold.blockId} />
+            </li>)}
+          </ul>
+        </section>}
         {Boolean(property.published) && <ShareListing path={`/${locale}/casas/${property.slug}`} title={title} label={t('share')} copied={t('copied')} />}
       </div>
     </div>

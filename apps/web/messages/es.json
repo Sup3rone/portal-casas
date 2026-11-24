@@ -1111,6 +1111,21 @@
     "clientMode": "Modo cliente",
     "clientModeHint": "Oculta lo que el cliente no debe ver en tu pantalla",
     "whatsapp": "Enviar por WhatsApp",
-    "noReferralLink": "No tienes enlace de referido: crea uno en Referidos para que esta venta se te atribuya."
+    "noReferralLink": "No tienes enlace de referido: crea uno en Referidos para que esta venta se te atribuya.",
+    "hold": "Apartar estas fechas",
+    "holdIntro": "Crea la consulta del cliente y bloquea estas fechas en el calendario. Se puede liberar después.",
+    "clientName": "Nombre del cliente",
+    "clientPhone": "Teléfono (opcional)",
+    "clientEmail": "Correo (opcional)",
+    "clientNote": "Nota (opcional)",
+    "holding": "Apartando…",
+    "held": "Fechas apartadas: quedaron bloqueadas y la consulta está en Consultas.",
+    "holdTaken": "Alguien acaba de ocupar esas fechas. Ya no están libres.",
+    "holdError": "No se pudo apartar. Inténtalo de nuevo.",
+    "holdsTitle": "Apartados",
+    "release": "Liberar",
+    "releaseConfirm": "¿Liberar? Toca otra vez",
+    "releasing": "Liberando…",
+    "releaseError": "No se pudo liberar"
   }
 }

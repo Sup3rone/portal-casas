@@ -21,8 +21,9 @@ export function ModeSwitchView({ pathname, locale }: { pathname: string; locale:
     window.setTimeout(() => window.location.assign(href), 180);
   }
   return <button type="button" role="switch" aria-checked={on} data-mode-switch="" data-target={href} onClick={toggle}
-    className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-1 text-sm font-semibold text-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:text-gray-100">
-    <span>{t('modeSwitch')}</span>
+    className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full px-1 text-sm font-semibold text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:text-gray-100">
+    {/* En el teléfono solo el interruptor (la fila del header no cabe con el texto); el nombre sigue para lectores. */}
+    <span className="max-sm:sr-only">{t('modeSwitch')}</span>
     <span aria-hidden="true" className={`relative h-7 w-12 rounded-full transition-colors duration-200 ${on ? 'bg-green-700' : 'bg-gray-300 dark:bg-gray-600'}`}>
       <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-[left] duration-200 ${on ? 'left-[1.375rem]' : 'left-0.5'}`} />
     </span>

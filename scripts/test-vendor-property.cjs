@@ -96,6 +96,9 @@ async function main() {
     // Fechas inválidas → aviso, sin «Cotizar».
     const invalid = await show('pa', { start: end, end: start });
     assert.ok(invalid.includes(t('invalid')) && !invalid.includes('/cotizar'));
+    // Más de 365 noches → inválidas (tope de cálculo, T-5208).
+    const huge = await show('pa', { start, end: plus(40 + 366) });
+    assert.ok(huge.includes(t('invalid')) && !huge.includes('/cotizar'));
     // Mes basura → mes de las fechas o el actual, sin romper.
     assert.ok((await show('pa', { month: '2026-13' })).includes('data-state='));
 

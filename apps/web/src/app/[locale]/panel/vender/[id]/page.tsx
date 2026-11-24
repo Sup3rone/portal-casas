@@ -14,6 +14,7 @@ import { formatMoney } from '@/lib/booking-breakdown';
 import PropertyGallery from '@/components/PropertyGallery';
 import MonthAvailability, { monthCells } from '@/components/panel/vendor/MonthAvailability';
 import ShareListing from '@/components/panel/vendor/ShareListing';
+import { stayTooLong } from '@/lib/vendor-quote';
 
 type Query = { start?: string | string[]; end?: string | string[]; guests?: string | string[]; month?: string | string[] };
 
@@ -29,7 +30,9 @@ export default async function VendorPropertyPage({ params, searchParams }: { par
   const query = await searchParams ?? {};
   const t = await getTranslations({ locale, namespace: 'vendor' });
   const filters = propertySearch({ start: query.start, end: query.end, guests: query.guests });
-  const chosen = !filters.invalid && Boolean(filters.start && filters.end);
+  // T-5208: más de un año de estancia no se calcula aquí (tope de CPU/memoria); se trata como fechas inválidas.
+  const tooLong = !filters.invalid && Boolean(filters.start && filters.end) && stayTooLong(filters.start, filters.end);
+  const chosen = !filters.invalid && !tooLong && Boolean(filters.start && filters.end);
 
   const isAnnual = property.rentalType === 'anual';
   const [mediaRows, bookingRows, blockRows, rateRows] = await Promise.all([
@@ -57,7 +60,7 @@ export default async function VendorPropertyPage({ params, searchParams }: { par
   const title = locale === 'en' ? property.titleEn : locale === 'fr' ? property.titleFr : property.titleEs;
   const money = (value: number | null) => value == null ? t('noPrice') : formatMoney(String(value), locale);
   const slides = mediaRows.map(row => ({ url: row.url, type: row.type === 'VIDEO' ? 'VIDEO' as const : 'PHOTO' as const }));
-  const notice = filters.invalid ? t('invalid') : !chosen ? t('pickStay') : quote?.overlap ? t('occupied') : null;
+  const notice = filters.invalid || tooLong ? t('invalid') : !chosen ? t('pickStay') : quote?.overlap ? t('occupied') : null;
   const chip = 'rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold dark:bg-gray-800';
 
   return <section className="space-y-5">

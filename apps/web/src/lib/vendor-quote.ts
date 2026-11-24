@@ -6,8 +6,8 @@ import 'server-only';
 // - Comisión = renta × % del referidor (Partner activo) ligado a quien cotiza: misma fórmula que /panel/reservas
 //   (commissionAmount, solo sobre la renta). Sin referidor propio → null. Nunca sale en WhatsApp (vendor-share.ts).
 // - Permisos en el servidor: casa no gestionada por `manager` → null (la página responde 404).
-import { db, properties, seasonRates, bookings, blockDates, partners } from '@portal/db';
-import { and, eq, gt, lt, sql } from 'drizzle-orm';
+import { db, properties, seasonRates, bookings, blockDates, partners, referralLinks } from '@portal/db';
+import { and, asc, eq, gt, isNull, lt, or, sql } from 'drizzle-orm';
 import { managedProperties, type PropertyManager } from './property-access';
 import { stayNights } from './stay-quote';
 import { breakdownTotal, commissionAmount, rentFromQuote, suggestedTaxes } from './booking-breakdown';
@@ -17,14 +17,21 @@ export type VendorQuote = {
   nights: number; weekdayNights: number; weekendNights: number; lines: QuoteLine[];
   rent: string | null; cleaning: string | null; taxes: string | null; total: string | null;
   commission: { percent: string; amount: string } | null; overlap: boolean;
+  /** Código de referido del vendedor para esta casa (o su enlace general): el WhatsApp lo lleva para que la venta
+   *  se le atribuya y la comisión prometida exista en la reserva. null = sin referidor activo o sin enlace. */
+  referralCode: string | null;
 };
+
+/** Tope de cálculo para la cotización y la ficha del vendedor: más de un año de estancia no se cotiza aquí. */
+export const MAX_STAY_NIGHTS = 365;
+export const stayTooLong = (start: string, end: string) => (Date.parse(end + 'T00:00:00Z') - Date.parse(start + 'T00:00:00Z')) / 86_400_000 > MAX_STAY_NIGHTS;
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const valid = (value: string) => DATE.test(value) && new Date(value + 'T00:00:00Z').toISOString().slice(0, 10) === value;
 const integer = (value: unknown) => value == null ? null : Number(value);
 
 export async function vendorQuote(propertyId: string, start: string, end: string, manager: PropertyManager): Promise<VendorQuote | null> {
-  if (!valid(start) || !valid(end) || end <= start) return null;
+  if (!valid(start) || !valid(end) || end <= start || stayTooLong(start, end)) return null;
   const [property] = await db.select({ weekday: properties.baseWeekdayPrice, weekend: properties.baseWeekendPrice, cleaning: properties.cleaningPrice })
     .from(properties).where(and(eq(properties.id, propertyId), managedProperties(manager))).limit(1);
   if (!property) return null;
@@ -35,8 +42,12 @@ export async function vendorQuote(propertyId: string, start: string, end: string
       .where(and(eq(bookings.propertyId, propertyId), lt(bookings.startDate, sql`${end}::date`), gt(bookings.endDate, sql`${start}::date`))),
     db.select({ start: blockDates.startDate, end: blockDates.endDate }).from(blockDates)
       .where(and(eq(blockDates.propertyId, propertyId), lt(blockDates.startDate, sql`${end}::date`), gt(blockDates.endDate, sql`${start}::date`))),
-    db.select({ percent: partners.commissionPercent }).from(partners).where(and(eq(partners.userId, manager.id), eq(partners.active, true))).limit(1),
+    db.select({ id: partners.id, percent: partners.commissionPercent }).from(partners).where(and(eq(partners.userId, manager.id), eq(partners.active, true))).limit(1),
   ]);
+  // Enlace de esta casa primero (propertyId no nulo ordena antes en ambos motores con `is null` asc), luego el general.
+  const [link] = partner ? await db.select({ code: referralLinks.code }).from(referralLinks)
+    .where(and(eq(referralLinks.partnerId, partner.id), or(eq(referralLinks.propertyId, propertyId), isNull(referralLinks.propertyId))))
+    .orderBy(sql`${referralLinks.propertyId} is null`, asc(referralLinks.createdAt), asc(referralLinks.id)).limit(1) : [];
   const nights = stayNights(start, end, {
     base: { weekday: integer(property.weekday), weekend: integer(property.weekend) },
     seasons: seasons.map(season => ({ name: season.name, start: String(season.start), end: String(season.end), weekday: Number(season.weekday), weekend: Number(season.weekend), priority: Number(season.priority) })),
@@ -64,5 +75,6 @@ export async function vendorQuote(propertyId: string, start: string, end: string
     total: rent == null ? null : breakdownTotal([rent, cleaning, taxes]),
     commission: percent && commissionValue ? { percent, amount: commissionValue } : null,
     overlap: nights.some(night => night.booked),
+    referralCode: link?.code ?? null,
   };
 }

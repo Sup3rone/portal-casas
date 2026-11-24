@@ -1110,6 +1110,7 @@
     "commission": "Tu comisión ({percent} % de la renta)",
     "clientMode": "Modo cliente",
     "clientModeHint": "Oculta lo que el cliente no debe ver en tu pantalla",
-    "whatsapp": "Enviar por WhatsApp"
+    "whatsapp": "Enviar por WhatsApp",
+    "noReferralLink": "No tienes enlace de referido: crea uno en Referidos para que esta venta se te atribuya."
   }
 }

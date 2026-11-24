@@ -6,10 +6,11 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { panelProperty } from '@/lib/panel-server';
 import { propertySearch } from '@/lib/property-search';
-import { vendorQuote } from '@/lib/vendor-quote';
+import { stayTooLong, vendorQuote } from '@/lib/vendor-quote';
 import { quoteWhatsappText, quoteWhatsappUrl } from '@/lib/vendor-share';
 import { formatMoney } from '@/lib/booking-breakdown';
-import { localizedUrl } from '@/lib/seo';
+import { localizedUrl, siteUrl } from '@/lib/seo';
+import { referralUrl } from '@/lib/referral';
 import ClientModeToggle from '@/components/panel/vendor/ClientModeToggle';
 
 type Query = { start?: string | string[]; end?: string | string[]; guests?: string | string[] };
@@ -21,7 +22,8 @@ export default async function VendorQuotePage({ params, searchParams }: { params
   const t = await getTranslations({ locale, namespace: 'vendor' });
   const lang = locale === 'en' || locale === 'fr' ? locale : 'es';
   const filters = propertySearch({ start: query.start, end: query.end, guests: query.guests });
-  const chosen = !filters.invalid && Boolean(filters.start && filters.end);
+  const tooLong = !filters.invalid && Boolean(filters.start && filters.end) && stayTooLong(filters.start, filters.end);
+  const chosen = !filters.invalid && !tooLong && Boolean(filters.start && filters.end);
   const quote = chosen ? await vendorQuote(property.id, filters.start, filters.end, manager) : null;
   if (chosen && !quote) notFound();
 
@@ -29,7 +31,7 @@ export default async function VendorQuotePage({ params, searchParams }: { params
   const title = lang === 'en' ? property.titleEn : lang === 'fr' ? property.titleFr : property.titleEs;
   const money = (value: string | null) => value == null ? t('noPrice') : formatMoney(value, locale);
   const dateLabel = (value: string) => new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(value + 'T00:00:00Z'));
-  const notice = filters.invalid ? t('invalid') : !chosen ? t('pickStay') : quote?.overlap ? t('occupied') : null;
+  const notice = filters.invalid || tooLong ? t('invalid') : !chosen ? t('pickStay') : quote?.overlap ? t('occupied') : null;
   const row = 'flex items-baseline justify-between gap-3 py-2';
 
   return <section className="space-y-5">
@@ -57,7 +59,8 @@ export default async function VendorQuotePage({ params, searchParams }: { params
         </dl>
       </section>
       <div className="space-y-4">
-        <a href={quoteWhatsappUrl(quoteWhatsappText(quote, { title, publicUrl: property.published ? localizedUrl(locale, `/casas/${property.slug}`) : null }, { start: filters.start, end: filters.end }, lang))}
+        <a href={quoteWhatsappUrl(quoteWhatsappText(quote, { title, publicUrl: !property.published ? null
+          : quote.referralCode ? referralUrl(siteUrl(), quote.referralCode, property.slug) : localizedUrl(locale, `/casas/${property.slug}`) }, { start: filters.start, end: filters.end }, lang))}
           target="_blank" rel="noopener noreferrer"
           className="flex min-h-12 items-center justify-center rounded-lg bg-green-700 px-6 text-base font-semibold text-white hover:bg-green-600">{t('whatsapp')}</a>
         {quote.commission && <ClientModeToggle label={t('clientMode')} hint={t('clientModeHint')}>
@@ -67,6 +70,7 @@ export default async function VendorQuotePage({ params, searchParams }: { params
               <span>{t('commission', { percent: quote.commission.percent })}</span>
               <span className="text-lg font-semibold">{formatMoney(quote.commission.amount, locale)}</span>
             </p>
+            {!quote.referralCode && <p className="text-sm text-amber-900 dark:text-amber-100">{t('noReferralLink')}</p>}
           </section>
         </ClientModeToggle>}
       </div>

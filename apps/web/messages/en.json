@@ -1110,6 +1110,7 @@
     "commission": "Your commission ({percent}% of rent)",
     "clientMode": "Client mode",
     "clientModeHint": "Hides what the client should not see on your screen",
-    "whatsapp": "Send by WhatsApp"
+    "whatsapp": "Send by WhatsApp",
+    "noReferralLink": "You have no referral link: create one in Referrals so this sale is credited to you."
   }
 }

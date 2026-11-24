@@ -1111,6 +1111,7 @@
     "commission": "Votre commission ({percent} % de la location)",
     "clientMode": "Mode client",
     "clientModeHint": "Masque ce que le client ne doit pas voir sur votre écran",
-    "whatsapp": "Envoyer par WhatsApp"
+    "whatsapp": "Envoyer par WhatsApp",
+    "noReferralLink": "Vous n’avez pas de lien de parrainage : créez-en un dans Parrainages pour que cette vente vous soit attribuée."
   }
 }

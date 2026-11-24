@@ -26,6 +26,8 @@ memory.prepare('UPDATE "Property" SET "baseWeekdayPrice" = 1000, "baseWeekendPri
 for (const id of ['pa', 'pb', 'hidden']) memory.prepare('UPDATE "Property" SET "titleEs" = ?, "titleEn" = ?, "titleFr" = ? WHERE id = ?').run(`Casa ${id}`, `House ${id}`, `Maison ${id}`, id);
 // El vendedor COLLABORATOR 'a' es también referidor (Partner ligado a su usuario) con 10 %; el de 'b' está inactivo.
 insert('Partner', { id: 'pt-a', name: 'Vendedor A', commissionPercent: '10.00', active: 1, userId: 'a', createdAt: 0, updatedAt: 0 });
+insert('ReferralLink', { id: 'rl-a-pa', partnerId: 'pt-a', propertyId: 'pa', code: 'VENDEPA1', createdAt: 0, updatedAt: 0 });
+insert('ReferralLink', { id: 'rl-a-gen', partnerId: 'pt-a', propertyId: null, code: 'VENDEGEN', createdAt: 0, updatedAt: 0 });
 insert('Partner', { id: 'pt-b', name: 'Vendedor B', commissionPercent: '20.00', active: 0, userId: 'b', createdAt: 0, updatedAt: 0 });
 
 async function main() {
@@ -45,6 +47,15 @@ async function main() {
   ]);
   // Comisión = renta × % del referidor ligado a quien cotiza (misma fórmula que /panel/reservas: solo sobre la renta).
   assert.deepEqual(q.commission, { percent: '10.00', amount: '500.00' });
+  // Atribución: el enlace del vendedor para ESA casa; si no hay, el general; sin referidor activo, ninguno.
+  assert.equal(q.referralCode, 'VENDEPA1');
+  memory.prepare('UPDATE "Property" SET "ownerId" = ? WHERE id = ?').run('a', 'pb');
+  assert.equal((await vendorQuote('pb', start, end, ownerA)).referralCode, 'VENDEGEN');
+  memory.prepare('UPDATE "Property" SET "ownerId" = ? WHERE id = ?').run('b', 'pb');
+  assert.equal((await vendorQuote('pa', start, end, admin)).referralCode, null);
+  // Estancia de más de 365 noches → null (tope de cálculo; la pantalla lo trata como fechas inválidas).
+  assert.equal(await vendorQuote('pa', '2026-12-18', '2027-12-19', ownerA), null);
+  assert.equal((await vendorQuote('pa', '2026-12-18', '2027-12-18', ownerA)).nights, 365);
   // Quien no es referidor (ADMIN) o tiene el referidor inactivo no ve comisión.
   assert.equal((await vendorQuote('pa', start, end, admin)).commission, null);
   assert.equal((await vendorQuote('pb', start, end, ownerB)).commission, null);
@@ -128,8 +139,15 @@ async function main() {
     assert.ok(wa, 'botón de WhatsApp');
     const sent = decodeURIComponent(wa[1].replace(/&amp;/g, '&').split('text=')[1]);
     assert.ok(!/comisi|commission/i.test(sent) && !sent.includes(formatMoney(expected.commission.amount, locale)), 'WhatsApp sin comisión');
-    assert.ok(sent.includes(`/${locale}/casas/pa`), 'enlace público de la casa publicada');
+    assert.ok(sent.includes('/casas/pa?ref=VENDEPA1'), 'enlace público con el código del vendedor (la venta se le atribuye)');
+    const tooLong = render(await call('pa', { start: from, end: plus(30 + 366) }));
+    assert.ok(tooLong.includes(t('invalid')) && !tooLong.includes('wa.me'), 'más de 365 noches → inválidas');
     assert.ok(html.includes(`href="/${locale}/panel/vender/pa?start=${from}&amp;end=${to}&amp;guests=2"`), 'volver a la ficha');
+    memory.prepare('DELETE FROM "ReferralLink"').run();
+    const unlinked = render(await call('pa', { start: from, end: to }));
+    assert.ok(unlinked.includes(t('noReferralLink')), 'avisa que sin enlace la venta no cuenta');
+    assert.ok(decodeURIComponent(/text=([^"]+)"/.exec(unlinked)[1]).includes(`/${locale}/casas/pa`) && !unlinked.includes('ref%3D'));
+    insert('ReferralLink', { id: 'rl-a-pa', partnerId: 'pt-a', propertyId: 'pa', code: 'VENDEPA1', createdAt: 0, updatedAt: 0 });
     // Limpieza sin capturar → «por confirmar».
     memory.prepare('UPDATE "Property" SET "cleaningPrice" = NULL WHERE id = ?').run('pa');
     assert.ok(render(await call('pa', { start: from, end: to })).includes(t('cleaningPending')));

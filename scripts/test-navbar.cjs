@@ -47,10 +47,11 @@ if (require.main === module) {
     assert.ok(!closed.includes('M4 21v-2'), 'Sin avatar anterior');
     assert.ok(closed.includes('public-header'));
     assert.equal((closed.match(/marcellus-logo-variable/g)||[]).length,1,'Fuente exclusivamente en wordmark');
-    // T-5210: switch «Usuario | Vendedor» solo para quien tiene panel; en público marca Usuario, en el panel Vendedor.
+    // T-5210: el switch «Usuario | Vendedor» solo se monta para quien tiene panel, y solo se VE en la app instalada
+    // (se decide en el navegador): en el render del servidor nunca aparece, solo su hueco oculto.
     const hasPanel = role === 'ADMIN' || role === 'COLLABORATOR';
-    assert.equal(closed.includes('data-mode-switch'), hasPanel, `switch de modo para ${role}`);
-    if (hasPanel) assert.ok(closed.includes(`href="/${locale}/panel/vender"`) && renderNavbar(role, locale, false, '/panel/vender').includes(`href="/${locale}/casas"`));
+    assert.equal(closed.includes('data-mode-switch-slot'), hasPanel, `hueco del switch para ${role}`);
+    assert.ok(!closed.includes('data-mode-switch=""') && !renderNavbar(role, locale, false, '/panel/vender').includes('data-mode-switch=""'), 'fuera de la app no se ve');
     for(const privatePath of ['/panel','/admin/tarifas']) assert.ok(!renderNavbar(role,locale,false,privatePath).includes('public-header'));
     renderNavbar(role,locale);
     assert.ok(!closed.includes('href="/'+locale+'/casas"'));

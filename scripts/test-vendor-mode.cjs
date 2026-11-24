@@ -1,77 +1,78 @@
-// T-5210 (pedido de Gabriel): switch «Modo usuario ↔ Modo vendedor» para quien tiene panel.
-// Offline: mapeo puro de rutas equivalentes, páginas de paso (slug ↔ id con permisos) y entrada /app que recuerda el modo.
+// T-5210 (pedido de Gabriel, replanteado 23-nov): switch «Usuario | Vendedor» SOLO en la app instalada (teléfono),
+// para quien tiene panel. Cambiar de modo lleva SIEMPRE al inicio: usuario → portada; vendedor → «¿Qué está libre?».
+// Offline: mapeo puro, detección de app instalada (pura), vista del switch y entrada /[locale]/app (route handler).
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { load, memory, req, mockModule, setSession } = require('./test-property-access.cjs');
-let cookie = null;
-mockModule('next/headers', { cookies: async () => ({ get: name => name === 'alia_mode' && cookie ? { name, value: cookie } : undefined }), headers: async () => new Headers() });
+const { load, memory, req, setSession } = require('./test-property-access.cjs');
 const React = req('react');
 const { renderToStaticMarkup } = req('react-dom/server');
 const { NextIntlClientProvider } = req('next-intl');
-const { modeTarget, MODE_COOKIE } = load('apps/web/src/lib/vendor-mode.ts');
-const ModeSwitch = load('apps/web/src/components/ModeSwitch.tsx').default;
-const openPage = load('apps/web/src/app/[locale]/panel/vender/abrir/page.tsx').default;
-const publicPage = load('apps/web/src/app/[locale]/panel/vender/[id]/publica/page.tsx').default;
-const appPage = load('apps/web/src/app/[locale]/app/page.tsx').default;
+const { modeTarget, isInstalledApp, MODE_COOKIE, APP_COOKIE } = load('apps/web/src/lib/vendor-mode.ts');
+const { ModeSwitchView } = load('apps/web/src/components/ModeSwitch.tsx');
+const appEntry = load('apps/web/src/app/[locale]/app/route.ts');
 
-// 1) Mapeo puro (rutas sin prefijo de idioma). Solo viajan fechas, huéspedes y destino; nada más de la URL.
-const q = '?start=2026-12-18&end=2026-12-22&guests=2&state=Jalisco&destinationCity=Guadalajara&utm=x';
-assert.equal(MODE_COOKIE, 'alia_mode');
-assert.deepEqual(modeTarget('/panel/vender', q), { mode: 'vendor', target: '/casas?start=2026-12-18&end=2026-12-22&guests=2&state=Jalisco&destinationCity=Guadalajara' });
-assert.deepEqual(modeTarget('/panel/vender/abc-123', q), { mode: 'vendor', target: '/panel/vender/abc-123/publica?start=2026-12-18&end=2026-12-22&guests=2' });
-assert.deepEqual(modeTarget('/panel/vender/abc-123/cotizar', q), { mode: 'vendor', target: '/panel/vender/abc-123/publica?start=2026-12-18&end=2026-12-22&guests=2' });
-assert.deepEqual(modeTarget('/panel/reservas', ''), { mode: 'vendor', target: '/' });
-assert.deepEqual(modeTarget('/admin/calendario', ''), { mode: 'vendor', target: '/' });
-assert.deepEqual(modeTarget('/casas', q), { mode: 'user', target: '/panel/vender?start=2026-12-18&end=2026-12-22&guests=2&state=Jalisco&destinationCity=Guadalajara' });
-assert.deepEqual(modeTarget('/casas/casa-azul', q), { mode: 'user', target: '/panel/vender/abrir?slug=casa-azul&start=2026-12-18&end=2026-12-22&guests=2' });
-assert.deepEqual(modeTarget('/', ''), { mode: 'user', target: '/panel/vender' });
-assert.deepEqual(modeTarget('/nosotros', '?x=1'), { mode: 'user', target: '/panel/vender' });
-assert.deepEqual(modeTarget('/casas/a%20b', ''), { mode: 'user', target: '/panel/vender/abrir?slug=a+b' }, 'slug decodificado y re-codificado');
-console.log('modeTarget: rutas equivalentes OK');
+// 1) Mapeo: panel/admin = vendedor → portada; todo lo demás = usuario → inicio del vendedor. Sin «página equivalente».
+assert.deepEqual([MODE_COOKIE, APP_COOKIE], ['alia_mode', 'alia_app']);
+for (const [pathname, expected] of [
+  ['/panel/vender', { mode: 'vendor', target: '/' }],
+  ['/es/panel/vender/abc/cotizar', { mode: 'vendor', target: '/' }],
+  ['/admin/calendario', { mode: 'vendor', target: '/' }],
+  ['/', { mode: 'user', target: '/panel/vender' }],
+  ['/fr', { mode: 'user', target: '/panel/vender' }],
+  ['/casas/casa-azul', { mode: 'user', target: '/panel/vender' }],
+  ['/en/casas', { mode: 'user', target: '/panel/vender' }],
+  ['/panelista', { mode: 'user', target: '/panel/vender' }],
+]) assert.deepEqual(modeTarget(pathname), expected, pathname);
 
-// 2) El switch: dos opciones, la actual marcada; el otro modo enlaza al destino equivalente con idioma.
+// 2) ¿App instalada? Modo standalone (Android/PWA/TWA), navigator.standalone (iPhone) o la marca de la entrada /app.
+const win = ({ standalone = false, iosStandalone, cookie = '' } = {}) => ({ matchMedia: query => ({ matches: query === '(display-mode: standalone)' && standalone }), navigator: { standalone: iosStandalone }, document: { cookie } });
+assert.equal(isInstalledApp(win()), false, 'navegador normal');
+assert.equal(isInstalledApp(win({ cookie: 'theme=dark; alia_mode=vendor' })), false);
+assert.equal(isInstalledApp(win({ standalone: true })), true, 'Android / PWA / TWA');
+assert.equal(isInstalledApp(win({ iosStandalone: true })), true, 'iPhone desde la pantalla de inicio');
+assert.equal(isInstalledApp(win({ cookie: 'theme=dark; alia_app=1' })), true, 'entró por /app');
+assert.equal(isInstalledApp(win({ cookie: 'xalia_app=1' })), false);
+assert.equal(isInstalledApp({ matchMedia: undefined, navigator: {}, document: { cookie: '' } }), false, 'sin matchMedia no rompe');
+console.log('modeTarget e isInstalledApp OK');
+
+// 3) Vista del switch: el modo actual marcado; el otro enlaza al inicio del otro modo, con idioma.
 for (const locale of ['es', 'en', 'fr']) {
   const messages = JSON.parse(fs.readFileSync(path.join(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
-  const html = renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } },
-    React.createElement(ModeSwitch, { pathname: '/casas/casa-azul', locale })));
-  assert.ok(html.includes('data-mode-switch'));
-  assert.ok(html.includes(messages.vendor.modeUser) && html.includes(messages.vendor.modeVendor));
-  assert.match(html, /aria-current="page"[^>]*>[^<]*<\/span>|aria-current="page"/);
-  assert.ok(html.includes(`href="/${locale}/panel/vender/abrir?slug=casa-azul"`), locale + ': salta a la ficha del vendedor');
-  const vendor = renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } },
-    React.createElement(ModeSwitch, { pathname: '/panel/vender', locale })));
-  assert.ok(vendor.includes(`href="/${locale}/casas"`), locale + ': del panel al sitio público');
+  const render = pathname => renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } },
+    React.createElement(ModeSwitchView, { pathname, locale })));
+  const user = render('/casas/casa-azul');
+  assert.ok(user.includes('data-mode-switch') && user.includes(messages.vendor.modeUser) && user.includes(messages.vendor.modeVendor));
+  assert.ok(user.includes(`href="/${locale}/panel/vender"`), locale + ': de usuario al inicio del vendedor');
+  assert.match(user, new RegExp(`aria-current="page"[^>]*>${messages.vendor.modeUser}<`));
+  const vendor = render('/panel/vender/abc');
+  assert.ok(vendor.includes(`href="/${locale}"`), locale + ': de vendedor a la portada');
+  assert.match(vendor, new RegExp(`aria-current="page"[^>]*>${messages.vendor.modeVendor}<`));
 }
-console.log('ModeSwitch es/en/fr OK');
+console.log('ModeSwitchView es/en/fr OK');
 
 async function main() {
-  memory.prepare('UPDATE "Property" SET slug = id').run();
-  // 3) Página de paso usuario → vendedor: slug → id SOLO si la gestiona; si no, a la búsqueda del vendedor con sus fechas.
-  const open = query => openPage({ params: Promise.resolve({ locale: 'es' }), searchParams: Promise.resolve(query) });
-  setSession(null);
-  await assert.rejects(() => open({ slug: 'pa' }), error => error.message === 'redirect: /es', 'sin panel → portada');
+  // 4) Entrada /[locale]/app (inicio de la app instalada): marca el navegador como app y abre en el último modo;
+  //    quien no tiene panel va a la portada (también marcado: es la app).
+  const enter = async (locale, cookie) => {
+    const response = await appEntry.GET(new Request(`http://localhost/${locale}/app`, { headers: cookie ? { cookie } : {} }), { params: Promise.resolve({ locale }) });
+    return { status: response.status, location: new URL(response.headers.get('location')).pathname, setCookie: response.headers.get('set-cookie') || '' };
+  };
   setSession({ user: { id: 'a' } });
-  await assert.rejects(() => open({ slug: 'pa', start: '2026-12-18', end: '2026-12-22', guests: '2', extra: 'x' }), error => error.message === 'redirect: /es/panel/vender/pa?start=2026-12-18&end=2026-12-22&guests=2');
-  await assert.rejects(() => open({ slug: 'pb', start: '2026-12-18', end: '2026-12-22' }), error => error.message === 'redirect: /es/panel/vender?start=2026-12-18&end=2026-12-22', 'casa ajena: no revela su id');
-  await assert.rejects(() => open({}), error => error.message === 'redirect: /es/panel/vender');
-  // 4) Página de paso vendedor → usuario: id → ficha pública si está publicada; borrador → portada; ajena → 404.
-  const pub = (id, query = {}) => publicPage({ params: Promise.resolve({ locale: 'en', id }), searchParams: Promise.resolve(query) });
-  await assert.rejects(() => pub('pa', { start: '2026-12-18', end: '2026-12-22', guests: '2' }), error => error.message === 'redirect: /en/casas/pa?start=2026-12-18&end=2026-12-22&guests=2');
-  await assert.rejects(() => pub('hidden'), error => error.message === 'redirect: /en');
-  await assert.rejects(() => pub('pb'), error => error.status === 404);
-  // 5) Entrada /app (la usará la PWA): abre en el último modo; quien no tiene panel siempre va a la portada.
-  const app = () => appPage({ params: Promise.resolve({ locale: 'fr' }) });
-  for (const [value, target] of [[null, '/fr/panel/vender'], ['vendor', '/fr/panel/vender'], ['user', '/fr'], ['raro', '/fr/panel/vender']]) {
-    cookie = value;
-    await assert.rejects(app, error => error.message === `redirect: ${target}`, String(value));
+  for (const [cookie, target] of [[null, '/fr/panel/vender'], ['alia_mode=vendor', '/fr/panel/vender'], ['alia_mode=user', '/fr'], ['alia_mode=raro', '/fr/panel/vender']]) {
+    const result = await enter('fr', cookie);
+    assert.equal(result.status, 307, String(cookie));
+    assert.equal(result.location, target, String(cookie));
+    assert.match(result.setCookie, /alia_app=1/);
+    assert.match(result.setCookie, /Path=\//i);
   }
   setSession({ user: { id: 'client' } });
-  cookie = 'vendor';
-  await assert.rejects(app, error => error.message === 'redirect: /fr', 'un cliente nunca entra al panel');
+  assert.equal((await enter('es', 'alia_mode=vendor')).location, '/es', 'un cliente nunca entra al panel');
   setSession(null);
-  await assert.rejects(app, error => error.message === 'redirect: /fr');
-  console.log('páginas de paso y entrada /app OK');
+  const anonymous = await enter('en');
+  assert.deepEqual([anonymous.location, /alia_app=1/.test(anonymous.setCookie)], ['/en', true]);
+  assert.equal((await enter('xx')).location, '/es', 'idioma desconocido → es');
+  console.log('entrada /app OK');
   memory.close();
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

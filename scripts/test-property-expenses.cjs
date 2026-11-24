@@ -79,6 +79,17 @@ async function main() {
   assert.deepEqual(entryInput({ paid: false }, '2026-11-24', true), { paid: false, paidAt: null }, 'desmarcar borra la fecha');
   assert.throws(() => entryInput({ typeId: 'luz', date: '2026-11-01' }, '2026-11-24'), undefined, 'el cargo exige monto');
   assert.throws(() => entryInput({ typeId: 'luz', date: '2026-11-01', amount: '1', paidAt: '2026-11-02' }, '2026-11-24'), undefined, 'fecha de pago sin pagado');
+  // Periodo que toca pagar hoy (botón «Registrar pago del …»): el último vencimiento ya pasado.
+  const current = rules.currentDueDate;
+  assert.equal(current('2026-01-10', 'bimestral', '2026-11-24'), '2026-11-10', 'el próximo sería 10-ene; el actual es 10-nov');
+  assert.equal(current('2026-01-10', 'bimestral', '2026-11-10'), '2026-11-10', 'el día del vencimiento');
+  assert.equal(current('2026-01-10', 'bimestral', '2026-11-09'), '2026-09-10');
+  assert.equal(current('2026-12-01', 'mensual', '2026-11-24'), '2026-12-01', 'aún no empieza → el primero');
+  assert.equal(current('2026-01-31', 'mensual', '2026-03-15'), '2026-02-28', 'fin de mes');
+  assert.equal(current('2026-11-02', 'semanal', '2026-11-24'), '2026-11-23');
+  assert.equal(current('2026-11-02', 'semanal', '2026-11-29'), '2026-11-23');
+  assert.equal(current('2024-02-29', 'anual', '2026-03-01'), '2026-02-28');
+  assert.equal(current('2026-01-10', 'trimestral', '2026-11-24'), '2026-10-10');
   // Revisión de seguridad/dinero: año 0000 (Postgres lo rechaza con 500), pago en el futuro, desmarcar con fecha.
   for (const bad of ['0000-01-01', '1899-12-31', '3000-01-01']) assert.equal(rules.isCivilDate(bad), false, bad);
   assert.equal(rules.isCivilDate('2026-02-28'), true);
@@ -207,6 +218,14 @@ async function main() {
     assert.ok(/<input type="checkbox"[^>]*checked=""/.test(html), locale + ': cargo pagado marcado');
     assert.equal(html.includes('/api/panel/expense-types') || html.includes(messages.expenses.addType), locale === 'es', 'solo el ADMIN ve «agregar tipo»');
     assert.ok(!html.includes('Viejo'), 'un tipo desactivado no se ofrece');
+    // «Pagos» (antes «Cargos») y el botón del periodo: la luz bimestral desde 10-ene ya tiene su pago del 10-nov.
+    assert.ok(html.includes(`>${messages.expenses.entriesTitle}</h2>`), locale + ': sección «Pagos»');
+    assert.ok(html.includes('data-period-registered'), locale + ': el pago del periodo ya está → sin botón');
+    assert.ok(!html.includes('data-register-period'));
+    const empty = renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } },
+      React.createElement(PropertyExpenses, { propertyId: 'pa', data: { ...screen, entries: [] }, today: '2026-11-24', isAdmin: false })));
+    assert.ok(empty.includes('data-register-period="2026-11-10"'), locale + ': sin pago del periodo → botón con la fecha del periodo');
+    assert.ok(empty.includes('id="registrar-pago"'), 'el formulario al que lleva el botón');
   }
   console.log('pantalla es/en/fr OK');
   console.log('test-property-expenses OK');

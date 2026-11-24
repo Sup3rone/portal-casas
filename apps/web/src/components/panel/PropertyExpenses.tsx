@@ -6,7 +6,7 @@ import { useState, type FormEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { formatMoney } from '@/lib/booking-breakdown';
-import { expensePeriodicities, maintenanceKinds, maintenanceStatuses, nextDueDate, overBudget } from '@/lib/property-expenses-rules';
+import { currentDueDate, expensePeriodicities, maintenanceKinds, maintenanceStatuses, nextDueDate, overBudget, type Periodicity } from '@/lib/property-expenses-rules';
 import { panelErrorKey, panelRequest, inputClass, buttonClass } from './request';
 
 type Type = { id: string; name: string; fixed: boolean; active: boolean };
@@ -30,6 +30,9 @@ function fields(form: HTMLFormElement, names: string[]) {
 export default function PropertyExpenses({ propertyId, data, today, isAdmin }: { propertyId: string; data: PropertyExpensesData; today: string; isAdmin: boolean }) {
   const t = useTranslations('expenses'), errors = useTranslations('panel'), router = useRouter(), locale = useLocale();
   const [busy, setBusy] = useState(false), [status, setStatus] = useState(''), [error, setError] = useState('');
+  // «Registrar pago de este periodo»: llena el formulario de pago con el gasto recurrente (key = lo vuelve a montar).
+  const [prefill, setPrefill] = useState<{ typeId: string; recurringExpenseId: string; date: string; amount: string } | null>(null);
+  const [formKey, setFormKey] = useState(0);
   const base = `/api/properties/${encodeURIComponent(propertyId)}/expenses`;
   const money = (value: string | null) => formatMoney(value, locale);
   const day = (value: string | null) => value ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value + 'T00:00:00Z')) : '—';
@@ -38,7 +41,7 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
 
   async function run(action: () => Promise<unknown>, done: string, form?: HTMLFormElement) {
     setBusy(true); setStatus(''); setError('');
-    try { await action(); form?.reset(); setStatus(t(done)); router.refresh(); }
+    try { await action(); form?.reset(); if (form) { setPrefill(null); setFormKey(key => key + 1); } setStatus(t(done)); router.refresh(); }
     catch (failure) { setError(errors(panelErrorKey(failure))); }
     finally { setBusy(false); }
   }
@@ -53,10 +56,20 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
     if (!window.confirm(t('confirmRemove'))) return;
     void run(() => panelRequest(`${base}/${kind}/${encodeURIComponent(id)}`, 'DELETE'), 'removed');
   };
-  const typeSelect = <select name="typeId" required className={inputClass} defaultValue="">
+  const typeSelect = (value = '') => <select name="typeId" required className={inputClass} defaultValue={value}>
     <option value="" disabled>{t('chooseType')}</option>
     {activeTypes.map(type => <option key={type.id} value={type.id}>{type.name}</option>)}
   </select>;
+  function registerPeriod(item: Recurring, date: string) {
+    setPrefill({ typeId: item.typeId, recurringExpenseId: item.id, date, amount: item.amount ?? '' });
+    setFormKey(key => key + 1);
+    setStatus(''); setError('');
+    requestAnimationFrame(() => {
+      const form = document.getElementById('registrar-pago');
+      form?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      (form?.querySelector('input[name="amount"]') as HTMLInputElement | null)?.focus({ preventScroll: true });
+    });
+  }
 
   const totals = data.totals;
   const over = data.maintenances.filter(item => overBudget(item.budget, item.actualCost));
@@ -111,16 +124,22 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
       {!data.recurring.length && <p>{t('recurringEmpty')}</p>}
       <ul className="space-y-3">{data.recurring.map(item => <li key={item.id} className={`space-y-2 rounded-lg border p-3 dark:border-gray-700 ${item.active ? '' : 'opacity-60'}`}>
         <p className="font-semibold">{typeName(item.typeId)} <span className="text-sm font-normal">· {t(`periodicities.${item.periodicity}`)} · {money(item.amount)}</span></p>
-        <p className="text-sm">{item.active ? t('nextDue', { date: day(nextDueDate(item.startDate, item.periodicity as typeof expensePeriodicities[number], today)) }) : t('inactive')}</p>
+        <p className="text-sm">{item.active ? t('nextDue', { date: day(nextDueDate(item.startDate, item.periodicity as Periodicity, today)) }) : t('inactive')}</p>
         {item.notes && <p className="whitespace-pre-line text-sm">{item.notes}</p>}
         <div className="flex flex-wrap gap-3">
+          {item.active && (() => {
+            const period = currentDueDate(item.startDate, item.periodicity as Periodicity, today);
+            return data.entries.some(entry => entry.recurringExpenseId === item.id && entry.date === period)
+              ? <span data-period-registered="" className="flex min-h-11 items-center text-sm text-green-800 dark:text-green-300">{t('periodRegistered', { date: day(period) })}</span>
+              : <button type="button" data-register-period={period} disabled={busy} className={buttonClass} onClick={() => registerPeriod(item, period)}>{t('registerPeriod', { date: day(period) })}</button>;
+          })()}
           <button type="button" disabled={busy} className={secondary} onClick={() => patch('recurring', item.id, { active: !item.active })}>{t(item.active ? 'deactivate' : 'activate')}</button>
           <button type="button" disabled={busy} className={secondary} onClick={() => remove('recurring', item.id)}>{t('remove')}</button>
         </div>
       </li>)}</ul>
       <form className="grid gap-3 sm:grid-cols-2" onSubmit={submit('recurring', ['typeId', 'periodicity', 'amount', 'startDate', 'notes'])}>
         <h3 className="font-semibold sm:col-span-2">{t('recurringNew')}</h3>
-        <label className={label}><span>{t('type')}</span>{typeSelect}</label>
+        <label className={label}><span>{t('type')}</span>{typeSelect()}</label>
         <label className={label}><span>{t('periodicity')}</span><select name="periodicity" required className={inputClass} defaultValue="mensual">{expensePeriodicities.map(value => <option key={value} value={value}>{t(`periodicities.${value}`)}</option>)}</select></label>
         <label className={label}><span>{t('estimatedAmount')}</span><input name="amount" inputMode="decimal" placeholder="0.00" className={inputClass} /></label>
         <label className={label}><span>{t('firstDate')}</span><input name="startDate" type="date" required defaultValue={today} className={inputClass} /></label>
@@ -149,16 +168,18 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
         </label>
         <button type="button" disabled={busy} className={secondary} onClick={() => remove('entry', item.id)}>{t('remove')}</button>
       </li>)}</ul>
-      <form className="grid gap-3 sm:grid-cols-2" onSubmit={submit('entry', ['typeId', 'recurringExpenseId', 'date', 'amount', 'notes'], form => ({ paid: (form.elements.namedItem('paid') as HTMLInputElement).checked }))}>
+      <form key={formKey} id="registrar-pago" data-prefilled={prefill ? '' : undefined} className="grid gap-3 sm:grid-cols-2" onSubmit={submit('entry', ['typeId', 'recurringExpenseId', 'date', 'amount', 'notes'], form => ({ paid: (form.elements.namedItem('paid') as HTMLInputElement).checked }))}>
         <h3 className="font-semibold sm:col-span-2">{t('entryNew')}</h3>
-        <label className={label}><span>{t('type')}</span>{typeSelect}</label>
-        <label className={label}><span>{t('fromRecurring')}</span><select name="recurringExpenseId" className={inputClass} defaultValue="">
+        <label className={label}><span>{t('type')}</span>{typeSelect(prefill?.typeId)}</label>
+        <label className={label}><span>{t('fromRecurring')}</span><select name="recurringExpenseId" className={inputClass} defaultValue={prefill?.recurringExpenseId ?? ''}>
           <option value="">{t('noRecurring')}</option>
           {data.recurring.filter(item => item.active).map(item => <option key={item.id} value={item.id}>{typeName(item.typeId)} · {t(`periodicities.${item.periodicity}`)}</option>)}
         </select></label>
-        <label className={label}><span>{t('date')}</span><input name="date" type="date" required defaultValue={today} className={inputClass} /></label>
-        <label className={label}><span>{t('amount')}</span><input name="amount" required inputMode="decimal" placeholder="0.00" className={inputClass} /></label>
-        <label className="flex min-h-11 items-center gap-3 sm:col-span-2"><input name="paid" type="checkbox" className="h-5 w-5" /><span>{t('paid')}</span></label>
+        <label className={label}><span>{t('date')}</span><input name="date" type="date" required defaultValue={prefill?.date ?? today} className={inputClass} /></label>
+        <label className={label}><span>{t('amount')}</span><input name="amount" required inputMode="decimal" placeholder="0.00" defaultValue={prefill?.amount ?? ''} className={inputClass} /></label>
+        {/* Desde «Registrar pago de este periodo» se asume pagado; se puede desmarcar. */}
+        <label className="flex min-h-11 items-center gap-3 sm:col-span-2"><input name="paid" type="checkbox" defaultChecked={Boolean(prefill)} className="h-5 w-5" /><span>{t('paid')}</span></label>
+        {prefill && <p className="text-sm text-gray-600 dark:text-gray-300 sm:col-span-2">{t('prefillHint')}</p>}
         <label className={`${label} sm:col-span-2`}><span>{t('notes')}</span><textarea name="notes" maxLength={2000} rows={2} className={inputClass} /></label>
         <div className="sm:col-span-2"><button type="submit" disabled={busy || !activeTypes.length} className={buttonClass}>{t('add')}</button></div>
       </form>

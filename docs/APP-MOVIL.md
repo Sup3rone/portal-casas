@@ -70,6 +70,14 @@ Si algún día se sube a Google Play con «firma de apps de Google Play», Play 
 
 Actualizar: instalar el APK nuevo encima; conserva la sesión.
 
+## Dónde se ha probado
+
+| Fecha | Teléfono | Sistema | Navegador | Resultado |
+|---|---|---|---|---|
+| 24-11-2026 | Samsung Galaxy J7 Prime | Android 11 · LineageOS (sin servicios de Google) | Sin Chrome | Con `customtabs`: abría con barra. Con `webview` (APK de la corrida 45469470887): **sin barra**, se ve bien |
+
+Pendiente: un Android con Chrome (debe abrir sin barra por el vínculo `assetlinks`) y un iPhone (Safari → Agregar a inicio).
+
 ## Detalles técnicos
 
 - `android/twa-manifest.json`: configuración de Bubblewrap (paquete `com.aliaforrent.app`, dominio, colores, íconos). El proyecto Android completo se genera en cada corrida y no se versiona.

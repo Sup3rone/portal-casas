@@ -300,3 +300,82 @@ export const autoTranslations = pgTable('AutoTranslation', {
   valueHash: text('valueHash').notNull(),
   updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// T-5248: mantenimientos y gastos por casa. Todo cuelga de propertyId para usar el mismo corte del panel
+// (managedResource). Montos MXN numeric(12,2) y fechas civiles, como Booking. SQL: scripts/sql/property-expenses.sql.
+export const expensePeriodicities = ['semanal', 'mensual', 'bimestral', 'trimestral', 'anual'] as const;
+export const maintenanceKinds = ['puntual', 'recurrente'] as const;
+export const maintenanceStatuses = ['pendiente', 'en_proceso', 'terminado', 'cancelado'] as const;
+
+// Catálogo global de tipos de gasto. Los «fijos» (luz y agua, sembrados por el SQL) no se pueden desactivar.
+export const expenseTypes = pgTable('ExpenseType', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  fixed: boolean('fixed').notNull().default(false),
+  active: boolean('active').notNull().default(true),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  uniqueIndex('ExpenseType_name_unique').on(sql`lower(${table.name})`),
+  check('ExpenseType_name_check', sql`btrim(${table.name}) <> ''`),
+]);
+
+// Un gasto que se repite en una casa (luz bimestral, internet mensual…). El monto es el estimado.
+export const recurringExpenses = pgTable('RecurringExpense', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  typeId: text('typeId').notNull().references(() => expenseTypes.id, { onDelete: 'restrict' }),
+  periodicity: text('periodicity').$type<typeof expensePeriodicities[number]>().notNull(),
+  amount: numeric('amount', { precision: 12, scale: 2 }),
+  startDate: date('startDate').notNull(),
+  active: boolean('active').notNull().default(true),
+  notes: text('notes'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  index('RecurringExpense_propertyId_idx').on(table.propertyId),
+  check('RecurringExpense_periodicity_check', sql`${table.periodicity} in ('semanal', 'mensual', 'bimestral', 'trimestral', 'anual')`),
+  check('RecurringExpense_amount_check', sql`${table.amount} is null or ${table.amount} >= 0`),
+]);
+
+// Cada cargo concreto: un periodo de un gasto recurrente o un gasto suelto. «pagado» es la casilla del cliente.
+export const expenseEntries = pgTable('ExpenseEntry', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  recurringExpenseId: text('recurringExpenseId').references(() => recurringExpenses.id, { onDelete: 'set null' }),
+  typeId: text('typeId').notNull().references(() => expenseTypes.id, { onDelete: 'restrict' }),
+  date: date('date').notNull(),
+  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+  paid: boolean('paid').notNull().default(false),
+  paidAt: date('paidAt'),
+  notes: text('notes'),
+  createdBy: text('createdBy').notNull().references(() => users.id),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  index('ExpenseEntry_property_date_idx').on(table.propertyId, table.date),
+  check('ExpenseEntry_amount_check', sql`${table.amount} >= 0`),
+  check('ExpenseEntry_paid_check', sql`${table.paid} or ${table.paidAt} is null`),
+]);
+
+// Un trabajo en una casa. «Sobre presupuesto» (actualCost > budget) se calcula, no se guarda.
+export const maintenances = pgTable('Maintenance', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  kind: text('kind').$type<typeof maintenanceKinds[number]>().notNull(),
+  status: text('status').$type<typeof maintenanceStatuses[number]>().notNull().default('pendiente'),
+  budget: numeric('budget', { precision: 12, scale: 2 }),
+  actualCost: numeric('actualCost', { precision: 12, scale: 2 }),
+  startDate: date('startDate'),
+  endDate: date('endDate'),
+  notes: text('notes'),
+  createdBy: text('createdBy').notNull().references(() => users.id),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  index('Maintenance_propertyId_idx').on(table.propertyId),
+  check('Maintenance_title_check', sql`btrim(${table.title}) <> ''`),
+  check('Maintenance_kind_check', sql`${table.kind} in ('puntual', 'recurrente')`),
+  check('Maintenance_status_check', sql`${table.status} in ('pendiente', 'en_proceso', 'terminado', 'cancelado')`),
+  check('Maintenance_budget_check', sql`${table.budget} is null or ${table.budget} >= 0`),
+  check('Maintenance_actualCost_check', sql`${table.actualCost} is null or ${table.actualCost} >= 0`),
+  check('Maintenance_dates_check', sql`${table.startDate} is null or ${table.endDate} is null or ${table.endDate} >= ${table.startDate}`),
+]);

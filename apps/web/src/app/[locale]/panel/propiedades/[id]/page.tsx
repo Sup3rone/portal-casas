@@ -32,7 +32,9 @@ export default async function EditPropertyPage({ params, searchParams }: { param
   const sectionAuto = Object.fromEntries(sections.map(section => [section.section, autoFor(`section:${id}:${section.section}:`)]));
   const t = await getTranslations({ locale, namespace: 'panel' });
   return <section key={property.id} className="space-y-8">
-    <Link href="/panel" className="text-green-700 dark:text-green-400 underline">{t('back')}</Link>
+    <div className="flex flex-wrap gap-6"><Link href="/panel" className="text-green-700 dark:text-green-400 underline">{t('back')}</Link>
+      {/* T-5248: mantenimientos y gastos de esta casa. */}
+      <Link href={`/panel/propiedades/${id}/gastos`} className="text-green-700 dark:text-green-400 underline">{t('expenses')}</Link></div>
     <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-3xl font-semibold">{t('edit')}</h1>
       <span>{t(property.published ? 'published' : 'draft')}</span><PublicationButton id={id} published={property.published} canManagePublication={manager.role === 'ADMIN' || manager.canPublishProperties} /></div>
     <PropertyRentalType key={`${id}:${property.rentalType}`} initial={property.rentalType}>

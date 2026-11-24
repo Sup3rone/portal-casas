@@ -8,7 +8,7 @@ import { AccessError, managedResource, requireAdmin, type PropertyManager } from
 import { managedProperty } from './panel-server';
 import { PanelValidationError } from './panel-validation';
 import { inquiryToday } from './inquiry-validation';
-import { entryInput, expenseKinds, expenseTypeInput, maintenanceInput, recurringInput, type ExpenseKind } from './property-expenses-rules';
+import { entryInput, expenseKinds, expenseTotals, expenseTypeInput, maintenanceInput, recurringInput, type ExpenseKind } from './property-expenses-rules';
 
 const ENTRY_LIMIT = 200;
 
@@ -24,7 +24,7 @@ export async function listExpenseTypes() {
 
 export async function loadPropertyExpenses(propertyId: string, manager: PropertyManager) {
   await managedProperty(propertyId, manager);
-  const [types, works, recurring, entries] = await Promise.all([
+  const [types, works, recurring, entries, amounts] = await Promise.all([
     listExpenseTypes(),
     db.select().from(maintenances)
       .where(and(eq(maintenances.propertyId, propertyId), managedResource(maintenances.propertyId, manager)))
@@ -35,8 +35,12 @@ export async function loadPropertyExpenses(propertyId: string, manager: Property
     db.select().from(expenseEntries)
       .where(and(eq(expenseEntries.propertyId, propertyId), managedResource(expenseEntries.propertyId, manager)))
       .orderBy(desc(expenseEntries.date), desc(expenseEntries.createdAt)).limit(ENTRY_LIMIT),
+    // Totales con TODOS los cargos de la casa (la lista de arriba se recorta a ENTRY_LIMIT solo para mostrar).
+    db.select({ amount: expenseEntries.amount, paid: expenseEntries.paid }).from(expenseEntries)
+      .where(and(eq(expenseEntries.propertyId, propertyId), managedResource(expenseEntries.propertyId, manager))),
   ]);
-  return { types, maintenances: works, recurring, entries };
+  const totals = expenseTotals(amounts.map(row => ({ amount: row.amount, paid: Boolean(row.paid) })));
+  return { types, maintenances: works, recurring, entries, totals, truncated: amounts.length > entries.length };
 }
 
 /** Un tipo existente y activo; uno desactivado solo se acepta si el registro ya lo tenía. */
@@ -100,10 +104,13 @@ export async function updateExpenseItem(propertyId: string, kind: ExpenseKind, i
     await db.update(recurringExpenses).set(value).where(where(recurringExpenses));
   } else {
     const value = entryInput(input, inquiryToday(), true), current = row as typeof expenseEntries.$inferSelect;
+    const sentPaidAt = Boolean(input && typeof input === 'object' && 'paidAt' in input);
     if (value.typeId) await assertType(value.typeId, current.typeId);
     await assertRecurring(propertyId, value.recurringExpenseId);
-    // paidAt sin tocar «paid»: solo vale si ya estaba pagado.
-    if (value.paid === undefined && value.paidAt !== undefined && !current.paid) throw new PanelValidationError('validation');
+    // Volver a marcar «pagado» lo que ya estaba pagado conserva la fecha real (no la cambia por hoy).
+    if (value.paid === true && current.paid && !sentPaidAt) delete value.paidAt;
+    // paidAt sin tocar «paid»: solo vale si ya estaba pagado, y un pagado nunca queda sin fecha.
+    if (value.paid === undefined && value.paidAt !== undefined && (!current.paid || value.paidAt === null)) throw new PanelValidationError('validation');
     await db.update(expenseEntries).set(value).where(where(expenseEntries));
   }
 }

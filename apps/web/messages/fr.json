@@ -1197,6 +1197,7 @@
     "added": "Ajouté.",
     "saved": "Enregistré.",
     "removed": "Retiré.",
-    "typeAdded": "Type de dépense ajouté."
+    "typeAdded": "Type de dépense ajouté.",
+    "entriesTruncated": "Affichage des {count} frais les plus récents. Les totaux ci-dessus les incluent tous."
   }
 }

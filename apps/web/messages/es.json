@@ -1196,6 +1196,7 @@
     "added": "Agregado.",
     "saved": "Guardado.",
     "removed": "Quitado.",
-    "typeAdded": "Tipo de gasto agregado."
+    "typeAdded": "Tipo de gasto agregado.",
+    "entriesTruncated": "Se muestran los {count} cargos más recientes. Los totales de arriba incluyen todos."
   }
 }

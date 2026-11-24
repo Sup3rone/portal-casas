@@ -19,8 +19,9 @@ export type ExpenseKind = typeof expenseKinds[number];
 const MAX_TITLE = 200, MAX_NOTES = 2000, MAX_TYPE_NAME = 60;
 const fail = (): never => { throw new PanelValidationError('validation'); };
 
+/** YYYY-MM-DD real, de 1900 a 2999 (un año 0000 lo rechazaría Postgres con un 500 en vez de un 400). */
 export function isCivilDate(value: unknown): value is string {
-  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value))
+  return typeof value === 'string' && /^(19|2\d)\d{2}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value))
     && new Date(value + 'T00:00:00Z').toISOString().slice(0, 10) === value;
 }
 function body(value: unknown) {
@@ -111,7 +112,8 @@ export function entryInput(value: unknown, today: string, partial = false) {
     notes: pick(input, 'notes', true, v => optionalText(v, MAX_NOTES)),
   });
   if (partial && !Object.keys(result).length) fail();
-  if (result.paid === false) result.paidAt = null;
+  if (result.paidAt && result.paidAt > today) fail(); // no se registra un pago en el futuro
+  if (result.paid === false) { if (result.paidAt) fail(); result.paidAt = null; }
   else if (result.paid === true && !result.paidAt) result.paidAt = today;
   // Al crear, una fecha de pago sin «pagado» no tiene sentido. Al editar lo decide el servicio: vale si ya estaba pagado.
   else if (!partial && result.paid === undefined && result.paidAt) fail();

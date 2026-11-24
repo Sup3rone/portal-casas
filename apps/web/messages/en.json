@@ -1196,6 +1196,7 @@
     "added": "Added.",
     "saved": "Saved.",
     "removed": "Removed.",
-    "typeAdded": "Expense type added."
+    "typeAdded": "Expense type added.",
+    "entriesTruncated": "Showing the {count} most recent charges. The totals above include all of them."
   }
 }

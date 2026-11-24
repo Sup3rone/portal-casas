@@ -6,14 +6,16 @@ import { useState, type FormEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { formatMoney } from '@/lib/booking-breakdown';
-import { expensePeriodicities, expenseTotals, maintenanceKinds, maintenanceStatuses, nextDueDate, overBudget } from '@/lib/property-expenses-rules';
+import { expensePeriodicities, maintenanceKinds, maintenanceStatuses, nextDueDate, overBudget } from '@/lib/property-expenses-rules';
 import { panelErrorKey, panelRequest, inputClass, buttonClass } from './request';
 
 type Type = { id: string; name: string; fixed: boolean; active: boolean };
 type Maintenance = { id: string; title: string; kind: string; status: string; budget: string | null; actualCost: string | null; startDate: string | null; endDate: string | null; notes: string | null };
 type Recurring = { id: string; typeId: string; periodicity: string; amount: string | null; startDate: string; active: boolean; notes: string | null };
 type Entry = { id: string; typeId: string; recurringExpenseId: string | null; date: string; amount: string; paid: boolean; paidAt: string | null; notes: string | null };
-export type PropertyExpensesData = { types: Type[]; maintenances: Maintenance[]; recurring: Recurring[]; entries: Entry[] };
+/** totals los calcula el servidor con TODOS los cargos; entries es la lista (recortada si truncated). */
+export type PropertyExpensesData = { types: Type[]; maintenances: Maintenance[]; recurring: Recurring[]; entries: Entry[];
+  totals: { paid: string; pending: string; total: string }; truncated: boolean };
 
 const secondary = 'min-h-11 rounded-lg border border-green-700 px-3 text-green-800 disabled:opacity-50 dark:border-green-400 dark:text-green-300';
 const card = 'space-y-4 rounded-lg border p-4 dark:border-gray-700';
@@ -56,7 +58,7 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
     {activeTypes.map(type => <option key={type.id} value={type.id}>{type.name}</option>)}
   </select>;
 
-  const totals = expenseTotals(data.entries);
+  const totals = data.totals;
   const over = data.maintenances.filter(item => overBudget(item.budget, item.actualCost));
 
   return <div className="space-y-6">
@@ -138,6 +140,7 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
     <section className={card} data-expenses-section="entry">
       <h2 className="text-xl font-semibold">{t('entriesTitle')}</h2>
       {!data.entries.length && <p>{t('entriesEmpty')}</p>}
+      {data.truncated && <p data-entries-truncated="" className="text-sm text-gray-600 dark:text-gray-300">{t('entriesTruncated', { count: data.entries.length })}</p>}
       <ul className="space-y-2">{data.entries.map(item => <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 dark:border-gray-700">
         <label className="flex min-h-11 items-center gap-3">
           <input type="checkbox" checked={item.paid} disabled={busy} className="h-5 w-5" aria-label={t('paid')} onChange={event => patch('entry', item.id, { paid: event.target.checked })} />

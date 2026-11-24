@@ -79,6 +79,12 @@ async function main() {
   assert.deepEqual(entryInput({ paid: false }, '2026-11-24', true), { paid: false, paidAt: null }, 'desmarcar borra la fecha');
   assert.throws(() => entryInput({ typeId: 'luz', date: '2026-11-01' }, '2026-11-24'), undefined, 'el cargo exige monto');
   assert.throws(() => entryInput({ typeId: 'luz', date: '2026-11-01', amount: '1', paidAt: '2026-11-02' }, '2026-11-24'), undefined, 'fecha de pago sin pagado');
+  // Revisión de seguridad/dinero: año 0000 (Postgres lo rechaza con 500), pago en el futuro, desmarcar con fecha.
+  for (const bad of ['0000-01-01', '1899-12-31', '3000-01-01']) assert.equal(rules.isCivilDate(bad), false, bad);
+  assert.equal(rules.isCivilDate('2026-02-28'), true);
+  assert.throws(() => entryInput({ typeId: 'luz', date: '0000-01-01', amount: '1' }, '2026-11-24'), undefined, 'año 0000 → 400, no 500');
+  assert.throws(() => entryInput({ typeId: 'luz', date: '2026-11-01', amount: '1', paid: true, paidAt: '2026-11-25' }, '2026-11-24'), undefined, 'pago en el futuro');
+  assert.throws(() => entryInput({ paid: false, paidAt: '2026-11-02' }, '2026-11-24', true), undefined, 'sin pagar pero con fecha');
   console.log('reglas OK');
 
   // 3) Permisos: sin sesión 401; huésped/visor 403; dueño con casa ajena 404 sin escribir; registro desconocido 404.
@@ -137,6 +143,11 @@ async function main() {
   assert.match(row('ExpenseEntry', entryId).paidAt, /^\d{4}-\d{2}-\d{2}$/, 'fecha de pago = hoy en México');
   assert.equal(await change('pa', 'entry', entryId, { paidAt: '2026-11-11' }), 200, 'corregir la fecha de un pagado');
   assert.equal(row('ExpenseEntry', entryId).paidAt, '2026-11-11');
+  // Revisión: volver a marcar «pagado» conserva la fecha real; un pagado nunca queda sin fecha.
+  assert.equal(await change('pa', 'entry', entryId, { paid: true }), 200);
+  assert.equal(row('ExpenseEntry', entryId).paidAt, '2026-11-11', 'no se cambia por hoy');
+  assert.equal(await change('pa', 'entry', entryId, { paidAt: null }), 400, 'pagado sin fecha');
+  assert.equal(row('ExpenseEntry', entryId).paidAt, '2026-11-11');
   res = await post('pa', { record: 'entry', typeId: 'agua', date: '2026-11-05', amount: '310', paid: false });
   assert.equal(res.status, 201);
   assert.equal(await change('pa', 'entry', entryId, { paid: false }), 200);
@@ -155,6 +166,16 @@ async function main() {
   assert.ok(own && own.props, 'el dueño abre la página de su casa');
   as('b');
   await assert.rejects(() => page({ params: Promise.resolve({ locale: 'es', id: 'pa' }) }), error => error.status === 404, 'página de casa ajena → 404');
+  // Revisión: los totales cuentan TODOS los cargos, aunque la lista se recorte a 200.
+  const insertEntry = memory.prepare(`INSERT INTO "ExpenseEntry" ("id", "propertyId", "typeId", "date", "amount", "paid", "createdBy", "createdAt") VALUES (?, 'hidden', 'agua', ?, ?, ?, 'a', '2026-11-24')`);
+  insertEntry.run('old-pending', '2020-01-01', '5000.00', 0);
+  for (let i = 0; i < 204; i++) insertEntry.run('bulk-' + i, '2026-10-' + String(1 + (i % 28)).padStart(2, '0'), '1.00', 1);
+  const big = await loadPropertyExpenses('hidden', manager('a'));
+  assert.equal(big.entries.length, 200, 'la lista se recorta');
+  assert.equal(big.truncated, true);
+  assert.ok(!big.entries.some(entry => entry.id === 'old-pending'), 'el pendiente viejo queda fuera de la lista…');
+  assert.deepEqual(big.totals, { paid: '204.00', pending: '5000.00', total: '5204.00' }, '…pero dentro de los totales');
+  assert.equal((await loadPropertyExpenses('pa', manager('a'))).truncated, false);
   console.log('lectura y página OK');
 
   // 8) Catálogo: solo el ADMIN agrega tipos.

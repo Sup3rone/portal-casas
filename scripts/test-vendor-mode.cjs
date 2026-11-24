@@ -50,8 +50,13 @@ for (const locale of ['es', 'en', 'fr']) {
   assert.ok(vendor.includes('aria-checked="true"'), locale + ': en el panel, encendido');
   assert.ok(vendor.includes(`data-target="/${locale}"`), locale + ': al apagar, la portada');
   assert.ok(!vendor.includes('<a '), 'es un interruptor, no enlaces');
-  // En el teléfono el texto queda solo para lectores de pantalla: la fila del header cabe (búsqueda no se sale).
-  assert.match(user, new RegExp(`<span class="[^"]*max-sm:sr-only[^"]*">${messages.vendor.modeSwitch}</span>`));
+  // El identificador SIEMPRE se ve: «Vendedor» bajo el interruptor en el teléfono (cabe en la fila) y
+  // «Modo vendedor» en pantallas grandes; nombre completo para lectores de pantalla; ícono de tienda en la bolita.
+  assert.ok(user.includes(`aria-label="${messages.vendor.modeSwitch}"`));
+  assert.match(user, new RegExp(`<span [^>]*class="(?:[^"]* )?sm:hidden[^"]*"[^>]*>${messages.vendor.modeShort}</span>`));
+  assert.match(user, new RegExp(`<span [^>]*class="[^"]*max-sm:hidden[^"]*"[^>]*>${messages.vendor.modeSwitch}</span>`));
+  assert.ok(!user.includes('sr-only'), 'nada escondido: el texto se ve');
+  assert.ok(user.includes('data-mode-icon'), 'ícono en la bolita');
 }
 // En la portada (header transparente sobre el video) el interruptor va en blanco como los demás iconos.
 assert.match(fs.readFileSync(path.join(__dirname, '../apps/web/src/app/home-composition.css'), 'utf8'), /\.home-navbar\[data-home-top\] \[data-mode-switch\][^{]*\{[^}]*color: var\(--color-white\)/);

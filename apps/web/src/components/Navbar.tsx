@@ -136,7 +136,7 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
           </Link>
 
           {/* NAV LINKS + ACTIONS — derecha */}
-          <div className={privatePage ? 'flex items-center gap-6 max-md:w-full max-md:flex-wrap max-md:gap-4' : 'ml-auto flex items-center justify-end gap-4 max-md:w-full'}>
+          <div className={privatePage ? 'flex items-center gap-6 max-md:w-full max-md:flex-wrap max-md:gap-2' : 'ml-auto flex items-center justify-end gap-4 max-md:w-full'}>
             <div ref={searchRef} data-header-search className="contents">
               <button ref={searchTrigger} type="button" aria-label={searchText('buscar')} aria-expanded={searchOpen} aria-controls={searchId}
                 onClick={() => { setOpen(false); setSearchOpen(value => !value); searchTrigger.current?.focus(); }}

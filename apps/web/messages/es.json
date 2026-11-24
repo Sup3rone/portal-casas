@@ -1130,6 +1130,7 @@
     "modeLabel": "Cambiar de modo",
     "modeUser": "Usuario",
     "modeVendor": "Vendedor",
-    "modeSwitch": "Modo vendedor"
+    "modeSwitch": "Modo vendedor",
+    "modeShort": "Vendedor"
   }
 }

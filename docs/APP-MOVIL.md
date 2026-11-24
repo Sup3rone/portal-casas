@@ -4,7 +4,7 @@ La app es el mismo sitio (`https://aliaforrent.vercel.app`), instalado en el tel
 
 | | Cómo se instala | Notas |
 |---|---|---|
-| **Android (APK)** | Descargar el `.apk` de GitHub (Actions o Releases) e instalarlo | Abre sin barra de navegador cuando `assetlinks.json` está bien configurado |
+| **Android (APK)** | Descargar el `.apk` de GitHub (Actions o Releases) e instalarlo | Android 7.0+. Con Chrome: abre sin barra cuando `assetlinks.json` está bien configurado. Sin Chrome (LineageOS sin Google, Huawei…): abre en un WebView propio, también sin barra, con sesión aparte del navegador |
 | **Android (sin APK)** | Chrome → menú ⋮ → «Instalar app» | Misma app, instalada como PWA |
 | **iPhone** | Safari → Compartir → «Agregar a inicio» | No hay APK para iPhone. Sin avisos push |
 

@@ -4,7 +4,7 @@ La app es el mismo sitio (`https://aliaforrent.vercel.app`), instalado en el tel
 
 | | Cómo se instala | Notas |
 |---|---|---|
-| **Android (APK)** | Descargar el `.apk` de GitHub (Actions o Releases) e instalarlo | Abre sin barra de navegador cuando `assetlinks.json` está bien configurado |
+| **Android (APK)** | Descargar el `.apk` de GitHub (Actions o Releases) e instalarlo | Android 7.0+. Con Chrome: abre sin barra cuando `assetlinks.json` está bien configurado. Sin Chrome (LineageOS sin Google, Huawei…): abre en un WebView propio, también sin barra, con sesión aparte del navegador |
 | **Android (sin APK)** | Chrome → menú ⋮ → «Instalar app» | Misma app, instalada como PWA |
 | **iPhone** | Safari → Compartir → «Agregar a inicio» | No hay APK para iPhone. Sin avisos push |
 
@@ -69,6 +69,36 @@ Si algún día se sube a Google Play con «firma de apps de Google Play», Play 
 3. Abrir **ALIA**. Si se ve **sin barra de dirección**, el vínculo del paso 4 funciona. Si se ve una barra arriba con la URL, revisa la huella y espera unos minutos (Android guarda la verificación un rato; reinstalar la fuerza).
 
 Actualizar: instalar el APK nuevo encima; conserva la sesión.
+
+## Dónde se ha probado
+
+| Fecha | Teléfono | Sistema | Navegador | Resultado |
+|---|---|---|---|---|
+| 24-11-2026 | Samsung Galaxy J7 Prime | Android 11 · LineageOS (sin servicios de Google) | Sin Chrome | Con `customtabs`: abría con barra. Con `webview` (APK de la corrida 45469470887): **sin barra**, se ve bien |
+
+Pendiente: un Android con Chrome (debe abrir sin barra por el vínculo `assetlinks`) y un iPhone (Safari → Agregar a inicio).
+
+### Verificación de punta a punta (T-5244, 24-11-2026)
+
+En el mismo J7 Prime, con la app instalada, contra **producción**, rol **ADMIN**, fechas lejanas. Lo hizo el dueño del repo en el teléfono; sin capturas guardadas.
+
+| # | Paso | Resultado |
+|---|---|---|
+| 1 | Abrir la app → «¿Qué está libre?» | ✅ |
+| 2 | Buscar fechas → casas libres con total | ✅ |
+| 3 | Ficha de la casa (fotos, calendario, tarifas) | ✅ |
+| 4 | Cotizar → desglose | ✅ |
+| 5 | Modo cliente oculta la comisión | ✅ |
+| 6 | Enviar por WhatsApp | ⚪ No probado: el teléfono no tiene WhatsApp. El texto (sin comisión ni WhatsApp de limpieza) lo cubre `test-vendor-quote.cjs` |
+| 7 | Apartar | ✅ |
+| 8 | Bloqueo en el calendario + correo de consulta nueva | ✅ |
+| 9 | La casa apartada ya no sale libre | ✅ |
+| 10 | Liberar → vuelve a salir libre | ✅ |
+| 11 | Switch Usuario ↔ Vendedor | ✅ |
+
+Puntos críticos del plan (salida y llegada el mismo día, noche sin precio, dos vendedores a la vez, casa ajena por URL, comisión fuera de WhatsApp y modo cliente): cubiertos por `scripts/test-vendor-*.cjs` (7/7 en verde sobre `main`). En producción, la carrera la frena además la regla `BlockDate_no_overlap`.
+
+**No probado:** la vuelta como dueño (COLLABORATOR), el botón de WhatsApp en un teléfono que lo tenga, iPhone y Android con Chrome.
 
 ## Detalles técnicos
 

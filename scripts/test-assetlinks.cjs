@@ -41,6 +41,8 @@ const B = '12:'.repeat(31) + '34';
   assert.equal(twa.startUrl, '/es/app');
   assert.equal(twa.webManifestUrl, 'https://aliaforrent.vercel.app/manifest.webmanifest');
   assert.equal(twa.display, 'standalone');
+  // Sin Chrome compatible (LineageOS sin Google, Huawei…): WebView dentro de la app, sin barra; no un navegador con URL.
+  assert.equal(twa.fallbackType, 'webview');
   assert.ok(!JSON.stringify(twa).match(/password/i), 'sin contraseñas en el manifest');
 
   // La llave nunca se versiona; el proyecto Android que genera Bubblewrap tampoco.

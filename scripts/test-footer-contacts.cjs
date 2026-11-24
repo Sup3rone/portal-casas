@@ -37,7 +37,9 @@ async function main(){
       const html=await render(path,detail);
       assert.equal((html.match(/<footer /g)||[]).length,1);
       assert.ok(html.includes('public-footer'));
-      for(const privatePath of ['/'+locale+'/panel','/'+locale+'/admin/tarifas']) assert.ok(!(await render(privatePath)).includes('public-footer'));
+      // T-5212: en el panel (modo vendedor) no hay pie de página del sitio; en lo público sí.
+      for(const privatePath of ['/'+locale+'/panel','/'+locale+'/panel/vender','/'+locale+'/admin/tarifas']) assert.ok(!(await render(privatePath)).includes('<footer'), privatePath+' sin pie');
+      assert.ok((await render('/'+locale)).includes('<footer'), 'el sitio público conserva su pie');
       pathname=path;
       assert.ok(html.includes('lasmoras.residences@outlook.com'));
       assert.ok(html.includes('mailto:lasmoras.residences@outlook.com'));

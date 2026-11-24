@@ -137,7 +137,8 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
 
           {/* NAV LINKS + ACTIONS — derecha */}
           <div className={privatePage ? 'flex items-center gap-6 max-md:w-full max-md:flex-wrap max-md:gap-2' : 'ml-auto flex items-center justify-end gap-4 max-md:w-full'}>
-            <div ref={searchRef} data-header-search className="contents">
+            {/* T-5212: en el panel (modo vendedor) no hay búsqueda de casas públicas: se busca en «¿Qué está libre?». */}
+            {!privatePage && <div ref={searchRef} data-header-search className="contents">
               <button ref={searchTrigger} type="button" aria-label={searchText('buscar')} aria-expanded={searchOpen} aria-controls={searchId}
                 onClick={() => { setOpen(false); setSearchOpen(value => !value); searchTrigger.current?.focus(); }}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
@@ -146,7 +147,7 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
               {searchOpen && <div id={searchId} className="header-search-popover absolute inset-x-0 top-full z-50 max-h-[70dvh] overflow-y-auto border-b border-gray-200 bg-white px-4 py-4 shadow-lg dark:border-gray-700 dark:bg-gray-900">
                 <div className="mx-auto max-w-5xl"><PropertySearchForm destinations={destinations} /></div>
               </div>}
-            </div>
+            </div>}
 
             {/* T-5210: «Usuario | Vendedor» solo para quien tiene panel (pedido de Gabriel). */}
             {isManager && <ModeSwitch pathname={pathname} locale={locale} />}

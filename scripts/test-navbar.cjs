@@ -52,7 +52,13 @@ if (require.main === module) {
     const hasPanel = role === 'ADMIN' || role === 'COLLABORATOR';
     assert.equal(closed.includes('data-mode-switch-slot'), hasPanel, `hueco del switch para ${role}`);
     assert.ok(!closed.includes('data-mode-switch=""') && !renderNavbar(role, locale, false, '/panel/vender').includes('data-mode-switch=""'), 'fuera de la app no se ve');
-    for(const privatePath of ['/panel','/admin/tarifas']) assert.ok(!renderNavbar(role,locale,false,privatePath).includes('public-header'));
+    for(const privatePath of ['/panel','/panel/vender','/admin/tarifas']) {
+      const header = renderNavbar(role,locale,false,privatePath);
+      assert.ok(!header.includes('public-header'));
+      // T-5212: modo vendedor simple: sin la lupa de casas públicas (el vendedor busca en «¿Qué está libre?»).
+      assert.ok(!header.includes('data-header-search'), privatePath+' sin búsqueda pública');
+    }
+    assert.ok(closed.includes('data-header-search'), 'el sitio público conserva la búsqueda');
     renderNavbar(role,locale);
     assert.ok(!closed.includes('href="/'+locale+'/casas"'));
     assert.ok(!closed.includes('<form'));

@@ -16,6 +16,8 @@ export default function Footer({ inDetail = false }: { inDetail?: boolean } = {}
   const Content = privatePage ? 'div' : Reveal;
   if (!inDetail && /^\/(?:(?:es|en|fr)\/)?casas\/[^/]+\/?$/.test(pathname)) return null;
   // T-4944: /unete es un cuestionario a pantalla completa, sin scroll: no lleva footer.
+  // T-5212: el panel (modo vendedor) tampoco: contacto, redes y «Nosotros» son para clientes.
+  if (privatePage) return null;
   if (/^\/(?:(?:es|en|fr)\/)?unete\/?$/.test(pathname)) return null;
 
   return (

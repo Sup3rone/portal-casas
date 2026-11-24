@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F1EC">
+<title>Sin conexión · ALIA</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { display: grid; place-items: center; background: #F4F1EC; color: #29251f; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
+  @media (prefers-color-scheme: dark) { body { background: #24211D; color: #F4F1EC; } }
+  img { width: 72px; height: 72px; }
+  h1 { font-size: 1.35rem; margin: 20px 0 8px; font-weight: 600; }
+  p { margin: 4px 0; opacity: .8; line-height: 1.45; }
+  .other { font-size: .9rem; margin-top: 14px; opacity: .65; }
+  button { margin-top: 24px; min-height: 48px; padding: 0 28px; border: 0; border-radius: 999px; background: #5B3629; color: #F4F1EC; font: inherit; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <img src="/icon-192.png" alt="">
+  <h1>Sin conexión</h1>
+  <p>No mostramos disponibilidad ni precios guardados: podrían estar desactualizados.</p>
+  <p>Revisa tu conexión e inténtalo de nuevo.</p>
+  <p class="other">No connection — check your network and try again.<br>Pas de connexion — vérifiez le réseau et réessayez.</p>
+  <button type="button" onclick="location.reload()">Reintentar</button>
+</main>
+</body>
+</html>

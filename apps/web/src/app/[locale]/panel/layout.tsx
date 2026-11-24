@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { panelManager } from '@/lib/panel-server';
 import { privateMetadata } from '@/lib/seo';
+import RegisterServiceWorker from '@/components/panel/RegisterServiceWorker';
 
 export const metadata = privateMetadata;
 
@@ -53,6 +54,8 @@ export default async function PanelLayout({ children, params }: { children: Reac
       {links}
     </nav>
     {children}
+    {/* T-5213: la app instalada (PWA/TWA) necesita el service worker; se registra desde el panel. */}
+    <RegisterServiceWorker />
     <nav data-mobile-nav="" aria-label={vendor('mobileNav')} className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden dark:border-gray-700 dark:bg-gray-900/95">
       <ul className="grid grid-cols-4">
         {quick.map(item => <li key={item.href}><Link href={item.href} className={tab}>{item.label}</Link></li>)}

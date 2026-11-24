@@ -78,6 +78,28 @@ Actualizar: instalar el APK nuevo encima; conserva la sesión.
 
 Pendiente: un Android con Chrome (debe abrir sin barra por el vínculo `assetlinks`) y un iPhone (Safari → Agregar a inicio).
 
+### Verificación de punta a punta (T-5244, 24-11-2026)
+
+En el mismo J7 Prime, con la app instalada, contra **producción**, rol **ADMIN**, fechas lejanas. Lo hizo el dueño del repo en el teléfono; sin capturas guardadas.
+
+| # | Paso | Resultado |
+|---|---|---|
+| 1 | Abrir la app → «¿Qué está libre?» | ✅ |
+| 2 | Buscar fechas → casas libres con total | ✅ |
+| 3 | Ficha de la casa (fotos, calendario, tarifas) | ✅ |
+| 4 | Cotizar → desglose | ✅ |
+| 5 | Modo cliente oculta la comisión | ✅ |
+| 6 | Enviar por WhatsApp | ⚪ No probado: el teléfono no tiene WhatsApp. El texto (sin comisión ni WhatsApp de limpieza) lo cubre `test-vendor-quote.cjs` |
+| 7 | Apartar | ✅ |
+| 8 | Bloqueo en el calendario + correo de consulta nueva | ✅ |
+| 9 | La casa apartada ya no sale libre | ✅ |
+| 10 | Liberar → vuelve a salir libre | ✅ |
+| 11 | Switch Usuario ↔ Vendedor | ✅ |
+
+Puntos críticos del plan (salida y llegada el mismo día, noche sin precio, dos vendedores a la vez, casa ajena por URL, comisión fuera de WhatsApp y modo cliente): cubiertos por `scripts/test-vendor-*.cjs` (7/7 en verde sobre `main`). En producción, la carrera la frena además la regla `BlockDate_no_overlap`.
+
+**No probado:** la vuelta como dueño (COLLABORATOR), el botón de WhatsApp en un teléfono que lo tenga, iPhone y Android con Chrome.
+
 ## Detalles técnicos
 
 - `android/twa-manifest.json`: configuración de Bubblewrap (paquete `com.aliaforrent.app`, dominio, colores, íconos). El proyecto Android completo se genera en cada corrida y no se versiona.

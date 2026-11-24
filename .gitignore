@@ -8,3 +8,9 @@ out/
 Thumbs.db
 .DS_Store
 dist/
+
+# T-5243: proyecto Android que genera Bubblewrap en CI; solo se versiona la configuración. Llaves, nunca.
+android/*
+!android/twa-manifest.json
+*.keystore
+*.jks

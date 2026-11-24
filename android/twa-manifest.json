@@ -1,0 +1,39 @@
+{
+  "packageId": "com.aliaforrent.app",
+  "host": "aliaforrent.vercel.app",
+  "name": "ALIA for Rent",
+  "launcherName": "ALIA",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#F4F1EC",
+  "themeColorDark": "#24211D",
+  "navigationColor": "#F4F1EC",
+  "navigationColorDark": "#24211D",
+  "navigationDividerColor": "#F4F1EC",
+  "navigationDividerColorDark": "#24211D",
+  "backgroundColor": "#F4F1EC",
+  "enableNotifications": false,
+  "startUrl": "/es/app",
+  "iconUrl": "https://aliaforrent.vercel.app/icon-512.png",
+  "maskableIconUrl": "https://aliaforrent.vercel.app/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "alia"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://aliaforrent.vercel.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://aliaforrent.vercel.app/",
+  "minSdkVersion": 21
+}

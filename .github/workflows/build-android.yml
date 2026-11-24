@@ -35,9 +35,8 @@ jobs:
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          for name in KEYSTORE STORE_PASS KEY_PASS; do
+          for name in KEYSTORE STORE_PASS; do
             if [ -z "${!name}" ]; then echo "::error::Falta un secreto de firma (ver docs/APP-MOVIL.md)"; exit 1; fi
           done
 
@@ -80,7 +79,8 @@ jobs:
       - name: Generar proyecto y compilar
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          # Llave PKCS12 (la de keytool actual): una sola contraseña para el almacén y la llave.
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json
           bubblewrap build --skipPwaValidation --manifest=./twa-manifest.json

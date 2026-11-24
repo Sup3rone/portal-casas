@@ -22,18 +22,12 @@ Requiere Java (`keytool`). En una terminal, **fuera del repo**:
 keytool -genkeypair -v -keystore alia.keystore -alias alia -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Pide una contraseña para el almacén y otra para la llave (pueden ser la misma) y unos datos (nombre, organización…).
+Pide una contraseña (si después pide otra para la llave, Enter = la misma) y unos datos (nombre, organización…). Si Windows no reconoce `keytool` tras instalar Java (`winget install EclipseAdoptium.Temurin.17.JDK`), agrega su carpeta `bin` al PATH de esa ventana: `$env:Path += ";C:\Program Files\Eclipse Adoptium\<jdk>\bin"`.
 
-Pasarla a texto para GitHub:
+Subirla a GitHub **directo desde el archivo** (copiar y pegar un texto tan largo suele cortarse). Con `gh` iniciado sesión, en Git Bash o con `!` en Claude Code:
 
 ```bash
-# macOS / Linux / Git Bash
-base64 -w0 alia.keystore > alia.keystore.b64    # en macOS: base64 -i alia.keystore -o alia.keystore.b64
-```
-
-```powershell
-# PowerShell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("alia.keystore")) | Out-File -Encoding ascii alia.keystore.b64
+base64 -w0 ~/Documents/alia-llave/alia.keystore | gh secret set ANDROID_KEYSTORE_BASE64 --repo Sup3rone/portal-casas
 ```
 
 ## 2. Secretos en GitHub
@@ -42,11 +36,10 @@ Repo → **Settings → Secrets and variables → Actions → New repository sec
 
 | Secreto | Valor |
 |---|---|
-| `ANDROID_KEYSTORE_BASE64` | El contenido de `alia.keystore.b64` |
-| `ANDROID_KEYSTORE_PASSWORD` | Contraseña del almacén |
-| `ANDROID_KEY_PASSWORD` | Contraseña de la llave |
+| `ANDROID_KEYSTORE_BASE64` | Ya lo subió el comando del paso 1 |
+| `ANDROID_KEYSTORE_PASSWORD` | La contraseña de la llave (sin espacios ni Enter al final) |
 
-Después borra `alia.keystore.b64` (el `.keystore` original guárdalo en el lugar seguro).
+Comprobar la contraseña antes: `keytool -list -keystore alia.keystore -alias alia` debe mostrar la entrada `alia`.
 
 ## 3. Compilar el APK
 

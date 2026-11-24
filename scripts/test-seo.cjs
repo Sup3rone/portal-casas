@@ -23,14 +23,14 @@ async function main() {
     assert.equal(metadata.alternates.canonical,`https://portal.test/${locale}/casas/pa`);
     for(const lang of ['es','en','fr']) assert.equal(metadata.alternates.languages[lang],`https://portal.test/${lang}/casas/pa`);
     assert.equal(metadata.alternates.languages['x-default'],'https://portal.test/es/casas/pa');
-    assert.equal(metadata.openGraph.title,`${title} | Portal Casas`);
-    assert.equal(metadata.openGraph.type,'website'); assert.equal(metadata.openGraph.siteName,'Portal Casas');
+    assert.equal(metadata.openGraph.title,`${title} | ALIA for Rent`);
+    assert.equal(metadata.openGraph.type,'website'); assert.equal(metadata.openGraph.siteName,'ALIA for Rent');
     assert.equal(metadata.openGraph.images[0].url,'https://store.public.blob.vercel-storage.com/one.jpg');
     assert.equal(metadata.twitter.card,'summary_large_image'); assert.equal(metadata.twitter.images[0],metadata.openGraph.images[0].url);
     for(const [page,path] of [[home,''],[listing,'/casas']]) {
       const value = await page.generateMetadata({params:Promise.resolve({locale})});
       assert.ok(value.title); assert.ok(value.description); assert.equal(value.alternates.canonical,`https://portal.test/${locale}${path}`);
-      assert.deepEqual(value.openGraph.images,[{url:'https://portal.test/og-default.jpg',width:1200,height:630,alt:'Portal Casas'}]);
+      assert.deepEqual(value.openGraph.images,[{url:'https://portal.test/og-default.jpg',width:1200,height:630,alt:'ALIA for Rent'}]);
       assert.deepEqual(value.twitter.images,['https://portal.test/og-default.jpg']);
     }
   }

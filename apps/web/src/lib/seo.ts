@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const seoLocales = ['es', 'en', 'fr'] as const;
 export function defaultSocialImage() {
-  return { url: new URL('/og-default.jpg', siteUrl()).toString(), width: 1200, height: 630, alt: 'Portal Casas' };
+  return { url: new URL('/og-default.jpg', siteUrl()).toString(), width: 1200, height: 630, alt: 'ALIA for Rent' };
 }
 export function siteUrl() {
   const url = new URL(process.env.PUBLIC_SITE_URL || 'http://localhost:3000');
@@ -26,11 +26,11 @@ export function descriptionExcerpt(description: string, limit = 155) {
   return boundary > 0 ? prefix.slice(0, boundary).trimEnd() + '…' : '';
 }
 export function pageMetadata(locale: string, path: string, title: string, description: string, photo?: string | null): Metadata {
-  const fullTitle = `${title} | Portal Casas`;
+  const fullTitle = `${title} | ALIA for Rent`;
   const image = photo ? { url: new URL(photo, siteUrl()).toString(), alt: title } : defaultSocialImage();
   return {
     title, description: description || undefined, alternates: seoAlternates(locale, path),
-    openGraph: { title: fullTitle, description: description || undefined, siteName: 'Portal Casas', type: 'website', url: localizedUrl(locale, path),
+    openGraph: { title: fullTitle, description: description || undefined, siteName: 'ALIA for Rent', type: 'website', url: localizedUrl(locale, path),
       locale: locale === 'en' ? 'en_GB' : locale === 'fr' ? 'fr_FR' : 'es_MX',
       alternateLocale: seoLocales.filter(language => language !== locale).map(language => language === 'en' ? 'en_GB' : language === 'fr' ? 'fr_FR' : 'es_MX'),
       images: [image] },

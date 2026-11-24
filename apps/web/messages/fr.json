@@ -98,6 +98,8 @@
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "saved": "Modifications enregistrées",
+    "savedTranslated": "Modifications enregistrées. L’anglais et le français ont été traduits automatiquement.",
+    "savedTranslationPending": "Modifications enregistrées, mais la traduction est indisponible pour le moment : l’anglais et le français affichent le texte espagnol et seront traduits au prochain enregistrement.",
     "published": "Publié",
     "draft": "Brouillon · en attente d’approbation",
     "approve": "Approuver et publier",
@@ -607,17 +609,10 @@
     "lng": "Longitude"
   },
   "panelTranslation": {
-    "button": "Traduire",
-    "translating": "Traduction…",
-    "hint": "Utilise MyMemory pour traduire uniquement les champs vides. Vérifiez les résultats puis cliquez sur Enregistrer.",
-    "prepared": "Langues remplies : {filled}. Ignorées car déjà remplies : {skipped}.",
-    "emptySource": "Il n’y a aucun texte source à traduire.",
-    "error": "La traduction n’a pas pu être terminée. Vos champs restent inchangés ; réessayez plus tard ou remplissez-les manuellement.",
-    "quota": "La limite de traduction disponible aujourd’hui est atteinte. Réessayez plus tard ou remplissez manuellement ; vos textes sont conservés.",
-    "rateLimit": "Trop de demandes de traduction. Attendez une minute puis réessayez.",
-    "sourceChanged": "Le texte source a changé pendant la traduction. Aucun champ n’a été rempli ; réessayez.",
-    "tooLong": "Le texte ou sa traduction dépasse la limite autorisée. Raccourcissez-le ou remplissez manuellement.",
-    "busy": "Une traduction est déjà en cours dans ce formulaire. Attendez sa fin."
+    "auto": "Traduit automatiquement de l’espagnol",
+    "hint": "Écrivez en espagnol. À l’enregistrement, l’anglais et le français se traduisent seuls s’ils sont vides ou s’ils sont encore la traduction automatique. Si vous en modifiez un à la main, votre version est conservée.",
+    "useAuto": "Utiliser la traduction automatique",
+    "useAutoDone": "Sera traduit de l’espagnol à l’enregistrement."
   },
   "referrals": {
     "title": "Parrainage",

@@ -28,6 +28,11 @@ export function dateRange(body: Record<string, unknown>) {
   return { startDate, endDate };
 }
 const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address', 'city'] as const;
+const translatedTexts = new Set<string>(['titleEn', 'titleFr', 'descEn', 'descFr']);
+function optionalText(value: unknown) {
+  if (typeof value !== 'string') throw new PanelValidationError('validation');
+  return value.trim();
+}
 const integers = ['maxGuests', 'bedrooms'] as const;
 const prices = ['baseWeekdayPrice', 'baseWeekendPrice', 'cleaningPrice'] as const;
 const backgroundFields = ['sectionBgInicio', 'sectionBgMapa', 'sectionBgReserva'] as const;
@@ -105,7 +110,8 @@ export function propertyInput(value: unknown, creating = false) {
     if (value !== null && (key === 'contactName' ? value.length > 100 : !/^[0-9]{8,15}$/.test(value))) throw new PanelValidationError('validation');
     changes[key] = value;
   }
-  for (const key of texts) if (key !== 'city' && (key in body || creating)) changes[key] = text(body[key]);
+  // T-5072: en/fr pueden llegar vacíos; al guardar se traducen solos desde el español (auto-translation.ts).
+  for (const key of texts) if (key !== 'city' && (key in body || creating)) changes[key] = translatedTexts.has(key) ? optionalText(body[key] ?? '') : text(body[key]);
   if ('city' in body) {
     if (typeof body.city !== 'string') throw new PanelValidationError('validation');
     changes.city = body.city.trim();

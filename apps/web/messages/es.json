@@ -98,6 +98,8 @@
     "save": "Guardar",
     "saving": "Guardando…",
     "saved": "Cambios guardados",
+    "savedTranslated": "Cambios guardados. Inglés y francés se tradujeron automáticamente.",
+    "savedTranslationPending": "Cambios guardados, pero ahora no se pudo traducir: inglés y francés llevan el texto en español y se traducirán al volver a guardar.",
     "published": "Publicada",
     "draft": "Borrador · pendiente de aprobación",
     "approve": "Aprobar y publicar",
@@ -606,17 +608,10 @@
     "lng": "Longitud"
   },
   "panelTranslation": {
-    "button": "Traducir",
-    "translating": "Traduciendo…",
-    "hint": "Traduce con MyMemory solo los campos vacíos. Revisa los resultados y pulsa Guardar para conservarlos.",
-    "prepared": "Idiomas rellenados: {filled}. Omitidos porque ya tienen contenido: {skipped}.",
-    "emptySource": "No hay texto de origen para traducir.",
-    "error": "No se pudo completar la traducción. Tus campos no se han modificado; intenta más tarde o rellena a mano.",
-    "quota": "Se alcanzó el límite de traducción disponible hoy. Intenta más tarde o rellena a mano; tus textos se conservan.",
-    "rateLimit": "Demasiadas solicitudes de traducción. Espera un minuto y vuelve a intentar.",
-    "sourceChanged": "El texto de origen cambió durante la traducción. No se rellenaron los campos; vuelve a intentar.",
-    "tooLong": "El texto o su traducción supera el límite permitido. Acórtalo o rellena a mano.",
-    "busy": "Ya hay una traducción en curso en este formulario. Espera a que termine."
+    "auto": "Traducido automáticamente del español",
+    "hint": "Escribe en español. Al guardar, inglés y francés se traducen solos si están vacíos o siguen siendo la traducción automática. Si editas uno a mano, se respeta tu versión.",
+    "useAuto": "Usar traducción automática",
+    "useAutoDone": "Se traducirá del español al guardar."
   },
   "referrals": {
     "title": "Referidos",

@@ -1,114 +1,185 @@
-// Pruebas de traducción sin red ni BD real; proveedor y hooks simulados.
+// T-5072: traducción automática al guardar (sin botón «Traducir»). Sin red ni BD real: DeepL simulado con
+// global.fetch y SQLite en memoria. Comprueba reglas (vacío/automático/manual), retraducción al cambiar el español,
+// fallos del proveedor, marcadores {summary}, los cuatro guardados y que el botón y MyMemory ya no existen.
 const assert = require('node:assert/strict');
-const { load, req, mockModule, memory, setSession } = require('./test-property-access.cjs');
-const { translateFields } = load('apps/web/src/lib/panel-translation-drafts.ts');
-const service = load('apps/web/src/lib/panel-translation.ts');
+const fs = require('node:fs');
+const { load, req, memory, setSession } = require('./test-property-access.cjs');
+const plan = load('apps/web/src/lib/auto-translation-plan.ts');
+const groupsLib = load('apps/web/src/lib/translation-groups.ts');
+const auto = load('apps/web/src/lib/auto-translation.ts');
+const propertyRoute = load('apps/web/src/app/api/properties/[id]/route.ts');
+const createRoute = load('apps/web/src/app/api/properties/route.ts');
+const sectionRoute = load('apps/web/src/app/api/properties/[id]/sections/[section]/route.ts');
+const siteRoute = load('apps/web/src/app/api/panel/site-content/route.ts');
+const pageRoute = load('apps/web/src/app/api/panel/page-content/route.ts');
+const store = load('apps/web/src/lib/page-content-store.ts');
+
 const originalFetch = global.fetch;
-const fields = source => Object.fromEntries(['es','en','fr'].map(language => [language, { value: language === source ? 'Texto original' : '', maxLength: 10000 }]));
-const request = body => new Request('http://localhost/api/traducir', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-const success = text => Response.json({ responseStatus:200, responseData:{ translatedText:text }, quotaFinished:false });
-function find(node, predicate) {
-  if (!node || typeof node !== 'object') return null;
-  if (Array.isArray(node)) { for (const child of node) { const found = find(child, predicate); if (found) return found; } return null; }
-  return predicate(node) ? node : find(node.props?.children, predicate);
-}
+let calls = [], failWith = null;
+// DeepL falso: «[EN-US] texto» / «[FR] texto», respetando las etiquetas <keep>.
+global.fetch = async (url, options) => {
+  if (!String(url).includes('deepl.com')) return originalFetch(url, options);
+  const body = JSON.parse(options.body);
+  calls.push({ url: String(url), auth: options.headers.Authorization, ...body });
+  if (failWith) return new Response('{}', { status: failWith });
+  return Response.json({ translations: body.text.map(text => ({ text: `[${body.target_lang}] ${text}` })) });
+};
+const request = (body, method = 'PATCH') => new Request('http://localhost/test', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+const row = id => memory.prepare('SELECT * FROM "Property" WHERE id = ?').get(id);
+const states = prefix => memory.prepare('SELECT key FROM "AutoTranslation" WHERE key LIKE ? ORDER BY key').all(prefix + '%').map(r => r.key);
+const texts = { titleEs: 'Casa del mar', titleEn: '', titleFr: '', descEs: 'Frente a la playa', descEn: '', descFr: '' };
+const patch = async (id, body) => { const response = await propertyRoute.PATCH(request(body), { params: Promise.resolve({ id }) }); return { status: response.status, data: await response.json() }; };
+
 async function main() {
-  for (const source of ['es','en','fr']) {
-    const controls = fields(source), calls = [];
-    const result = await translateFields(source, controls, async (text, from, to) => { calls.push([text,from,to]); return `Traducido ${to}`; });
-    assert.equal(calls.length,2); assert.deepEqual(result.skipped,[]);
-    for (const language of ['es','en','fr']) assert.equal(controls[language].value, language === source ? 'Texto original' : `Traducido ${language}`);
+  // --- Reglas puras ---
+  const { textHash, stateKey, planTranslations, applyTranslations, autoTranslatedKeys, protectPlaceholders, restorePlaceholders, PENDING_SOURCE } = plan;
+  const g = { key: 'k', es: 'Hola', en: '', fr: 'Bonjour a mano' };
+  let planned = planTranslations([g], new Map());
+  assert.deepEqual(planned.jobs, [{ group: 0, language: 'en' }], 'Vacío se traduce; escrito a mano (sin estado) se respeta');
+  const autoState = { sourceHash: textHash('Hola'), valueHash: textHash('Hello') };
+  planned = planTranslations([{ ...g, en: 'Hello' }], new Map([[stateKey('k', 'en'), autoState]]));
+  assert.deepEqual(planned.jobs, [], 'Automático y al día: no se vuelve a pedir');
+  planned = planTranslations([{ ...g, es: 'Hola amigo', en: 'Hello' }], new Map([[stateKey('k', 'en'), autoState]]));
+  assert.deepEqual(planned.jobs, [{ group: 0, language: 'en' }], 'Cambió el español: el automático se retraduce');
+  planned = planTranslations([{ ...g, es: 'Hola amigo', en: 'Hello, edited' }], new Map([[stateKey('k', 'en'), autoState]]));
+  assert.deepEqual(planned.jobs, [], 'Editado a mano: no se toca aunque cambie el español');
+  planned = planTranslations([{ ...g, es: '', en: 'Hello' }], new Map([[stateKey('k', 'en'), autoState]]));
+  assert.deepEqual(planned.clears, [{ group: 0, language: 'en' }], 'Sin español, lo automático se vacía');
+  let applied = applyTranslations([{ key: 'k', es: 'Hola', en: '', fr: '' }], [{ group: 0, language: 'en' }, { group: 0, language: 'fr' }], ['Hello', null], []);
+  assert.equal(applied.outcome, 'pending'); assert.equal(applied.groups[0].en, 'Hello'); assert.equal(applied.groups[0].fr, 'Hola', 'Fallo: el idioma vacío lleva el español');
+  assert.equal(applied.writes.get('k:fr').sourceHash, PENDING_SOURCE, 'Pendiente: se reintenta al volver a guardar');
+  applied = applyTranslations([{ key: 'k', es: 'Hola', en: '', fr: '', copySource: false }], [{ group: 0, language: 'en' }], [null], []);
+  assert.equal(applied.groups[0].en, '', 'Páginas: sin copia del español (vale el texto por defecto)');
+  applied = applyTranslations([{ key: 'k', es: 'Hola', en: '', fr: '', maxLength: 3 }], [{ group: 0, language: 'en' }], ['Hello'], []);
+  assert.equal(applied.outcome, 'pending', 'Traducción más larga que el límite: no se guarda');
+  assert.deepEqual(autoTranslatedKeys([{ key: 'k', es: 'Hola', en: 'Hello', fr: 'Salut' }], new Map([[stateKey('k', 'en'), autoState]])), ['k:en']);
+  assert.equal(restorePlaceholders('<keep>{summary}</keep> &amp; &lt;b&gt;'), '{summary} & <b>');
+  assert.equal(protectPlaceholders('Hola {summary} & <b>'), 'Hola <keep>{summary}</keep> &amp; &lt;b&gt;');
+  assert.equal(groupsLib.fieldNameForKey('property:pa:title:en'), 'titleEn');
+  assert.equal(groupsLib.fieldNameForKey('section:pa:destino:fr'), 'descriptionFr');
+  assert.equal(groupsLib.fieldNameForKey('site:about_title:en'), 'about_title_en');
+  assert.equal(groupsLib.fieldNameForKey('page:join:join.owners.whatsappMessage:fr'), 'fr:join.owners.whatsappMessage');
+
+  // --- Propiedad: PATCH con DeepL Free (clave :fx → api-free), en/fr vacíos se traducen y se recuerdan ---
+  process.env.DEEPL_API_KEY = 'clave-de-prueba:fx';
+  setSession({ user: { id: 'a' } });
+  let result = await patch('pa', texts);
+  assert.equal(result.status, 200); assert.equal(result.data.translation, 'translated');
+  assert.equal(calls.length, 2, 'Una petición por idioma con título y descripción juntos');
+  assert.ok(calls.every(call => call.url === 'https://api-free.deepl.com/v2/translate' && call.auth === 'DeepL-Auth-Key clave-de-prueba:fx' && call.source_lang === 'ES' && call.tag_handling === 'xml'));
+  assert.deepEqual(calls.map(call => call.target_lang), ['EN-US', 'FR']);
+  assert.equal(row('pa').titleEn, '[EN-US] Casa del mar'); assert.equal(row('pa').descFr, '[FR] Frente a la playa');
+  assert.deepEqual(states('property:pa:'), ['property:pa:desc:en', 'property:pa:desc:fr', 'property:pa:title:en', 'property:pa:title:fr']);
+  assert.deepEqual([...await auto.readAutoTranslated(groupsLib.propertyGroups('pa', row('pa')))].sort(), states('property:pa:'), 'El panel ve los cuatro como automáticos');
+
+  // Mismo español y en/fr intactos (el formulario reenvía lo guardado): no se llama a DeepL.
+  calls = [];
+  result = await patch('pa', { ...texts, titleEn: row('pa').titleEn, titleFr: row('pa').titleFr, descEn: row('pa').descEn, descFr: row('pa').descFr });
+  assert.equal(result.data.translation, 'none'); assert.equal(calls.length, 0);
+
+  // Cambia el español; el inglés del título se editó a mano: se respeta. El resto, automático, se retraduce.
+  calls = [];
+  result = await patch('pa', { ...texts, titleEs: 'Casa del mar azul', titleEn: 'Blue sea house', titleFr: row('pa').titleFr, descEn: row('pa').descEn, descFr: row('pa').descFr });
+  assert.equal(result.data.translation, 'translated');
+  assert.equal(row('pa').titleEn, 'Blue sea house', 'Manual: intacto');
+  assert.equal(row('pa').titleFr, '[FR] Casa del mar azul', 'Automático: retraducido');
+  assert.equal(row('pa').descEn, '[EN-US] Frente a la playa', 'Su español no cambió: intacto');
+  assert.ok(!(await auto.readAutoTranslated(groupsLib.propertyGroups('pa', row('pa')))).has('property:pa:title:en'), 'El manual pierde la etiqueta');
+
+  // PATCH sin textos (p. ej. publicar): no traduce.
+  calls = [];
+  result = await patch('pa', { maxGuests: 6 });
+  assert.equal(result.data.translation, 'none'); assert.equal(calls.length, 0);
+
+  // DeepL caído: se guarda igual; los vacíos llevan el español y quedan pendientes; al volver a guardar, se traducen.
+  setSession({ user: { id: 'b' } }); // pb es del colaborador b
+  failWith = 503; calls = [];
+  result = await patch('pb', { ...texts, titleEs: 'Villa', descEs: 'Jardín' });
+  assert.equal(result.status, 200); assert.equal(result.data.translation, 'pending');
+  assert.equal(row('pb').titleEn, 'Villa'); assert.equal(row('pb').descFr, 'Jardín');
+  failWith = null; calls = [];
+  result = await patch('pb', { titleEs: 'Villa', titleEn: 'Villa', titleFr: 'Villa', descEs: 'Jardín', descEn: 'Jardín', descFr: 'Jardín' });
+  assert.equal(result.data.translation, 'translated'); assert.equal(row('pb').titleEn, '[EN-US] Villa'); assert.equal(row('pb').descFr, '[FR] Jardín');
+
+  // Sin clave configurada: igual que caído (pendiente), sin llamar a nadie.
+  setSession({ user: { id: 'a' } });
+  delete process.env.DEEPL_API_KEY; calls = [];
+  result = await patch('hidden', { ...texts, titleEs: 'Oculta' });
+  assert.equal(result.data.translation, 'pending'); assert.equal(calls.length, 0); assert.equal(row('hidden').titleEn, 'Oculta');
+  process.env.DEEPL_API_KEY = 'clave-pro';
+
+  // Validación: solo el español es obligatorio.
+  result = await patch('pa', { ...texts, titleEs: '  ' });
+  assert.equal(result.status, 400);
+
+  // --- Alta: en/fr vacíos llegan traducidos a la ficha nueva (clave de pago → api.deepl.com) ---
+  calls = [];
+  const created = await createRoute.POST(request({ ...texts, titleEs: 'Loft', address: 'Centro', maxGuests: 2, bedrooms: 1, bathrooms: 1, rentalType: 'nocturna' }, 'POST'));
+  const createdData = await created.json();
+  assert.equal(created.status, 201); assert.equal(createdData.translation, 'translated');
+  assert.ok(calls.every(call => call.url === 'https://api.deepl.com/v2/translate'), 'Clave sin :fx → API de pago');
+  assert.equal(row(createdData.id).titleEn, '[EN-US] Loft');
+  assert.equal(states(`property:${createdData.id}:`).length, 4);
+
+  // --- Secciones de la ficha ---
+  calls = [];
+  let response = await sectionRoute.PUT(request({ descriptionEs: 'Playa a 5 minutos', descriptionEn: null, descriptionFr: 'À la main', heroMediaId: null }, 'PUT'), { params: Promise.resolve({ id: 'pa', section: 'destino' }) });
+  assert.equal(response.status, 200); assert.equal((await response.json()).translation, 'translated');
+  const section = memory.prepare(`SELECT * FROM "PropertySection" WHERE "propertyId" = 'pa' AND section = 'destino'`).get();
+  assert.equal(section.descriptionEn, '[EN-US] Playa a 5 minutos'); assert.equal(section.descriptionFr, 'À la main', 'Francés escrito a mano: intacto');
+  assert.equal(calls.length, 1);
+
+  // --- Sobre nosotros (SiteContent), solo ADMIN ---
+  setSession({ user: { id: 'admin' } }); calls = [];
+  response = await siteRoute.PUT(request({ about_es: 'Somos ALIA', about_en: '', about_fr: '', about_title_es: 'Quiénes somos', about_title_en: '', about_title_fr: '', social_instagram: '', social_facebook: '', featured_property_id: '', contact_whatsapp: '' }, 'PUT'));
+  assert.equal(response.status, 200); assert.equal((await response.json()).translation, 'translated');
+  const site = Object.fromEntries(memory.prepare('SELECT key, value FROM "SiteContent"').all().map(r => [r.key, r.value]));
+  assert.equal(site.about_en, '[EN-US] Somos ALIA'); assert.equal(site.about_title_fr, '[FR] Quiénes somos');
+
+  // --- Páginas: textos propios en español se traducen; {summary} sobrevive; vacío sigue siendo el texto por defecto ---
+  calls = [];
+  response = await pageRoute.PUT(request({ page: 'join', texts: { es: { 'join.owners.whatsappMessage': 'Hola, quiero rentar. {summary}' }, en: {}, fr: {} } }, 'PUT'));
+  assert.equal(response.status, 200); assert.equal((await response.json()).translation, 'translated');
+  assert.ok(calls[0].text[0].includes('<keep>{summary}</keep>'), 'El marcador viaja protegido');
+  let saved = await store.readPageContent('join');
+  assert.equal(saved.texts.en['join.owners.whatsappMessage'], '[EN-US] Hola, quiero rentar. {summary}');
+  assert.equal(Object.keys(saved.texts.en).length, 1, 'Solo se traduce lo que tiene texto propio en español');
+  failWith = 500;
+  response = await pageRoute.PUT(request({ page: 'about', texts: { es: { 'about.ctaTitle': 'Ven a vernos' }, en: {}, fr: {} } }, 'PUT'));
+  assert.equal((await response.json()).translation, 'pending');
+  saved = await store.readPageContent('about');
+  assert.deepEqual(saved.texts.en, {}, 'Fallo en Páginas: inglés vacío (texto por defecto), no el español');
+  failWith = null;
+
+  // --- Sin la tabla (SQL sin aplicar): se guarda igual y solo se rellenan los vacíos ---
+  memory.exec('ALTER TABLE "AutoTranslation" RENAME TO "AutoTranslationOff"');
+  setSession({ user: { id: 'a' } }); calls = [];
+  result = await patch('pa', { ...texts, titleEs: 'Casa sin tabla', titleEn: 'Blue sea house', titleFr: '' });
+  assert.equal(result.status, 200); assert.equal(row('pa').titleFr, '[FR] Casa sin tabla'); assert.equal(row('pa').titleEn, 'Blue sea house');
+  memory.exec('ALTER TABLE "AutoTranslationOff" RENAME TO "AutoTranslation"');
+
+  // --- Fuera el botón, la ruta y MyMemory; SQL presente ---
+  for (const file of ['apps/web/src/components/panel/TranslationDraftButton.tsx', 'apps/web/src/app/api/traducir/route.ts', 'apps/web/src/lib/panel-translation.ts', 'apps/web/src/lib/panel-translation-drafts.ts']) assert.ok(!fs.existsSync(file), `${file} eliminado`);
+  for (const file of ['PropertyForm', 'PropertySectionsEditor', 'SiteContentEditor', 'PageContentEditor']) {
+    const source = fs.readFileSync(`apps/web/src/components/panel/${file}.tsx`, 'utf8');
+    assert.ok(source.includes('AutoTranslationControl') && source.includes('AutoTranslationHint') && source.includes('savedKey'), `${file}: etiqueta, nota y aviso de traducción`);
   }
-  let controls = fields('es'), calls = 0;
-  controls.es.value = '  ';
-  await assert.rejects(translateFields('es',controls,async () => { calls++; return 'No'; }), /emptySource/); assert.equal(calls,0);
-  controls = fields('es'); controls.en.value = 'Manual';
-  const skipped = await translateFields('es',controls,async () => 'Français');
-  assert.deepEqual(skipped.skipped,['en']); assert.equal(controls.en.value,'Manual');
-  controls = fields('es');
-  await assert.rejects(translateFields('es',controls,async (_,__,target) => { if (target === 'fr') throw Error('offline'); return 'English'; }), /offline/);
-  assert.equal(controls.en.value,''); assert.equal(controls.fr.value,'');
-  controls = fields('es');
-  await translateFields('es',controls,async () => { controls.en.value = 'Escrito mientras esperaba'; return 'Traducido'; });
-  assert.equal(controls.en.value,'Escrito mientras esperaba');
-  controls = fields('es');
-  await assert.rejects(translateFields('es',controls,async () => { controls.es.value = 'Nuevo origen'; return 'Traducido'; }), /sourceChanged/); assert.equal(controls.fr.value,'');
-  controls = fields('es'); controls.en.maxLength = 2;
-  await assert.rejects(translateFields('es',controls,async () => 'Demasiado largo'), /tooLong/); assert.equal(controls.fr.value,'');
-  for (const text of ['a '.repeat(900),'é😀'.repeat(300),'  Uno\n\nDos  ','x'.repeat(1000)]) {
-    const chunks = service.translationChunks(text);
-    assert.equal(chunks.join(''),text); assert.ok(chunks.every(chunk => new TextEncoder().encode(chunk).length <= 450));
+  assert.ok(!/mymemory.translated.net/.test(fs.readFileSync('apps/web/src/lib/auto-translation.ts', 'utf8')), 'Sin llamadas a MyMemory');
+  assert.match(fs.readFileSync('scripts/sql/auto-translation.sql', 'utf8'), /CREATE TABLE IF NOT EXISTS "AutoTranslation"/);
+  for (const locale of ['es', 'en', 'fr']) {
+    const messages = JSON.parse(fs.readFileSync(`apps/web/messages/${locale}.json`, 'utf8'));
+    assert.ok(messages.panelTranslation.auto && messages.panelTranslation.hint && messages.panelTranslation.useAuto && messages.panelTranslation.useAutoDone && messages.panel.savedTranslated && messages.panel.savedTranslationPending, `${locale}: textos`);
   }
-  let providerCalls = [];
-  global.fetch = async url => { providerCalls.push(new URL(url)); return success(new URL(url).searchParams.get('q')); };
-  assert.equal(await service.translateText('  Hola\n\n mundo  ','es','en'),'  Hola\n\n mundo  ');
-  assert.equal(providerCalls[0].searchParams.get('langpair'),'es|en');
-  await service.translateText('palabra '.repeat(200),'es','fr'); assert.ok(providerCalls.length > 2);
-  global.fetch = async () => success('Tom &amp; Jerry'); assert.equal(await service.translateText('Hola','es','en'),'Tom & Jerry');
-  global.fetch = async () => Response.json({quotaFinished:true}, {status:429});
-  await assert.rejects(service.translateText('Hola','es','en'), error => error.code === 'TRANSLATION_QUOTA');
-  global.fetch = async () => { throw Error('offline'); };
-  await assert.rejects(service.translateText('Hola','es','en'), error => error.code === 'TRANSLATION_FAILED');
-  const now = Date.UTC(2030,0,1);
-  for (let i=0;i<4;i++) service.translationAllowance('rate-test','Hola',now);
-  assert.throws(() => service.translationAllowance('rate-test','Hola',now), error => error.code === 'TRANSLATION_RATE_LIMIT');
-  assert.throws(() => service.translationAllowance('quota-test','x'.repeat(5001),now), error => error.code === 'TRANSLATION_QUOTA');
-  const route = load('apps/web/src/app/api/traducir/route.ts');
-  providerCalls = []; global.fetch = async url => { providerCalls.push(url); return success('Hello'); };
-  const body = {texto:'Hola',idiomaOrigen:'es',idiomaDestino:'en'};
-  for (const [id,status] of [[null,401],['client',403],['viewer',403]]) {
-    setSession(id ? {user:{id}} : null); assert.equal((await route.POST(request(body))).status,status);
-  }
-  assert.equal(providerCalls.length,0);
-  for (const id of ['admin','a']) {
-    setSession({user:{id}}); const response = await route.POST(request(body)); assert.equal(response.status,200); assert.deepEqual(await response.json(),{traduccion:'Hello'});
-  }
-  for (const invalid of [{...body,texto:''},{...body,texto:'x'.repeat(10001)},{...body,idiomaOrigen:'de'},{...body,idiomaDestino:'es'}]) assert.equal((await route.POST(request(invalid))).status,400);
-  setSession({user:{id:'admin'}});
-  global.fetch = async () => Response.json({quotaFinished:true},{status:429});
-  const quota = await route.POST(request(body)); assert.equal(quota.status,429); assert.equal((await quota.json()).code,'TRANSLATION_QUOTA');
-  global.fetch = async () => { throw Error('offline'); };
-  assert.equal((await route.POST(request(body))).status,502);
-  global.fetch = async () => success('Hello');
-  assert.equal((await route.POST(request(body))).status,200);
-  const limited = await route.POST(request(body)); assert.equal(limited.status,429); assert.equal((await limited.json()).code,'TRANSLATION_RATE_LIMIT');
-  const React = req('react'); let index=0, states=[]; const ref={current:false};
-  mockModule('react',{...React,useRef:()=>ref,useState:initial=>{const key=index++;if(!(key in states)) states[key]=initial;return [states[key],value=>states[key]=value];}});
-  mockModule('next-intl',{useTranslations:()=>key=>key});
-  const Button = load('apps/web/src/components/panel/TranslationDraftButton.tsx').default;
-  function render(options = {}) { index=0; return Button({source:'es',prefix:'desc',...options}); }
-  controls = fields('es'); const form={elements:{namedItem:name=>controls[name.slice(-2).toLowerCase()]}};
-  const event={currentTarget:{closest:()=>form}};
-  let release; calls=0;
-  global.fetch = async (_,options) => { calls++; const body=JSON.parse(options.body); await new Promise(resolve=>{ if (!release) release=[];release.push(resolve); }); return Response.json({traduccion:`Traducción ${body.idiomaDestino}`}); };
-  const click=find(render(),node=>node.type==='button').props.onClick;
-  const pending=click(event); await click(event); assert.equal(calls,2,'Doble clic no duplica solicitudes');
-  assert.equal(find(render(),node=>node.type==='button').props.disabled,true);
-  for(const resolve of release) resolve(); await pending;
-  assert.equal(controls.en.value,'Traducción en'); assert.equal(controls.fr.value,'Traducción fr');
-  assert.equal(find(render(),node=>node.props?.role==='status').props.children,'prepared');
-  controls.en.value='Manual'; controls.fr.value=''; global.fetch=async()=>{throw Error('offline');}; await click(event);
-  assert.equal(controls.en.value,'Manual'); assert.equal(controls.fr.value,''); assert.equal(find(render(),node=>node.props?.role==='status').props.children,'error');
-  controls.es.value=''; calls=0; global.fetch=async()=>{calls++;return Response.json({});}; await click(event); assert.equal(calls,0);
-  assert.equal(find(render(),node=>node.props?.role==='status').props.children,'emptySource');
-  controls = fields('es');
-  const names = { es: 'about_es', en: 'about_en', fr: 'about_fr' }, requested = [];
-  const siteForm = { elements: { namedItem: name => { requested.push(name); return controls[Object.keys(names).find(language => names[language] === name)]; } } };
-  const siteOptions = { fieldNames: names, useCentralErrors: true };
-  const siteClick = find(render(siteOptions), node => node.type === 'button').props.onClick;
-  global.fetch = async (_, options) => Response.json({ traduccion: JSON.parse(options.body).idiomaDestino });
-  await siteClick({ currentTarget: { closest: () => siteForm } });
-  assert.deepEqual(requested, ['about_es', 'about_en', 'about_fr']);
-  assert.equal(controls.en.value, 'en'); assert.equal(controls.fr.value, 'fr');
-  controls.en.value = ''; controls.fr.value = '';
-  global.fetch = async () => Response.json({ code: 'UNAUTHENTICATED' }, { status: 401 });
-  await siteClick({ currentTarget: { closest: () => siteForm } });
-  assert.equal(find(render(siteOptions), node => node.props?.role === 'status').props.children, 'sessionExpired');
-  assert.equal(controls.en.value, ''); assert.equal(controls.fr.value, '');
-  global.fetch = async () => { throw Error('offline'); };
-  await siteClick({ currentTarget: { closest: () => siteForm } });
-  assert.equal(find(render(siteOptions), node => node.props?.role === 'status').props.children, 'networkError');
-  for(const locale of ['es','en','fr']) for(const key of ['button','translating','hint','prepared','emptySource','quota','rateLimit','sourceChanged','tooLong','busy','error']) assert.ok(require('../apps/web/messages/'+locale+'.json').panelTranslation[key]);
-  console.log('OK traducción: tres orígenes, relleno atómico, ediciones protegidas, errores/cuota/rate, API autorizada, segmentos UTF-8 y botón sin doble clic.');
+  // --- Control bajo cada campo en/fr: etiqueta si es automático; «Usar traducción automática» si es manual ---
+  const React = req('react'), { renderToStaticMarkup } = req('react-dom/server'), { NextIntlClientProvider } = req('next-intl');
+  const { AutoTranslationControl } = load('apps/web/src/components/panel/AutoTranslation.tsx');
+  const messagesEs = JSON.parse(fs.readFileSync('apps/web/messages/es.json', 'utf8'));
+  const render = props => renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale: 'es', messages: messagesEs }, React.createElement('label', null, React.createElement('input', { defaultValue: 'test' }), React.createElement(AutoTranslationControl, props))));
+  assert.ok(render({ auto: true }).includes('data-auto-translated') && render({ auto: true }).includes(messagesEs.panelTranslation.auto));
+  const manual = render({ auto: false });
+  assert.ok(manual.includes('type="button"') && manual.includes('data-use-auto-translation') && manual.includes(messagesEs.panelTranslation.useAuto), 'Manual: enlace para volver a lo automático');
+  assert.ok(!render({ auto: false, target: false }).includes('data-use-auto') && !render({ auto: true, target: false }).includes('data-auto-translated'), 'Español: sin control');
+  global.fetch = originalFetch;
+  console.log('OK traducción al guardar T-5072: vacío/automático/manual, retraducción, DeepL Free/Pro, fallo y sin clave, propiedad (alta y edición), secciones, Sobre nosotros, Páginas con {summary}, sin tabla, sin botón y enlace «Usar traducción automática» en lo manual.');
 }
-main().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>{global.fetch=originalFetch;memory.close();});
+main().catch(error => { console.error(error); process.exit(1); });

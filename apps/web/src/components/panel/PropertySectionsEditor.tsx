@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import type { EditorialSection, SectionName } from '@/lib/property-sections';
-import { panelRequest, buttonClass, inputClass } from './request';
-import TranslationDraftButton from './TranslationDraftButton';
+import { panelRequest, savedKey, savedKeys, buttonClass, inputClass } from './request';
+import { AutoTranslationHint, AutoTranslationControl } from './AutoTranslation';
 import { sectionOrder, sectionModules, type ModuleName } from '@/lib/section-modules';
 import styles from './PropertySectionsEditor.module.css';
 
@@ -16,7 +16,8 @@ type Photo = { id: string; url: string; order: number; type: string };
 const SECTION_HERO_PICKER_ENABLED = false;
 const titles = { destino: 'destino', amenidades: 'amenidades', habitaciones: 'habitaciones', lugar: 'enLugar', advertencias: 'advertencias' } as const;
 
-function SectionForm({ propertyId, name, value, photos, enabled, onDraft, revealed }: { propertyId: string; name: SectionName; value?: EditorialSection; photos: Photo[]; enabled: boolean; onDraft: (value: Partial<EditorialSection>) => void; revealed: boolean }) {
+// T-5072: saved = lo que hay en BD (remonta los textos tras guardar y ver la traducción); autoTranslated = campos en/fr automáticos.
+function SectionForm({ propertyId, name, value, saved, photos, enabled, onDraft, onSaved, revealed, autoTranslated }: { propertyId: string; name: SectionName; value?: EditorialSection; saved?: EditorialSection; photos: Photo[]; enabled: boolean; onDraft: (value: Partial<EditorialSection>) => void; onSaved: () => void; revealed: boolean; autoTranslated: string[] }) {
   const t = useTranslations('panelSections'), details = useTranslations('details'), panel = useTranslations('panel'), router = useRouter();
   const [hero, setHero] = useState(value?.heroMediaId || ''), [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   const selected = photos.find(photo => photo.id === hero);
@@ -28,8 +29,8 @@ function SectionForm({ propertyId, name, value, photos, enabled, onDraft, reveal
       const body = { descriptionEs: String(form.get('descriptionEs') || '').trim() || null,
         descriptionEn: String(form.get('descriptionEn') || '').trim() || null,
         descriptionFr: String(form.get('descriptionFr') || '').trim() || null, heroMediaId: hero || null, photoMediaIds: photoIds.length ? photoIds : null };
-      await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}/sections/${name}`, 'PUT', body);
-      setMessage('saved'); router.refresh();
+      const result = await panelRequest(`/api/properties/${encodeURIComponent(propertyId)}/sections/${name}`, 'PUT', body);
+      onSaved(); setMessage(savedKey(result)); router.refresh();
     } catch (error) { setMessage(error instanceof Error ? error.message : 'error'); }
     finally { setBusy(false); }
   }
@@ -37,8 +38,9 @@ function SectionForm({ propertyId, name, value, photos, enabled, onDraft, reveal
     <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-xl font-semibold">{details(titles[name])}</h3>
       <span id={`${moduleId(propertyId, name)}-state`} role="status" className={styles.state}>{t(enabled ? 'active' : 'inactive')}</span></div>
     <div className="space-y-4">
+    <AutoTranslationHint />
     <div className="grid gap-4 md:grid-cols-3">{(['descriptionEs', 'descriptionEn', 'descriptionFr'] as const).map(field =>
-      <label key={field} className="block text-sm">{t(field)}<textarea name={field} maxLength={10000} rows={5} defaultValue={value?.[field] || ''} onChange={event => onDraft({ [field]: event.target.value })} disabled={busy} className={inputClass} /><TranslationDraftButton source={field.slice(-2).toLowerCase() as 'es' | 'en' | 'fr'} prefix="description" disabled={busy} /></label>)}</div>
+      <label key={`${field}:${saved?.[field] ?? ''}`} className="block text-sm">{t(field)}<textarea name={field} maxLength={10000} rows={5} defaultValue={value?.[field] || ''} onChange={event => onDraft({ [field]: event.target.value })} disabled={busy} className={inputClass} /><AutoTranslationControl auto={autoTranslated.includes(field)} target={field !== 'descriptionEs'} /></label>)}</div>
     {SECTION_HERO_PICKER_ENABLED && <><label className="block text-sm">{t('hero')}<select value={hero} onChange={event => setHero(event.target.value)} disabled={busy} className={inputClass}>
       <option value="">{t('noImage')}</option>
       {hero && !selected && <option value={hero}>{t('unavailable')}</option>}
@@ -62,12 +64,12 @@ function SectionForm({ propertyId, name, value, photos, enabled, onDraft, reveal
       </label>)}</div>
     </fieldset>
     <button type="submit" disabled={busy} className={buttonClass}>{panel(busy ? 'saving' : 'save')}</button>
-    {message && <p role={message === 'saved' ? 'status' : 'alert'}>{panel(message)}</p>}
+    {message && <p role={savedKeys.has(message) ? 'status' : 'alert'}>{panel(message)}</p>}
     </div>
   </form>;
 }
 
-export default function PropertySectionsEditor({ propertyId, sections, media, modules, order: savedOrder }: { propertyId: string; sections: EditorialSection[]; media: Photo[]; modules?: Record<ModuleName, boolean>; order?: ModuleName[] | null }) {
+export default function PropertySectionsEditor({ propertyId, sections, media, modules, order: savedOrder, autoTranslated = {} }: { propertyId: string; sections: EditorialSection[]; media: Photo[]; modules?: Record<ModuleName, boolean>; order?: ModuleName[] | null; autoTranslated?: Partial<Record<SectionName, string[]>> }) {
   const t = useTranslations('panelSections'), details = useTranslations('details'), panel = useTranslations('panel'), router = useRouter();
   const [enabled, setEnabled] = useState(modules || sectionModules({}, sections, media));
   const [busy, setBusy] = useState(false), [message, setMessage] = useState('');
@@ -148,11 +150,11 @@ export default function PropertySectionsEditor({ propertyId, sections, media, mo
         </ul></nav>
         <p className="mt-3 text-xs">{t('reservationRequired')}</p>
       </div>
-      {message && <p role={message === 'saved' ? 'status' : 'alert'} className="mt-2 text-sm">{panel(message)}</p>}
+      {message && <p role={savedKeys.has(message) ? 'status' : 'alert'} className="mt-2 text-sm">{panel(message)}</p>}
     </aside>
     <div className="min-w-0 space-y-4">
     <p role="status" className={styles.state}>{t('visibleCount', { active: order.filter(name => enabled[name]).length, inactive: order.filter(name => !enabled[name]).length })}</p>
-    {order.filter(name => enabled[name]).map(name => name !== 'mapa' && name !== 'reserva' ? <SectionForm key={name} name={name} propertyId={propertyId} value={{ ...sections.find(section => section.section === name), ...drafts[name] } as EditorialSection} photos={photos} enabled={enabled[name]} revealed={revealed === name} onDraft={value => setDrafts(current => ({ ...current, [name]: { ...current[name], ...value } }))} /> : <section key={name} data-revealed={revealed === name} id={moduleId(propertyId, name)} aria-describedby={`${moduleId(propertyId, name)}-state`} className={`${styles.module} space-y-4 rounded-2xl border bg-white p-6 dark:border-gray-700 dark:bg-gray-900`}>
+    {order.filter(name => enabled[name]).map(name => name !== 'mapa' && name !== 'reserva' ? <SectionForm key={name} name={name} propertyId={propertyId} value={{ ...sections.find(section => section.section === name), ...drafts[name] } as EditorialSection} saved={sections.find(section => section.section === name)} autoTranslated={autoTranslated[name] ?? []} onSaved={() => setDrafts(current => { const next = { ...current }; delete next[name]; return next; })} photos={photos} enabled={enabled[name]} revealed={revealed === name} onDraft={value => setDrafts(current => ({ ...current, [name]: { ...current[name], ...value } }))} /> : <section key={name} data-revealed={revealed === name} id={moduleId(propertyId, name)} aria-describedby={`${moduleId(propertyId, name)}-state`} className={`${styles.module} space-y-4 rounded-2xl border bg-white p-6 dark:border-gray-700 dark:bg-gray-900`}>
       <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-xl font-semibold">{details(name === 'mapa' ? 'locationSection' : 'reservar')}</h3>
         <span id={`${moduleId(propertyId, name)}-state`} role="status" className={styles.state}>{t(enabled[name] ? 'active' : 'inactive')}</span></div>
       {name === 'reserva' ? <p className="text-sm">{t('reservationRequired')}</p> : enabled[name] && <p className="text-sm">{t('mapFieldsHint')}</p>}

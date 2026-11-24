@@ -35,5 +35,5 @@
   "isChromeOSOnly": false,
   "isMetaQuest": false,
   "fullScopeUrl": "https://aliaforrent.vercel.app/",
-  "minSdkVersion": 21
+  "minSdkVersion": 24
 }

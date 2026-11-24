@@ -52,6 +52,10 @@ jobs:
           if ! keytool -list -keystore android.keystore -alias alia -storepass "$STORE_PASS" > /dev/null; then
             echo "::error::La llave no abre con ANDROID_KEYSTORE_PASSWORD (o no tiene el alias «alia»)"; exit 1
           fi
+          # -list no descifra la llave privada; -certreq sí (con la misma contraseña, como firma apksigner).
+          if ! keytool -certreq -keystore android.keystore -alias alia -storepass "$STORE_PASS" -keypass "$STORE_PASS" > /dev/null; then
+            echo "::error::El almacén abre, pero la llave privada «alia» tiene OTRA contraseña. Crea la llave de nuevo con una sola contraseña."; exit 1
+          fi
           echo "Llave y contraseña OK"
 
       - name: Versión
@@ -77,16 +81,25 @@ jobs:
           cat ~/.bubblewrap/config.json
 
       - name: Generar proyecto y compilar
-        env:
-          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          # Llave PKCS12 (la de keytool actual): una sola contraseña para el almacén y la llave.
-          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
+          # Bubblewrap solo genera el proyecto Android; compilamos con Gradle y firmamos aparte.
           bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json
-          bubblewrap build --skipPwaValidation --manifest=./twa-manifest.json
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Firmar
+        env:
+          # La contraseña va por variable (env:), nunca en la línea de comandos: así no la alteran $, !, comillas…
+          # Llave PKCS12 (la de keytool actual): una sola contraseña para el almacén y la llave.
+          STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          BT=$(ls -d "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/* | sort -V | tail -1)
           mkdir -p dist
-          cp app-release-signed.apk "dist/alia-${GITHUB_RUN_NUMBER}.apk"
-          [ -f app-release-bundle.aab ] && cp app-release-bundle.aab "dist/alia-${GITHUB_RUN_NUMBER}.aab" || true
+          "$BT/zipalign" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+          "$BT/apksigner" sign --ks android.keystore --ks-key-alias alia --ks-pass env:STORE_PASS --key-pass env:STORE_PASS \
+            --out "dist/alia-${GITHUB_RUN_NUMBER}.apk" aligned.apk
+          "$BT/apksigner" verify --print-certs "dist/alia-${GITHUB_RUN_NUMBER}.apk" | grep -i 'SHA-256'
+          rm -f aligned.apk
 
       - name: Huella del certificado (para ANDROID_CERT_SHA256 en Vercel)
         env:

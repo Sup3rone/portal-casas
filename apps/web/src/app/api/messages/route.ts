@@ -9,6 +9,7 @@ import { propertyBlocks } from '@/lib/occupation-calendar';
 import { referralAttribution } from '@/lib/referrals';
 import { refreshPropertyCalendars } from '@/lib/ical-sync-runner';
 import { inquiryFromFormData, inquiryToday, normalizeInquiry, validateInquiry, type InquiryErrors } from '@/lib/inquiry-validation';
+import { sendInquiryNotice } from '@/lib/inquiry-notice';
 
 const invalid = (fields: InquiryErrors, maxGuests?: number) =>
   NextResponse.json({ code: 'INVALID_INQUIRY', fields, maxGuests }, { status: 400 });
@@ -76,6 +77,9 @@ export async function POST(req: NextRequest) {
     if (!newMessage) {
       return NextResponse.json({ code: 'INQUIRY_CHANGED', ...(contactOnly ? {} : { fields: { endDate: 'availabilityChanged' } }) }, { status: 400 });
     }
+    // T-5211: aviso por correo a ADMIN + dueño. Nunca rompe la consulta (ya guardada).
+    try { await sendInquiryNotice(String(newMessage.id), 'public'); }
+    catch (noticeError) { console.error('Falló el aviso de consulta (la consulta quedó guardada):', noticeError); }
     // T-4736: la atribución es interna; no se devuelve al visitante.
     const publicMessage = { ...newMessage };
     delete publicMessage.referredByPartnerId; delete publicMessage.referralLinkId;

@@ -14,6 +14,7 @@ import { AccessError, managedProperties, managedResource, type PropertyManager }
 import { PanelValidationError, dateRange, number, objectBody, text } from './panel-validation';
 import { inquiryToday } from './inquiry-validation';
 import { stayTooLong, vendorReferral } from './vendor-quote';
+import { sendInquiryNotice } from './inquiry-notice';
 
 export type HoldInput = { propertyId: string; start: string; end: string; guests: number; name: string; phone: string | null; email: string | null; note: string | null };
 
@@ -91,6 +92,9 @@ export async function holdDates(input: HoldInput, manager: PropertyManager, loca
     await db.delete(blockDates).where(eq(blockDates.id, blockId));
     throw error;
   }
+  // T-5211: aviso por correo a ADMIN + dueño; el apartado ya quedó y un fallo de correo no lo deshace.
+  try { await sendInquiryNotice(messageId, 'vendor'); }
+  catch (error) { console.error('Falló el aviso de consulta (el apartado quedó guardado):', error); }
   return { messageId, blockId };
 }
 

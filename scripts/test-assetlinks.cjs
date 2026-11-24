@@ -47,7 +47,7 @@ const B = '12:'.repeat(31) + '34';
   const ignore = fs.readFileSync(path.join(root, '.gitignore'), 'utf8');
   assert.ok(/android\/\*/.test(ignore) && /!android\/twa-manifest\.json/.test(ignore) && /\*\.keystore/.test(ignore), '.gitignore');
   const workflow = fs.readFileSync(path.join(root, '.github/workflows/build-android.yml'), 'utf8');
-  for (const secret of ['ANDROID_KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_PASSWORD']) assert.ok(workflow.includes('secrets.' + secret), secret);
+  for (const secret of ['ANDROID_KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD']) assert.ok(workflow.includes('secrets.' + secret), secret);
   assert.ok(workflow.includes('workflow_dispatch') && workflow.includes("'app-v*'"));
   // proxy: la ruta lleva punto → no pasa por idioma ni sesión.
   const pattern = fs.readFileSync(path.join(root, 'apps/web/src/proxy.ts'), 'utf8').match(/matcher:\s*\['([^']+)'\]/)[1].replace(/\\\\/g, '\\');

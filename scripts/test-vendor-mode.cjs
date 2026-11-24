@@ -36,18 +36,20 @@ assert.equal(isInstalledApp(win({ cookie: 'xalia_app=1' })), false);
 assert.equal(isInstalledApp({ matchMedia: undefined, navigator: {}, document: { cookie: '' } }), false, 'sin matchMedia no rompe');
 console.log('modeTarget e isInstalledApp OK');
 
-// 3) Vista del switch: el modo actual marcado; el otro enlaza al inicio del otro modo, con idioma.
+// 3) Vista: interruptor tipo iOS «Modo vendedor» (role=switch). Encendido = vendedor; apagado = usuario.
+//    Al tocarlo va al inicio del otro modo, con idioma.
 for (const locale of ['es', 'en', 'fr']) {
   const messages = JSON.parse(fs.readFileSync(path.join(__dirname, '../apps/web/messages/' + locale + '.json'), 'utf8'));
   const render = pathname => renderToStaticMarkup(React.createElement(NextIntlClientProvider, { locale, messages, timeZone: 'America/Mexico_City', onError(error) { throw error; } },
     React.createElement(ModeSwitchView, { pathname, locale })));
   const user = render('/casas/casa-azul');
-  assert.ok(user.includes('data-mode-switch') && user.includes(messages.vendor.modeUser) && user.includes(messages.vendor.modeVendor));
-  assert.ok(user.includes(`href="/${locale}/panel/vender"`), locale + ': de usuario al inicio del vendedor');
-  assert.match(user, new RegExp(`aria-current="page"[^>]*>${messages.vendor.modeUser}<`));
+  assert.ok(user.includes('data-mode-switch') && user.includes('role="switch"') && user.includes(messages.vendor.modeSwitch));
+  assert.ok(user.includes('aria-checked="false"'), locale + ': en el sitio, apagado');
+  assert.ok(user.includes(`data-target="/${locale}/panel/vender"`), locale + ': al encender, inicio del vendedor');
   const vendor = render('/panel/vender/abc');
-  assert.ok(vendor.includes(`href="/${locale}"`), locale + ': de vendedor a la portada');
-  assert.match(vendor, new RegExp(`aria-current="page"[^>]*>${messages.vendor.modeVendor}<`));
+  assert.ok(vendor.includes('aria-checked="true"'), locale + ': en el panel, encendido');
+  assert.ok(vendor.includes(`data-target="/${locale}"`), locale + ': al apagar, la portada');
+  assert.ok(!vendor.includes('<a '), 'es un interruptor, no enlaces');
 }
 console.log('ModeSwitchView es/en/fr OK');
 

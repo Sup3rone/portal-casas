@@ -1129,6 +1129,7 @@
     "releaseError": "Could not release",
     "modeLabel": "Switch mode",
     "modeUser": "User",
-    "modeVendor": "Seller"
+    "modeVendor": "Seller",
+    "modeSwitch": "Seller mode"
   }
 }

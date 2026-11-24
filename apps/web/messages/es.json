@@ -1129,6 +1129,7 @@
     "releaseError": "No se pudo liberar",
     "modeLabel": "Cambiar de modo",
     "modeUser": "Usuario",
-    "modeVendor": "Vendedor"
+    "modeVendor": "Vendedor",
+    "modeSwitch": "Modo vendedor"
   }
 }

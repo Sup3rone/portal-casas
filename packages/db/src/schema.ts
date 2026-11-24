@@ -62,6 +62,8 @@ export const properties = pgTable('Property', {
   whatsapp: text('whatsapp'),
   // T-4683: WhatsApp de la persona de limpieza (solo panel; nunca se publica).
   cleaningWhatsapp: text('cleaningWhatsapp'),
+  // T-5206: precio de limpieza por estancia (MXN). NULL = «por confirmar»; 0 = sin costo.
+  cleaningPrice: integer('cleaningPrice'),
 }, table => [
   index('Property_ownerId_idx').on(table.ownerId),
   check('Property_section_titles_check', sql`${table.sectionTitles} is null or jsonb_typeof(${table.sectionTitles}) = 'object'`),
@@ -69,6 +71,7 @@ export const properties = pgTable('Property', {
   check('Property_rentalType_check', sql`${table.rentalType} in ('nocturna', 'anual', 'ambas')`),
   check('Property_whatsapp_check', sql`${table.whatsapp} is null or ${table.whatsapp} ~ '^[0-9]{8,15}$'`),
   check('Property_cleaningWhatsapp_check', sql`${table.cleaningWhatsapp} is null or ${table.cleaningWhatsapp} ~ '^[0-9]{8,15}$'`),
+  check('Property_cleaningPrice_check', sql`${table.cleaningPrice} is null or ${table.cleaningPrice} >= 0`),
 ]);
 
 export const media = pgTable('Media', {
@@ -204,6 +207,9 @@ export const blockDates = pgTable('BlockDate', {
   endDate: date('endDate').notNull(),
   createdBy: text('createdBy').notNull().references(() => users.id),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
+  // T-5209: consulta que originó el bloqueo («Apartar» del vendedor); null = bloqueo manual. Sin FK, como
+  // Booking.referralMessageId. La exclusión «BlockDate_no_overlap» (btree_gist) vive en scripts/sql/blockdate-hold.sql.
+  messageId: text('messageId'),
 }, table => [
   check('BlockDate_range_check', sql`${table.endDate} > ${table.startDate}`),
   index('BlockDate_property_dates_idx').on(table.propertyId, table.startDate, table.endDate),

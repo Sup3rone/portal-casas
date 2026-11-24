@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { panelManager } from '@/lib/panel-server';
 import { privateMetadata } from '@/lib/seo';
+import RegisterServiceWorker from '@/components/panel/RegisterServiceWorker';
 
 export const metadata = privateMetadata;
 
@@ -15,8 +16,10 @@ export default async function PanelLayout({ children, params }: { children: Reac
   const content = await getTranslations({ locale, namespace: 'siteContent' });
   const referrals = await getTranslations({ locale, namespace: 'referrals' });
   const report = await getTranslations({ locale, namespace: 'monthlyReport' });
-  return <main data-panel-palette="paper" className="panel-skin mx-auto max-w-6xl space-y-8 px-4 py-10">
-    <nav aria-label={t('title')} className="flex flex-wrap gap-6 border-b pb-4 dark:border-gray-700">
+  const vendor = await getTranslations({ locale, namespace: 'vendor' });
+  // T-5201: la misma lista de enlaces va en el menú de escritorio (md+) y dentro de «Más» de la barra móvil.
+  const links = <>
+      <Link href="/panel/vender" className="font-semibold text-green-700 dark:text-green-400">{vendor('navSell')}</Link>
       {manager.role === 'COLLABORATOR' && <>
       <Link href="/panel" className="font-semibold text-green-700 dark:text-green-400">{t('properties')}</Link>
       <Link href="/panel/nueva" className="text-green-700 dark:text-green-400">{t('newProperty')}</Link>
@@ -37,7 +40,34 @@ export default async function PanelLayout({ children, params }: { children: Reac
       {manager.role === 'ADMIN' && <>
         <Link href="/admin/calendario" className="text-green-700 dark:text-green-400">{nav('calendario')}</Link>
       </>}
+  </>;
+  // T-5201: en el teléfono, una barra fija con los accesos del vendedor; el resto, en «Más». El ADMIN no tiene
+  // «Consultas» en el panel, así que su tercer acceso es Reservas.
+  const quick = [
+    { href: '/panel/vender', label: vendor('navSell') },
+    { href: manager.role === 'ADMIN' ? '/admin/calendario' : '/panel/calendario', label: nav('calendario') },
+    manager.role === 'ADMIN' ? { href: '/panel/reservas', label: t('bookings') } : { href: '/panel/consultas', label: t('messages') },
+  ];
+  const tab = 'flex min-h-14 items-center justify-center px-1 text-center text-sm font-semibold text-green-800 dark:text-green-300';
+  return <main data-panel-palette="paper" className="panel-skin mx-auto max-w-6xl space-y-6 px-4 pb-28 pt-6 md:space-y-8 md:py-10">
+    <nav aria-label={t('title')} className="hidden md:flex flex-wrap gap-6 border-b pb-4 dark:border-gray-700">
+      {links}
     </nav>
     {children}
+    {/* T-5213: la app instalada (PWA/TWA) necesita el service worker; se registra desde el panel. */}
+    <RegisterServiceWorker />
+    <nav data-mobile-nav="" aria-label={vendor('mobileNav')} className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden dark:border-gray-700 dark:bg-gray-900/95">
+      <ul className="grid grid-cols-4">
+        {quick.map(item => <li key={item.href}><Link href={item.href} className={tab}>{item.label}</Link></li>)}
+        <li>
+          <details className="group relative">
+            <summary className={`${tab} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>{vendor('more')}</summary>
+            <div className="absolute bottom-full right-2 mb-2 flex w-64 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-xl dark:border-gray-700 dark:bg-gray-900">
+              {links}
+            </div>
+          </details>
+        </li>
+      </ul>
+    </nav>
   </main>;
 }

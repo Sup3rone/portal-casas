@@ -10,6 +10,8 @@
 .home-navbar[data-home-top] .home-brand,
 .home-navbar[data-home-top] .home-brand span,
 .home-navbar[data-home-top] > div > div > div > div > button { color: var(--color-white); }
+/* T-5210: el interruptor «Modo vendedor» (app instalada) va en blanco sobre el video, como los demás iconos. */
+.home-navbar[data-home-top] [data-mode-switch] { color: var(--color-white); }
 .home-navbar[data-home-top] > div > div > div > div > button:hover { background-color: var(--home-nav-hover, var(--color-gray-800)); }
 .home-navbar[data-home-hidden]:not(:focus-within) { transform: translateY(-105%); }
 .home-featured-track { display: flex; position: relative; gap: 1.5rem; overflow-x: hidden; scrollbar-width: none; }

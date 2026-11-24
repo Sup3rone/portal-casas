@@ -25,6 +25,7 @@ function load(file) {
     if (name === '@/lib/theme') return { getServerTheme: () => 'light', getTheme: () => 'light', getStoredTheme: () => 'light', subscribeTheme: () => () => {}, applyTheme() {} };
     if (name === '@/lib/destinations') return load('apps/web/src/lib/destinations.ts');
     if (name === '@/lib/public-pages-live') return load('apps/web/src/lib/public-pages-live.ts');
+    if (name === '../lib/vendor-mode') return load('apps/web/src/lib/vendor-mode.ts'); // T-5210
     if (name.startsWith('./')) return load(`apps/web/src/components/${name.slice(2)}.tsx`);
     return req(name);
   }, exports);
@@ -46,7 +47,18 @@ if (require.main === module) {
     assert.ok(!closed.includes('M4 21v-2'), 'Sin avatar anterior');
     assert.ok(closed.includes('public-header'));
     assert.equal((closed.match(/marcellus-logo-variable/g)||[]).length,1,'Fuente exclusivamente en wordmark');
-    for(const privatePath of ['/panel','/admin/tarifas']) assert.ok(!renderNavbar(role,locale,false,privatePath).includes('public-header'));
+    // T-5210: el switch «Usuario | Vendedor» solo se monta para quien tiene panel, y solo se VE en la app instalada
+    // (se decide en el navegador): en el render del servidor nunca aparece, solo su hueco oculto.
+    const hasPanel = role === 'ADMIN' || role === 'COLLABORATOR';
+    assert.equal(closed.includes('data-mode-switch-slot'), hasPanel, `hueco del switch para ${role}`);
+    assert.ok(!closed.includes('data-mode-switch=""') && !renderNavbar(role, locale, false, '/panel/vender').includes('data-mode-switch=""'), 'fuera de la app no se ve');
+    for(const privatePath of ['/panel','/panel/vender','/admin/tarifas']) {
+      const header = renderNavbar(role,locale,false,privatePath);
+      assert.ok(!header.includes('public-header'));
+      // T-5212: modo vendedor simple: sin la lupa de casas públicas (el vendedor busca en «¿Qué está libre?»).
+      assert.ok(!header.includes('data-header-search'), privatePath+' sin búsqueda pública');
+    }
+    assert.ok(closed.includes('data-header-search'), 'el sitio público conserva la búsqueda');
     renderNavbar(role,locale);
     assert.ok(!closed.includes('href="/'+locale+'/casas"'));
     assert.ok(!closed.includes('<form'));

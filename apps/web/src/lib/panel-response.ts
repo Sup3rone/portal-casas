@@ -12,7 +12,8 @@ export function panelError(error: unknown) {
   const denied = accessFailure(error);
   if (denied) return NextResponse.json({ error: denied.message, code: denied.code }, { status: denied.status });
   if (error instanceof PanelValidationError) return NextResponse.json(error.message === 'invalidDestination' ? { error: 'invalidDestination', code: 'INVALID_DESTINATION' } : { error: 'validation' }, { status: 400 });
-  if (error && typeof error === 'object' && 'cause' in error && error.cause && typeof error.cause === 'object' && 'code' in error.cause && error.cause.code === '23505') {
+  if (error && typeof error === 'object' && 'cause' in error && error.cause && typeof error.cause === 'object' && 'code' in error.cause && ['23505', '23P01'].includes(String(error.cause.code))) {
+    // 23P01 (T-5209): exclusión de traslapes de BlockDate; otro bloqueo ganó la carrera.
     return NextResponse.json({ error: 'conflict' }, { status: 409 });
   }
   console.error('Error en panel:', error);

@@ -16,8 +16,15 @@ export async function quoteBookingRent(propertyId: string, startDate: string, en
   return rentFromQuote(quoteStay(startDate, endDate, { base: property, seasons })?.total);
 }
 
-/** Valores iniciales al confirmar: renta cotizada e IVA 16 % sobre ella (el aseo aún no existe). */
+/**
+ * Valores iniciales al confirmar: renta cotizada, limpieza fija de la casa (T-5206; null = «por confirmar») e IVA
+ * 16 % sobre renta + aseo (suggestedTaxes, regla vigente). Todo editable después en /panel/reservas/[id].
+ */
 export async function initialBreakdown(propertyId: string, startDate: string, endDate: string) {
-  const rentAmount = await quoteBookingRent(propertyId, startDate, endDate);
-  return { rentAmount, taxes: suggestedTaxes(rentAmount, null) };
+  const [rentAmount, [property]] = await Promise.all([
+    quoteBookingRent(propertyId, startDate, endDate),
+    db.select({ cleaning: properties.cleaningPrice }).from(properties).where(eq(properties.id, propertyId)).limit(1),
+  ]);
+  const cleaningCost = rentFromQuote(property?.cleaning);
+  return { rentAmount, cleaningCost, taxes: suggestedTaxes(rentAmount, cleaningCost) };
 }

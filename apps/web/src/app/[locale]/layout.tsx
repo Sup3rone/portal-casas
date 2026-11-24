@@ -14,8 +14,8 @@ import type { Metadata } from 'next';
 import { defaultSocialImage, siteUrl } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  metadataBase: siteUrl(), title: { default: 'Portal Casas', template: '%s | Portal Casas' },
-  openGraph: { siteName: 'Portal Casas', type: 'website', images: [defaultSocialImage()] },
+  metadataBase: siteUrl(), title: { default: 'ALIA for Rent', template: '%s | ALIA for Rent' },
+  openGraph: { siteName: 'ALIA for Rent', type: 'website', images: [defaultSocialImage()] },
   twitter: { card: 'summary_large_image', images: [defaultSocialImage().url] },
 };
 

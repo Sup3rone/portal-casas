@@ -34,7 +34,7 @@ export async function requestPasswordReset(formData: FormData) {
 
       await sendEmail({
         to: user.email,
-        subject: 'Recupera tu contraseña — Portal Casas',
+        subject: 'Recupera tu contraseña — ALIA for Rent',
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
             <h2 style="color: #654838;">Recuperación de contraseña</h2>

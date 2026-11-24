@@ -11,7 +11,7 @@ export default async function NotFound() {
   const t = await getTranslations('notFoundPage');
   return (
     <main className="public-paper relative flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-24 text-[var(--paper-text)] sm:px-6" data-not-found>
-      <title>{`${t('title')} | Portal Casas`}</title>
+      <title>{`${t('title')} | ALIA for Rent`}</title>
       <div className="flex w-full max-w-xl flex-col items-center text-center">
         {/* Decorativa: el mensaje real es el h1. */}
         <div aria-hidden="true"

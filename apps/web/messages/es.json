@@ -173,7 +173,8 @@
       "bedrooms": "Recámaras",
       "bathrooms": "Baños",
       "baseWeekdayPrice": "Precio entre semana (MXN)",
-      "baseWeekendPrice": "Precio fin de semana (MXN)"
+      "baseWeekendPrice": "Precio fin de semana (MXN)",
+      "cleaningPrice": "Limpieza por estancia (MXN, opcional)"
     },
     "invalidIcalUrl": "Enlace iCal no válido: usa un enlace https público de Airbnb, Booking, VRBO o Google (.ics).",
     "invalidReferrerAccount": "No hay una cuenta de huésped registrada con ese correo, o ya está ligada a otro referidor. Pídele que se registre en el sitio y vuelve a intentar.",

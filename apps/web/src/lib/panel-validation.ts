@@ -29,7 +29,7 @@ export function dateRange(body: Record<string, unknown>) {
 }
 const texts = ['titleEs', 'titleEn', 'titleFr', 'descEs', 'descEn', 'descFr', 'address', 'city'] as const;
 const integers = ['maxGuests', 'bedrooms'] as const;
-const prices = ['baseWeekdayPrice', 'baseWeekendPrice'] as const;
+const prices = ['baseWeekdayPrice', 'baseWeekendPrice', 'cleaningPrice'] as const;
 const backgroundFields = ['sectionBgInicio', 'sectionBgMapa', 'sectionBgReserva'] as const;
 const allowed = new Set<string>([...texts, ...integers, ...prices, ...backgroundFields, 'bathrooms', 'lat', 'lng', 'published', 'rentalType', 'contactName', 'contactEmail', 'whatsapp', 'cleaningWhatsapp', 'state', 'destinationCity', 'sectionTitles', 'sectionsEnabled', 'sectionsOrder']);
 export function propertyInput(value: unknown, creating = false) {

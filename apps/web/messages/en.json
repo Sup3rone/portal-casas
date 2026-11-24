@@ -1108,8 +1108,8 @@
     "total": "Total",
     "onlyYou": "Only for you",
     "commission": "Your commission ({percent}% of rent)",
-    "clientMode": "Client mode",
-    "clientModeHint": "Hides what the client should not see on your screen",
+    "clientMode": "Hide commission",
+    "clientModeHint": "To show the screen to the client",
     "whatsapp": "Send by WhatsApp",
     "noReferralLink": "You have no referral link: create one in Referrals so this sale is credited to you.",
     "hold": "Hold these dates",
@@ -1126,6 +1126,9 @@
     "release": "Release",
     "releaseConfirm": "Release? Tap again",
     "releasing": "Releasing…",
-    "releaseError": "Could not release"
+    "releaseError": "Could not release",
+    "modeLabel": "Switch mode",
+    "modeUser": "User",
+    "modeVendor": "Seller"
   }
 }

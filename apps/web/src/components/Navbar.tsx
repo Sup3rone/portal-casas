@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
 import { Marcellus } from 'next/font/google';
 import LocaleSwitcher from './LocaleSwitcher';
+import ModeSwitch from './ModeSwitch';
 import type { PublishedDestinationGroup } from '@/lib/published-destinations';
 import ThemeToggle from './ThemeToggle';
 import { PUBLIC_PAGES_LIVE } from '@/lib/public-pages-live';
@@ -147,6 +148,8 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
               </div>}
             </div>
 
+            {/* T-5210: «Usuario | Vendedor» solo para quien tiene panel (pedido de Gabriel). */}
+            {isManager && <ModeSwitch pathname={pathname} locale={locale} />}
             <LocaleSwitcher />
             {privatePage && <ThemeToggle />}
 

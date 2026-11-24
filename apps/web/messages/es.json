@@ -1108,8 +1108,8 @@
     "total": "Total",
     "onlyYou": "Solo para ti",
     "commission": "Tu comisión ({percent} % de la renta)",
-    "clientMode": "Modo cliente",
-    "clientModeHint": "Oculta lo que el cliente no debe ver en tu pantalla",
+    "clientMode": "Ocultar comisión",
+    "clientModeHint": "Para enseñar la pantalla al cliente",
     "whatsapp": "Enviar por WhatsApp",
     "noReferralLink": "No tienes enlace de referido: crea uno en Referidos para que esta venta se te atribuya.",
     "hold": "Apartar estas fechas",
@@ -1126,6 +1126,9 @@
     "release": "Liberar",
     "releaseConfirm": "¿Liberar? Toca otra vez",
     "releasing": "Liberando…",
-    "releaseError": "No se pudo liberar"
+    "releaseError": "No se pudo liberar",
+    "modeLabel": "Cambiar de modo",
+    "modeUser": "Usuario",
+    "modeVendor": "Vendedor"
   }
 }

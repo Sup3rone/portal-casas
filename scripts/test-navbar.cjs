@@ -25,6 +25,7 @@ function load(file) {
     if (name === '@/lib/theme') return { getServerTheme: () => 'light', getTheme: () => 'light', getStoredTheme: () => 'light', subscribeTheme: () => () => {}, applyTheme() {} };
     if (name === '@/lib/destinations') return load('apps/web/src/lib/destinations.ts');
     if (name === '@/lib/public-pages-live') return load('apps/web/src/lib/public-pages-live.ts');
+    if (name === '../lib/vendor-mode') return load('apps/web/src/lib/vendor-mode.ts'); // T-5210
     if (name.startsWith('./')) return load(`apps/web/src/components/${name.slice(2)}.tsx`);
     return req(name);
   }, exports);
@@ -46,6 +47,10 @@ if (require.main === module) {
     assert.ok(!closed.includes('M4 21v-2'), 'Sin avatar anterior');
     assert.ok(closed.includes('public-header'));
     assert.equal((closed.match(/marcellus-logo-variable/g)||[]).length,1,'Fuente exclusivamente en wordmark');
+    // T-5210: switch «Usuario | Vendedor» solo para quien tiene panel; en público marca Usuario, en el panel Vendedor.
+    const hasPanel = role === 'ADMIN' || role === 'COLLABORATOR';
+    assert.equal(closed.includes('data-mode-switch'), hasPanel, `switch de modo para ${role}`);
+    if (hasPanel) assert.ok(closed.includes(`href="/${locale}/panel/vender"`) && renderNavbar(role, locale, false, '/panel/vender').includes(`href="/${locale}/casas"`));
     for(const privatePath of ['/panel','/admin/tarifas']) assert.ok(!renderNavbar(role,locale,false,privatePath).includes('public-header'));
     renderNavbar(role,locale);
     assert.ok(!closed.includes('href="/'+locale+'/casas"'));

@@ -1109,8 +1109,8 @@
     "total": "Total",
     "onlyYou": "Rien que pour vous",
     "commission": "Votre commission ({percent} % de la location)",
-    "clientMode": "Mode client",
-    "clientModeHint": "Masque ce que le client ne doit pas voir sur votre écran",
+    "clientMode": "Masquer la commission",
+    "clientModeHint": "Pour montrer l’écran au client",
     "whatsapp": "Envoyer par WhatsApp",
     "noReferralLink": "Vous n’avez pas de lien de parrainage : créez-en un dans Parrainages pour que cette vente vous soit attribuée.",
     "hold": "Bloquer ces dates",
@@ -1127,6 +1127,9 @@
     "release": "Libérer",
     "releaseConfirm": "Libérer ? Touchez encore",
     "releasing": "Libération…",
-    "releaseError": "Impossible de libérer"
+    "releaseError": "Impossible de libérer",
+    "modeLabel": "Changer de mode",
+    "modeUser": "Utilisateur",
+    "modeVendor": "Vendeur"
   }
 }

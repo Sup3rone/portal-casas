@@ -44,7 +44,16 @@ jobs:
       - name: Llave de firma (solo en esta máquina)
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: echo "$KEYSTORE" | base64 --decode > android.keystore
+          STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          # Copiado desde Windows trae \r, saltos o espacios: se limpian antes de decodificar.
+          if ! printf '%s' "$KEYSTORE" | tr -d '\r\n\t ' | base64 --decode > android.keystore; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 no es base64 válido: vuelve a copiarlo (docs/APP-MOVIL.md, paso 2)"; exit 1
+          fi
+          if ! keytool -list -keystore android.keystore -alias alia -storepass "$STORE_PASS" > /dev/null; then
+            echo "::error::La llave no abre con ANDROID_KEYSTORE_PASSWORD (o no tiene el alias «alia»)"; exit 1
+          fi
+          echo "Llave y contraseña OK"
 
       - name: Versión
         run: |

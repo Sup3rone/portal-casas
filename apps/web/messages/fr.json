@@ -1180,9 +1180,9 @@
     "newType": "Nouveau type de dépense",
     "addType": "Ajouter le type",
     "typesHint": "Les types valent pour tous les logements. Électricité et eau sont préchargées.",
-    "entriesTitle": "Frais",
-    "entriesEmpty": "Aucun frais enregistré pour l’instant.",
-    "entryNew": "Enregistrer un frais",
+    "entriesTitle": "Paiements",
+    "entriesEmpty": "Aucun paiement enregistré pour l’instant.",
+    "entryNew": "Enregistrer un paiement",
     "fromRecurring": "Dépense récurrente (facultatif)",
     "noRecurring": "Aucune (dépense ponctuelle)",
     "date": "Date",
@@ -1198,6 +1198,9 @@
     "saved": "Enregistré.",
     "removed": "Retiré.",
     "typeAdded": "Type de dépense ajouté.",
-    "entriesTruncated": "Affichage des {count} frais les plus récents. Les totaux ci-dessus les incluent tous."
+    "entriesTruncated": "Affichage des {count} paiements les plus récents. Les totaux ci-dessus les incluent tous.",
+    "registerPeriod": "Enregistrer le paiement du {date}",
+    "periodRegistered": "Paiement du {date} enregistré",
+    "prefillHint": "Vérifiez le montant réel de la facture puis appuyez sur Ajouter."
   }
 }

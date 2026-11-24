@@ -1179,9 +1179,9 @@
     "newType": "New expense type",
     "addType": "Add type",
     "typesHint": "Types apply to every property. Electricity and water come preloaded.",
-    "entriesTitle": "Charges",
-    "entriesEmpty": "No charges recorded yet.",
-    "entryNew": "Record a charge",
+    "entriesTitle": "Payments",
+    "entriesEmpty": "No payments recorded yet.",
+    "entryNew": "Record a payment",
     "fromRecurring": "Recurring expense (optional)",
     "noRecurring": "None (one-off expense)",
     "date": "Date",
@@ -1197,6 +1197,9 @@
     "saved": "Saved.",
     "removed": "Removed.",
     "typeAdded": "Expense type added.",
-    "entriesTruncated": "Showing the {count} most recent charges. The totals above include all of them."
+    "entriesTruncated": "Showing the {count} most recent payments. The totals above include all of them.",
+    "registerPeriod": "Record the {date} payment",
+    "periodRegistered": "{date} payment recorded",
+    "prefillHint": "Check the actual amount on the bill and press Add."
   }
 }

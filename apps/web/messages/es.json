@@ -1179,9 +1179,9 @@
     "newType": "Nuevo tipo de gasto",
     "addType": "Agregar tipo",
     "typesHint": "Los tipos sirven para todas las casas. Luz y agua vienen precargados.",
-    "entriesTitle": "Cargos",
-    "entriesEmpty": "Aún no hay cargos registrados.",
-    "entryNew": "Registrar cargo",
+    "entriesTitle": "Pagos",
+    "entriesEmpty": "Aún no hay pagos registrados.",
+    "entryNew": "Registrar pago",
     "fromRecurring": "Gasto recurrente (opcional)",
     "noRecurring": "Ninguno (gasto suelto)",
     "date": "Fecha",
@@ -1197,6 +1197,9 @@
     "saved": "Guardado.",
     "removed": "Quitado.",
     "typeAdded": "Tipo de gasto agregado.",
-    "entriesTruncated": "Se muestran los {count} cargos más recientes. Los totales de arriba incluyen todos."
+    "entriesTruncated": "Se muestran los {count} pagos más recientes. Los totales de arriba incluyen todos.",
+    "registerPeriod": "Registrar pago del {date}",
+    "periodRegistered": "Pago del {date} registrado",
+    "prefillHint": "Revisa el monto real del recibo y pulsa Agregar."
   }
 }

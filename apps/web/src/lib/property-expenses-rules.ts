@@ -152,6 +152,17 @@ export function nextDueDate(startDate: string, periodicity: Periodicity, today: 
   return addMonths(startDate, k * step);
 }
 
+/** Periodo que toca pagar hoy: el último vencimiento <= today (el recibo que ya llegó). Si el ciclo aún no
+ *  empieza, el primero. Ej.: luz bimestral desde 10-ene, hoy 24-nov → 10-nov (el próximo sería 10-ene). */
+export function currentDueDate(startDate: string, periodicity: Periodicity, today: string) {
+  const next = nextDueDate(startDate, periodicity, today);
+  if (next <= today || startDate >= today) return next;
+  if (periodicity === 'semanal') return addDays(next, -7);
+  const step = MONTHS[periodicity];
+  const [sy, sm] = startDate.split('-').map(Number), [ny, nm] = next.split('-').map(Number);
+  return addMonths(startDate, ((ny - sy) * 12 + (nm - sm)) - step); // un paso antes, contado desde el inicio
+}
+
 /** Costo real mayor que el presupuesto. Sin alguno de los dos no hay alerta. */
 export function overBudget(budget: string | null | undefined, actualCost: string | null | undefined) {
   return budget != null && actualCost != null && toCents(actualCost) > toCents(budget);

@@ -1096,6 +1096,20 @@
     "share": "Compartir ficha",
     "copied": "Enlace copiado",
     "occupied": "La casa está ocupada en alguna de esas noches.",
-    "pickStay": "Elige llegada y salida en la búsqueda para cotizar esta casa."
+    "pickStay": "Elige llegada y salida en la búsqueda para cotizar esta casa.",
+    "quoteTitle": "Cotización",
+    "backHouse": "Volver a la casa",
+    "lineBase": "{count, plural, =1 {1 noche} other {# noches}} {weekend, select, true {de fin de semana} other {entre semana}} × {price}",
+    "lineSeason": "{season}: {count, plural, =1 {1 noche} other {# noches}} {weekend, select, true {de fin de semana} other {entre semana}} × {price}",
+    "rent": "Renta",
+    "cleaning": "Limpieza",
+    "cleaningPending": "Por confirmar",
+    "taxes": "IVA (16 %)",
+    "total": "Total",
+    "onlyYou": "Solo para ti",
+    "commission": "Tu comisión ({percent} % de la renta)",
+    "clientMode": "Modo cliente",
+    "clientModeHint": "Oculta lo que el cliente no debe ver en tu pantalla",
+    "whatsapp": "Enviar por WhatsApp"
   }
 }

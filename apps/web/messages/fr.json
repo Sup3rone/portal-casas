@@ -1097,6 +1097,20 @@
     "share": "Partager la fiche",
     "copied": "Lien copié",
     "occupied": "La maison est occupée certaines de ces nuits.",
-    "pickStay": "Choisissez l’arrivée et le départ dans la recherche pour faire le devis de cette maison."
+    "pickStay": "Choisissez l’arrivée et le départ dans la recherche pour faire le devis de cette maison.",
+    "quoteTitle": "Devis",
+    "backHouse": "Retour à la maison",
+    "lineBase": "{count, plural, =1 {1 nuit} other {# nuits}} {weekend, select, true {de week-end} other {en semaine}} × {price}",
+    "lineSeason": "{season} : {count, plural, =1 {1 nuit} other {# nuits}} {weekend, select, true {de week-end} other {en semaine}} × {price}",
+    "rent": "Location",
+    "cleaning": "Ménage",
+    "cleaningPending": "À confirmer",
+    "taxes": "TVA (16 %)",
+    "total": "Total",
+    "onlyYou": "Rien que pour vous",
+    "commission": "Votre commission ({percent} % de la location)",
+    "clientMode": "Mode client",
+    "clientModeHint": "Masque ce que le client ne doit pas voir sur votre écran",
+    "whatsapp": "Envoyer par WhatsApp"
   }
 }

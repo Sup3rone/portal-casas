@@ -1096,6 +1096,20 @@
     "share": "Share listing",
     "copied": "Link copied",
     "occupied": "The house is booked on some of those nights.",
-    "pickStay": "Pick check-in and check-out in the search to quote this house."
+    "pickStay": "Pick check-in and check-out in the search to quote this house.",
+    "quoteTitle": "Quote",
+    "backHouse": "Back to the house",
+    "lineBase": "{count, plural, =1 {1 night} other {# nights}} {weekend, select, true {on weekends} other {on weeknights}} × {price}",
+    "lineSeason": "{season}: {count, plural, =1 {1 night} other {# nights}} {weekend, select, true {on weekends} other {on weeknights}} × {price}",
+    "rent": "Rent",
+    "cleaning": "Cleaning",
+    "cleaningPending": "To be confirmed",
+    "taxes": "VAT (16%)",
+    "total": "Total",
+    "onlyYou": "Only for you",
+    "commission": "Your commission ({percent}% of rent)",
+    "clientMode": "Client mode",
+    "clientModeHint": "Hides what the client should not see on your screen",
+    "whatsapp": "Send by WhatsApp"
   }
 }

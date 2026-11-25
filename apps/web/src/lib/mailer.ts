@@ -5,6 +5,8 @@ import nodemailer, { type Transporter } from 'nodemailer';
 // 1) Gmail por SMTP si están GMAIL_USER y GMAIL_APP_PASSWORD (contraseña de aplicación; requiere verificación en
 //    dos pasos). Mientras no haya dominio propio es la única forma gratis de entregar a cualquier destinatario.
 //    Límite de Gmail: ~500 destinatarios al día. El remitente es la propia cuenta de Gmail.
+//    Puerto 587 + STARTTLS obligatorio (requireTLS): si el servidor no ofrece TLS, no se envía. Se eligió 587 y no 465
+//    porque algunos antivirus (Norton Mail Shield) interceptan el 465 con un certificado no confiable.
 // 2) Si no, Resend. Sin EMAIL_FROM con dominio verificado, onboarding@resend.dev solo entrega al dueño de la cuenta.
 // La elección se hace en cada envío (no al cargar el módulo) para que cambiar variables no deje un estado viejo.
 const SENDER_NAME = 'ALIA for Rent';
@@ -13,7 +15,7 @@ let gmail: { key: string; transport: Transporter } | null = null;
 function gmailTransport(user: string, pass: string) {
   const key = `${user}\n${pass}`;
   if (gmail?.key !== key) {
-    gmail = { key, transport: nodemailer.createTransport({ host: 'smtp.gmail.com', port: 465, secure: true, auth: { user, pass } }) };
+    gmail = { key, transport: nodemailer.createTransport({ host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true, auth: { user, pass } }) };
   }
   return gmail.transport;
 }

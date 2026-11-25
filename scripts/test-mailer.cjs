@@ -28,12 +28,12 @@ async function main() {
   await mailer.sendEmail(msg);
   assert.equal(resendCalls.pop().from, 'ALIA <noreply@dominio.mx>');
 
-  // Con las dos → Gmail SMTP 465/TLS, remitente = la cuenta, contraseña sin espacios, adjunto intacto.
+  // Con las dos → Gmail SMTP 587 + STARTTLS obligatorio, remitente = la cuenta, contraseña sin espacios, adjunto intacto.
   env({ RESEND_API_KEY: 're_x', GMAIL_USER: ' portal@gmail.com ', GMAIL_APP_PASSWORD: 'abcd efgh ijkl mnop' });
   assert.equal(mailer.mailProvider(), 'gmail');
   const excel = Buffer.from('PK');
   await mailer.sendEmail({ ...msg, attachments: [{ filename: 'r.xlsx', content: excel }] });
-  assert.deepEqual(transports.at(-1), { host: 'smtp.gmail.com', port: 465, secure: true, auth: { user: 'portal@gmail.com', pass: 'abcdefghijklmnop' } });
+  assert.deepEqual(transports.at(-1), { host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true, auth: { user: 'portal@gmail.com', pass: 'abcdefghijklmnop' } });
   assert.deepEqual(smtp.pop(), { from: { name: 'ALIA for Rent', address: 'portal@gmail.com' }, ...msg, attachments: [{ filename: 'r.xlsx', content: excel }] });
   assert.equal(resendCalls.length, 0, 'no se usa Resend');
   // Reutiliza la conexión mientras no cambien las variables; si cambian, crea otra.

@@ -283,7 +283,7 @@
       "fechasInvalidas": "The check-out date must be after the check-in date.",
       "error": "Could not send your message. Please try again.",
       "incompleto": "Some details are missing to send your inquiry. Please check the fields marked in red.",
-      "exitoReserva": "Your request has been received. Once your booking is confirmed, you will receive a confirmation email.",
+      "exitoReserva": "Your request has been received. Once your booking is confirmed, you will receive a confirmation email; if you don't see it, check your spam or junk folder.",
       "otraConsulta": "Send another inquiry"
     },
     "gallery": {
@@ -401,7 +401,7 @@
     "forgotSubtitle": "Enter your email and we'll send you a recovery link.",
     "email": "Email",
     "forgotButton": "Send link",
-    "forgotSent": "If your email is registered, you'll receive a link within minutes. Check your spam folder too.",
+    "forgotSent": "If your email is registered, you'll receive a link within minutes. If you don't see it, check your spam or junk folder and mark it as “Not spam”.",
     "resetTitle": "New password",
     "newPassword": "New password (minimum 8 characters)",
     "resetButton": "Save password",
@@ -751,7 +751,7 @@
     "saved": "Saved.",
     "sendNow": "Send the {month} report now",
     "sending": "Sending…",
-    "sentOk": "Report sent.",
+    "sentOk": "Report sent. If it doesn't arrive, check the spam or junk folder.",
     "sentFailed": "Could not send: {error}",
     "noRecipients": "Add at least one email to enable delivery.",
     "deliveriesTitle": "Deliveries",

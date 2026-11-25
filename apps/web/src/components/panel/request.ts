@@ -13,6 +13,9 @@ const codes: Record<string, string> = {
   INVALID_FEATURED_PROPERTY: 'invalidFeaturedProperty', INVALID_SITE_CONTENT: 'invalidSiteContent', INVALID_HOME_VIDEOS: 'invalidHomeVideos', INVALID_JSON: 'invalidRequest',
   INVALID_PAGE_CONTENT: 'invalidPageContent', PAGE_TEXT_TOO_LONG: 'pageTextTooLong', INVALID_PAGE_IMAGE: 'invalidPageImage', PAGE_CONTENT_NOT_READY: 'pageContentNotReady',
   INVALID_FILE_TYPE: 'invalidPhotoType', INVALID_FILE_SIZE: 'invalidPhotoSize', INVALID_UPLOAD_REQUEST: 'invalidUploadRequest', UPLOAD_FAILED: 'uploadFailed',
+  // T-5248 (fase 2): facturas y recibos.
+  INVALID_ATTACHMENT_TYPE: 'invalidAttachmentType', INVALID_ATTACHMENT_SIZE: 'invalidAttachmentSize',
+  INVALID_ATTACHMENT_REQUEST: 'invalidUploadRequest', ATTACHMENTS_DISABLED: 'attachmentsDisabled',
 };
 /** T-5072: mensaje tras guardar según lo que pasó con la traducción automática (campo translation de la respuesta). */
 export function savedKey(result: unknown) {

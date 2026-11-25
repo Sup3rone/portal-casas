@@ -379,3 +379,25 @@ export const maintenances = pgTable('Maintenance', {
   check('Maintenance_actualCost_check', sql`${table.actualCost} is null or ${table.actualCost} >= 0`),
   check('Maintenance_dates_check', sql`${table.startDate} is null or ${table.endDate} is null or ${table.endDate} >= ${table.startDate}`),
 ]);
+
+// T-5248 (fase 2): factura o recibo de UN mantenimiento o de UN pago. El archivo vive en el almacén PRIVADO de Vercel
+// Blob (BLOB_PRIVATE_READ_WRITE_TOKEN; el de fotos es público): sin URL pública, se descarga solo por el panel con el
+// mismo corte por casa. SQL: scripts/sql/expense-attachments.sql.
+export const expenseAttachments = pgTable('ExpenseAttachment', {
+  id: text('id').primaryKey(),
+  propertyId: text('propertyId').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  maintenanceId: text('maintenanceId').references(() => maintenances.id, { onDelete: 'cascade' }),
+  entryId: text('entryId').references(() => expenseEntries.id, { onDelete: 'cascade' }),
+  pathname: text('pathname').notNull(),
+  contentType: text('contentType').notNull(),
+  size: integer('size').notNull(),
+  fileName: text('fileName').notNull(),
+  uploadedBy: text('uploadedBy').notNull().references(() => users.id),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  index('ExpenseAttachment_propertyId_idx').on(table.propertyId),
+  unique('ExpenseAttachment_pathname_unique').on(table.pathname),
+  check('ExpenseAttachment_target_check', sql`(${table.maintenanceId} is null) <> (${table.entryId} is null)`),
+  check('ExpenseAttachment_type_check', sql`${table.contentType} in ('image/jpeg', 'image/png', 'image/webp', 'application/pdf')`),
+  check('ExpenseAttachment_size_check', sql`${table.size} > 0 and ${table.size} <= 4000000`),
+]);

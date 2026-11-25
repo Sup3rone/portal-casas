@@ -12,7 +12,7 @@ const { NextIntlClientProvider } = req('next-intl');
 
 const root = path.join(__dirname, '..');
 // Tablas nuevas en la BD en memoria del arnés (mismo criterio: números REAL, resto TEXT).
-for (const name of ['expenseTypes', 'recurringExpenses', 'expenseEntries', 'maintenances']) {
+for (const name of ['expenseTypes', 'recurringExpenses', 'expenseEntries', 'maintenances', 'expenseAttachments']) {
   const config = getTableConfig(portal[name]);
   memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => `"${column.name}" ${/integer|boolean|double/.test(column.getSQLType()) ? 'REAL' : 'TEXT'}${column.primary ? ' PRIMARY KEY' : ''}`).join(', ')})`);
 }

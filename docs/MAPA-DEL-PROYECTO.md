@@ -786,7 +786,8 @@ Detalle de piezas en la sección 8.6. Añade `SiteContent.home_background_videos
 | `monthly-commission-report.sql` | T-4739 | Pendiente | Pendiente |
 | `ical-feed-sync-status.sql` | T-4739 (sync iCal automático) | Pendiente | Pendiente |
 | `partner-owner.sql` | T-4767 (`Partner.ownerId`) | ✅ Aplicado (inferido: alta de referidor con `ownerId` respondió 201 en local contra Respaldo, 11-11; no consultado por SQL) | Pendiente: **sin él no carga el panel del colaborador** |
-| `property-expenses.sql` | T-5248 (mantenimientos y gastos por casa: `ExpenseType` con luz/agua, `RecurringExpense`, `ExpenseEntry`, `Maintenance`) | Pendiente | Pendiente: **sin él falla `/panel/propiedades/[id]/gastos`** |
+| `property-expenses.sql` | T-5248 (mantenimientos y gastos por casa: `ExpenseType` con luz/agua, `RecurringExpense`, `ExpenseEntry`, `Maintenance`) | ✅ Aplicado (24-11, verificado por lectura) | ✅ Aplicado (24-11, según el usuario) |
+| `expense-attachments.sql` | T-5248 fase 2 (`ExpenseAttachment`: facturas/recibos; archivos en el almacén **privado** de Blob, `BLOB_PRIVATE_READ_WRITE_TOKEN`) | Pendiente | Pendiente: **sin él falla `/panel/propiedades/[id]/gastos`** |
 
 ### 9.6 Verificación
 

@@ -184,7 +184,10 @@
     "pageTextTooLong": "Un texte est trop long.",
     "invalidPageImage": "L’image doit être une adresse https valide.",
     "pageContentNotReady": "Le SQL site-content-pages.sql n’est pas encore appliqué à la base. Impossible d’enregistrer d’ici là.",
-    "expenses": "Dépenses"
+    "expenses": "Dépenses",
+    "invalidAttachmentType": "Seules les images JPG, PNG ou WebP et les PDF sont acceptés.",
+    "invalidAttachmentSize": "Le fichier dépasse 4 Mo.",
+    "attachmentsDisabled": "L’ajout de factures n’est pas encore activé."
   },
   "nav": {
     "menu": "Menu",
@@ -1201,6 +1204,12 @@
     "entriesTruncated": "Affichage des {count} paiements les plus récents. Les totaux ci-dessus les incluent tous.",
     "registerPeriod": "Enregistrer le paiement du {date}",
     "periodRegistered": "Paiement du {date} enregistré",
-    "prefillHint": "Vérifiez le montant réel de la facture puis appuyez sur Ajouter."
+    "prefillHint": "Vérifiez le montant réel de la facture puis appuyez sur Ajouter.",
+    "attach": "Joindre une facture ou un reçu (image ou PDF, 4 Mo max.)",
+    "image": "Image",
+    "removeAttachment": "Retirer le fichier",
+    "confirmRemoveAttachment": "Retirer ce fichier ? Action irréversible.",
+    "attachmentAdded": "Fichier joint.",
+    "attachmentsOff": "L’ajout de factures n’est pas encore activé."
   }
 }

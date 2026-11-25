@@ -8,6 +8,7 @@ import { AccessError, managedResource, requireAdmin, type PropertyManager } from
 import { managedProperty } from './panel-server';
 import { PanelValidationError } from './panel-validation';
 import { inquiryToday } from './inquiry-validation';
+import { deleteTargetFiles, listAttachments } from './expense-attachments';
 import { entryInput, expenseKinds, expenseTotals, expenseTypeInput, maintenanceInput, recurringInput, type ExpenseKind } from './property-expenses-rules';
 
 const ENTRY_LIMIT = 200;
@@ -24,7 +25,7 @@ export async function listExpenseTypes() {
 
 export async function loadPropertyExpenses(propertyId: string, manager: PropertyManager) {
   await managedProperty(propertyId, manager);
-  const [types, works, recurring, entries, amounts] = await Promise.all([
+  const [types, works, recurring, entries, amounts, attachments] = await Promise.all([
     listExpenseTypes(),
     db.select().from(maintenances)
       .where(and(eq(maintenances.propertyId, propertyId), managedResource(maintenances.propertyId, manager)))
@@ -38,9 +39,10 @@ export async function loadPropertyExpenses(propertyId: string, manager: Property
     // Totales con TODOS los cargos de la casa (la lista de arriba se recorta a ENTRY_LIMIT solo para mostrar).
     db.select({ amount: expenseEntries.amount, paid: expenseEntries.paid }).from(expenseEntries)
       .where(and(eq(expenseEntries.propertyId, propertyId), managedResource(expenseEntries.propertyId, manager))),
+    listAttachments(propertyId, manager), // fase 2: facturas y recibos (solo metadatos; el archivo se baja aparte)
   ]);
   const totals = expenseTotals(amounts.map(row => ({ amount: row.amount, paid: Boolean(row.paid) })));
-  return { types, maintenances: works, recurring, entries, totals, truncated: amounts.length > entries.length };
+  return { types, maintenances: works, recurring, entries, totals, truncated: amounts.length > entries.length, attachments };
 }
 
 /** Un tipo existente y activo; uno desactivado solo se acepta si el registro ya lo tenía. */
@@ -117,6 +119,8 @@ export async function updateExpenseItem(propertyId: string, kind: ExpenseKind, i
 
 export async function deleteExpenseItem(propertyId: string, kind: ExpenseKind, itemId: string, manager: PropertyManager) {
   await ownedRow(propertyId, kind, itemId, manager);
+  // Fase 2: los archivos del almacén privado se borran antes; sus filas caen por cascada con el registro.
+  if (kind === 'maintenance' || kind === 'entry') await deleteTargetFiles(propertyId, kind, itemId);
   const table = tables[kind];
   await db.delete(table).where(and(eq(table.id, itemId), eq(table.propertyId, propertyId)));
 }

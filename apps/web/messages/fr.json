@@ -704,6 +704,42 @@
     "taxesManual": "Montant manuel (non recalculé).",
     "applyTaxes": "Calculer 16 % (TVA)"
   },
+  "emailLog": {
+    "navTitle": "E-mails",
+    "title": "E-mails envoyés",
+    "intro": "Chaque e-mail envoyé par le portail ces {days} derniers jours : à qui, de quel type et s’il est bien parti. Le contenu n’est pas conservé.",
+    "search": "Rechercher un destinataire",
+    "status": "Statut",
+    "kind": "Type",
+    "all": "Tous",
+    "filter": "Filtrer",
+    "date": "Date",
+    "recipients": "À",
+    "subject": "Objet",
+    "empty": "Aucun e-mail ne correspond à ces filtres.",
+    "pagination": "Pages",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {number}",
+    "statuses": {
+      "sent": "Envoyé",
+      "failed": "Échec"
+    },
+    "providers": {
+      "gmail": "via Gmail",
+      "resend": "via Resend"
+    },
+    "kinds": {
+      "password-reset": "Récupération du mot de passe",
+      "password-changed": "Mot de passe modifié",
+      "booking-guest": "Réservation (voyageur)",
+      "booking-owner": "Réservation (copie au propriétaire)",
+      "inquiry": "Nouvelle demande",
+      "monthly-report": "Rapport mensuel",
+      "expense-reminder": "Rappel de dépenses",
+      "other": "Autre"
+    }
+  },
   "expenseReminders": {
     "emailSubject": "Paiements et entretiens à traiter — {date}",
     "emailIntro": "Bonjour {name}, voici ce qui arrive à échéance dans vos logements :",

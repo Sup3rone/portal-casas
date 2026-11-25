@@ -17,6 +17,7 @@ export default async function PanelLayout({ children, params }: { children: Reac
   const referrals = await getTranslations({ locale, namespace: 'referrals' });
   const report = await getTranslations({ locale, namespace: 'monthlyReport' });
   const vendor = await getTranslations({ locale, namespace: 'vendor' });
+  const emails = await getTranslations({ locale, namespace: 'emailLog' });
   // T-5201: la misma lista de enlaces va en el menú de escritorio (md+) y dentro de «Más» de la barra móvil.
   const links = <>
       <Link href="/panel/vender" className="font-semibold text-green-700 dark:text-green-400">{vendor('navSell')}</Link>
@@ -35,6 +36,8 @@ export default async function PanelLayout({ children, params }: { children: Reac
       {/* T-4767: «Mis referidos» (T-4736) descontinuado en UI; el dueño usa «Mis referidores». */}
       {manager.role === 'ADMIN' && <Link href="/panel/usuarios" className="text-green-700 dark:text-green-400">{admin('title')}</Link>}
       {manager.role === 'ADMIN' && <Link href="/panel/contenido" className="text-green-700 dark:text-green-400">{content('title')}</Link>}
+      {/* T-5310: bitácora de correos enviados (solo ADMIN). */}
+      {manager.role === 'ADMIN' && <Link href="/panel/correos" className="text-green-700 dark:text-green-400">{emails('navTitle')}</Link>}
       {/* T-4767: el ADMIN ve todos los referidores; el dueño (COLLABORATOR) administra los suyos. */}
       <Link href="/panel/referidos" className="text-green-700 dark:text-green-400">{referrals(manager.role === 'ADMIN' ? 'title' : 'ownerTitle')}</Link>
       {manager.role === 'ADMIN' && <>

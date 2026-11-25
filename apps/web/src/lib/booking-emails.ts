@@ -119,11 +119,11 @@ export async function sendBookingConfirmation(bookingId: string, input: { guestN
   };
   const sent = { guest: null as string | null, owner: null as string | null };
   if (email) {
-    try { await sendEmail({ to: email, ...guestConfirmationEmail(data) }); sent.guest = email; }
+    try { await sendEmail({ kind: 'booking-guest', to: email, ...guestConfirmationEmail(data) }); sent.guest = email; }
     catch (error) { console.error('Fallo la confirmación al huésped (reserva OK):', error); }
   }
   if (row.ownerEmail && row.ownerEmail.toLowerCase() !== email?.toLowerCase()) {
-    try { await sendEmail({ to: row.ownerEmail, ...ownerCopyEmail(data) }); sent.owner = row.ownerEmail; }
+    try { await sendEmail({ kind: 'booking-owner', to: row.ownerEmail, ...ownerCopyEmail(data) }); sent.owner = row.ownerEmail; }
     catch (error) { console.error('Fallo la copia al dueño (reserva OK):', error); }
   }
   return sent;

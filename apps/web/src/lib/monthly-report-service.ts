@@ -146,6 +146,7 @@ export async function deliverMonthlyReport(owner: { id: string; name: string | n
     } catch (expenseError) { console.error(`Reporte de gastos ${month} para ${owner.id} no se adjuntó:`, expenseError); }
     // Todo lo interpolado en el HTML se escapa (el nombre lo controla el usuario).
     await sendEmail({
+      kind: 'monthly-report',
       to: recipients,
       subject: t('emailSubject', { month }),
       html: `<div style="font-family:sans-serif;max-width:520px"><p>${html(t('emailIntro', { month, name: owner.name ?? '' }))}</p>`

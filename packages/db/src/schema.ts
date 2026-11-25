@@ -402,6 +402,26 @@ export const expenseAttachments = pgTable('ExpenseAttachment', {
   check('ExpenseAttachment_size_check', sql`${table.size} > 0 and ${table.size} <= 4000000`),
 ]);
 
+// T-5310: bitácora de TODOS los correos que envía el portal (lib/mailer.ts), para /panel/correos (solo ADMIN).
+// NUNCA guarda el contenido: el de recuperación de contraseña lleva un enlace que da acceso a la cuenta.
+// Se borra sola a los 90 días (lib/email-log.ts). SQL: scripts/sql/email-log.sql.
+export const emailKinds = ['password-reset', 'password-changed', 'booking-guest', 'booking-owner', 'inquiry', 'monthly-report', 'expense-reminder', 'other'] as const;
+export const emailLogs = pgTable('EmailLog', {
+  id: text('id').primaryKey(),
+  kind: text('kind').$type<typeof emailKinds[number]>().notNull(),
+  recipients: jsonb('recipients').$type<string[]>().notNull().default([]),
+  subject: text('subject').notNull(),
+  status: text('status').$type<'sent' | 'failed'>().notNull(),
+  provider: text('provider').$type<'gmail' | 'resend'>().notNull(),
+  error: text('error'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  index('EmailLog_createdAt_idx').on(table.createdAt),
+  check('EmailLog_kind_check', sql`${table.kind} in ('password-reset', 'password-changed', 'booking-guest', 'booking-owner', 'inquiry', 'monthly-report', 'expense-reminder', 'other')`),
+  check('EmailLog_status_check', sql`${table.status} in ('sent', 'failed')`),
+  check('EmailLog_provider_check', sql`${table.provider} in ('gmail', 'resend')`),
+]);
+
 // T-5248 (fase 4): bitácora de los avisos diarios de pagos y mantenimientos por vencer (correo al colaborador).
 // Un solo aviso vivo (pending/sent) por colaborador y día: el cron no duplica aunque corra dos veces; un fallo
 // ('failed') libera el hueco para reintentar. SQL: scripts/sql/expense-reminders.sql.

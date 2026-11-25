@@ -703,6 +703,42 @@
     "taxesManual": "Manual amount (not recalculated).",
     "applyTaxes": "Calculate 16% (VAT)"
   },
+  "emailLog": {
+    "navTitle": "Emails",
+    "title": "Sent emails",
+    "intro": "Every email the portal sent in the last {days} days: to whom, what kind and whether it went out. The content is not stored.",
+    "search": "Search recipient",
+    "status": "Status",
+    "kind": "Type",
+    "all": "All",
+    "filter": "Filter",
+    "date": "Date",
+    "recipients": "To",
+    "subject": "Subject",
+    "empty": "No emails match these filters.",
+    "pagination": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {number}",
+    "statuses": {
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "providers": {
+      "gmail": "via Gmail",
+      "resend": "via Resend"
+    },
+    "kinds": {
+      "password-reset": "Password recovery",
+      "password-changed": "Password changed",
+      "booking-guest": "Booking (guest)",
+      "booking-owner": "Booking (owner copy)",
+      "inquiry": "New inquiry",
+      "monthly-report": "Monthly report",
+      "expense-reminder": "Expense reminder",
+      "other": "Other"
+    }
+  },
   "expenseReminders": {
     "emailSubject": "Payments and maintenance to handle — {date}",
     "emailIntro": "Hi {name}, this is due at your homes:",

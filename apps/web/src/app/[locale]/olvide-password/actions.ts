@@ -34,6 +34,7 @@ export async function requestPasswordReset(formData: FormData) {
       const resetUrl = passwordResetUrl(locale, token); // T-4771: PUBLIC_SITE_URL, como el resto del sitio
 
       await sendEmail({
+        kind: 'password-reset',
         to: user.email,
         subject: 'Recupera tu contraseña — ALIA for Rent',
         html: `

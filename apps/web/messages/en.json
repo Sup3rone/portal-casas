@@ -1210,5 +1210,48 @@
     "confirmRemoveAttachment": "Remove this file? This cannot be undone.",
     "attachmentAdded": "File attached.",
     "attachmentsOff": "Attaching invoices is not enabled yet."
+  },
+  "expenseReport": {
+    "title": "Expenses and maintenance for {month}",
+    "download": "Download expenses Excel",
+    "empty": "No payments or maintenance in {month}.",
+    "totals": {
+      "paid": "Paid",
+      "pending": "To pay",
+      "maintenances": "Active maintenance",
+      "overBudget": "Over budget"
+    },
+    "columns": {
+      "property": "Property",
+      "payments": "Payments",
+      "paid": "Paid",
+      "pending": "To pay",
+      "maintenances": "Maintenance",
+      "actualCost": "Actual cost"
+    },
+    "overBudgetCount": "{count, plural, one {# over budget} other {# over budget}}",
+    "sheetTitle": "Expenses and maintenance — {month}",
+    "paymentsTitle": "Payments this month",
+    "maintenanceTitle": "Maintenance active this month",
+    "property": "Property",
+    "date": "Date",
+    "type": "Type",
+    "recurring": "Recurring",
+    "amount": "Amount (MXN)",
+    "status": "Status",
+    "paidAt": "Paid on",
+    "notes": "Notes",
+    "work": "Job",
+    "kind": "Job type",
+    "start": "Start",
+    "end": "End",
+    "budget": "Budget (MXN)",
+    "actualCost": "Actual cost (MXN)",
+    "overBudget": "Over budget",
+    "yes": "Yes",
+    "no": "No",
+    "paymentsTotal": "Total of {count} payments",
+    "maintenanceTotal": "Total of {count} maintenance jobs",
+    "emailLine": "Expenses this month: paid {paid}, to pay {pending}; {count} active maintenance jobs. Details in the second Excel file."
   }
 }

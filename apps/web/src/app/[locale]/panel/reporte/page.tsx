@@ -9,6 +9,7 @@ import { getReportEmails, listDeliveries, loadMonthlyReport, reportPage, reportP
 import { formatMoney } from '@/lib/booking-breakdown';
 import { inputClass, buttonClass } from '@/components/panel/request';
 import { ReportRecipientsForm, SendReportButton } from '@/components/panel/MonthlyReportControls';
+import { loadExpenseReport } from '@/lib/expense-report-service';
 
 export default async function MonthlyReportPage({ params, searchParams }: {
   params: Promise<{ locale: string }>; searchParams: Promise<{ month?: string; partner?: string }>;
@@ -19,8 +20,11 @@ export default async function MonthlyReportPage({ params, searchParams }: {
   const month = isMonth(query.month) ? query.month : previousMonth(inquiryToday());
   const partnerOptions = await reportPartnerOptions(manager);
   const partner = partnerOptions.some(option => option.id === query.partner) ? query.partner! : null;
-  const [report, recipients, deliveries] = await Promise.all([
-    loadMonthlyReport(manager, month, partner, locale), getReportEmails(manager.id), listDeliveries(manager.id)]);
+  const [report, recipients, deliveries, expenses] = await Promise.all([
+    loadMonthlyReport(manager, month, partner, locale), getReportEmails(manager.id), listDeliveries(manager.id),
+    loadExpenseReport(manager, month, locale)]); // T-5248 (fase 3): gastos y mantenimientos del mismo mes
+  const e = await getTranslations({ locale, namespace: 'expenseReport' });
+  const expensesDownload = `/api/panel/reports/expenses?${new URLSearchParams({ month, locale })}`;
   const money = (value: string | null) => formatMoney(value, locale);
   const date = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' });
   const day = (value: string) => date.format(new Date(`${value}T00:00:00Z`));
@@ -81,6 +85,27 @@ export default async function MonthlyReportPage({ params, searchParams }: {
         </tbody>
       </table></div>
     </section>)}
+
+    {/* T-5248 (fase 3): gastos y mantenimientos del mes, por casa, con su Excel. */}
+    <section data-expense-report="" className="space-y-4 rounded-lg border p-4 dark:border-gray-700">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-xl font-semibold">{e('title', { month })}</h2>
+        <a href={expensesDownload} className={`${buttonClass} inline-flex items-center`} download>{e('download')}</a>
+      </div>
+      <dl className="grid gap-4 sm:grid-cols-4">
+        {([['paid', money(expenses.totals.paid)], ['pending', money(expenses.totals.pending)], ['maintenances', String(expenses.totals.maintenances)], ['overBudget', String(expenses.totals.overBudget)]] as const)
+          .map(([key, value]) => <div key={key}><dt className="text-sm text-gray-600 dark:text-gray-300">{e(`totals.${key}`)}</dt><dd className="text-lg font-semibold" data-testid={`expense-${key}`}>{value}</dd></div>)}
+      </dl>
+      {!expenses.groups.length ? <p>{e('empty', { month })}</p> : <div className="overflow-x-auto"><table className="w-full min-w-[40rem] text-left text-sm">
+        <thead><tr>{(['property', 'payments', 'paid', 'pending', 'maintenances', 'actualCost'] as const).map(key => <th key={key} scope="col" className="p-2">{e(`columns.${key}`)}</th>)}</tr></thead>
+        <tbody>{expenses.groups.map(group => <tr key={group.propertyId} className="border-t dark:border-gray-700">
+          <td className="p-2 break-words">{group.propertyTitle}</td><td className="p-2">{group.totals.payments}</td>
+          <td className="p-2 whitespace-nowrap">{money(group.totals.paid)}</td><td className="p-2 whitespace-nowrap">{money(group.totals.pending)}</td>
+          <td className="p-2">{group.totals.maintenances}{group.totals.overBudget > 0 && <span className="ml-2 text-red-800 dark:text-red-300">{e('overBudgetCount', { count: group.totals.overBudget })}</span>}</td>
+          <td className="p-2 whitespace-nowrap">{money(group.totals.actualCost)}</td>
+        </tr>)}</tbody>
+      </table></div>}
+    </section>
 
     <section className="space-y-4 rounded-lg border p-4 dark:border-gray-700">
       <h2 className="text-xl font-semibold">{t('autoTitle')}</h2>

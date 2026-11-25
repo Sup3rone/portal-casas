@@ -100,7 +100,7 @@ export async function runExpenseReminders(today: string) {
     const titles = new Map(own.map(row => [row.id, row.titleEs || row.slug]));
     try {
       const message = await reminderEmail(owner, today, plan.soon, plan.items, id => titles.get(id) ?? id, id => data.typeNames.get(id) ?? id);
-      await sendEmail({ to: owner.email, ...message });
+      await sendEmail({ kind: 'expense-reminder', to: owner.email, ...message });
       try { await db.update(expenseReminderDeliveries).set({ status: 'sent' }).where(eq(expenseReminderDeliveries.id, claimId)); }
       catch (logError) { console.error('Aviso de gastos enviado pero no se pudo registrar como sent:', logError); }
       results.push({ userId: owner.id, status: 'sent', items: plan.items.length });

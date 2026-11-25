@@ -88,7 +88,8 @@ async function main() {
   // 7) Cada plantilla declara su tipo; el SQL coincide con la lista de tipos.
   for (const [file, kind] of [['apps/web/src/app/[locale]/olvide-password/actions.ts', 'password-reset'], ['apps/web/src/lib/account-emails.ts', 'password-changed'],
     ['apps/web/src/lib/booking-emails.ts', 'booking-guest'], ['apps/web/src/lib/booking-emails.ts', 'booking-owner'],
-    ['apps/web/src/lib/inquiry-notice.ts', 'inquiry'], ['apps/web/src/lib/monthly-report-service.ts', 'monthly-report']]) {
+    ['apps/web/src/lib/inquiry-notice.ts', 'inquiry'], ['apps/web/src/lib/monthly-report-service.ts', 'monthly-report'],
+    ['apps/web/src/lib/expense-reminder-service.ts', 'expense-reminder']]) {
     assert.ok(fs.readFileSync(file, 'utf8').includes(`kind: '${kind}'`), `${file}: ${kind}`);
   }
   const sqlText = fs.readFileSync('scripts/sql/email-log.sql', 'utf8');

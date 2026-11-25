@@ -7,15 +7,18 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { formatMoney } from '@/lib/booking-breakdown';
 import { currentDueDate, expensePeriodicities, maintenanceKinds, maintenanceStatuses, nextDueDate, overBudget, type Periodicity } from '@/lib/property-expenses-rules';
-import { panelErrorKey, panelRequest, inputClass, buttonClass } from './request';
+import { AttachmentError, attachmentAccept, attachmentMetadata } from '@/lib/expense-attachment-rules';
+import { panelErrorKey, panelRequest, panelResponseError, PanelRequestError, inputClass, buttonClass } from './request';
 
 type Type = { id: string; name: string; fixed: boolean; active: boolean };
 type Maintenance = { id: string; title: string; kind: string; status: string; budget: string | null; actualCost: string | null; startDate: string | null; endDate: string | null; notes: string | null };
 type Recurring = { id: string; typeId: string; periodicity: string; amount: string | null; startDate: string; active: boolean; notes: string | null };
 type Entry = { id: string; typeId: string; recurringExpenseId: string | null; date: string; amount: string; paid: boolean; paidAt: string | null; notes: string | null };
+type Attachment = { id: string; maintenanceId: string | null; entryId: string | null; fileName: string; contentType: string; size: number };
 /** totals los calcula el servidor con TODOS los cargos; entries es la lista (recortada si truncated). */
 export type PropertyExpensesData = { types: Type[]; maintenances: Maintenance[]; recurring: Recurring[]; entries: Entry[];
-  totals: { paid: string; pending: string; total: string }; truncated: boolean };
+  totals: { paid: string; pending: string; total: string }; truncated: boolean; attachments: Attachment[] };
+const attachmentCodes: Record<string, string> = { INVALID_ATTACHMENT_TYPE: 'invalidAttachmentType', INVALID_ATTACHMENT_SIZE: 'invalidAttachmentSize' };
 
 const secondary = 'min-h-11 rounded-lg border border-green-700 px-3 text-green-800 disabled:opacity-50 dark:border-green-400 dark:text-green-300';
 const card = 'space-y-4 rounded-lg border p-4 dark:border-gray-700';
@@ -27,7 +30,7 @@ function fields(form: HTMLFormElement, names: string[]) {
   return Object.fromEntries(names.map(name => { const value = String(data.get(name) ?? '').trim(); return [name, value || null]; }));
 }
 
-export default function PropertyExpenses({ propertyId, data, today, isAdmin }: { propertyId: string; data: PropertyExpensesData; today: string; isAdmin: boolean }) {
+export default function PropertyExpenses({ propertyId, data, today, isAdmin, attachmentsEnabled = false }: { propertyId: string; data: PropertyExpensesData; today: string; isAdmin: boolean; attachmentsEnabled?: boolean }) {
   const t = useTranslations('expenses'), errors = useTranslations('panel'), router = useRouter(), locale = useLocale();
   const [busy, setBusy] = useState(false), [status, setStatus] = useState(''), [error, setError] = useState('');
   // «Registrar pago de este periodo»: llena el formulario de pago con el gasto recurrente (key = lo vuelve a montar).
@@ -55,6 +58,40 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
   const remove = (kind: string, id: string) => {
     if (!window.confirm(t('confirmRemove'))) return;
     void run(() => panelRequest(`${base}/${kind}/${encodeURIComponent(id)}`, 'DELETE'), 'removed');
+  };
+
+  // Fase 2: facturas y recibos. Se valida antes de subir (el servidor vuelve a validar) y se sube como multipart.
+  async function upload(kind: 'maintenance' | 'entry', id: string, file: File | undefined) {
+    if (!file) return;
+    try { attachmentMetadata(file.type, file.size); }
+    catch (failure) { setStatus(''); setError(errors(failure instanceof AttachmentError ? attachmentCodes[failure.code] ?? 'error' : 'error')); return; }
+    const form = new FormData(); form.append('file', file);
+    await run(async () => {
+      let response: Response;
+      try { response = await fetch(`${base}/${kind}/${encodeURIComponent(id)}/attachments`, { method: 'POST', body: form }); }
+      catch { throw new PanelRequestError('networkError'); }
+      if (!response.ok) throw panelResponseError(response.status, await response.json().catch(() => ({})));
+    }, 'attachmentAdded');
+  }
+  const kb = (size: number) => `${Math.max(1, Math.round(size / 1000)).toLocaleString(locale)} KB`;
+  const attachmentsFor = (kind: 'maintenance' | 'entry', id: string) => {
+    const files = data.attachments.filter(file => (kind === 'maintenance' ? file.maintenanceId : file.entryId) === id);
+    return <div data-attachments={kind} className="w-full space-y-2">
+      {files.length > 0 && <ul className="space-y-1">{files.map(file => <li key={file.id} className="flex flex-wrap items-center gap-3 text-sm">
+        <a href={`${base}/attachments/${encodeURIComponent(file.id)}`} target="_blank" rel="noopener" className="text-green-700 underline dark:text-green-400">
+          {file.contentType === 'application/pdf' ? 'PDF' : t('image')} · {file.fileName}</a>
+        <span className="text-gray-600 dark:text-gray-300">{kb(file.size)}</span>
+        <button type="button" disabled={busy} className="min-h-11 px-2 text-red-800 underline disabled:opacity-50 dark:text-red-300" onClick={() => {
+          if (!window.confirm(t('confirmRemoveAttachment'))) return;
+          void run(() => panelRequest(`${base}/attachments/${encodeURIComponent(file.id)}`, 'DELETE'), 'removed');
+        }}>{t('removeAttachment')}</button>
+      </li>)}</ul>}
+      {attachmentsEnabled
+        ? <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-dashed border-green-700 px-3 text-sm text-green-800 dark:border-green-400 dark:text-green-300">
+            {t('attach')}<input type="file" accept={attachmentAccept} disabled={busy} className="sr-only"
+              onChange={event => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; void upload(kind, id, file); }} /></label>
+        : files.length === 0 && <p className="text-sm text-gray-600 dark:text-gray-300">{t('attachmentsOff')}</p>}
+    </div>;
   };
   const typeSelect = (value = '') => <select name="typeId" required className={inputClass} defaultValue={value}>
     <option value="" disabled>{t('chooseType')}</option>
@@ -103,6 +140,7 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
             <button type="submit" disabled={busy} className={secondary}>{t('save')}</button>
           </form>
           <button type="button" disabled={busy} className={secondary} onClick={() => remove('maintenance', item.id)}>{t('remove')}</button>
+          {attachmentsFor('maintenance', item.id)}
         </div>
       </li>)}</ul>
       <form className="grid gap-3 sm:grid-cols-2" onSubmit={submit('maintenance', ['title', 'kind', 'status', 'budget', 'actualCost', 'startDate', 'endDate', 'notes'])}>
@@ -167,6 +205,7 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin }: {
             <span className="block text-sm">{item.paid ? t('paidOn', { date: day(item.paidAt) }) : t('unpaid')}</span></span>
         </label>
         <button type="button" disabled={busy} className={secondary} onClick={() => remove('entry', item.id)}>{t('remove')}</button>
+        {attachmentsFor('entry', item.id)}
       </li>)}</ul>
       <form key={formKey} id="registrar-pago" data-prefilled={prefill ? '' : undefined} className="grid gap-3 sm:grid-cols-2" onSubmit={submit('entry', ['typeId', 'recurringExpenseId', 'date', 'amount', 'notes'], form => ({ paid: (form.elements.namedItem('paid') as HTMLInputElement).checked }))}>
         <h3 className="font-semibold sm:col-span-2">{t('entryNew')}</h3>

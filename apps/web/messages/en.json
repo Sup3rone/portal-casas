@@ -184,7 +184,10 @@
     "pageTextTooLong": "A text is too long.",
     "invalidPageImage": "The image must be a valid https address.",
     "pageContentNotReady": "The SQL site-content-pages.sql has not been applied to the database yet. Saving is not possible until then.",
-    "expenses": "Expenses"
+    "expenses": "Expenses",
+    "invalidAttachmentType": "Only JPG, PNG or WebP images and PDF files are accepted.",
+    "invalidAttachmentSize": "The file is larger than 4 MB.",
+    "attachmentsDisabled": "Attaching invoices is not enabled yet."
   },
   "nav": {
     "menu": "Menu",
@@ -1200,6 +1203,12 @@
     "entriesTruncated": "Showing the {count} most recent payments. The totals above include all of them.",
     "registerPeriod": "Record the {date} payment",
     "periodRegistered": "{date} payment recorded",
-    "prefillHint": "Check the actual amount on the bill and press Add."
+    "prefillHint": "Check the actual amount on the bill and press Add.",
+    "attach": "Attach invoice or receipt (image or PDF, up to 4 MB)",
+    "image": "Image",
+    "removeAttachment": "Remove file",
+    "confirmRemoveAttachment": "Remove this file? This cannot be undone.",
+    "attachmentAdded": "File attached.",
+    "attachmentsOff": "Attaching invoices is not enabled yet."
   }
 }

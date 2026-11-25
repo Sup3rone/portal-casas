@@ -184,7 +184,10 @@
     "pageTextTooLong": "Algún texto es demasiado largo.",
     "invalidPageImage": "La imagen debe ser una dirección https válida.",
     "pageContentNotReady": "Falta aplicar el SQL site-content-pages.sql en la base de datos. Hasta entonces no se puede guardar.",
-    "expenses": "Gastos"
+    "expenses": "Gastos",
+    "invalidAttachmentType": "Solo se aceptan imágenes JPG, PNG o WebP y PDF.",
+    "invalidAttachmentSize": "El archivo pesa más de 4 MB.",
+    "attachmentsDisabled": "Adjuntar facturas aún no está activado."
   },
   "nav": {
     "menu": "Menú",
@@ -1200,6 +1203,12 @@
     "entriesTruncated": "Se muestran los {count} pagos más recientes. Los totales de arriba incluyen todos.",
     "registerPeriod": "Registrar pago del {date}",
     "periodRegistered": "Pago del {date} registrado",
-    "prefillHint": "Revisa el monto real del recibo y pulsa Agregar."
+    "prefillHint": "Revisa el monto real del recibo y pulsa Agregar.",
+    "attach": "Adjuntar factura o recibo (imagen o PDF, hasta 4 MB)",
+    "image": "Imagen",
+    "removeAttachment": "Quitar archivo",
+    "confirmRemoveAttachment": "¿Quitar este archivo? No se puede deshacer.",
+    "attachmentAdded": "Archivo adjuntado.",
+    "attachmentsOff": "Adjuntar facturas aún no está activado."
   }
 }

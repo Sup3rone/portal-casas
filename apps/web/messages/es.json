@@ -703,6 +703,42 @@
     "taxesManual": "Importe manual (no se recalcula).",
     "applyTaxes": "Calcular 16 % (IVA)"
   },
+  "emailLog": {
+    "navTitle": "Correos",
+    "title": "Correos enviados",
+    "intro": "Cada correo que envió el portal en los últimos {days} días: a quién, de qué tipo y si llegó a salir. No se guarda el contenido.",
+    "search": "Buscar destinatario",
+    "status": "Estado",
+    "kind": "Tipo",
+    "all": "Todos",
+    "filter": "Filtrar",
+    "date": "Fecha",
+    "recipients": "Para",
+    "subject": "Asunto",
+    "empty": "No hay correos con esos filtros.",
+    "pagination": "Páginas",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {number}",
+    "statuses": {
+      "sent": "Enviado",
+      "failed": "Falló"
+    },
+    "providers": {
+      "gmail": "por Gmail",
+      "resend": "por Resend"
+    },
+    "kinds": {
+      "password-reset": "Recuperar contraseña",
+      "password-changed": "Contraseña cambiada",
+      "booking-guest": "Reserva (huésped)",
+      "booking-owner": "Reserva (copia al dueño)",
+      "inquiry": "Consulta nueva",
+      "monthly-report": "Reporte mensual",
+      "expense-reminder": "Aviso de gastos",
+      "other": "Otro"
+    }
+  },
   "monthlyReport": {
     "navTitle": "Reporte mensual",
     "title": "Reporte mensual de comisiones",

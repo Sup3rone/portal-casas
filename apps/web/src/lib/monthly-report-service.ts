@@ -133,6 +133,7 @@ export async function deliverMonthlyReport(owner: { id: string; name: string | n
     const file = await reportXlsx(report, locale);
     // Todo lo interpolado en el HTML se escapa (el nombre lo controla el usuario).
     await sendEmail({
+      kind: 'monthly-report',
       to: recipients,
       subject: t('emailSubject', { month }),
       html: `<div style="font-family:sans-serif;max-width:520px"><p>${html(t('emailIntro', { month, name: owner.name ?? '' }))}</p>`

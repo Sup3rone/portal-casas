@@ -50,7 +50,7 @@ export async function sendInquiryNotice(messageId: string, origin: 'public' | 'v
 
   const sent: string[] = [];
   for (const to of recipients) {
-    try { await sendEmail({ to, subject, html }); sent.push(to); }
+    try { await sendEmail({ kind: 'inquiry', to, subject, html }); sent.push(to); }
     catch (error) { console.error('Falló el aviso de consulta (la consulta quedó guardada):', to, error); }
   }
   return { sent };

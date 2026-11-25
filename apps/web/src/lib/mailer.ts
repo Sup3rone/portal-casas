@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { emailLayout, emailText } from './email-layout';
 import { EMAIL_LOGO_CID, EMAIL_LOGO_PNG_BASE64 } from './email-logo';
+import { recordEmail, type EmailKind } from './email-log';
 
 // T-5308: dos salidas para TODOS los correos del portal (contraseña, cuenta, reservas, consultas, reportes, avisos).
 // 1) Gmail por SMTP si están GMAIL_USER y GMAIL_APP_PASSWORD (contraseña de aplicación; requiere verificación en
@@ -26,17 +27,30 @@ export function mailProvider() {
   return process.env.GMAIL_USER?.trim() && process.env.GMAIL_APP_PASSWORD?.trim() ? 'gmail' as const : 'resend' as const;
 }
 
+type Message = { to: string | string[]; subject: string; html: string; attachments?: { filename: string; content: Buffer }[] };
+
 // T-4739: `to` admite varios destinatarios y `attachments` (p. ej. el Excel del reporte mensual).
-export async function sendEmail({ to, subject, html, attachments }: {
-  to: string | string[]; subject: string; html: string; attachments?: { filename: string; content: Buffer }[];
-}) {
+// T-5310: `kind` clasifica el correo en la bitácora /panel/correos. Cada envío deja su fila (enviado o fallido, sin el
+// contenido); un fallo del registro nunca rompe el envío, y un fallo del envío se registra y se vuelve a lanzar.
+export async function sendEmail({ kind = 'other', ...message }: Message & { kind?: EmailKind }) {
+  const provider = mailProvider();
+  try {
+    await deliver(message, provider);
+  } catch (error) {
+    await recordEmail({ kind, to: message.to, subject: message.subject, status: 'failed', provider, error: error instanceof Error ? error.message : String(error) });
+    throw error;
+  }
+  await recordEmail({ kind, to: message.to, subject: message.subject, status: 'sent', provider });
+}
+
+async function deliver({ to, subject, html, attachments }: Message, provider: 'gmail' | 'resend') {
   // T-5309: marco común (logo, colores, pie) para todos los correos + versión de texto plano (los filtros de spam
   // castigan los correos solo-HTML). Sin texto oculto de bandeja: en cuentas nuevas suma puntos de spam.
   html = emailLayout(html);
   const text = emailText(html);
   // Logo como adjunto en línea (cid:), solo si el HTML lo usa.
   const logo = html.includes(`cid:${EMAIL_LOGO_CID}`) ? Buffer.from(EMAIL_LOGO_PNG_BASE64, 'base64') : null;
-  if (mailProvider() === 'gmail') {
+  if (provider === 'gmail') {
     const user = process.env.GMAIL_USER!.trim();
     // La contraseña de aplicación se muestra en grupos de 4 con espacios; se acepta con o sin ellos.
     const pass = process.env.GMAIL_APP_PASSWORD!.replace(/\s+/g, '');
@@ -63,6 +77,6 @@ export async function sendEmail({ to, subject, html, attachments }: {
   const { error } = await resend.emails.send({ from, to, subject, html, text, ...(all.length ? { attachments: all } : {}) });
   if (error) {
     console.error('Error enviando email:', error);
-    throw new Error('No se pudo enviar el email');
+    throw new Error(`No se pudo enviar el email (Resend: ${String(error.message ?? error.name ?? '').slice(0, 200)})`);
   }
 }

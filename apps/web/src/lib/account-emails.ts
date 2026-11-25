@@ -8,6 +8,7 @@ export async function sendPasswordChangedEmail(user: { email: string; name: stri
   const when = new Intl.DateTimeFormat('es-MX', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Mexico_City' }).format(new Date());
   try {
     await sendEmail({
+      kind: 'password-changed',
       to: user.email,
       subject: 'Tu contraseña cambió — ALIA for Rent',
       html: `<div>

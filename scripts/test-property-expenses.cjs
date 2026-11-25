@@ -14,7 +14,7 @@ const root = path.join(__dirname, '..');
 // Tablas nuevas en la BD en memoria del arnés (mismo criterio: números REAL, resto TEXT).
 for (const name of ['expenseTypes', 'recurringExpenses', 'expenseEntries', 'maintenances', 'expenseAttachments']) {
   const config = getTableConfig(portal[name]);
-  memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => `"${column.name}" ${/integer|boolean|double/.test(column.getSQLType()) ? 'REAL' : 'TEXT'}${column.primary ? ' PRIMARY KEY' : ''}`).join(', ')})`);
+  memory.exec(`CREATE TABLE IF NOT EXISTS "${config.name}" (${config.columns.map(column => `"${column.name}" ${/integer|boolean|double/.test(column.getSQLType()) ? 'REAL' : 'TEXT'}${column.primary ? ' PRIMARY KEY' : ''}`).join(', ')})`);
 }
 memory.exec(`INSERT INTO "ExpenseType" ("id", "name", "fixed", "active") VALUES ('luz', 'Luz', 1, 1), ('agua', 'Agua', 1, 1), ('viejo', 'Viejo', 0, 0)`);
 

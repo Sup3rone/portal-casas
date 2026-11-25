@@ -26,7 +26,19 @@ const button = emailButton('https://x.test/a?b=1&c="2"', 'Ver <más>');
 assert.ok(button.startsWith('<table') && button.includes('href="https://x.test/a?b=1&amp;c=&quot;2&quot;"') && button.includes('Ver &lt;más&gt;'));
 
 // sendEmail aplica el marco; las plantillas usan el botón y ya no fijan su propio ancho.
-assert.match(fs.readFileSync('apps/web/src/lib/mailer.ts', 'utf8'), /html = emailLayout\(html, \{ preheader: subject \}\)/);
+const mailerSource = fs.readFileSync('apps/web/src/lib/mailer.ts', 'utf8');
+assert.match(mailerSource, /html = emailLayout\(html\);/);
+assert.ok(!mailerSource.includes('preheader'), 'sin texto oculto de bandeja (suma puntos de spam en cuentas nuevas)');
+
+// Texto plano: enlaces legibles, viñetas, entidades decodificadas, sin <head>, texto oculto ni etiquetas.
+const { emailText } = load('apps/web/src/lib/email-layout.ts');
+const plain = emailText(emailLayout('<h2>Hola &amp; adiós</h2><p>Línea 1<br>Línea 2</p><ul><li>Casa &lt;Sol&gt;</li></ul>'
+  + emailButton('https://a.test/x?y=1&z=2', 'Ver gastos'), { preheader: 'OCULTO' }));
+assert.ok(plain.startsWith('ALIA for Rent'), plain);
+assert.ok(plain.includes('Hola & adiós\n') && plain.includes('Línea 1\nLínea 2') && plain.includes('• Casa <Sol>'), plain);
+assert.ok(plain.includes('Ver gastos: https://a.test/x?y=1&z=2'), plain);
+assert.ok(plain.includes('aliaforrent.vercel.app'), plain);
+assert.ok(!/[<>]/.test(plain.replace('<Sol>', '')) && !plain.includes('OCULTO') && !plain.includes('\n\n\n'), plain);
 for (const file of ['apps/web/src/app/[locale]/olvide-password/actions.ts', 'apps/web/src/lib/inquiry-notice.ts', 'apps/web/src/lib/account-emails.ts', 'apps/web/src/lib/booking-emails.ts']) {
   assert.ok(!/max-width: 4[0-9]0px|max-width: 520px/.test(fs.readFileSync(file, 'utf8')), `${file}: sin ancho propio`);
 }

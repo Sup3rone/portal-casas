@@ -24,7 +24,8 @@ async function main() {
   await mailer.sendEmail(msg);
   const first = resendCalls.pop();
   assert.ok(first.html.startsWith('<!doctype html>') && first.html.includes('<p>Hola</p>'), 'T-5309: el marco envuelve el contenido');
-  assert.deepEqual({ ...first, html: undefined }, { key: 're_x', from: 'ALIA for Rent <onboarding@resend.dev>', ...msg, html: undefined });
+  assert.ok(first.text.includes('Hola'), 'T-5309: también va la versión de texto');
+  assert.deepEqual({ ...first, html: undefined, text: undefined }, { key: 're_x', from: 'ALIA for Rent <onboarding@resend.dev>', ...msg, html: undefined, text: undefined });
   env({ RESEND_API_KEY: 're_x', EMAIL_FROM: 'ALIA <noreply@dominio.mx>', GMAIL_USER: 'solo-usuario@gmail.com' });
   assert.equal(mailer.mailProvider(), 'resend', 'falta la contraseña → Resend');
   await mailer.sendEmail(msg);
@@ -38,7 +39,8 @@ async function main() {
   assert.deepEqual(transports.at(-1), { host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true, auth: { user: 'portal@gmail.com', pass: 'abcdefghijklmnop' } });
   const viaGmail = smtp.pop();
   assert.ok(viaGmail.html.includes('<p>Hola</p>') && viaGmail.html.includes('alia-email-layout'));
-  assert.deepEqual({ ...viaGmail, html: undefined }, { from: { name: 'ALIA for Rent', address: 'portal@gmail.com' }, ...msg, html: undefined, attachments: [{ filename: 'r.xlsx', content: excel }] });
+  assert.ok(viaGmail.text.includes('Hola'));
+  assert.deepEqual({ ...viaGmail, html: undefined, text: undefined }, { from: { name: 'ALIA for Rent', address: 'portal@gmail.com' }, ...msg, html: undefined, text: undefined, attachments: [{ filename: 'r.xlsx', content: excel }] });
   assert.equal(resendCalls.length, 0, 'no se usa Resend');
   // Reutiliza la conexión mientras no cambien las variables; si cambian, crea otra.
   const before = transports.length;

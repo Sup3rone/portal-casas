@@ -53,3 +53,27 @@ export function emailLayout(inner: string, options: { preheader?: string } = {})
     + `ALIA for Rent${footerSite}<br>Correo automático del portal.</td></tr>`
     + `</table></td></tr></table></body></html>`;
 }
+
+const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", nbsp: ' ' };
+/**
+ * Versión de texto plano del correo (parte text/plain). Los filtros de spam castigan los correos solo-HTML.
+ * Enlaces como «texto: url», listas con viñeta, párrafos separados; sin el texto oculto ni el <head>.
+ */
+export function emailText(html: string) {
+  return html
+    .replace(/<head[\s\S]*?<\/head>/gi, '')
+    .replace(/<div style="display:none[\s\S]*?<\/div>/gi, '')
+    .replace(/<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_, href: string, label: string) => {
+      const text = label.replace(/<[^>]+>/g, '').trim();
+      const url = href.replace(/&amp;/g, '&');
+      return text && text !== url && text !== new URL(url, 'https://x.invalid').host ? `${text}: ${url}` : url;
+    })
+    .replace(/<li\b[^>]*>/gi, '\n• ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|h[1-6]|tr|li|ul|table|div)>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, name: string) => ENTITIES[name])
+    .split('\n').map(line => line.replace(/[ \t]+/g, ' ').trim()).join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}

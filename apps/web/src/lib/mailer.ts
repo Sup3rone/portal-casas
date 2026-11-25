@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import nodemailer, { type Transporter } from 'nodemailer';
-import { emailLayout } from './email-layout';
+import { emailLayout, emailText } from './email-layout';
 
 // T-5308: dos salidas para TODOS los correos del portal (contraseña, cuenta, reservas, consultas, reportes, avisos).
 // 1) Gmail por SMTP si están GMAIL_USER y GMAIL_APP_PASSWORD (contraseña de aplicación; requiere verificación en
@@ -29,14 +29,17 @@ export function mailProvider() {
 export async function sendEmail({ to, subject, html, attachments }: {
   to: string | string[]; subject: string; html: string; attachments?: { filename: string; content: Buffer }[];
 }) {
-  html = emailLayout(html, { preheader: subject }); // T-5309: marco común (logo, colores, pie) para todos los correos
+  // T-5309: marco común (logo, colores, pie) para todos los correos + versión de texto plano (los filtros de spam
+  // castigan los correos solo-HTML). Sin texto oculto de bandeja: en cuentas nuevas suma puntos de spam.
+  html = emailLayout(html);
+  const text = emailText(html);
   if (mailProvider() === 'gmail') {
     const user = process.env.GMAIL_USER!.trim();
     // La contraseña de aplicación se muestra en grupos de 4 con espacios; se acepta con o sin ellos.
     const pass = process.env.GMAIL_APP_PASSWORD!.replace(/\s+/g, '');
     try {
       await gmailTransport(user, pass).sendMail({
-        from: { name: SENDER_NAME, address: user }, to, subject, html, ...(attachments?.length ? { attachments } : {}),
+        from: { name: SENDER_NAME, address: user }, to, subject, html, text, ...(attachments?.length ? { attachments } : {}),
       });
     } catch (error) {
       // Solo el código y la respuesta del servidor: nunca credenciales.
@@ -51,7 +54,7 @@ export async function sendEmail({ to, subject, html, attachments }: {
   // Fase desarrollo: onboarding@resend.dev solo entrega a tu propio correo.
   // Fase producción: EMAIL_FROM="ALIA for Rent <noreply@tudominio.com>"
   const from = process.env.EMAIL_FROM || `${SENDER_NAME} <onboarding@resend.dev>`;
-  const { error } = await resend.emails.send({ from, to, subject, html, ...(attachments?.length ? { attachments } : {}) });
+  const { error } = await resend.emails.send({ from, to, subject, html, text, ...(attachments?.length ? { attachments } : {}) });
   if (error) {
     console.error('Error enviando email:', error);
     throw new Error('No se pudo enviar el email');

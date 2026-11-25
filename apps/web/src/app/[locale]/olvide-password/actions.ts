@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { randomUUID, randomBytes } from 'crypto';
 import { sendEmail } from '@/lib/mailer';
+import { emailButton } from '@/lib/email-layout';
 import { headers } from 'next/headers';
 import { consumeRateLimit } from '@/lib/rate-limit';
 import { passwordResetUrl } from '@/lib/password-reset-url';
@@ -36,15 +37,11 @@ export async function requestPasswordReset(formData: FormData) {
         to: user.email,
         subject: 'Recupera tu contraseña — ALIA for Rent',
         html: `
-          <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-            <h2 style="color: #654838;">Recuperación de contraseña</h2>
+          <div>
+            <h2 style="margin: 0 0 12px; color: #654838;">Recuperación de contraseña</h2>
             <p>Hola ${user.name ?? ''},</p>
             <p>Recibimos una solicitud para cambiar la contraseña de tu cuenta. Este enlace expira en <strong>1 hora</strong>:</p>
-            <p style="margin: 24px 0;">
-              <a href="${resetUrl}" style="background: #654838; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-                Cambiar mi contraseña
-              </a>
-            </p>
+            ${emailButton(resetUrl, 'Cambiar mi contraseña')}
             <p style="font-size: 13px; color: #666;">Si tú no pediste esto, puedes ignorar este correo tranquilamente. Tu contraseña sigue igual.</p>
           </div>
         `,

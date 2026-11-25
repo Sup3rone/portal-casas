@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 import { sendEmail } from '@/lib/mailer';
 import { civilDate, escapeHtml, nightsBetween } from './booking-emails';
 import { localizedUrl } from './seo';
+import { emailButton } from './email-layout';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -34,8 +35,8 @@ export async function sendInquiryNotice(messageId: string, origin: 'public' | 'v
     ? `Apartado por ${seller?.name || seller?.email || 'un vendedor'} — ${row.title}`
     : `Nueva consulta — ${row.title}`;
   const line = (label: string, value: string) => `<p style="margin: 4px 0;"><strong>${label}:</strong> ${value}</p>`;
-  const html = `<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #29251f;">
-    <h2 style="margin: 0 0 12px;">${escapeHtml(subject)}</h2>
+  const html = `<div>
+    <h2 style="margin: 0 0 12px; color: #654838;">${escapeHtml(subject)}</h2>
     <div style="background: #f5f1ea; border-radius: 8px; padding: 16px; margin: 16px 0;">
       ${line('Casa', escapeHtml(row.title))}
       ${start && end ? line('Llegada', escapeHtml(civilDate(start))) + line('Salida', escapeHtml(civilDate(end))) + line('Noches', String(nightsBetween(start, end))) : ''}
@@ -44,7 +45,7 @@ export async function sendInquiryNotice(messageId: string, origin: 'public' | 'v
       ${row.phone ? line('Teléfono', escapeHtml(row.phone)) : ''}
       ${row.body ? `<p style="margin: 12px 0 0; white-space: pre-line;">${escapeHtml(row.body)}</p>` : ''}
     </div>
-    <p><a href="${escapeHtml(localizedUrl('es', '/admin/mensajes'))}" style="color: #2f6b3a; font-weight: bold;">Ver la consulta en el panel</a></p>
+    ${emailButton(localizedUrl('es', '/admin/mensajes'), 'Ver la consulta en el panel')}
   </div>`;
 
   const sent: string[] = [];

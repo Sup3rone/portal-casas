@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import nodemailer, { type Transporter } from 'nodemailer';
+import { emailLayout } from './email-layout';
 
 // T-5308: dos salidas para TODOS los correos del portal (contraseña, cuenta, reservas, consultas, reportes, avisos).
 // 1) Gmail por SMTP si están GMAIL_USER y GMAIL_APP_PASSWORD (contraseña de aplicación; requiere verificación en
@@ -28,6 +29,7 @@ export function mailProvider() {
 export async function sendEmail({ to, subject, html, attachments }: {
   to: string | string[]; subject: string; html: string; attachments?: { filename: string; content: Buffer }[];
 }) {
+  html = emailLayout(html, { preheader: subject }); // T-5309: marco común (logo, colores, pie) para todos los correos
   if (mailProvider() === 'gmail') {
     const user = process.env.GMAIL_USER!.trim();
     // La contraseña de aplicación se muestra en grupos de 4 con espacios; se acepta con o sin ellos.

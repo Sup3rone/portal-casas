@@ -52,13 +52,13 @@ function detailRows(data: ConfirmationData) {
 }
 
 const box = (inner: string) => `<div style="background: #f5f1ea; border-radius: 8px; padding: 16px; margin: 16px 0;">${inner}</div>`;
-const wrap = (inner: string) => `<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #29251f;">${inner}</div>`;
+const wrap = (inner: string) => `<div>${inner}</div>`; // T-5309: ancho, letra y color los pone el marco común
 
 export function guestConfirmationEmail(data: ConfirmationData) {
   return {
     subject: `Reserva confirmada — ${data.property.title} (folio ${bookingFolio(data.bookingId)})`,
     html: wrap(`
-      <h2 style="color: #654838;">Su reserva está confirmada</h2>
+      <h2 style="margin: 0 0 12px; color: #654838;">Su reserva está confirmada</h2>
       <p>Hola ${escapeHtml(data.guest.name || 'huésped')},</p>
       <p>Esta es la confirmación de lo que se reservó:</p>
       ${box(detailRows(data))}
@@ -76,7 +76,7 @@ export function ownerCopyEmail(data: ConfirmationData) {
   return {
     subject: `Copia: reserva confirmada — ${data.property.title} (folio ${bookingFolio(data.bookingId)})`,
     html: wrap(`
-      <h2 style="color: #654838;">Se confirmó una reserva en su propiedad</h2>
+      <h2 style="margin: 0 0 12px; color: #654838;">Se confirmó una reserva en su propiedad</h2>
       ${box(detailRows(data) + guest)}
       <p style="font-size: 13px; color: #666;">Copia automática para el dueño. El huésped recibió su propia confirmación${data.guest.email ? '' : ' (no: la reserva no tenía correo del huésped)'}.</p>`),
   };

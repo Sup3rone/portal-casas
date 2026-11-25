@@ -9,9 +9,9 @@ export async function sendPasswordChangedEmail(user: { email: string; name: stri
   try {
     await sendEmail({
       to: user.email,
-      subject: 'Tu contraseña cambió — ALIA FOR RENT',
-      html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #29251f;">
-        <h2 style="color: #654838;">Tu contraseña cambió</h2>
+      subject: 'Tu contraseña cambió — ALIA for Rent',
+      html: `<div>
+        <h2 style="margin: 0 0 12px; color: #654838;">Tu contraseña cambió</h2>
         <p>Hola ${escapeHtml(user.name || '')},</p>
         <p>La contraseña de tu cuenta se cambió el ${escapeHtml(when)} (hora de Ciudad de México)${via === 'recovery' ? ' con el enlace de «olvidé mi contraseña»' : ' desde «Mi cuenta»'}.</p>
         <p><strong>Si no fuiste tú</strong>, entra a «¿Olvidaste tu contraseña?» para crear una nueva y responde a este correo.</p>

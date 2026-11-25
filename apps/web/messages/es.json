@@ -283,7 +283,7 @@
       "fechasInvalidas": "La fecha de salida debe ser posterior a la llegada.",
       "error": "Error al enviar. Intenta de nuevo.",
       "incompleto": "Faltan datos para enviar tu consulta. Revisa los campos marcados en rojo.",
-      "exitoReserva": "Su petición ha sido recibida. Al confirmarse su reserva, recibirá un correo de confirmación.",
+      "exitoReserva": "Su petición ha sido recibida. Al confirmarse su reserva, recibirá un correo de confirmación; si no lo ve, revise su carpeta de spam o correo no deseado.",
       "otraConsulta": "Enviar otra consulta"
     },
     "gallery": {
@@ -401,7 +401,7 @@
     "forgotSubtitle": "Escribe tu correo y te enviaremos un enlace para recuperarla.",
     "email": "Correo electrónico",
     "forgotButton": "Enviar enlace",
-    "forgotSent": "Si tu correo está registrado, recibirás un enlace en unos minutos. Revisa también spam.",
+    "forgotSent": "Si tu correo está registrado, recibirás un enlace en unos minutos. Si no lo ves, revisa tu carpeta de spam o correo no deseado y márcalo como «No es spam».",
     "resetTitle": "Nueva contraseña",
     "newPassword": "Nueva contraseña (mínimo 8 caracteres)",
     "resetButton": "Guardar contraseña",
@@ -741,7 +741,7 @@
     "saved": "Guardado.",
     "sendNow": "Enviar ahora el reporte de {month}",
     "sending": "Enviando…",
-    "sentOk": "Reporte enviado.",
+    "sentOk": "Reporte enviado. Si no llega, revisa la carpeta de spam o correo no deseado.",
     "sentFailed": "No se pudo enviar: {error}",
     "noRecipients": "Agrega al menos un correo para activar el envío.",
     "deliveriesTitle": "Envíos",

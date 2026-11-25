@@ -46,4 +46,10 @@ for (const file of ['apps/web/src/app/[locale]/olvide-password/actions.ts', 'app
 }
 assert.ok(fs.readFileSync('apps/web/src/app/[locale]/olvide-password/actions.ts', 'utf8').includes("emailButton(resetUrl, 'Cambiar mi contraseña')"));
 assert.ok(fs.readFileSync('apps/web/src/lib/inquiry-notice.ts', 'utf8').includes("emailButton(localizedUrl('es', '/admin/mensajes'), 'Ver la consulta en el panel')"));
+// Mientras no haya dominio propio los correos pueden caer en spam: cada pantalla que promete un correo lo avisa.
+for (const locale of ['es', 'en', 'fr']) {
+  const messages = JSON.parse(fs.readFileSync(`apps/web/messages/${locale}.json`, 'utf8'));
+  const texts = [messages.auth?.forgotSent, messages.monthlyReport?.sentOk, JSON.stringify(messages).match(/"exitoReserva":"([^"]*)"/)?.[1]];
+  for (const text of texts) assert.match(text ?? '', /spam/i, `${locale}: aviso de spam en «${text}»`);
+}
 console.log('test-email-layout OK');

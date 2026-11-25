@@ -283,7 +283,7 @@
       "fechasInvalidas": "La date de départ doit être postérieure à la date d’arrivée.",
       "error": "Impossible d’envoyer votre message. Réessayez.",
       "incompleto": "Il manque des informations pour envoyer votre demande. Vérifiez les champs indiqués en rouge.",
-      "exitoReserva": "Votre demande a bien été reçue. Une fois votre réservation confirmée, vous recevrez un e-mail de confirmation.",
+      "exitoReserva": "Votre demande a bien été reçue. Une fois votre réservation confirmée, vous recevrez un e-mail de confirmation ; si vous ne le voyez pas, vérifiez vos spams ou courriers indésirables.",
       "otraConsulta": "Envoyer une autre demande"
     },
     "gallery": {
@@ -402,7 +402,7 @@
     "forgotSubtitle": "Entrez votre e-mail et nous vous enverrons un lien de récupération.",
     "email": "E-mail",
     "forgotButton": "Envoyer le lien",
-    "forgotSent": "Si votre e-mail est enregistré, vous recevrez un lien dans quelques minutes. Vérifiez aussi vos spams.",
+    "forgotSent": "Si votre e-mail est enregistré, vous recevrez un lien dans quelques minutes. Si vous ne le voyez pas, vérifiez vos spams ou courriers indésirables et marquez-le comme « Non spam ».",
     "resetTitle": "Nouveau mot de passe",
     "newPassword": "Nouveau mot de passe (minimum 8 caractères)",
     "resetButton": "Enregistrer le mot de passe",
@@ -742,7 +742,7 @@
     "saved": "Enregistré.",
     "sendNow": "Envoyer maintenant le rapport de {month}",
     "sending": "Envoi…",
-    "sentOk": "Rapport envoyé.",
+    "sentOk": "Rapport envoyé. S’il n’arrive pas, vérifiez les spams ou courriers indésirables.",
     "sentFailed": "Envoi impossible : {error}",
     "noRecipients": "Ajoutez au moins une adresse pour activer l’envoi.",
     "deliveriesTitle": "Envois",

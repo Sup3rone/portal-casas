@@ -290,6 +290,7 @@ Diagrama resumido; no enumera cada FK, CHECK o auditoría.
 | PUBLIC_SITE_URL | SEO/canonical/OG/sitemap/robots y, desde T-4771, el enlace del correo de recuperación (`lib/password-reset-url.ts`); fallback localhost. **Obligatoria en Vercel.** |
 | NEXT_PUBLIC_SITE_URL | Solo respaldo heredado del enlace de recuperación si falta `PUBLIC_SITE_URL` (T-4771). |
 | RESEND_API_KEY / EMAIL_FROM | Adaptador de correo y remitente. Sin `EMAIL_FROM` con dominio verificado en Resend, el remitente `onboarding@resend.dev` solo entrega al dueño de la cuenta Resend: **no llegan** recuperación, confirmación de reserva ni reporte en Excel. |
+| GMAIL_USER / GMAIL_APP_PASSWORD | T-5308: si están las dos, todos los correos salen por SMTP de Gmail (contraseña de aplicación) en vez de Resend. Es la salida mientras no haya dominio propio; límite ~500 destinatarios/día. `lib/mailer.ts`. |
 | ADMIN_PASSWORD | Acceso alternativo api/admin/login; no es la contraseña de User/Auth.js. |
 | DB_PASSWORD / MINIO_USER / MINIO_PASSWORD | Servicios opcionales de docker-compose.yml. |
 

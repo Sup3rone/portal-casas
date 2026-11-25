@@ -1211,5 +1211,48 @@
     "confirmRemoveAttachment": "Retirer ce fichier ? Action irréversible.",
     "attachmentAdded": "Fichier joint.",
     "attachmentsOff": "L’ajout de factures n’est pas encore activé."
+  },
+  "expenseReport": {
+    "title": "Dépenses et entretien de {month}",
+    "download": "Télécharger l’Excel des dépenses",
+    "empty": "Aucun paiement ni entretien en {month}.",
+    "totals": {
+      "paid": "Payé",
+      "pending": "À payer",
+      "maintenances": "Entretiens en cours",
+      "overBudget": "Hors budget"
+    },
+    "columns": {
+      "property": "Logement",
+      "payments": "Paiements",
+      "paid": "Payé",
+      "pending": "À payer",
+      "maintenances": "Entretiens",
+      "actualCost": "Coût réel"
+    },
+    "overBudgetCount": "{count, plural, one {# hors budget} other {# hors budget}}",
+    "sheetTitle": "Dépenses et entretien — {month}",
+    "paymentsTitle": "Paiements du mois",
+    "maintenanceTitle": "Entretiens en cours dans le mois",
+    "property": "Logement",
+    "date": "Date",
+    "type": "Type",
+    "recurring": "Récurrent",
+    "amount": "Montant (MXN)",
+    "status": "Statut",
+    "paidAt": "Payé le",
+    "notes": "Notes",
+    "work": "Travaux",
+    "kind": "Type de travaux",
+    "start": "Début",
+    "end": "Fin",
+    "budget": "Budget (MXN)",
+    "actualCost": "Coût réel (MXN)",
+    "overBudget": "Hors budget",
+    "yes": "Oui",
+    "no": "Non",
+    "paymentsTotal": "Total de {count} paiements",
+    "maintenanceTotal": "Total de {count} entretiens",
+    "emailLine": "Dépenses du mois : payé {paid}, à payer {pending} ; {count} entretiens en cours. Détail dans le second fichier Excel."
   }
 }

@@ -401,3 +401,19 @@ export const expenseAttachments = pgTable('ExpenseAttachment', {
   check('ExpenseAttachment_type_check', sql`${table.contentType} in ('image/jpeg', 'image/png', 'image/webp', 'application/pdf')`),
   check('ExpenseAttachment_size_check', sql`${table.size} > 0 and ${table.size} <= 4000000`),
 ]);
+
+// T-5248 (fase 4): bitácora de los avisos diarios de pagos y mantenimientos por vencer (correo al colaborador).
+// Un solo aviso vivo (pending/sent) por colaborador y día: el cron no duplica aunque corra dos veces; un fallo
+// ('failed') libera el hueco para reintentar. SQL: scripts/sql/expense-reminders.sql.
+export const expenseReminderDeliveries = pgTable('ExpenseReminderDelivery', {
+  id: text('id').primaryKey(),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  day: date('day').notNull(),
+  status: text('status').$type<'pending' | 'sent' | 'failed'>().notNull(),
+  itemCount: integer('itemCount').notNull().default(0),
+  error: text('error'),
+  createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  check('ExpenseReminderDelivery_status_check', sql`${table.status} in ('pending', 'sent', 'failed')`),
+  uniqueIndex('ExpenseReminderDelivery_once').on(table.userId, table.day).where(sql`${table.status} in ('pending', 'sent')`),
+]);

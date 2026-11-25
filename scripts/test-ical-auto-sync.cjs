@@ -3,7 +3,12 @@
 // límite de tiempo, estado por calendario y avisos en el panel.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const { load, memory, mockModule, portal, setSession } = require('./test-property-access.cjs');
+const { load, memory, mockModule, portal, req, setSession } = require('./test-property-access.cjs');
+// T-5307: el cron diario también corre los avisos de gastos; sus tablas (vacías) para que ese paso no falle.
+for (const name of ['expenseTypes', 'recurringExpenses', 'expenseEntries', 'maintenances', 'expenseReminderDeliveries']) {
+  const config = req('drizzle-orm/pg-core').getTableConfig(portal[name]);
+  memory.exec(`CREATE TABLE IF NOT EXISTS "${config.name}" (${config.columns.map(column => `"${column.name}" ${/integer|boolean|double/.test(column.getSQLType()) ? 'REAL' : 'TEXT'}${column.primary ? ' PRIMARY KEY' : ''}`).join(', ')})`);
+}
 // SQLite: jsonb_array_length → json_array_length (solo para este test).
 const query = portal.db.$client.query;
 portal.db.$client.query = (sql, values, options) => query(sql.replace(/jsonb_array_length/g, 'json_array_length'), values, options);
@@ -53,6 +58,7 @@ const AUTH = 'Bearer secreto-diario-de-prueba-1234';
     assert.equal(res.status, 200);
     assert.deepEqual([body.ical.feeds, body.ical.failedFeeds, body.ical.failed[0].feedId, body.ical.failed[0].error], [2, 1, 'fb', 'FETCH_FAILED']);
     assert.equal(body.monthlyReport, undefined, 'Día 15: sin reporte mensual');
+    assert.equal(body.expenseReminders.sent, 0, 'Día 15: avisos de gastos corren sin nada que avisar');
     assert.deepEqual(imported('fa'), [['2027-07-10', '2027-07-12']]);
     assert.ok(feed('fa').lastSyncedAt && !feed('fa').lastError, 'Estado OK guardado');
     assert.deepEqual([Boolean(feed('fb').lastSyncedAt), feed('fb').lastError], [false, 'FETCH_FAILED'], 'Fallo registrado, fechas intactas');

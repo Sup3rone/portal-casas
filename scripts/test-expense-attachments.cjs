@@ -132,6 +132,12 @@ async function main() {
 
   // 5) Borrar un archivo; borrar un mantenimiento borra también sus archivos del almacén.
   as('a');
+  // Revisión de seguridad (1b): sin token, borrar un registro CON archivos se rechaza (503) en vez de dejar huérfanos.
+  delete process.env.BLOB_PRIVATE_READ_WRITE_TOKEN;
+  const blocked = await item.DELETE(new Request('http://localhost/x', { method: 'DELETE' }), { params: Promise.resolve({ id: 'pa', kind: 'maintenance', itemId: 'm-a' }) });
+  assert.deepEqual([blocked.status, (await blocked.json()).code], [503, 'ATTACHMENTS_DISABLED']);
+  assert.ok(memory.prepare(`SELECT 1 FROM "Maintenance" WHERE id = 'm-a'`).get(), 'el mantenimiento sigue');
+  process.env.BLOB_PRIVATE_READ_WRITE_TOKEN = TOKEN;
   assert.equal(await removeOne('pa', fileId), 200);
   assert.ok(!blobs.has(stored.pathname) && !rows().some(row => row.id === fileId));
   const photoPath = rows().find(row => row.id === photo.body.id).pathname;

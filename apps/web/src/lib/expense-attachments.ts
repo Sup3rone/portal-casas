@@ -84,8 +84,11 @@ export async function deleteTargetFiles(propertyId: string, target: AttachmentTa
   const column = target === 'maintenance' ? expenseAttachments.maintenanceId : expenseAttachments.entryId;
   const rows = await db.select({ pathname: expenseAttachments.pathname }).from(expenseAttachments)
     .where(and(eq(column, targetId), eq(expenseAttachments.propertyId, propertyId)));
+  if (!rows.length) return;
+  // Sin token no se puede borrar del almacén: se rechaza (503) en vez de borrar el registro y dejar archivos huérfanos.
   const token = privateBlobToken();
-  if (rows.length && token) await del(rows.map(row => row.pathname), { token });
+  if (!token) throw new AttachmentError('ATTACHMENTS_DISABLED');
+  await del(rows.map(row => row.pathname), { token });
 }
 
 export async function listAttachments(propertyId: string, manager: PropertyManager) {

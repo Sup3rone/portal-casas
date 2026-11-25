@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { requirePropertyManager } from '@/lib/property-access';
 import { deleteExpenseItem, expenseKind, updateExpenseItem } from '@/lib/property-expenses';
-import { panelError } from '@/lib/panel-response';
+// attachmentError = panelError + el 503 de facturas (borrar un registro con archivos sin el almacén privado).
+import { attachmentError as panelError } from '@/lib/attachment-response';
 
 type Context = { params: Promise<{ id: string; kind: string; itemId: string }> };
 

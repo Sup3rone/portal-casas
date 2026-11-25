@@ -79,7 +79,7 @@ function load(file, source) {
 const schema = load('packages/db/src/schema.ts');
 for (const name of ['users', 'properties', 'messages', 'bookings', 'seasonRates', 'icalFeeds', 'media', 'propertySections', 'blockDates', 'siteContent', 'partners', 'referralLinks', 'reportDeliveries', 'autoTranslations',
   // T-5248: gastos y mantenimientos (el reporte mensual y la página de reporte también los leen).
-  'expenseTypes', 'recurringExpenses', 'expenseEntries', 'maintenances']) {
+  'expenseTypes', 'recurringExpenses', 'expenseEntries', 'maintenances', 'expenseAttachments']) {
   const config = getTableConfig(schema[name]);
   memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => {
     const numeric = /integer|boolean|double/.test(column.getSQLType());

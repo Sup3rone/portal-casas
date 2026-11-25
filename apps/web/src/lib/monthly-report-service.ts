@@ -12,6 +12,7 @@ import { sendEmail } from '@/lib/mailer';
 import { buildMonthlyReport, isMonth, monthRange, type MonthlyReport, type ReportBooking } from './monthly-report';
 import { buildXlsx, type Row } from './xlsx';
 import { formatMoney } from './booking-breakdown';
+import { expenseReportFilename, expenseReportXlsx, loadExpenseReport } from './expense-report-service';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const MAX_REPORT_EMAILS = 2;
@@ -131,6 +132,18 @@ export async function deliverMonthlyReport(owner: { id: string; name: string | n
     bookingCount = report.totals.bookings;
     const t = await getTranslations({ locale, namespace: 'monthlyReport' });
     const file = await reportXlsx(report, locale);
+    // T-5248 (fase 3): el Excel de gastos y mantenimientos va como segundo adjunto si el mes tiene algo. Si falla
+    // armarlo, se manda igual el de comisiones (nunca se pierde el reporte principal por el secundario).
+    const attachments = [{ filename: reportFilename(month), content: Buffer.from(file) }];
+    let expenseLine = '';
+    try {
+      const expenses = await loadExpenseReport(manager, month, locale);
+      if (expenses.groups.length) {
+        attachments.push({ filename: expenseReportFilename(month), content: Buffer.from(await expenseReportXlsx(expenses, locale)) });
+        const e = await getTranslations({ locale, namespace: 'expenseReport' });
+        expenseLine = `<p>${html(e('emailLine', { paid: formatMoney(expenses.totals.paid, locale), pending: formatMoney(expenses.totals.pending, locale), count: expenses.totals.maintenances }))}</p>`;
+      }
+    } catch (expenseError) { console.error(`Reporte de gastos ${month} para ${owner.id} no se adjuntó:`, expenseError); }
     // Todo lo interpolado en el HTML se escapa (el nombre lo controla el usuario).
     await sendEmail({
       kind: 'monthly-report',
@@ -138,8 +151,9 @@ export async function deliverMonthlyReport(owner: { id: string; name: string | n
       subject: t('emailSubject', { month }),
       html: `<div style="font-family:sans-serif;max-width:520px"><p>${html(t('emailIntro', { month, name: owner.name ?? '' }))}</p>`
         + `<p>${html(t('emailTotals', { count: bookingCount, total: formatMoney(report.totals.total, locale), commission: formatMoney(report.totals.commission, locale) }))}</p>`
+        + expenseLine
         + `<p style="color:#666;font-size:13px">${html(t('emailFooter'))}</p></div>`,
-      attachments: [{ filename: reportFilename(month), content: Buffer.from(file) }],
+      attachments,
     });
     try { await record('sent', bookingCount, null); }
     catch (logError) { console.error('Reporte enviado pero no se pudo registrar como sent:', logError); }

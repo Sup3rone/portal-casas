@@ -2,6 +2,7 @@
 // vercel.json → "0 12 * * *" = 06:00 en Ciudad de México (Vercel Hobby puede ejecutarlo dentro de esa hora).
 // 1) Todos los días: sincroniza los calendarios iCal de todas las propiedades no anuales.
 // 2) Si HOY en America/Mexico_City es día 1: envía además el reporte mensual del mes anterior.
+// 3) T-5307: todos los días, aviso por correo de pagos y mantenimientos que vencen hoy o en 3 días (solo colaboradores).
 // Simulación manual:
 //   curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/daily
 //   (?today=YYYY-MM-DD solo para pruebas: fuerza la fecha MX y con ello si toca reporte mensual)
@@ -10,6 +11,7 @@ import { cronAuthorized } from '@/lib/cron-auth';
 import { inquiryToday } from '@/lib/inquiry-validation';
 import { previousMonth } from '@/lib/monthly-report';
 import { runMonthlyReports } from '@/lib/monthly-report-service';
+import { runExpenseReminders } from '@/lib/expense-reminder-service';
 import { syncAllFeeds } from '@/lib/ical-sync-runner';
 
 export const dynamic = 'force-dynamic';
@@ -35,6 +37,12 @@ export async function GET(req: NextRequest) {
       if (summary.failed) console.error(`Reporte mensual ${month}: ${summary.failed} envío(s) fallido(s).`);
     } catch (error) { console.error(`Reporte mensual ${month}: el cron falló antes de enviar.`, error); out.monthlyReport = { error: 'error', month }; }
   }
-  const failed = (out.ical as { error?: string }).error || (out.monthlyReport as { error?: string } | undefined)?.error;
+  try {
+    const summary = await runExpenseReminders(today);
+    out.expenseReminders = summary;
+    if (summary.failed) console.error(`Avisos de gastos ${today}: ${summary.failed} envío(s) fallido(s).`);
+  } catch (error) { console.error(`Avisos de gastos ${today}: el cron falló antes de enviar.`, error); out.expenseReminders = { error: 'error', day: today }; }
+  const failed = (out.ical as { error?: string }).error || (out.monthlyReport as { error?: string } | undefined)?.error
+    || (out.expenseReminders as { error?: string }).error;
   return NextResponse.json(out, { status: failed ? 500 : 200, headers: { 'Cache-Control': 'no-store' } });
 }

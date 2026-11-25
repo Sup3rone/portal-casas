@@ -739,6 +739,16 @@
       "other": "Otro"
     }
   },
+  "expenseReminders": {
+    "emailSubject": "Pagos y mantenimientos por atender — {date}",
+    "emailIntro": "Hola {name}, esto vence en tus casas:",
+    "dueToday": "Vence hoy ({date})",
+    "dueSoon": "Vence en 3 días ({date})",
+    "overdue": "Atrasado, sin pagar o sin empezar",
+    "paymentLine": "{property} · {type} · periodo del {date} · {amount}",
+    "maintenanceLine": "{property} · Mantenimiento: {title} · empieza el {date}",
+    "emailFooter": "Correo automático de ALIA for Rent. Marca el pago como «pagado» o el mantenimiento como «en proceso» en la pantalla de Gastos de cada casa para que deje de aparecer."
+  },
   "monthlyReport": {
     "navTitle": "Reporte mensual",
     "title": "Reporte mensual de comisiones",
@@ -1246,5 +1256,48 @@
     "confirmRemoveAttachment": "¿Quitar este archivo? No se puede deshacer.",
     "attachmentAdded": "Archivo adjuntado.",
     "attachmentsOff": "Adjuntar facturas aún no está activado."
+  },
+  "expenseReport": {
+    "title": "Gastos y mantenimientos de {month}",
+    "download": "Descargar Excel de gastos",
+    "empty": "Sin pagos ni mantenimientos en {month}.",
+    "totals": {
+      "paid": "Pagado",
+      "pending": "Por pagar",
+      "maintenances": "Mantenimientos activos",
+      "overBudget": "Sobre presupuesto"
+    },
+    "columns": {
+      "property": "Casa",
+      "payments": "Pagos",
+      "paid": "Pagado",
+      "pending": "Por pagar",
+      "maintenances": "Mantenimientos",
+      "actualCost": "Costo real"
+    },
+    "overBudgetCount": "{count, plural, one {# sobre presupuesto} other {# sobre presupuesto}}",
+    "sheetTitle": "Gastos y mantenimientos — {month}",
+    "paymentsTitle": "Pagos del mes",
+    "maintenanceTitle": "Mantenimientos activos en el mes",
+    "property": "Casa",
+    "date": "Fecha",
+    "type": "Tipo",
+    "recurring": "Recurrente",
+    "amount": "Monto (MXN)",
+    "status": "Estado",
+    "paidAt": "Pagado el",
+    "notes": "Notas",
+    "work": "Trabajo",
+    "kind": "Tipo de trabajo",
+    "start": "Inicio",
+    "end": "Fin",
+    "budget": "Presupuesto (MXN)",
+    "actualCost": "Costo real (MXN)",
+    "overBudget": "Sobre presupuesto",
+    "yes": "Sí",
+    "no": "No",
+    "paymentsTotal": "Total de {count} pagos",
+    "maintenanceTotal": "Total de {count} mantenimientos",
+    "emailLine": "Gastos del mes: pagado {paid}, por pagar {pending}; {count} mantenimientos activos. Detalle en el segundo Excel."
   }
 }

@@ -36,7 +36,7 @@ mockModule('@vercel/blob', {
 
 for (const name of ['expenseTypes', 'recurringExpenses', 'expenseEntries', 'maintenances', 'expenseAttachments']) {
   const config = getTableConfig(portal[name]);
-  memory.exec(`CREATE TABLE "${config.name}" (${config.columns.map(column => `"${column.name}" ${/integer|boolean|double/.test(column.getSQLType()) ? 'REAL' : 'TEXT'}${column.primary ? ' PRIMARY KEY' : ''}`).join(', ')})`);
+  memory.exec(`CREATE TABLE IF NOT EXISTS "${config.name}" (${config.columns.map(column => `"${column.name}" ${/integer|boolean|double/.test(column.getSQLType()) ? 'REAL' : 'TEXT'}${column.primary ? ' PRIMARY KEY' : ''}`).join(', ')})`);
 }
 memory.exec(`INSERT INTO "ExpenseType" ("id", "name", "fixed", "active") VALUES ('luz', 'Luz', 1, 1)`);
 memory.exec(`INSERT INTO "Maintenance" ("id", "propertyId", "title", "kind", "status", "createdBy") VALUES ('m-a', 'pa', 'Pintar', 'puntual', 'pendiente', 'a'), ('m-b', 'pb', 'Ajeno', 'puntual', 'pendiente', 'b')`);

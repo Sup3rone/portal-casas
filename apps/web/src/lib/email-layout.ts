@@ -2,6 +2,7 @@
 // blanca centrada y pie con el sitio. HTML de correo «a la antigua» (tablas y estilos en línea) para que se vea igual en
 // Gmail, Outlook, Proton y el teléfono. Los colores son los del sitio (globals.css: --paper-bg, --brand-brown).
 import { siteUrl } from './seo';
+import { EMAIL_LOGO_CID } from './email-logo';
 
 export const EMAIL_COLORS = { paper: '#F4F1EC', card: '#ffffff', text: '#29251f', muted: '#6b6259', brand: '#654838', line: '#e6ded3' } as const;
 const FONT = "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -9,7 +10,7 @@ const MARK = '<!-- alia-email-layout -->';
 
 const esc = (value: string) => value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
 
-/** Sitio público para el logo y el pie. En local (localhost) no hay logo: el correo no puede cargar una imagen local. */
+/** Sitio público para el enlace del encabezado y del pie. En local (localhost) no se enlaza. */
 function publicSite() {
   try {
     const url = siteUrl();
@@ -32,12 +33,11 @@ export function emailButton(href: string, label: string) {
 export function emailLayout(inner: string, options: { preheader?: string } = {}) {
   if (inner.includes(MARK)) return inner;
   const site = publicSite();
-  const logo = site
-    ? `<img src="${esc(new URL('/brand/alia-email-logo.png', site).toString())}" width="40" height="40" alt="" style="display:block;border:0;width:40px;height:40px">`
-    : '';
+  // Logo incrustado (sendEmail lo adjunta en línea): se ve aunque el buzón bloquee imágenes externas.
+  const logo = `<img src="cid:${EMAIL_LOGO_CID}" width="40" height="40" alt="ALIA" style="display:block;border:0;width:40px;height:40px">`;
   const brand = `<span style="font-family:Georgia, 'Times New Roman', serif;font-size:20px;letter-spacing:.5px;color:${EMAIL_COLORS.brand}">ALIA for Rent</span>`;
   const header = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr>`
-    + (logo ? `<td style="padding-right:10px;vertical-align:middle">${logo}</td>` : '')
+    + `<td style="padding-right:10px;vertical-align:middle">${logo}</td>`
     + `<td style="vertical-align:middle">${site ? `<a href="${esc(site.origin)}" style="text-decoration:none">${brand}</a>` : brand}</td></tr></table>`;
   const footerSite = site ? ` · <a href="${esc(site.origin)}" style="color:${EMAIL_COLORS.muted};text-decoration:underline">${esc(site.host)}</a>` : '';
   const preheader = options.preheader

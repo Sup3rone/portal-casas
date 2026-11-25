@@ -5,21 +5,23 @@ const { load } = require('./test-property-access.cjs');
 const { emailLayout, emailButton, EMAIL_COLORS } = load('apps/web/src/lib/email-layout.ts');
 
 delete process.env.PUBLIC_SITE_URL;
-// Local: sin logo (localhost no se puede cargar desde un buzón) ni enlace al sitio; el resto del marco sí.
+// Local: logo incrustado (cid:) y sin enlace a localhost; el resto del marco igual.
 let html = emailLayout('<p>Hola</p>');
 assert.ok(html.startsWith('<!doctype html>') && html.includes('<p>Hola</p>'));
-assert.ok(!html.includes('<img') && !html.includes('localhost'), 'en local no hay logo ni enlace a localhost');
+assert.ok(html.includes('src="cid:alia-logo"') && !html.includes('localhost'), 'logo incrustado siempre; en local sin enlace a localhost');
 assert.ok(html.includes(EMAIL_COLORS.paper) && html.includes(EMAIL_COLORS.brand) && html.includes('ALIA for Rent'));
 assert.ok(html.includes('name="color-scheme" content="light"'));
 assert.equal(emailLayout(html), html, 'idempotente: no se envuelve dos veces');
 
-// Producción: logo pequeño absoluto + enlace al sitio en el pie; preheader escapado y oculto.
+// Producción: logo incrustado (nunca una URL externa) + enlace al sitio en el pie; preheader escapado y oculto.
 process.env.PUBLIC_SITE_URL = 'https://aliaforrent.vercel.app';
 html = emailLayout('<p>x</p>', { preheader: 'Reserva <confirmada> & "lista"' });
-assert.ok(html.includes('src="https://aliaforrent.vercel.app/brand/alia-email-logo.png"'));
+assert.ok(html.includes('src="cid:alia-logo"') && !/<img[^>]+src="https?:/.test(html), 'el logo no depende de una URL externa');
 assert.ok(html.includes('href="https://aliaforrent.vercel.app"') && html.includes('>aliaforrent.vercel.app</a>'));
 assert.ok(html.includes('display:none') && html.includes('Reserva &lt;confirmada&gt; &amp; &quot;lista&quot;'));
-assert.ok(fs.existsSync('apps/web/public/brand/alia-email-logo.png') && fs.statSync('apps/web/public/brand/alia-email-logo.png').size < 20_000, 'logo de correo liviano');
+const { EMAIL_LOGO_PNG_BASE64 } = load('apps/web/src/lib/email-logo.ts');
+const logoBytes = Buffer.from(EMAIL_LOGO_PNG_BASE64, 'base64');
+assert.ok(logoBytes.subarray(1, 4).toString() === 'PNG' && logoBytes.length < 20_000, 'logo incrustado: PNG liviano');
 
 // Botón: tabla (Outlook) y todo escapado.
 const button = emailButton('https://x.test/a?b=1&c="2"', 'Ver <más>');

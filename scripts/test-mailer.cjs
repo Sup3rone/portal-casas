@@ -23,6 +23,9 @@ async function main() {
   assert.equal(mailer.mailProvider(), 'resend');
   await mailer.sendEmail(msg);
   const first = resendCalls.pop();
+  // Logo incrustado como adjunto en línea (Resend: contentId).
+  assert.deepEqual(first.attachments.map(a => [a.filename, a.contentId, a.content.subarray(1, 4).toString()]), [['alia.png', 'alia-logo', 'PNG']]);
+  delete first.attachments;
   assert.ok(first.html.startsWith('<!doctype html>') && first.html.includes('<p>Hola</p>'), 'T-5309: el marco envuelve el contenido');
   assert.ok(first.text.includes('Hola'), 'T-5309: también va la versión de texto');
   assert.deepEqual({ ...first, html: undefined, text: undefined }, { key: 're_x', from: 'ALIA for Rent <onboarding@resend.dev>', ...msg, html: undefined, text: undefined });
@@ -38,6 +41,9 @@ async function main() {
   await mailer.sendEmail({ ...msg, attachments: [{ filename: 'r.xlsx', content: excel }] });
   assert.deepEqual(transports.at(-1), { host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true, auth: { user: 'portal@gmail.com', pass: 'abcdefghijklmnop' } });
   const viaGmail = smtp.pop();
+  // Excel del llamador intacto + logo en línea (nodemailer: cid).
+  const logoPart = viaGmail.attachments.pop();
+  assert.deepEqual([logoPart.filename, logoPart.cid, logoPart.contentType, logoPart.contentDisposition], ['alia.png', 'alia-logo', 'image/png', 'inline']);
   assert.ok(viaGmail.html.includes('<p>Hola</p>') && viaGmail.html.includes('alia-email-layout'));
   assert.ok(viaGmail.text.includes('Hola'));
   assert.deepEqual({ ...viaGmail, html: undefined, text: undefined }, { from: { name: 'ALIA for Rent', address: 'portal@gmail.com' }, ...msg, html: undefined, text: undefined, attachments: [{ filename: 'r.xlsx', content: excel }] });
@@ -46,7 +52,7 @@ async function main() {
   const before = transports.length;
   await mailer.sendEmail(msg);
   assert.equal(transports.length, before);
-  assert.equal(smtp.pop().attachments, undefined, 'sin adjuntos no manda la llave');
+  assert.deepEqual(smtp.pop().attachments.map(a => a.cid), ['alia-logo'], 'sin adjuntos del llamador: solo el logo');
   env({ GMAIL_USER: 'otra@gmail.com', GMAIL_APP_PASSWORD: 'zzzzzzzzzzzzzzzz' });
   await mailer.sendEmail(msg);
   assert.equal(transports.length, before + 1);

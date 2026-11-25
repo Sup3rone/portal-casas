@@ -134,7 +134,7 @@ function addMonths(date: string, months: number) {
   const last = new Date(Date.UTC(year, month + 1, 0)).getUTCDate(); // el 31 cae en el último día de un mes corto
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(Math.min(d, last)).padStart(2, '0')}`;
 }
-function addDays(date: string, days: number) {
+export function addDays(date: string, days: number) {
   return new Date(Date.parse(date + 'T00:00:00Z') + days * 86_400_000).toISOString().slice(0, 10);
 }
 /** Próxima fecha (>= today) del ciclo que empieza en startDate. Cada paso se cuenta desde startDate, no desde el

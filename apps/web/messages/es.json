@@ -703,6 +703,16 @@
     "taxesManual": "Importe manual (no se recalcula).",
     "applyTaxes": "Calcular 16 % (IVA)"
   },
+  "expenseReminders": {
+    "emailSubject": "Pagos y mantenimientos por atender — {date}",
+    "emailIntro": "Hola {name}, esto vence en tus casas:",
+    "dueToday": "Vence hoy ({date})",
+    "dueSoon": "Vence en 3 días ({date})",
+    "overdue": "Atrasado, sin pagar o sin empezar",
+    "paymentLine": "{property} · {type} · periodo del {date} · {amount}",
+    "maintenanceLine": "{property} · Mantenimiento: {title} · empieza el {date}",
+    "emailFooter": "Correo automático de ALIA for Rent. Marca el pago como «pagado» o el mantenimiento como «en proceso» en la pantalla de Gastos de cada casa para que deje de aparecer."
+  },
   "monthlyReport": {
     "navTitle": "Reporte mensual",
     "title": "Reporte mensual de comisiones",

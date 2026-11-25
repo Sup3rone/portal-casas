@@ -704,6 +704,16 @@
     "taxesManual": "Montant manuel (non recalculé).",
     "applyTaxes": "Calculer 16 % (TVA)"
   },
+  "expenseReminders": {
+    "emailSubject": "Paiements et entretiens à traiter — {date}",
+    "emailIntro": "Bonjour {name}, voici ce qui arrive à échéance dans vos logements :",
+    "dueToday": "Échéance aujourd’hui ({date})",
+    "dueSoon": "Échéance dans 3 jours ({date})",
+    "overdue": "En retard, non payé ou non commencé",
+    "paymentLine": "{property} · {type} · période du {date} · {amount}",
+    "maintenanceLine": "{property} · Entretien : {title} · commence le {date}",
+    "emailFooter": "E-mail automatique d’ALIA for Rent. Marquez le paiement comme « payé » ou l’entretien comme « en cours » dans l’écran Dépenses de chaque logement pour qu’il n’apparaisse plus."
+  },
   "monthlyReport": {
     "navTitle": "Rapport mensuel",
     "title": "Rapport mensuel des commissions",

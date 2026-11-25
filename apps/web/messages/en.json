@@ -703,6 +703,16 @@
     "taxesManual": "Manual amount (not recalculated).",
     "applyTaxes": "Calculate 16% (VAT)"
   },
+  "expenseReminders": {
+    "emailSubject": "Payments and maintenance to handle — {date}",
+    "emailIntro": "Hi {name}, this is due at your homes:",
+    "dueToday": "Due today ({date})",
+    "dueSoon": "Due in 3 days ({date})",
+    "overdue": "Overdue, unpaid or not started",
+    "paymentLine": "{property} · {type} · period of {date} · {amount}",
+    "maintenanceLine": "{property} · Maintenance: {title} · starts {date}",
+    "emailFooter": "Automatic email from ALIA for Rent. Mark the payment as “paid” or the maintenance as “in progress” on each home’s Expenses screen so it stops showing up."
+  },
   "monthlyReport": {
     "navTitle": "Monthly report",
     "title": "Monthly commission report",

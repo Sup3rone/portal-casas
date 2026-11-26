@@ -226,6 +226,16 @@ async function main() {
       React.createElement(PropertyExpenses, { propertyId: 'pa', data: { ...screen, entries: [] }, today: '2026-11-24', isAdmin: false })));
     assert.ok(empty.includes('data-register-period="2026-11-10"'), locale + ': sin pago del periodo → botón con la fecha del periodo');
     assert.ok(empty.includes('id="registrar-pago"'), 'el formulario al que lleva el botón');
+    // T-5325: cada bloque se distingue (acento propio + línea que explica) y su «Nuevo…» va plegado si ya hay elementos.
+    for (const [section, accent, hint] of [['maintenance', 'border-l-amber-600', 'maintenanceHint'], ['recurring', 'border-l-sky-700', 'recurringHint'], ['entry', 'border-l-emerald-700', 'entriesHint']]) {
+      assert.match(html, new RegExp(`<section class="[^"]*${accent}[^"]*" data-expenses-section="${section}"`), `${locale} ${section}: acento`);
+      assert.ok(html.includes(messages.expenses[hint]), `${locale} ${section}: descripción`);
+    }
+    assert.equal((html.match(/<details class="group rounded-lg border border-dashed/g) || []).length, 3, locale + ': 3 formularios «Nuevo» plegables');
+    const entryDetails = new RegExp(`<details([^>]*)><summary[^>]*><span aria-hidden="true">\\+</span>${messages.expenses.entryNew}</summary>`);
+    assert.ok(entryDetails.test(html), locale + ': «Registrar pago» dentro de su desplegable');
+    assert.ok(!entryDetails.exec(html)[1].includes('open'), locale + ': con pagos, «Registrar pago» plegado');
+    assert.match(empty, new RegExp(`<details[^>]*open=""[^>]*><summary[^>]*><span aria-hidden="true">\\+</span>${messages.expenses.entryNew}</summary><form id="registrar-pago"`), locale + ': sin pagos, abierto');
   }
   console.log('pantalla es/en/fr OK');
   console.log('test-property-expenses OK');

@@ -26,6 +26,20 @@ export async function requirePropertyManager(): Promise<PropertyManager> {
   return { id: user.id, role: user.role, canPublishProperties: Boolean(user.canPublishProperties) };
 }
 
+// T-5322: el diseñador (DESIGNER) edita solo el contenido del sitio (Panel → Contenido), igual que el ADMIN.
+// No es PropertyManager: no ve casas, reservas, referidores, usuarios ni contraseñas.
+export type ContentEditor = { id: string; role: 'ADMIN' | 'DESIGNER' };
+export const contentEditorRoles = ['ADMIN', 'DESIGNER'] as const;
+export async function requireContentEditor(): Promise<ContentEditor> {
+  const session = await auth();
+  const id = session?.user?.id;
+  if (!id) throw new AccessError(401);
+  const [user] = await db.select({ id: users.id, role: users.role }).from(users).where(eq(users.id, id)).limit(1);
+  if (!user) throw new AccessError(403, 'SESSION_USER_NOT_FOUND');
+  if (user.role !== 'ADMIN' && user.role !== 'DESIGNER') throw new AccessError(403, 'ROLE_NOT_ALLOWED');
+  return { id: user.id, role: user.role };
+}
+
 export async function requireAdmin() {
   const manager = await requirePropertyManager();
   if (manager.role !== 'ADMIN') throw new AccessError(403);

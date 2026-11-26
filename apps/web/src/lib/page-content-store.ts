@@ -4,7 +4,7 @@ import 'server-only';
 import { cache } from 'react';
 import { eq, sql } from 'drizzle-orm';
 import { db, siteContent } from '@portal/db';
-import { requireAdmin, AccessError } from './property-access';
+import { requireContentEditor, AccessError } from './property-access';
 import { autoTranslate } from './auto-translation';
 import { pageGroups } from './translation-groups';
 import { PageContentError, isMissingPageContentSql, pageContentInput, pageContentKeys, pageFields, parsePageContent, type PageContentLocale, type PageContentPage } from './page-content';
@@ -21,7 +21,7 @@ export async function pageTexts(page: PageContentPage, locale: string) {
 }
 
 export async function savePageContent(page: PageContentPage, input: unknown) {
-  const actor = await requireAdmin();
+  const actor = await requireContentEditor();
   const value = pageContentInput(page, input);
   // T-5072: cada texto propio en español se traduce solo a en/fr (si están vacíos o siguen siendo automáticos).
   const fields = pageFields(page);
@@ -33,11 +33,11 @@ export async function savePageContent(page: PageContentPage, input: unknown) {
     }
   });
   try {
-    // Revalidar ADMIN dentro del statement, como saveSiteContent.
+    // Revalidar ADMIN/DESIGNER dentro del statement (T-5322), como saveSiteContent.
     const rows = await db.execute(sql`
       insert into "SiteContent" ("key", "value")
       select ${pageContentKeys[page]}::text, ${JSON.stringify(value)}::text
-      where exists (select 1 from "User" actor where actor.id = ${actor.id} and actor.role::text = 'ADMIN')
+      where exists (select 1 from "User" actor where actor.id = ${actor.id} and actor.role::text in ('ADMIN', 'DESIGNER'))
       on conflict ("key") do update set "value" = excluded."value"
       returning "key"
     `);

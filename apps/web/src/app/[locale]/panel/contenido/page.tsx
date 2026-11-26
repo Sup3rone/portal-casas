@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { requireAdmin, AccessError } from '@/lib/property-access';
+import { requireContentEditor, AccessError } from '@/lib/property-access';
 import { readSiteContent, featuredPropertyOptions } from '@/lib/site-content';
 import SiteContentEditor from '@/components/panel/SiteContentEditor';
 import PageContentEditor from '@/components/panel/PageContentEditor';
@@ -12,7 +12,7 @@ import { fieldNameForKey, pageGroups, siteGroups } from '@/lib/translation-group
 const sections = ['home', ...pageContentPages] as const;
 
 export default async function ContentPage({ params }: { params: Promise<{ locale: string }> }) {
-  try { await requireAdmin(); }
+  try { await requireContentEditor(); } // T-5322: ADMIN o diseñador.
   catch (error) { if (error instanceof AccessError) notFound(); throw error; }
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'siteContent' });

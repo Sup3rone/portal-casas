@@ -1,7 +1,7 @@
 import { pgTable, pgEnum, text, timestamp, integer, boolean, date, doublePrecision, varchar, index, unique, foreignKey, primaryKey, check, jsonb, uniqueIndex, numeric } from "drizzle-orm/pg-core";
 import { sql } from 'drizzle-orm';
 
-export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT", "COLLABORATOR"]);
+export const userRoleEnum = pgEnum("UserRole", ["ADMIN", "VIEWER", "CLIENT", "COLLABORATOR", "DESIGNER"]);
 export const mediaTypeEnum = pgEnum('MediaType', ['PHOTO', 'VIDEO']);
 
 export const siteContent = pgTable('SiteContent', {

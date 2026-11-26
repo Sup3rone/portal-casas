@@ -1026,6 +1026,7 @@
   "panelPages": {
     "intro": "Un champ vide utilise le texte par défaut, affiché en gris.",
     "pages": {
+      "season": "Thème saisonnier",
       "home": "Modifier la page d’accueil",
       "about": "Modifier la page À propos",
       "join": "Modifier la page Rejoignez-nous"
@@ -1098,6 +1099,7 @@
       "seoDescription": "Description pour les moteurs"
     },
     "pageDescriptions": {
+      "season": "Couleurs du site pour Noël ou la Saint-Valentin",
       "home": "Accueil : vidéos, maisons à la une, À propos, réseaux et WhatsApp.",
       "about": "/nosotros : textes, équipe, photos avec légende, valeurs, conclusion et images.",
       "join": "/unete : questions, options, écrans finaux et photo latérale."
@@ -1304,5 +1306,18 @@
     "paymentsTotal": "Total de {count} paiements",
     "maintenanceTotal": "Total de {count} entretiens",
     "emailLine": "Dépenses du mois : payé {paid}, à payer {pending} ; {count} entretiens en cours. Détail dans le second fichier Excel."
+  },
+  "siteSeason": {
+    "title": "Thème saisonnier",
+    "intro": "Change les couleurs du site public (le panneau ne change pas). « Normal » garde le site comme d’habitude.",
+    "seasons": {
+      "normal": "Normal",
+      "navidad": "Noël",
+      "san-valentin": "Saint-Valentin"
+    },
+    "current": "Actif maintenant",
+    "apply": "Appliquer le thème",
+    "applied": "Thème appliqué. Le site public l’affiche déjà.",
+    "notReady": "Le SQL du thème n’est pas encore appliqué à la base de données. Prévenez l’équipe technique."
   }
 }

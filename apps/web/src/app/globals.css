@@ -583,3 +583,83 @@ html.detail-free-scroll .detail-fullpage #reservar { scroll-snap-align: none; }
  el main ocupa lo que deja el header (JoinQuiz desplaza por dentro solo en pantallas muy bajas). */
 body:has(main[data-join-quiz]) { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
 main[data-join-quiz] { flex: 1 1 auto; min-height: 0; }
+
+/* T-5324: temas por temporada (solo paleta). El layout pone data-season en <html> desde Panel → Contenido.
+   Solo el sitio público: el panel y /admin (.panel-skin) conservan la paleta normal.
+   El contraste AA de cada paleta lo comprueba scripts/test-site-season.cjs. */
+html[data-season="navidad"]:not(:has(.panel-skin)) {
+  --paper-bg: #F6F1EA;
+  --brand-brown: #8e1f2a;
+  --brand-brown-strong: #6e1520;
+  --brand-brown-soft: #f3dcdc;
+  --brand-brown-light: #e9b9b4;
+  --brand-action: #c9d9c2;
+  --brand-action-hover: #b2c7a9;
+  --brand-action-ink: #1f2b1e;
+  --brand-action-surface: #e8efe4;
+  --brand-action-border: #4d6b48;
+  --brand-dark-accent: #d9a24a;
+  --brand-dark-accent-ink: #2b1c08;
+}
+html.dark[data-season="navidad"]:not(:has(.panel-skin)) {
+  --paper-bg: #24211D;
+  --brand-brown-light: #e9b9b4;
+}
+html[data-season="san-valentin"]:not(:has(.panel-skin)) {
+  --paper-bg: #F8F0F0;
+  --brand-brown: #8a2846;
+  --brand-brown-strong: #6b1c35;
+  --brand-brown-soft: #f6e1e7;
+  --brand-brown-light: #ecb8c6;
+  --brand-action: #ecc3cd;
+  --brand-action-hover: #e0a6b4;
+  --brand-action-ink: #3a1420;
+  --brand-action-surface: #f8e7eb;
+  --brand-action-border: #9c4a5f;
+  --brand-dark-accent: #e8899f;
+  --brand-dark-accent-ink: #3a0f1c;
+}
+html.dark[data-season="san-valentin"]:not(:has(.panel-skin)) {
+  --paper-bg: #24211D;
+  --brand-brown-light: #ecb8c6;
+}
+
+/* T-5324: piezas visibles del sitio público por temporada (encabezado, pie, títulos y botón principal).
+   El público usa su propia vestimenta (public-chrome.css), no solo las variables de marca. */
+html[data-season="navidad"]:not(:has(.panel-skin)) {
+  --header-bg: #f3e7e1;
+  --chrome-border: #c98f8f;
+  --season-footer-bg: #1f3b2c;
+  --season-footer-text: #f6efe4;
+  --season-footer-muted: #d9cdb8;
+  --season-footer-border: #3d6350;
+  --season-heading: #8e1f2a;
+  --season-heading-dark: #e9b9b4;
+  --season-button: #8e1f2a;
+  --season-button-hover: #6e1520;
+  --season-button-ink: #ffffff;
+}
+html[data-season="san-valentin"]:not(:has(.panel-skin)) {
+  --header-bg: #f7e4e8;
+  --chrome-border: #d99aaa;
+  --season-footer-bg: #6b1c35;
+  --season-footer-text: #fbeef1;
+  --season-footer-muted: #ecc3cd;
+  --season-footer-border: #8a3a53;
+  --season-heading: #8a2846;
+  --season-heading-dark: #ecb8c6;
+  --season-button: #8a2846;
+  --season-button-hover: #6b1c35;
+  --season-button-ink: #ffffff;
+}
+html.dark[data-season]:not(:has(.panel-skin)) { --header-bg: #2c2823; --chrome-border: #706659; }
+html[data-season]:not(:has(.panel-skin)) .public-footer {
+  --footer-bg: var(--season-footer-bg);
+  --chrome-text: var(--season-footer-text);
+  --chrome-muted: var(--season-footer-muted);
+  --chrome-border: var(--season-footer-border);
+}
+html[data-season]:not(:has(.panel-skin)) main :where(h1, h2, h3) { color: var(--season-heading); }
+html.dark[data-season]:not(:has(.panel-skin)) main :where(h1, h2, h3) { color: var(--season-heading-dark); }
+html[data-season]:not(:has(.panel-skin)) main [class~="bg-black"] { background-color: var(--season-button); color: var(--season-button-ink); }
+html[data-season]:not(:has(.panel-skin)) main [class~="bg-black"]:hover { background-color: var(--season-button-hover); }

@@ -1025,6 +1025,7 @@
   "panelPages": {
     "intro": "Un campo vacío usa el texto por defecto, que ves en gris.",
     "pages": {
+      "season": "Tema por temporada",
       "home": "Editar página principal",
       "about": "Editar página Nosotros",
       "join": "Editar página Únete"
@@ -1097,6 +1098,7 @@
       "seoDescription": "Descripción para buscadores"
     },
     "pageDescriptions": {
+      "season": "Colores del sitio para Navidad o San Valentín",
       "home": "Inicio: videos, destacadas, Sobre nosotros, redes y WhatsApp.",
       "about": "/nosotros: textos, equipo, fotos con pie, valores, cierre e imágenes.",
       "join": "/unete: preguntas, opciones, pantallas finales y foto lateral."
@@ -1303,5 +1305,18 @@
     "paymentsTotal": "Total de {count} pagos",
     "maintenanceTotal": "Total de {count} mantenimientos",
     "emailLine": "Gastos del mes: pagado {paid}, por pagar {pending}; {count} mantenimientos activos. Detalle en el segundo Excel."
+  },
+  "siteSeason": {
+    "title": "Tema por temporada",
+    "intro": "Cambia los colores del sitio público (el panel no cambia). «Normal» deja el sitio como siempre.",
+    "seasons": {
+      "normal": "Normal",
+      "navidad": "Navidad",
+      "san-valentin": "San Valentín"
+    },
+    "current": "Activo ahora",
+    "apply": "Aplicar tema",
+    "applied": "Tema aplicado. El sitio público ya lo muestra.",
+    "notReady": "Falta aplicar el SQL del tema en la base de datos. Avísale al equipo técnico."
   }
 }

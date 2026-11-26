@@ -4,12 +4,14 @@ import { requireContentEditor, AccessError } from '@/lib/property-access';
 import { readSiteContent, featuredPropertyOptions } from '@/lib/site-content';
 import SiteContentEditor from '@/components/panel/SiteContentEditor';
 import PageContentEditor from '@/components/panel/PageContentEditor';
+import SeasonPicker from '@/components/panel/SeasonPicker';
+import { readSiteSeason } from '@/lib/site-season';
 import { pageContentLocales, pageContentPages, pageFields, type PageContentLocale } from '@/lib/page-content';
 import { readPageContent } from '@/lib/page-content-store';
 import { readAutoTranslated } from '@/lib/auto-translation';
 import { fieldNameForKey, pageGroups, siteGroups } from '@/lib/translation-groups';
 
-const sections = ['home', ...pageContentPages] as const;
+const sections = ['season', 'home', ...pageContentPages] as const;
 
 export default async function ContentPage({ params }: { params: Promise<{ locale: string }> }) {
   try { await requireContentEditor(); } // T-5322: ADMIN o diseñador.
@@ -17,7 +19,7 @@ export default async function ContentPage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'siteContent' });
   const pages = await getTranslations({ locale, namespace: 'panelPages' });
-  const [content, rows, about, join] = await Promise.all([readSiteContent(), featuredPropertyOptions(), readPageContent('about'), readPageContent('join')]);
+  const [content, rows, about, join, season] = await Promise.all([readSiteContent(), featuredPropertyOptions(), readPageContent('about'), readPageContent('join'), readSiteSeason()]);
   const options = rows.map(row => ({ id: row.id, label: (locale === 'en' ? row.titleEn : locale === 'fr' ? row.titleFr : row.titleEs).trim() || row.titleEs, city: row.city }));
   // T-4944: texto por defecto de cada campo editable en los 3 idiomas (se muestra en gris en el editor).
   const keys = pageContentPages.flatMap(page => pageFields(page).map(field => field.key));
@@ -42,7 +44,7 @@ export default async function ContentPage({ params }: { params: Promise<{ locale
         </summary>
         {/* El formulario trae su propia tarjeta; dentro del desplegable se aplana para no anidar cajas. */}
         <div className="border-t border-gray-200 dark:border-gray-700 [&>form]:rounded-none [&>form]:rounded-b-2xl [&>form]:border-0 [&>form]:shadow-none">
-          {section === 'home'
+          {section === 'season' ? <SeasonPicker initial={season} /> : section === 'home'
             ? <SiteContentEditor content={content} properties={options} autoTranslated={autoFor('site:')} />
             : <><p className="px-6 pt-5 text-sm text-gray-600 dark:text-gray-300">{pages('intro')}</p><PageContentEditor page={section} initial={section === 'about' ? about : join} defaults={defaults} autoTranslated={autoFor(`page:${section}:`)} /></>}
         </div>

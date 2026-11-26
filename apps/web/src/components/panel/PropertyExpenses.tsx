@@ -23,6 +23,22 @@ const attachmentCodes: Record<string, string> = { INVALID_ATTACHMENT_TYPE: 'inva
 const secondary = 'min-h-11 rounded-lg border border-green-700 px-3 text-green-800 disabled:opacity-50 dark:border-green-400 dark:text-green-300';
 const card = 'space-y-4 rounded-lg border p-4 dark:border-gray-700';
 const label = 'block space-y-1 text-sm';
+// T-5325: cada bloque con su acento, ícono y una línea que dice para qué sirve, para no confundirlos.
+const accents = {
+  maintenance: { border: 'border-l-4 border-l-amber-600 dark:border-l-amber-400', chip: 'bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200', icon: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z' },
+  recurring: { border: 'border-l-4 border-l-sky-700 dark:border-l-sky-400', chip: 'bg-sky-100 text-sky-900 dark:bg-sky-900/40 dark:text-sky-200', icon: 'M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4' },
+  entry: { border: 'border-l-4 border-l-emerald-700 dark:border-l-emerald-400', chip: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200', icon: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3' },
+} as const;
+const newForm = 'group rounded-lg border border-dashed p-3 dark:border-gray-600';
+const newSummary = 'flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-green-800 dark:text-green-300 [&::-webkit-details-marker]:hidden';
+function SectionHeader({ kind, title, hint }: { kind: keyof typeof accents; title: string; hint: string }) {
+  return <header className="flex items-start gap-3">
+    <span aria-hidden="true" className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${accents[kind].chip}`}>
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={accents[kind].icon} /></svg>
+    </span>
+    <div><h2 className="text-xl font-semibold">{title}</h2><p className="text-sm text-gray-600 dark:text-gray-300">{hint}</p></div>
+  </header>;
+}
 
 /** FormData → objeto; los campos vacíos se mandan como null (montos y fechas opcionales). */
 function fields(form: HTMLFormElement, names: string[]) {
@@ -120,8 +136,8 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin, att
     {status && <p role="status" className="rounded-lg border border-green-700 p-3 text-sm">{status}</p>}
     {error && <p role="alert" className="rounded-lg border border-red-700 p-3 text-sm text-red-800 dark:text-red-300">{error}</p>}
 
-    <section className={card} data-expenses-section="maintenance">
-      <h2 className="text-xl font-semibold">{t('maintenanceTitle')}</h2>
+    <section className={`${card} ${accents.maintenance.border}`} data-expenses-section="maintenance">
+      <SectionHeader kind="maintenance" title={t('maintenanceTitle')} hint={t('maintenanceHint')} />
       {!data.maintenances.length && <p>{t('maintenanceEmpty')}</p>}
       <ul className="space-y-3">{data.maintenances.map(item => <li key={item.id} className="space-y-2 rounded-lg border p-3 dark:border-gray-700">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -143,8 +159,9 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin, att
           {attachmentsFor('maintenance', item.id)}
         </div>
       </li>)}</ul>
-      <form className="grid gap-3 sm:grid-cols-2" onSubmit={submit('maintenance', ['title', 'kind', 'status', 'budget', 'actualCost', 'startDate', 'endDate', 'notes'])}>
-        <h3 className="font-semibold sm:col-span-2">{t('maintenanceNew')}</h3>
+      <details className={newForm} open={!data.maintenances.length || undefined}>
+      <summary className={newSummary}><span aria-hidden="true">+</span>{t('maintenanceNew')}</summary>
+      <form className="mt-3 grid gap-3 sm:grid-cols-2" onSubmit={submit('maintenance', ['title', 'kind', 'status', 'budget', 'actualCost', 'startDate', 'endDate', 'notes'])}>
         <label className={`${label} sm:col-span-2`}><span>{t('maintenanceName')}</span><input name="title" required maxLength={200} className={inputClass} /></label>
         <label className={label}><span>{t('kind')}</span><select name="kind" required className={inputClass}>{maintenanceKinds.map(value => <option key={value} value={value}>{t(`kinds.${value}`)}</option>)}</select></label>
         <label className={label}><span>{t('status')}</span><select name="status" className={inputClass}>{maintenanceStatuses.map(value => <option key={value} value={value}>{t(`statuses.${value}`)}</option>)}</select></label>
@@ -155,10 +172,11 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin, att
         <label className={`${label} sm:col-span-2`}><span>{t('notes')}</span><textarea name="notes" maxLength={2000} rows={2} className={inputClass} /></label>
         <div className="sm:col-span-2"><button type="submit" disabled={busy} className={buttonClass}>{t('add')}</button></div>
       </form>
+      </details>
     </section>
 
-    <section className={card} data-expenses-section="recurring">
-      <h2 className="text-xl font-semibold">{t('recurringTitle')}</h2>
+    <section className={`${card} ${accents.recurring.border}`} data-expenses-section="recurring">
+      <SectionHeader kind="recurring" title={t('recurringTitle')} hint={t('recurringHint')} />
       {!data.recurring.length && <p>{t('recurringEmpty')}</p>}
       <ul className="space-y-3">{data.recurring.map(item => <li key={item.id} className={`space-y-2 rounded-lg border p-3 dark:border-gray-700 ${item.active ? '' : 'opacity-60'}`}>
         <p className="font-semibold">{typeName(item.typeId)} <span className="text-sm font-normal">· {t(`periodicities.${item.periodicity}`)} · {money(item.amount)}</span></p>
@@ -175,8 +193,9 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin, att
           <button type="button" disabled={busy} className={secondary} onClick={() => remove('recurring', item.id)}>{t('remove')}</button>
         </div>
       </li>)}</ul>
-      <form className="grid gap-3 sm:grid-cols-2" onSubmit={submit('recurring', ['typeId', 'periodicity', 'amount', 'startDate', 'notes'])}>
-        <h3 className="font-semibold sm:col-span-2">{t('recurringNew')}</h3>
+      <details className={newForm} open={!data.recurring.length || undefined}>
+      <summary className={newSummary}><span aria-hidden="true">+</span>{t('recurringNew')}</summary>
+      <form className="mt-3 grid gap-3 sm:grid-cols-2" onSubmit={submit('recurring', ['typeId', 'periodicity', 'amount', 'startDate', 'notes'])}>
         <label className={label}><span>{t('type')}</span>{typeSelect()}</label>
         <label className={label}><span>{t('periodicity')}</span><select name="periodicity" required className={inputClass} defaultValue="mensual">{expensePeriodicities.map(value => <option key={value} value={value}>{t(`periodicities.${value}`)}</option>)}</select></label>
         <label className={label}><span>{t('estimatedAmount')}</span><input name="amount" inputMode="decimal" placeholder="0.00" className={inputClass} /></label>
@@ -184,6 +203,7 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin, att
         <label className={`${label} sm:col-span-2`}><span>{t('notes')}</span><textarea name="notes" maxLength={2000} rows={2} className={inputClass} /></label>
         <div className="sm:col-span-2"><button type="submit" disabled={busy || !activeTypes.length} className={buttonClass}>{t('add')}</button></div>
       </form>
+      </details>
       {isAdmin && <form className="flex flex-wrap items-end gap-3 border-t pt-4 dark:border-gray-700" onSubmit={event => {
         event.preventDefault(); const form = event.currentTarget;
         void run(() => panelRequest('/api/panel/expense-types', 'POST', fields(form, ['name'])), 'typeAdded', form);
@@ -194,8 +214,8 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin, att
       </form>}
     </section>
 
-    <section className={card} data-expenses-section="entry">
-      <h2 className="text-xl font-semibold">{t('entriesTitle')}</h2>
+    <section className={`${card} ${accents.entry.border}`} data-expenses-section="entry">
+      <SectionHeader kind="entry" title={t('entriesTitle')} hint={t('entriesHint')} />
       {!data.entries.length && <p>{t('entriesEmpty')}</p>}
       {data.truncated && <p data-entries-truncated="" className="text-sm text-gray-600 dark:text-gray-300">{t('entriesTruncated', { count: data.entries.length })}</p>}
       <ul className="space-y-2">{data.entries.map(item => <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 dark:border-gray-700">
@@ -207,8 +227,10 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin, att
         <button type="button" disabled={busy} className={secondary} onClick={() => remove('entry', item.id)}>{t('remove')}</button>
         {attachmentsFor('entry', item.id)}
       </li>)}</ul>
-      <form key={formKey} id="registrar-pago" data-prefilled={prefill ? '' : undefined} className="grid gap-3 sm:grid-cols-2" onSubmit={submit('entry', ['typeId', 'recurringExpenseId', 'date', 'amount', 'notes'], form => ({ paid: (form.elements.namedItem('paid') as HTMLInputElement).checked }))}>
-        <h3 className="font-semibold sm:col-span-2">{t('entryNew')}</h3>
+      {/* Se abre solo al llegar desde «Registrar pago del periodo» (prefill) o si aún no hay pagos. */}
+      <details key={formKey} className={newForm} open={Boolean(prefill) || !data.entries.length || undefined}>
+      <summary className={newSummary}><span aria-hidden="true">+</span>{t('entryNew')}</summary>
+      <form id="registrar-pago" data-prefilled={prefill ? '' : undefined} className="mt-3 grid gap-3 sm:grid-cols-2" onSubmit={submit('entry', ['typeId', 'recurringExpenseId', 'date', 'amount', 'notes'], form => ({ paid: (form.elements.namedItem('paid') as HTMLInputElement).checked }))}>
         <label className={label}><span>{t('type')}</span>{typeSelect(prefill?.typeId)}</label>
         <label className={label}><span>{t('fromRecurring')}</span><select name="recurringExpenseId" className={inputClass} defaultValue={prefill?.recurringExpenseId ?? ''}>
           <option value="">{t('noRecurring')}</option>
@@ -222,6 +244,7 @@ export default function PropertyExpenses({ propertyId, data, today, isAdmin, att
         <label className={`${label} sm:col-span-2`}><span>{t('notes')}</span><textarea name="notes" maxLength={2000} rows={2} className={inputClass} /></label>
         <div className="sm:col-span-2"><button type="submit" disabled={busy || !activeTypes.length} className={buttonClass}>{t('add')}</button></div>
       </form>
+      </details>
     </section>
   </div>;
 }

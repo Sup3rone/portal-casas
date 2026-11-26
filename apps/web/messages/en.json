@@ -1025,6 +1025,7 @@
   "panelPages": {
     "intro": "An empty field uses the default text, shown in grey.",
     "pages": {
+      "season": "Seasonal theme",
       "home": "Edit home page",
       "about": "Edit About us page",
       "join": "Edit Join us page"
@@ -1097,6 +1098,7 @@
       "seoDescription": "Search description"
     },
     "pageDescriptions": {
+      "season": "Site colors for Christmas or Valentine’s Day",
       "home": "Home: videos, featured homes, About us, social links and WhatsApp.",
       "about": "/nosotros: texts, team, captioned photos, values, closing and images.",
       "join": "/unete: questions, options, final screens and side photo."
@@ -1189,6 +1191,7 @@
     "paidTotal": "Paid",
     "overBudgetCount": "Over budget",
     "maintenanceTitle": "Maintenance",
+    "maintenanceHint": "Works and repairs with a budget and actual cost (painting, plumbing, waterproofing…).",
     "maintenanceEmpty": "No maintenance yet.",
     "maintenanceNew": "New maintenance job",
     "maintenanceName": "Job",
@@ -1211,6 +1214,7 @@
     "endDate": "End",
     "notes": "Notes",
     "recurringTitle": "Recurring expenses",
+    "recurringHint": "Payments that repeat: power, water, internet, property tax… They are only scheduled here; they do not count as paid.",
     "recurringEmpty": "No recurring expenses yet.",
     "recurringNew": "New recurring expense",
     "type": "Expense type",
@@ -1233,6 +1237,7 @@
     "addType": "Add type",
     "typesHint": "Types apply to every property. Electricity and water come preloaded.",
     "entriesTitle": "Payments",
+    "entriesHint": "What was paid or is due, with date and amount. Mark it as paid here.",
     "entriesEmpty": "No payments recorded yet.",
     "entryNew": "Record a payment",
     "fromRecurring": "Recurring expense (optional)",
@@ -1303,5 +1308,18 @@
     "paymentsTotal": "Total of {count} payments",
     "maintenanceTotal": "Total of {count} maintenance jobs",
     "emailLine": "Expenses this month: paid {paid}, to pay {pending}; {count} active maintenance jobs. Details in the second Excel file."
+  },
+  "siteSeason": {
+    "title": "Seasonal theme",
+    "intro": "Changes the public site colors (the panel stays the same). “Normal” keeps the site as usual.",
+    "seasons": {
+      "normal": "Normal",
+      "navidad": "Christmas",
+      "san-valentin": "Valentine’s Day"
+    },
+    "current": "Active now",
+    "apply": "Apply theme",
+    "applied": "Theme applied. The public site now shows it.",
+    "notReady": "The theme SQL has not been applied to the database yet. Let the tech team know."
   }
 }

@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 import { AccessError, requireAdmin } from './property-access';
 import { PanelValidationError } from './panel-validation';
 
-export const userRoles = ['ADMIN', 'CLIENT', 'COLLABORATOR', 'VIEWER'] as const;
+export const userRoles = ['ADMIN', 'CLIENT', 'COLLABORATOR', 'DESIGNER', 'VIEWER'] as const;
 export type UserRole = typeof userRoles[number];
 
 export async function adminUsersPage() {
@@ -55,7 +55,8 @@ export async function mutateAdminUser(id: string, input: unknown) {
   const publicationChange = value.action === 'publication';
   const referralChange = value.action === 'referrals'; // T-4736
   if (roleChange && (actor.id === id || target.role === 'ADMIN')) throw new AccessError(403);
-  if (roleChange && (!['CLIENT', 'COLLABORATOR'].includes(String(value.role)) || !['CLIENT', 'COLLABORATOR', 'VIEWER'].includes(target.role))) {
+  // T-5322: DESIGNER (diseñador) se asigna y se retira igual que COLLABORATOR; nunca ADMIN.
+  if (roleChange && (!['CLIENT', 'COLLABORATOR', 'DESIGNER'].includes(String(value.role)) || !['CLIENT', 'COLLABORATOR', 'DESIGNER', 'VIEWER'].includes(target.role))) {
     throw new PanelValidationError('validation');
   }
   if (roleChange && value.role === target.role) throw new PanelValidationError('validation');
@@ -68,7 +69,7 @@ export async function mutateAdminUser(id: string, input: unknown) {
   const changes = roleChange ? sql`"role" = ${value.role as string}::"UserRole", "canPublishProperties" = false, "canCreateReferralLinks" = false`
     : publicationChange ? sql`"canPublishProperties" = ${value.allowed as boolean}`
     : referralChange ? sql`"canCreateReferralLinks" = ${value.allowed as boolean}` : sql`"passwordHash" = ${hash}`;
-  const restriction = roleChange ? sql`and target."id" <> ${actor.id} and target."role"::text in ('CLIENT', 'COLLABORATOR', 'VIEWER')`
+  const restriction = roleChange ? sql`and target."id" <> ${actor.id} and target."role"::text in ('CLIENT', 'COLLABORATOR', 'DESIGNER', 'VIEWER')`
     : publicationChange ? sql`and target."role"::text = 'COLLABORATOR' and target."canPublishProperties" = ${target.canPublishProperties}`
     : referralChange ? sql`and target."role"::text = 'COLLABORATOR' and target."canCreateReferralLinks" = ${Boolean(target.canCreateReferralLinks)}` : sql``;
   // T-4736: al conceder, el usuario queda ligado a un Partner (comisión 0 % hasta que el ADMIN la fije en Referidos).

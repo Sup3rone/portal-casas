@@ -204,6 +204,7 @@
     "forgotLink": "¿Olvidaste tu contraseña?",
     "panelAdmin": "Panel admin",
     "panelCollaborator": "Panel del colaborador",
+    "panelDesigner": "Panel de contenido",
     "nosotros": "Nosotros",
     "unete": "Únete"
   },
@@ -430,6 +431,8 @@
     "actions": "Acciones administrativas",
     "promote": "Promover a colaborador",
     "demote": "Revertir a cliente",
+    "makeDesigner": "Hacer diseñador (solo contenido)",
+    "confirmDesigner": "¿Hacer diseñador a este usuario? Podrá editar textos, imágenes y videos del sitio (Panel → Contenido), pero no verá usuarios, contraseñas, casas, reservas ni referidores.",
     "grantPublication": "Permitir publicar y despublicar propiedades",
     "revokePublication": "Quitar permiso de publicar propiedades",
     "reset": "Asignar contraseña temporal",
@@ -446,6 +449,7 @@
       "ADMIN": "Administrador",
       "CLIENT": "Cliente",
       "COLLABORATOR": "Colaborador",
+      "DESIGNER": "Diseñador",
       "VIEWER": "Lector"
     },
     "grantReferrals": "Permitir crear sus propios enlaces de referido",

@@ -54,6 +54,8 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
   const { data: session, status } = useSession();
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
   const isManager = isAdmin || (session?.user as { role?: string } | undefined)?.role === 'COLLABORATOR';
+  // T-5322: el diseñador solo tiene Panel → Contenido (sin switch Usuario | Vendedor).
+  const isDesigner = (session?.user as { role?: string } | undefined)?.role === 'DESIGNER';
 
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -168,6 +170,7 @@ export default function Navbar({ destinations = [] }: { destinations?: Published
                 {status === 'authenticated' ? <>
                   <Link href="/mi-cuenta" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('cuenta').toUpperCase()}</Link>
                   {isManager && <Link href="/panel" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-green-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-green-400 dark:hover:bg-gray-800">{t(isAdmin ? 'panelAdmin' : 'panelCollaborator')}</Link>}
+                  {isDesigner && <Link href="/panel/contenido" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-green-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-green-400 dark:hover:bg-gray-800">{t('panelDesigner')}</Link>}
                   <button type="button" onClick={() => { closeAccount(); void signOut({ callbackUrl: '/' + locale }); }} className="flex min-h-11 w-full items-center rounded-lg px-4 py-2 text-left text-sm font-medium text-gray-600 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-300 dark:hover:bg-gray-800">{t('salir').toUpperCase()}</button>
                 </> : <>
                   <Link href="/login" onClick={closeAccount} className="flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-green-700 dark:text-gray-100 dark:hover:bg-gray-800">{t('login').toUpperCase()}</Link>

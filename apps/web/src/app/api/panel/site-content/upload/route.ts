@@ -1,6 +1,6 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
-import { requireAdmin, accessFailure } from '@/lib/property-access';
+import { requireContentEditor, accessFailure } from '@/lib/property-access';
 import { PhotoUploadError, photoMetadata } from '@/lib/photo-upload';
 import { heroVideoMetadata } from '@/lib/hero-video-upload';
 
@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    await requireContentEditor();
     const form = await request.formData().catch(() => null);
     const purpose = form?.get('purpose');
     const video = purpose === 'home-background-video';
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const file = form.get('file');
     if (!(file instanceof File)) throw new PhotoUploadError('INVALID_UPLOAD_REQUEST');
     const metadata = video ? heroVideoMetadata(file.type, file.size) : photoMetadata(file.type, file.size);
-    await requireAdmin();
+    await requireContentEditor();
     const extension = metadata.contentType === 'video/mp4' ? 'mp4' : metadata.contentType === 'video/webm' ? 'webm' : metadata.contentType === 'image/jpeg' ? 'jpg' : metadata.contentType === 'image/png' ? 'png' : 'webp';
     const result = await put(video ? `site/home-video/${crypto.randomUUID()}.${extension}` : `site/listing/${crypto.randomUUID()}.${extension}`, file, {
       access: 'public', contentType: metadata.contentType, addRandomSuffix: false, allowOverwrite: false, token: process.env.BLOB_READ_WRITE_TOKEN,

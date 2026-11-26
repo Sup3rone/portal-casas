@@ -204,6 +204,7 @@
     "forgotLink": "Mot de passe oublié ?",
     "panelAdmin": "Panneau admin",
     "panelCollaborator": "Panneau du collaborateur",
+    "panelDesigner": "Panneau de contenu",
     "nosotros": "À propos",
     "unete": "Rejoignez-nous"
   },
@@ -431,6 +432,8 @@
     "actions": "Actions administratives",
     "promote": "Promouvoir en collaborateur",
     "demote": "Rétablir le rôle client",
+    "makeDesigner": "Nommer designer (contenu uniquement)",
+    "confirmDesigner": "Nommer cet utilisateur designer ? Il pourra modifier les textes, images et vidéos du site (Panneau → Contenu), mais ne verra ni les utilisateurs, ni les mots de passe, ni les logements, ni les réservations, ni les parrains.",
     "grantPublication": "Autoriser la publication et la dépublication des logements",
     "revokePublication": "Retirer l’autorisation de publier les logements",
     "reset": "Attribuer un mot de passe temporaire",
@@ -447,6 +450,7 @@
       "ADMIN": "Administrateur",
       "CLIENT": "Client",
       "COLLABORATOR": "Collaborateur",
+      "DESIGNER": "Designer",
       "VIEWER": "Lecteur"
     },
     "grantReferrals": "Autoriser la création de ses propres liens de parrainage",

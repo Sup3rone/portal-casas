@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { requireAdmin, accessFailure } from '@/lib/property-access';
+import { requireContentEditor, accessFailure } from '@/lib/property-access';
 import { readSiteContent, saveSiteContent, SiteContentError } from '@/lib/site-content';
 import { panelError } from '@/lib/panel-response';
 
@@ -12,7 +12,7 @@ function failure(error: unknown) {
 }
 export async function GET() {
   try {
-    await requireAdmin();
+    await requireContentEditor();
     return NextResponse.json(await readSiteContent(), { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) { return failure(error); }
 }

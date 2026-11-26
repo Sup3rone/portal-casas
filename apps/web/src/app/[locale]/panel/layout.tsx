@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { panelManager } from '@/lib/panel-server';
+import { panelMember } from '@/lib/panel-server';
 import { privateMetadata } from '@/lib/seo';
 import RegisterServiceWorker from '@/components/panel/RegisterServiceWorker';
 
@@ -9,7 +9,7 @@ export const metadata = privateMetadata;
 export const dynamic = 'force-dynamic';
 export default async function PanelLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const manager = await panelManager(locale);
+  const manager = await panelMember(locale);
   const t = await getTranslations({ locale, namespace: 'panel' });
   const admin = await getTranslations({ locale, namespace: 'adminUsers' });
   const nav = await getTranslations({ locale, namespace: 'nav' });
@@ -19,7 +19,9 @@ export default async function PanelLayout({ children, params }: { children: Reac
   const vendor = await getTranslations({ locale, namespace: 'vendor' });
   const emails = await getTranslations({ locale, namespace: 'emailLog' });
   // T-5201: la misma lista de enlaces va en el menú de escritorio (md+) y dentro de «Más» de la barra móvil.
-  const links = <>
+  // T-5322: el diseñador solo ve Contenido (ni Vender, ni reservas, ni referidores, ni usuarios).
+  const designer = manager.role === 'DESIGNER';
+  const links = designer ? <Link href="/panel/contenido" className="font-semibold text-green-700 dark:text-green-400">{content('title')}</Link> : <>
       <Link href="/panel/vender" className="font-semibold text-green-700 dark:text-green-400">{vendor('navSell')}</Link>
       {manager.role === 'COLLABORATOR' && <>
       <Link href="/panel" className="font-semibold text-green-700 dark:text-green-400">{t('properties')}</Link>
@@ -46,7 +48,7 @@ export default async function PanelLayout({ children, params }: { children: Reac
   </>;
   // T-5201: en el teléfono, una barra fija con los accesos del vendedor; el resto, en «Más». El ADMIN no tiene
   // «Consultas» en el panel, así que su tercer acceso es Reservas.
-  const quick = [
+  const quick = designer ? [{ href: '/panel/contenido', label: content('title') }] : [
     { href: '/panel/vender', label: vendor('navSell') },
     { href: manager.role === 'ADMIN' ? '/admin/calendario' : '/panel/calendario', label: nav('calendario') },
     manager.role === 'ADMIN' ? { href: '/panel/reservas', label: t('bookings') } : { href: '/panel/consultas', label: t('messages') },
@@ -60,7 +62,7 @@ export default async function PanelLayout({ children, params }: { children: Reac
     {/* T-5213: la app instalada (PWA/TWA) necesita el service worker; se registra desde el panel. */}
     <RegisterServiceWorker />
     <nav data-mobile-nav="" aria-label={vendor('mobileNav')} className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden dark:border-gray-700 dark:bg-gray-900/95">
-      <ul className="grid grid-cols-4">
+      <ul className={`grid ${designer ? 'grid-cols-2' : 'grid-cols-4'}`}>
         {quick.map(item => <li key={item.href}><Link href={item.href} className={tab}>{item.label}</Link></li>)}
         <li>
           <details className="group relative">

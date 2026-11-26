@@ -1,4 +1,4 @@
-// T-4944: guarda los textos e imágenes de /nosotros o /unete (Panel → Contenido → Páginas). Solo ADMIN.
+// T-4944: guarda los textos e imágenes de /nosotros o /unete (Panel → Contenido → Páginas). ADMIN o DESIGNER (T-5322).
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { accessFailure } from '@/lib/property-access';

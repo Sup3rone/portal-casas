@@ -8,9 +8,10 @@ export default function UserActions({ id, role, self, canPublishProperties, canC
   const t = useTranslations('adminUsers'), errors = useTranslations('panel'), router = useRouter();
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [saved, setSaved] = useState(false);
   const [password, setPassword] = useState<string | null>(null);
-  const nextRole = role === 'COLLABORATOR' ? 'CLIENT' : 'COLLABORATOR';
-  async function change(action: 'role' | 'password' | 'publication' | 'referrals', allowed?: boolean) {
-    const confirmation = action === 'role' ? 'confirmRole' : action === 'publication' ? allowed ? 'confirmPublicationGrant' : 'confirmPublicationRevoke'
+  // T-5322: colaborador o diseñador → «Revertir a cliente»; cliente/lector → «Promover a colaborador» o «Hacer diseñador».
+  const demotable = role === 'COLLABORATOR' || role === 'DESIGNER';
+  async function change(action: 'role' | 'password' | 'publication' | 'referrals', allowed?: boolean, nextRole: string = demotable ? 'CLIENT' : 'COLLABORATOR') {
+    const confirmation = action === 'role' ? nextRole === 'DESIGNER' ? 'confirmDesigner' : 'confirmRole' : action === 'publication' ? allowed ? 'confirmPublicationGrant' : 'confirmPublicationRevoke'
       : action === 'referrals' ? allowed ? 'confirmReferralsGrant' : 'confirmReferralsRevoke' : 'confirmReset';
     if (!window.confirm(t(confirmation))) return;
     setBusy(true); setError(''); setSaved(false); setPassword(null);
@@ -25,8 +26,10 @@ export default function UserActions({ id, role, self, canPublishProperties, canC
   return <section className="space-y-4">
     <h2 className="text-xl font-semibold">{t('actions')}</h2>
     {(self || role === 'ADMIN') && <p>{t('roleProtected')}</p>}
-    {!self && ['CLIENT', 'COLLABORATOR', 'VIEWER'].includes(role) && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('role')}>
-      {t(role === 'COLLABORATOR' ? 'demote' : 'promote')}</button>}
+    {!self && ['CLIENT', 'COLLABORATOR', 'DESIGNER', 'VIEWER'].includes(role) && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('role')}>
+      {t(demotable ? 'demote' : 'promote')}</button>}
+    {!self && ['CLIENT', 'VIEWER'].includes(role) && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('role', undefined, 'DESIGNER')}>
+      {t('makeDesigner')}</button>}
     {role === 'COLLABORATOR' && <button type="button" disabled={busy} className={buttonClass} onClick={() => change('publication', !canPublishProperties)}>
       {t(canPublishProperties ? 'revokePublication' : 'grantPublication')}</button>}
     {/* T-4767: «Mis referidos» descontinuado; el dueño administra sus referidores. Solo se ofrece retirar un permiso ya dado. */}

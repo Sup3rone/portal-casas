@@ -3,7 +3,7 @@ import 'server-only';
 import { cache } from 'react';
 import { db, siteContent, properties, media } from '@portal/db';
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
-import { requireAdmin, AccessError } from './property-access';
+import { requireContentEditor, AccessError } from './property-access';
 import { objectBody, PanelValidationError } from './panel-validation';
 import { parseHomeVideos, serializeHomeVideos } from './home-videos';
 import { autoTranslate } from './auto-translation';
@@ -57,7 +57,7 @@ export const readSiteContent = cache(async (): Promise<SiteContentValues> => {
   return values;
 });
 export async function saveSiteContent(input: unknown) {
-  const actor = await requireAdmin();
+  const actor = await requireContentEditor();
   const values = siteContentInput(input);
   // Un editor antiguo abierto antes del deploy no debe borrar los activos nuevos.
   const supplied = input as Record<string, unknown>;
@@ -75,11 +75,11 @@ export async function saveSiteContent(input: unknown) {
   const translation = await autoTranslate(siteGroups(values));
   const [title, about] = translation.groups;
   Object.assign(values, { about_title_en: title.en, about_title_fr: title.fr, about_en: about.en, about_fr: about.fr });
-  // Guardado atómico de las claves; revalidar ADMIN dentro del statement.
+  // Guardado atómico de las claves; revalidar ADMIN/DESIGNER dentro del statement (T-5322).
   const rows = await db.execute(sql`
     insert into "SiteContent" ("key", "value")
     select entry.key, entry.value from (${sql.join(siteContentKeys.map(key => sql`select ${key}::text as key, ${values[key]}::text as value`), sql` union all `)}) entry
-    where exists (select 1 from "User" actor where actor.id = ${actor.id} and actor.role::text = 'ADMIN')
+    where exists (select 1 from "User" actor where actor.id = ${actor.id} and actor.role::text in ('ADMIN', 'DESIGNER'))
     on conflict ("key") do update set "value" = excluded."value"
     returning "key"
   `);
@@ -89,7 +89,7 @@ export async function saveSiteContent(input: unknown) {
 }
 
 export async function featuredPropertyOptions() {
-  await requireAdmin();
+  await requireContentEditor();
   return db.select({ id: properties.id, titleEs: properties.titleEs, titleEn: properties.titleEn, titleFr: properties.titleFr, city: properties.city })
     .from(properties).where(eq(properties.published, true)).orderBy(asc(properties.titleEs), asc(properties.id));
 }

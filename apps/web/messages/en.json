@@ -204,6 +204,7 @@
     "forgotLink": "Forgot your password?",
     "panelAdmin": "Admin panel",
     "panelCollaborator": "Collaborator panel",
+    "panelDesigner": "Content panel",
     "nosotros": "About us",
     "unete": "Join us"
   },
@@ -430,6 +431,8 @@
     "actions": "Administrative actions",
     "promote": "Promote to collaborator",
     "demote": "Revert to client",
+    "makeDesigner": "Make designer (content only)",
+    "confirmDesigner": "Make this user a designer? They will be able to edit site texts, images and videos (Panel → Content), but will not see users, passwords, properties, bookings or referrers.",
     "grantPublication": "Allow publishing and unpublishing properties",
     "revokePublication": "Remove property publishing permission",
     "reset": "Assign temporary password",
@@ -446,6 +449,7 @@
       "ADMIN": "Administrator",
       "CLIENT": "Client",
       "COLLABORATOR": "Collaborator",
+      "DESIGNER": "Designer",
       "VIEWER": "Viewer"
     },
     "grantReferrals": "Allow creating their own referral links",

@@ -120,9 +120,9 @@ async function main() {
   setSession({ user: { id: 'admin' } });
   const panel = render('es', await ContentPage({ params: Promise.resolve({ locale: 'es' }) }));
   assert.ok(panel.includes('data-page-editor="about"') && panel.includes('data-page-editor="join"'));
-  // Tres desplegables bajo el título, en orden, cerrados al cargar y excluyentes (mismo name).
+  // Desplegables bajo el título, en orden (T-5324: el tema por temporada va primero), cerrados al cargar y excluyentes (mismo name).
   const sections = [...panel.matchAll(/<details([^>]*)data-content-section="([^"]+)"([^>]*)>/g)];
-  assert.deepEqual(sections.map(match => match[2]), ['home', 'about', 'join']);
+  assert.deepEqual(sections.map(match => match[2]), ['season', 'home', 'about', 'join']);
   assert.ok(sections.every(match => /name="content-section"/.test(match[0]) && !/\sopen[\s=>]/.test(match[0])), 'Todos cerrados y con el mismo name');
   const es = messagesFor('es').panelPages;
   for (const key of ['home', 'about', 'join']) assert.ok(panel.includes(esc(es.pages[key])) && panel.includes(esc(es.pageDescriptions[key])));

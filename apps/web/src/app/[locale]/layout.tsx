@@ -9,6 +9,7 @@ import FooterContactsProvider from '@/components/FooterContactsProvider';
 import SiteIntro from '@/components/SiteIntro';
 import { SITE_INTRO_SKIP } from '@/lib/site-intro';
 import { readSiteContent } from '@/lib/site-content';
+import { readSiteSeason } from '@/lib/site-season';
 import { readPublishedDestinations } from '@/lib/published-destinations';
 import type { Metadata } from 'next';
 import { defaultSocialImage, siteUrl } from '@/lib/seo';
@@ -32,10 +33,11 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   const messages = await getMessages();
-  const [{ social_instagram, social_facebook, contact_whatsapp }, destinations] = await Promise.all([readSiteContent(), readPublishedDestinations()]);
+  const [{ social_instagram, social_facebook, contact_whatsapp }, destinations, season] = await Promise.all([readSiteContent(), readPublishedDestinations(), readSiteSeason()]);
 
+  // T-5324: tema por temporada (paleta en globals.css). «normal» no pone atributo.
   return (
-    <html lang={locale} className="light" suppressHydrationWarning>
+    <html lang={locale} className="light" data-season={season === 'normal' ? undefined : season} suppressHydrationWarning>
           <head>
             <script src="/theme-init.js" async fetchPriority="high" />
           </head>

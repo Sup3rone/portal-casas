@@ -763,6 +763,7 @@
     "allPartners": "All",
     "apply": "Apply",
     "download": "Download Excel",
+    "downloadPdf": "Download PDF",
     "bookingsCount": "Bookings this month",
     "total": "Total",
     "taxes": "Taxes",
@@ -784,7 +785,7 @@
     "subtotal": "Subtotal {property}",
     "grandTotal": "Month total ({count} bookings)",
     "autoTitle": "Automatic delivery",
-    "autoIntro": "On the 1st of each month (06:00, central Mexico time) the previous month’s Excel is sent to these addresses.",
+    "autoIntro": "On the 1st of each month (06:00, central Mexico time) the previous month’s report, in Excel and PDF, is sent to these addresses.",
     "recipient": "Email {number}",
     "recipientsHelp": "Up to 2 addresses. Leave empty to stop the automatic delivery.",
     "saveRecipients": "Save emails",
@@ -799,7 +800,7 @@
     "emailSubject": "Commission report — {month}",
     "emailIntro": "Hi {name}, attached is the bookings and commissions report for {month}.",
     "emailTotals": "Bookings: {count} · Total: {total} · Commissions: {commission}.",
-    "emailFooter": "Automatic email from ALIA FOR RENT. The Excel file has the detail per property.",
+    "emailFooter": "Automatic email from ALIA FOR RENT. The Excel and PDF files have the detail per property.",
     "delivery": {
       "when": "Date",
       "month": "Month",
@@ -1269,6 +1270,7 @@
   "expenseReport": {
     "title": "Expenses and maintenance for {month}",
     "download": "Download expenses Excel",
+    "downloadPdf": "Download expenses PDF",
     "empty": "No payments or maintenance in {month}.",
     "totals": {
       "paid": "Paid",

@@ -11,8 +11,9 @@ import { PanelValidationError } from './panel-validation';
 import { sendEmail } from '@/lib/mailer';
 import { buildMonthlyReport, isMonth, monthRange, type MonthlyReport, type ReportBooking } from './monthly-report';
 import { buildXlsx, type Row } from './xlsx';
+import { buildPdf } from './pdf';
 import { formatMoney } from './booking-breakdown';
-import { expenseReportFilename, expenseReportXlsx, loadExpenseReport } from './expense-report-service';
+import { expenseReportFilename, expenseReportPdf, expenseReportPdfFilename, expenseReportXlsx, loadExpenseReport } from './expense-report-service';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const MAX_REPORT_EMAILS = 2;
@@ -59,7 +60,7 @@ export async function reportPartnerOptions(manager: PropertyManager) {
 export async function reportSheet(report: MonthlyReport, locale: string) {
   const t = await getTranslations({ locale, namespace: 'monthlyReport' });
   const money = (value: string | null) => value == null ? null : { number: value };
-  const header: Row = { bold: true, cells: [t('property'), t('checkIn'), t('checkOut'), t('nights'), t('crossing'), t('guest'), t('referredBy'),
+  const header: Row = { bold: true, header: true, cells: [t('property'), t('checkIn'), t('checkOut'), t('nights'), t('crossing'), t('guest'), t('referredBy'),
     t('rent'), t('cleaning'), t('taxes'), t('total'), t('percent'), t('commission')] };
   const rows: Row[] = [header];
   for (const group of report.groups) {
@@ -77,10 +78,18 @@ export async function reportSheet(report: MonthlyReport, locale: string) {
     money(report.totals.cleaningCost), money(report.totals.taxes), money(report.totals.total), null, money(report.totals.commission)] });
   return rows;
 }
+const REPORT_WIDTHS = [32, 12, 12, 9, 34, 24, 22, 14, 12, 12, 14, 10, 14];
 export async function reportXlsx(report: MonthlyReport, locale: string) {
-  return buildXlsx(`${report.month}`, await reportSheet(report, locale), [32, 12, 12, 9, 34, 24, 22, 14, 12, 12, 14, 10, 14]);
+  return buildXlsx(`${report.month}`, await reportSheet(report, locale), REPORT_WIDTHS);
+}
+/** T-5417: las MISMAS filas que el Excel, con el título del reporte arriba (la hoja de Excel no lo lleva). */
+export async function reportPdf(report: MonthlyReport, locale: string) {
+  const t = await getTranslations({ locale, namespace: 'monthlyReport' });
+  const title = t('emailSubject', { month: report.month });
+  return buildPdf(title, [{ bold: true, cells: [title] }, { cells: [] }, ...await reportSheet(report, locale)], REPORT_WIDTHS, { locale });
 }
 export const reportFilename = (month: string) => `reporte-comisiones-${month}.xlsx`;
+export const reportPdfFilename = (month: string) => `reporte-comisiones-${month}.pdf`;
 
 export async function getReportEmails(userId: string) {
   const [row] = await db.select({ emails: users.reportEmails }).from(users).where(eq(users.id, userId)).limit(1);
@@ -134,12 +143,16 @@ export async function deliverMonthlyReport(owner: { id: string; name: string | n
     const file = await reportXlsx(report, locale);
     // T-5248 (fase 3): el Excel de gastos y mantenimientos va como segundo adjunto si el mes tiene algo. Si falla
     // armarlo, se manda igual el de comisiones (nunca se pierde el reporte principal por el secundario).
-    const attachments = [{ filename: reportFilename(month), content: Buffer.from(file) }];
+    // T-5417: cada reporte va en Excel (para hacer cuentas) y en PDF (para leerlo), en ese orden.
+    const attachments = [{ filename: reportFilename(month), content: Buffer.from(file) },
+      { filename: reportPdfFilename(month), content: Buffer.from(await reportPdf(report, locale)) }];
     let expenseLine = '';
     try {
       const expenses = await loadExpenseReport(manager, month, locale);
       if (expenses.groups.length) {
-        attachments.push({ filename: expenseReportFilename(month), content: Buffer.from(await expenseReportXlsx(expenses, locale)) });
+        const [sheet, pdf] = await Promise.all([expenseReportXlsx(expenses, locale), expenseReportPdf(expenses, locale)]);
+        attachments.push({ filename: expenseReportFilename(month), content: Buffer.from(sheet) },
+          { filename: expenseReportPdfFilename(month), content: Buffer.from(pdf) });
         const e = await getTranslations({ locale, namespace: 'expenseReport' });
         expenseLine = `<p>${html(e('emailLine', { paid: formatMoney(expenses.totals.paid, locale), pending: formatMoney(expenses.totals.pending, locale), count: expenses.totals.maintenances }))}</p>`;
       }

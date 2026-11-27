@@ -11,7 +11,8 @@
 // cadenas inline (sin sharedStrings), números escritos con su texto decimal exacto (sin pasar por float).
 
 export type Cell = string | number | { number: string } | null | undefined;
-export type Row = { cells: Cell[]; bold?: boolean };
+/** `header`: encabezado de tabla; el Excel lo ignora y el PDF (lib/pdf.ts) lo repite en cada página (T-5417). */
+export type Row = { cells: Cell[]; bold?: boolean; header?: boolean };
 
 const CRC_TABLE = (() => {
   const table = new Uint32Array(256);

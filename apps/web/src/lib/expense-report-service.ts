@@ -10,6 +10,7 @@ import { inquiryToday } from './inquiry-validation';
 import { monthRange } from './monthly-report';
 import { buildExpenseReport, type ExpenseReport } from './expense-report';
 import { buildXlsx, type Row } from './xlsx';
+import { buildPdf } from './pdf';
 import { formatMoney } from './booking-breakdown';
 
 const title = (row: { titleEs: string | null; titleEn: string | null; titleFr: string | null; slug: string }, locale: string) =>
@@ -48,7 +49,7 @@ export async function expenseReportSheet(report: ExpenseReport, locale: string) 
   const money = (value: string | null) => value == null ? null : { number: value };
   const rows: Row[] = [{ bold: true, cells: [t('sheetTitle', { month: report.month })] }, { cells: [] }];
   rows.push({ bold: true, cells: [t('paymentsTitle')] });
-  rows.push({ bold: true, cells: [t('property'), t('date'), t('type'), t('recurring'), t('amount'), t('status'), t('paidAt'), t('notes')] });
+  rows.push({ bold: true, header: true, cells: [t('property'), t('date'), t('type'), t('recurring'), t('amount'), t('status'), t('paidAt'), t('notes')] });
   for (const group of report.groups) for (const p of group.payments) {
     rows.push({ cells: [p.propertyTitle, p.date, p.typeName, p.recurring ? t('yes') : t('no'), money(p.amount), p.paid ? e('paid') : e('unpaid'), p.paidAt ?? '', p.notes ?? ''] });
   }
@@ -56,7 +57,7 @@ export async function expenseReportSheet(report: ExpenseReport, locale: string) 
     `${e('paid')}: ${formatMoney(report.totals.paid, locale)} · ${e('unpaid')}: ${formatMoney(report.totals.pending, locale)}`] });
   rows.push({ cells: [] });
   rows.push({ bold: true, cells: [t('maintenanceTitle')] });
-  rows.push({ bold: true, cells: [t('property'), t('work'), t('kind'), t('status'), t('start'), t('end'), t('budget'), t('actualCost'), t('overBudget')] });
+  rows.push({ bold: true, header: true, cells: [t('property'), t('work'), t('kind'), t('status'), t('start'), t('end'), t('budget'), t('actualCost'), t('overBudget')] });
   for (const group of report.groups) for (const m of group.maintenances) {
     rows.push({ cells: [m.propertyTitle, m.title, e(`kinds.${m.kind}`), e(`statuses.${m.status}`), m.startDate ?? '', m.endDate ?? '', money(m.budget), money(m.actualCost), m.overBudget ? t('yes') : ''] });
   }
@@ -64,7 +65,14 @@ export async function expenseReportSheet(report: ExpenseReport, locale: string) 
     report.totals.overBudget ? String(report.totals.overBudget) : ''] });
   return rows;
 }
+const EXPENSE_WIDTHS = [32, 28, 16, 14, 14, 14, 14, 14, 14];
 export async function expenseReportXlsx(report: ExpenseReport, locale: string) {
-  return buildXlsx(`${report.month}`, await expenseReportSheet(report, locale), [32, 28, 16, 14, 14, 14, 14, 14, 14]);
+  return buildXlsx(`${report.month}`, await expenseReportSheet(report, locale), EXPENSE_WIDTHS);
+}
+/** T-5417: las MISMAS filas que el Excel (la hoja ya empieza con su título). */
+export async function expenseReportPdf(report: ExpenseReport, locale: string) {
+  const t = await getTranslations({ locale, namespace: 'expenseReport' });
+  return buildPdf(t('sheetTitle', { month: report.month }), await expenseReportSheet(report, locale), EXPENSE_WIDTHS, { locale });
 }
 export const expenseReportFilename = (month: string) => `reporte-gastos-${month}.xlsx`;
+export const expenseReportPdfFilename = (month: string) => `reporte-gastos-${month}.pdf`;

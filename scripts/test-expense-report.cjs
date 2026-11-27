@@ -18,6 +18,12 @@ const monthly = load('apps/web/src/lib/monthly-report-service.ts');
 const download = load('apps/web/src/app/api/panel/reports/expenses/route.ts');
 const page = load('apps/web/src/app/[locale]/panel/reporte/page.tsx').default;
 
+// T-5417: texto de un PDF del generador propio (cadenas hex de los Tj en cp1252), independiente de lib/pdf.ts.
+const pdfText = buffer => {
+  const raw = Buffer.from(buffer).toString('latin1');
+  assert.ok(raw.startsWith('%PDF-1.4'), 'es un PDF');
+  return [...raw.matchAll(/<([0-9A-F]*)> Tj/g)].map(([, hex]) => new TextDecoder('windows-1252').decode(Buffer.from(hex, 'hex'))).join(' | ');
+};
 // Lector ZIP independiente del generador (mismo que test-monthly-report).
 function unzip(bytes) {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), files = {};
@@ -101,6 +107,14 @@ memory.prepare(`UPDATE "User" SET "reportEmails" = ? WHERE id = 'a'`).run(JSON.s
     assert.ok(!sheet.includes('Pintar') && !sheet.includes('999'), 'ni lo de otro mes ni lo de otra casa');
     const en = sheetText(new Uint8Array(await (await get('month=2026-11&locale=en')).arrayBuffer()));
     assert.ok(en.includes('Payments this month') && en.includes('In progress'), 'Excel en el idioma del panel');
+    // T-5417: la misma descarga en PDF.
+    const pdfRes = await get('month=2026-11&locale=es&format=pdf');
+    assert.deepEqual([pdfRes.status, pdfRes.headers.get('content-type')], [200, 'application/pdf']);
+    assert.match(pdfRes.headers.get('content-disposition'), /reporte-gastos-2026-11\.pdf/);
+    const pdfBody = pdfText(await pdfRes.arrayBuffer());
+    for (const expected of ['Gastos y mantenimientos — 2026-11', 'Pagos del mes', 'Impermeabilizar', 'Jardín', 'En proceso', '980.40', '310.00']) assert.ok(pdfBody.includes(expected), `PDF: ${expected}`);
+    assert.ok(!pdfBody.includes('Pintar') && !pdfBody.includes('999'), 'PDF: ni lo de otro mes ni lo de otra casa');
+    assert.equal((await get('month=2026-11&format=doc')).status, 400, 'formato desconocido');
     console.log('descarga OK');
 
     // 4) Página /panel/reporte: sección de gastos con totales y enlace de descarga.
@@ -111,21 +125,25 @@ memory.prepare(`UPDATE "User" SET "reportEmails" = ? WHERE id = 'a'`).run(JSON.s
     assert.equal(text(findAll(section, n => n.props?.['data-testid'] === 'expense-pending')[0]), '$310.00 MXN');
     assert.equal(text(findAll(section, n => n.props?.['data-testid'] === 'expense-overBudget')[0]), '1');
     assert.ok(findAll(section, n => n.type === 'a' && /\/api\/panel\/reports\/expenses\?month=2026-11&locale=es/.test(n.props.href)).length, 'enlace');
+    assert.ok(findAll(section, n => n.type === 'a' && /\/api\/panel\/reports\/expenses\?month=2026-11&locale=es&format=pdf$/.test(n.props.href)).length, 'enlace PDF de gastos');
+    assert.ok(findAll(tree, n => n.type === 'a' && /\/api\/panel\/reports\/monthly\?month=2026-11&locale=es&format=pdf$/.test(n.props.href)).length, 'enlace PDF de comisiones');
     console.log('página OK');
 
     // 5) Correo mensual: segundo adjunto con gastos; sin gastos en el mes, solo el de comisiones.
     let out = await monthly.deliverMonthlyReport({ id: 'a', name: 'Ana' }, '2026-11', 'manual');
     assert.equal(out.status, 'sent');
-    assert.deepEqual(sent[0].attachments.map(a => a.filename), ['reporte-comisiones-2026-11.xlsx', 'reporte-gastos-2026-11.xlsx']);
-    assert.ok(sheetText(new Uint8Array(sent[0].attachments[1].content)).includes('Impermeabilizar'), 'mismo contenido que la descarga');
+    assert.deepEqual(sent[0].attachments.map(a => a.filename),
+      ['reporte-comisiones-2026-11.xlsx', 'reporte-comisiones-2026-11.pdf', 'reporte-gastos-2026-11.xlsx', 'reporte-gastos-2026-11.pdf']);
+    assert.ok(sheetText(new Uint8Array(sent[0].attachments[2].content)).includes('Impermeabilizar'), 'mismo contenido que la descarga');
+    assert.ok(pdfText(sent[0].attachments[3].content).includes('Impermeabilizar'), 'PDF de gastos con el mismo contenido');
     assert.match(sent[0].html, /Gastos del mes: pagado \$980\.40 MXN, por pagar \$310\.00 MXN; 2 mantenimientos activos/);
     out = await monthly.deliverMonthlyReport({ id: 'a', name: 'Ana' }, '2025-01', 'manual');
-    assert.deepEqual([out.status, sent[1].attachments.length], ['sent', 1], 'mes sin gastos: un solo Excel');
+    assert.deepEqual([out.status, sent[1].attachments.length], ['sent', 2], 'mes sin gastos: solo comisiones (Excel y PDF)');
     // Si el reporte de gastos falla, el de comisiones sale igual.
     memory.exec('ALTER TABLE "Maintenance" RENAME TO "Maintenance_x"');
     out = await monthly.deliverMonthlyReport({ id: 'a', name: 'Ana' }, '2026-11', 'manual');
     memory.exec('ALTER TABLE "Maintenance_x" RENAME TO "Maintenance"');
-    assert.deepEqual([out.status, sent[2].attachments.length], ['sent', 1], 'falla el secundario → se manda el principal');
+    assert.deepEqual([out.status, sent[2].attachments.length], ['sent', 2], 'falla el secundario → se manda el principal (Excel y PDF)');
     console.log('correo OK');
 
     // 6) Textos iguales en es/en/fr.

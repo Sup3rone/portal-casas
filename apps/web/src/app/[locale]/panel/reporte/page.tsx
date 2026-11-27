@@ -25,11 +25,13 @@ export default async function MonthlyReportPage({ params, searchParams }: {
     loadExpenseReport(manager, month, locale)]); // T-5248 (fase 3): gastos y mantenimientos del mismo mes
   const e = await getTranslations({ locale, namespace: 'expenseReport' });
   const expensesDownload = `/api/panel/reports/expenses?${new URLSearchParams({ month, locale })}`;
+  const expensesPdf = `${expensesDownload}&format=pdf`; // T-5417
   const money = (value: string | null) => formatMoney(value, locale);
   const date = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' });
   const day = (value: string) => date.format(new Date(`${value}T00:00:00Z`));
   const stamp = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Mexico_City' });
   const download = `/api/panel/reports/monthly?${new URLSearchParams({ month, locale, ...(partner ? { partner } : {}) })}`;
+  const downloadPdf = `${download}&format=pdf`; // T-5417
   const lastFailure = deliveries.find(delivery => delivery.status === 'failed');
   const failedLatest = deliveries[0]?.status === 'failed';
   const columns = ['checkIn', 'guest', 'referredBy', 'rent', 'cleaning', 'taxes', 'total', 'percent', 'commission'] as const;
@@ -46,6 +48,7 @@ export default async function MonthlyReportPage({ params, searchParams }: {
           {partnerOptions.map(option => <option key={option.id} value={option.id}>{option.name}</option>)}</select></label>
       <button type="submit" className={buttonClass}>{t('apply')}</button>
       <a href={download} className={`${buttonClass} inline-flex items-center`} download>{t('download')}</a>
+      <a href={downloadPdf} className={`${buttonClass} inline-flex items-center`} download>{t('downloadPdf')}</a>
     </form>
 
     <dl className="grid gap-4 rounded-lg border p-4 sm:grid-cols-4 dark:border-gray-700">
@@ -90,7 +93,10 @@ export default async function MonthlyReportPage({ params, searchParams }: {
     <section data-expense-report="" className="space-y-4 rounded-lg border p-4 dark:border-gray-700">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-xl font-semibold">{e('title', { month })}</h2>
-        <a href={expensesDownload} className={`${buttonClass} inline-flex items-center`} download>{e('download')}</a>
+        <div className="flex flex-wrap gap-2">
+          <a href={expensesDownload} className={`${buttonClass} inline-flex items-center`} download>{e('download')}</a>
+          <a href={expensesPdf} className={`${buttonClass} inline-flex items-center`} download>{e('downloadPdf')}</a>
+        </div>
       </div>
       <dl className="grid gap-4 sm:grid-cols-4">
         {([['paid', money(expenses.totals.paid)], ['pending', money(expenses.totals.pending)], ['maintenances', String(expenses.totals.maintenances)], ['overBudget', String(expenses.totals.overBudget)]] as const)

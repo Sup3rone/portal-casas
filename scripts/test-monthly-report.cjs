@@ -24,6 +24,12 @@ const sendRoute = load('apps/web/src/app/api/panel/reports/send/route.ts');
 const cron = load('apps/web/src/app/api/cron/monthly-report/route.ts');
 const page = load('apps/web/src/app/[locale]/panel/reporte/page.tsx').default;
 
+// T-5417: texto de un PDF del generador propio (cadenas hex de los Tj en cp1252), independiente de lib/pdf.ts.
+const pdfText = buffer => {
+  const raw = Buffer.from(buffer).toString('latin1');
+  assert.ok(raw.startsWith('%PDF-1.4'), 'es un PDF');
+  return [...raw.matchAll(/<([0-9A-F]*)> Tj/g)].map(([, hex]) => new TextDecoder('windows-1252').decode(Buffer.from(hex, 'hex'))).join(' | ');
+};
 // ---------- lector ZIP/XLSX independiente del generador (solo para verificar) ----------
 function unzip(bytes) {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), files = {};
@@ -168,6 +174,15 @@ const text = node => !node || typeof node !== 'object' ? String(node ?? '') : Ar
     assert.equal(res.headers.get('content-disposition'), 'attachment; filename="reporte-comisiones-2026-11.xlsx"');
     assert.equal(res.headers.get('cache-control'), 'no-store');
     assert.equal(Object.values(sheetRows(unzip(new Uint8Array(await res.arrayBuffer())))[0])[0], 'Property', 'Excel en el idioma del panel');
+    // T-5417: la misma descarga en PDF, con las mismas filas que el Excel y en el idioma del panel.
+    const pdfRes = await get('2026-11', '&locale=en&format=pdf');
+    assert.equal(pdfRes.status, 200); assert.equal(pdfRes.headers.get('content-type'), 'application/pdf');
+    assert.equal(pdfRes.headers.get('content-disposition'), 'attachment; filename="reporte-comisiones-2026-11.pdf"');
+    assert.equal(pdfRes.headers.get('cache-control'), 'no-store');
+    const pdfBody = pdfText(await pdfRes.arrayBuffer());
+    for (const expected of ['Commission report — 2026-11', 'Property', 'Subtotal pa', '9,280.00', '300.00']) assert.ok(pdfBody.includes(expected), `PDF: ${expected}`);
+    assert.ok(!pdfBody.includes('@test.invalid'), 'Sin correos del huésped (PDF)');
+    assert.equal((await get('2026-11', '&format=doc')).status, 400, 'formato desconocido');
 
     // 7. Destinatarios (máx. 2, válidos, sin duplicados).
     for (const bad of [{ emails: ['a@x.mx', 'b@x.mx', 'c@x.mx'] }, { emails: ['no-correo'] }, { emails: 'a@x.mx' }, {}, { emails: [5] }]) {
@@ -182,8 +197,9 @@ const text = node => !node || typeof node !== 'object' ? String(node ?? '') : Ar
     let out = await (await sendRoute.POST(json({ month: '2026-11' }))).json();
     assert.equal(out.status, 'sent');
     assert.deepEqual(sent[0].to, ['conta@empresa.mx', 'dueno@casa.mx']);
-    assert.equal(sent[0].attachments[0].filename, 'reporte-comisiones-2026-11.xlsx');
+    assert.deepEqual(sent[0].attachments.map(a => a.filename), ['reporte-comisiones-2026-11.xlsx', 'reporte-comisiones-2026-11.pdf'], 'Excel y PDF (T-5417)');
     assert.equal(sheetRows(unzip(new Uint8Array(sent[0].attachments[0].content))).length, 5, 'Mismo contenido que la descarga');
+    assert.ok(pdfText(sent[0].attachments[1].content).includes('Subtotal pa'), 'PDF con el mismo contenido');
     assert.match(sent[0].html, /Comisiones: \$300\.00 MXN/);
     assert.ok(sent[0].html.includes('&lt;a href=//phish&gt;Pagar&lt;/a&gt;') && !sent[0].html.includes('<a href'), 'HTML del nombre escapado');
     let log = memory.prepare('SELECT * FROM "ReportDelivery" ORDER BY "createdAt"').all();

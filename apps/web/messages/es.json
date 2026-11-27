@@ -763,6 +763,7 @@
     "allPartners": "Todos",
     "apply": "Aplicar",
     "download": "Descargar Excel",
+    "downloadPdf": "Descargar PDF",
     "bookingsCount": "Reservas del mes",
     "total": "Total",
     "taxes": "Impuestos",
@@ -784,7 +785,7 @@
     "subtotal": "Subtotal {property}",
     "grandTotal": "Total del mes ({count} reservas)",
     "autoTitle": "Envío automático",
-    "autoIntro": "El día 1 de cada mes (06:00, hora del centro de México) se envía el Excel del mes anterior a estos correos.",
+    "autoIntro": "El día 1 de cada mes (06:00, hora del centro de México) se envía el reporte del mes anterior, en Excel y PDF, a estos correos.",
     "recipient": "Correo {number}",
     "recipientsHelp": "Hasta 2 correos. Déjalos vacíos para no recibir el envío automático.",
     "saveRecipients": "Guardar correos",
@@ -799,7 +800,7 @@
     "emailSubject": "Reporte de comisiones — {month}",
     "emailIntro": "Hola {name}, adjuntamos el reporte de reservas y comisiones de {month}.",
     "emailTotals": "Reservas: {count} · Total: {total} · Comisiones: {commission}.",
-    "emailFooter": "Correo automático de ALIA FOR RENT. El Excel incluye el detalle por propiedad.",
+    "emailFooter": "Correo automático de ALIA FOR RENT. El Excel y el PDF incluyen el detalle por propiedad.",
     "delivery": {
       "when": "Fecha",
       "month": "Mes",
@@ -1269,6 +1270,7 @@
   "expenseReport": {
     "title": "Gastos y mantenimientos de {month}",
     "download": "Descargar Excel de gastos",
+    "downloadPdf": "Descargar PDF de gastos",
     "empty": "Sin pagos ni mantenimientos en {month}.",
     "totals": {
       "paid": "Pagado",
